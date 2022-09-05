@@ -93,7 +93,7 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 	}
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
-			{Text: "\n// " + fillerFuncName + " recursively fills the fields of the structure using fastjson.Value"},
+			{Text: "\n// " + fillerFuncName + " recursively fills the fields with fastjson.Value"},
 		}},
 		Recv: &ast.FieldList{List: []*ast.Field{
 			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
@@ -231,9 +231,169 @@ func NewUnmarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
 //	return err
 //}
 func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
+	const (
+		o   = "o"
+		v   = "_"
+		key = "key"
+	)
 	fastJsonValue := ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}}
-	var body []ast.Stmt
-
+	var visitBody = []ast.Stmt{
+		//		if err != nil {
+		//			return
+		//		}
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  ast.NewIdent(errVarName),
+				Op: token.NEQ,
+				Y:  ast.NewIdent("nil"),
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{}}},
+		},
+	}
+	for _, field := range fields {
+		fTags := parseTags(field.Tag.Value)
+		var runeArgs []ast.Expr
+		for name, i := []rune(fTags.jsonName()), 0; i < len(name); i++ {
+			runeArgs = append(runeArgs, &ast.BasicLit{
+				Kind:  token.CHAR,
+				Value: "'" + string(name[i]) + "'",
+			})
+		}
+		visitBody = append(
+			visitBody,
+			//		if bytes.Equal(key, []byte{'f', 'i', 'l', 't', 'e', 'r'}) {
+			//			return
+			//		}
+			&ast.IfStmt{
+				Cond: &ast.CallExpr{
+					Fun: &ast.SelectorExpr{X: ast.NewIdent("bytes"), Sel: ast.NewIdent("Equal")},
+					Args: []ast.Expr{
+						ast.NewIdent(key),
+						&ast.CompositeLit{
+							Type: &ast.ArrayType{Elt: ast.NewIdent("byte")},
+							Elts: runeArgs,
+						},
+					},
+				},
+				Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{}}},
+			},
+		)
+	}
+	//		if objPath == "" {
+	//			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
+	//		} else {
+	//			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
+	//		}
+	visitBody = append(
+		visitBody,
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  ast.NewIdent(objPathVarName),
+				Op: token.EQL,
+				Y: &ast.BasicLit{
+					Kind:  token.STRING,
+					Value: "\"\"",
+				},
+			},
+			// err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.AssignStmt{
+					Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+					Tok: token.ASSIGN,
+					Rhs: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("fmt"),
+								Sel: ast.NewIdent("Errorf"),
+							},
+							Args: []ast.Expr{
+								&ast.BasicLit{
+									Kind:  token.STRING,
+									Value: "\"unexpected field '%s' in the root of the object\"",
+								},
+								&ast.CallExpr{
+									Fun:  ast.NewIdent("string"),
+									Args: []ast.Expr{ast.NewIdent(key)},
+								},
+							},
+						},
+					},
+				},
+			}},
+			// err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
+			Else: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.AssignStmt{
+					Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+					Tok: token.ASSIGN,
+					Rhs: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X:   ast.NewIdent("fmt"),
+								Sel: ast.NewIdent("Errorf"),
+							},
+							Args: []ast.Expr{
+								&ast.BasicLit{
+									Kind:  token.STRING,
+									Value: "\"unexpected field '%s' in the '%s' path\"",
+								},
+								&ast.CallExpr{
+									Fun:  ast.NewIdent("string"),
+									Args: []ast.Expr{ast.NewIdent(key)},
+								},
+								ast.NewIdent(objPathVarName),
+							},
+						},
+					},
+				},
+			}},
+		},
+	)
+	//	o, err := v.Object()
+	//	if err != nil {
+	//		return err
+	//	}
+	var body = []ast.Stmt{
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent(o), ast.NewIdent(errVarName)},
+			Tok: token.DEFINE,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{Fun: &ast.SelectorExpr{X: ast.NewIdent(valVarName), Sel: ast.NewIdent("Object")}},
+			},
+		},
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  ast.NewIdent(errVarName),
+				Op: token.NEQ,
+				Y:  ast.NewIdent("nil"),
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(errVarName)}},
+			}},
+		},
+		//	o.Visit(func(key []byte, _ *fastjson.Value) {
+		&ast.ExprStmt{X: &ast.CallExpr{
+			Fun: &ast.SelectorExpr{X: ast.NewIdent(o), Sel: ast.NewIdent("Visit")},
+			Args: []ast.Expr{
+				&ast.FuncLit{
+					Type: &ast.FuncType{
+						Params: &ast.FieldList{List: []*ast.Field{
+							{
+								Names: []*ast.Ident{ast.NewIdent(key)},
+								Type:  &ast.ArrayType{Elt: ast.NewIdent("byte")},
+							},
+							{
+								Names: []*ast.Ident{ast.NewIdent(v)},
+								Type: &ast.StarExpr{
+									X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")},
+								},
+							},
+						}},
+					},
+					Body: &ast.BlockStmt{List: visitBody},
+				},
+			},
+		}},
+	}
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
 			{Text: "\n// " + validateFuncName + " checks for correct data structure"},

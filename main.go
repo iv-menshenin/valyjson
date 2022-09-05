@@ -3,10 +3,10 @@ package main
 import "valyjson/generator"
 
 func main() {
-	g := generator.New("./struct.go")
+	g := generator.New("./test/struct.go")
 	if err := g.Parse(); err != nil {
 		panic(err)
 	}
 	g.Analyse()
-	g.Print("./struct_json.go")
+	g.Print("./test/struct_json.go")
 }
