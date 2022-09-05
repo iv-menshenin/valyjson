@@ -52,6 +52,7 @@ func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			return fmt.Errorf("error parsing '%snested' value: %w", objPath, err)
 		}
 	}
+	return nil
 }
 
 // validate checks for correct data structure
@@ -82,4 +83,5 @@ func (s *Struct) validate(v *fastjson.Value, objPath string) error {
 			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
 		}
 	})
+	return nil
 }

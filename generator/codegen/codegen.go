@@ -91,6 +91,11 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 	for _, field := range fields {
 		body = append(body, NewFieldFillerStmt(field)...)
 	}
+	body = append(
+		body,
+		// return nil
+		&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil")}},
+	)
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
 			{Text: "\n// " + fillerFuncName + " recursively fills the fields with fastjson.Value"},
@@ -393,6 +398,8 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 				},
 			},
 		}},
+		// return nil
+		&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil")}},
 	}
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
