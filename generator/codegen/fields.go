@@ -103,6 +103,10 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 			result = append(result, int64Extraction(name, v))
 			return result
 
+		case "bool":
+			result = append(result, boolExtraction(name, v))
+			return result
+
 		case "string":
 			result = append(result, stringExtraction(name, v, f.t.jsonName())...)
 			return result
@@ -178,6 +182,17 @@ func int64Extraction(name, v string) ast.Stmt {
 		Tok: token.ASSIGN,
 		Rhs: []ast.Expr{&ast.CallExpr{
 			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
+		}},
+	}
+}
+
+// s.{name}, err = {v}.Bool()
+func boolExtraction(name, v string) ast.Stmt {
+	return &ast.AssignStmt{
+		Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}, ast.NewIdent(errVarName)},
+		Tok: token.ASSIGN,
+		Rhs: []ast.Expr{&ast.CallExpr{
+			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Bool")},
 		}},
 	}
 }
