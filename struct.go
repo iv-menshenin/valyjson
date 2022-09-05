@@ -27,11 +27,7 @@ func (s *Struct) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	// only if there is a strict rules
-	if err = validateStructKeys(v, ""); err != nil {
-		return err
-	}
-	return s.fill(v, "")
+	return s.FillFromJson(v, "")
 }
 
 func validateStructKeys(v *fastjson.Value, objPath string) error {
@@ -64,7 +60,11 @@ func validateStructKeys(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-func (s *Struct) fill(v *fastjson.Value, objPath string) (err error) {
+func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	// only if there is a strict rules
+	if err = validateStructKeys(v, ""); err != nil {
+		return err
+	}
 	if filter := v.Get("filter"); filter != nil {
 		if filter.Type() != fastjson.TypeString {
 			err = fmt.Errorf("value doesn't contain string; it contains %s", v.Type())
@@ -89,7 +89,7 @@ func (s *Struct) fill(v *fastjson.Value, objPath string) (err error) {
 		s.Offset = 100
 	}
 	if nested := v.Get("nested"); nested != nil {
-		err = s.Nested.fill(nested, objPath+"nested.")
+		err = s.Nested.FillFromJson(nested, objPath+"nested.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 		}
@@ -121,7 +121,7 @@ func (s *Nested) UnmarshalJSON(data []byte) error {
 	if err = validateNestedKeys(v, ""); err != nil {
 		return err
 	}
-	return s.fill(v, "")
+	return s.FillFromJson(v, "")
 }
 
 func validateNestedKeys(v *fastjson.Value, objPath string) error {
@@ -151,7 +151,7 @@ func validateNestedKeys(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-func (s *Nested) fill(v *fastjson.Value, objPath string) (err error) {
+func (s *Nested) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	if list := v.Get("list"); list != nil {
 		var listA []*fastjson.Value
 		listA, err = list.Array()

@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	strictRules = "strict"
+)
+
 type Tags map[string][]string
 
 func (t Tags) jsonName() string {
@@ -36,4 +40,15 @@ func structTag(tag string) reflect.StructTag {
 		return reflect.StructTag(tag[1 : len(tag)-1])
 	}
 	return ""
+}
+
+type StructTags []string
+
+func (t StructTags) Has(s string) bool {
+	for _, tag := range t {
+		if tag == s {
+			return true
+		}
+	}
+	return false
 }

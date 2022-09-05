@@ -1,15 +1,17 @@
 package codegen
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
 )
 
 type (
+	// fld render helper for ast.Field
 	fld struct {
+		// f contains field AST
 		f *ast.Field
+		// t contains tag descriptor
 		t Tags
 	}
 )
@@ -121,7 +123,8 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 		panic("unsupported field type 'struct'")
 
 	case *ast.SelectorExpr:
-		panic(fmt.Errorf("unsupported field type '%s.%s'", t.X.(*ast.Ident).Name, t.Sel))
+		result = append(result, nestedExtraction(name, v, f.t.jsonName()))
+		return result
 
 	}
 	panic("unsupported field type")

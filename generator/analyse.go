@@ -20,16 +20,20 @@ func (g *Gen) Analyse() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.decls {
-		var fillers []ast.Stmt
 		switch strc := structDecl.spec.Type.(type) {
 
 		case *ast.StructType:
-			for _, fld := range strc.Fields.List {
-				fillers = append(fillers, codegen.NewFieldFillerStmt(fld)...)
-			}
 			g.result.Decls = append(
 				g.result.Decls,
-				codegen.NewFillerFunc(structDecl.spec.Name.Name, fillers...),
+				codegen.NewUnmarshalFunc(structDecl.spec.Name.Name, structDecl.tags),
+			)
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewFillerFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
+			)
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewValidatorFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
 			)
 		}
 	}
