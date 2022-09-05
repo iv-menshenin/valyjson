@@ -1,8 +1,10 @@
 package codegen
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
+	"strings"
 )
 
 type (
@@ -105,10 +107,20 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 			result = append(result, stringExtraction(name, v, f.t.jsonName())...)
 			return result
 
+		default:
+			result = append(result, nestedExtraction(name, v, f.t.jsonName()))
+			return result
+
 		}
+
+	case *ast.StructType:
+		panic("unsupported field type 'struct'")
+
+	case *ast.SelectorExpr:
+		panic(fmt.Errorf("unsupported field type '%s.%s'", t.X.(*ast.Ident).Name, t.Sel))
+
 	}
-	return nil
-	// todo @menshenin panic("unsupported field type")
+	panic("unsupported field type")
 }
 
 //	if {v}.Type() != fastjson.TypeString {
@@ -167,6 +179,36 @@ func int64Extraction(name, v string) ast.Stmt {
 		Rhs: []ast.Expr{&ast.CallExpr{
 			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
 		}},
+	}
+}
+
+// err = s.{name}.fill({v}, objPath+"{json}.")
+func nestedExtraction(name, v, json string) ast.Stmt {
+	return &ast.AssignStmt{
+		Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+		Tok: token.ASSIGN,
+		Rhs: []ast.Expr{
+			&ast.CallExpr{
+				Fun: &ast.SelectorExpr{
+					X: &ast.SelectorExpr{
+						X:   ast.NewIdent(recvVarName),
+						Sel: ast.NewIdent(name),
+					},
+					Sel: ast.NewIdent(fillerFuncName),
+				},
+				Args: []ast.Expr{
+					ast.NewIdent(v),
+					&ast.BinaryExpr{
+						X:  ast.NewIdent(objPathVarName),
+						Op: token.ADD,
+						Y: &ast.BasicLit{
+							Kind:  token.STRING,
+							Value: "\"" + strings.Replace(json, "\"", "\\\"", -1) + ".\"",
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
