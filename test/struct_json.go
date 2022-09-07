@@ -35,6 +35,8 @@ func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		xFilter := filter.String()
 		s.Filter = xFilter
+	} else {
+		return fmt.Errorf("required element '%sfilter' is missing", objPath)
 	}
 	if limit := v.Get("limit"); limit != nil {
 		var xLimit int

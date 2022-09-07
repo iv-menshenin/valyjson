@@ -18,6 +18,13 @@ func (t Tags) jsonName() string {
 	return ""
 }
 
+func (t Tags) jsonTags() StructTags {
+	if v := t["json"]; len(v) > 0 {
+		return StructTags(v)
+	}
+	return nil
+}
+
 func (t Tags) defaultValue() string {
 	if v := t["default"]; len(v) > 0 {
 		return v[0]

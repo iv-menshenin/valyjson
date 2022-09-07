@@ -212,6 +212,20 @@ func (f fld) typedFillIn(name, t string, amp bool) []ast.Stmt {
 //	}
 func (f fld) ifDefault(name string) []ast.Stmt {
 	if f.t.defaultValue() == "" {
+		if f.t.jsonTags().Has("required") {
+			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
+			return []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{&ast.CallExpr{
+						Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
+						Args: []ast.Expr{
+							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.t.jsonName() + "' is missing\""},
+							ast.NewIdent(objPathVarName),
+						},
+					}},
+				},
+			}
+		}
 		return nil
 	}
 	return []ast.Stmt{
