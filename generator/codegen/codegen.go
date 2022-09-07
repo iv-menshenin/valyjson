@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 )
@@ -44,7 +45,7 @@ const (
 	errVarName        = "err"
 	recvVarName       = "s"
 	valVarName        = "v"
-	structPoolName    = "structPool"
+	structPoolName    = "jsonParser"
 	objPathVarName    = "objPath"
 	byteDataVarName   = "data"
 	fillerFuncName    = "FillFromJson"
@@ -52,6 +53,7 @@ const (
 	validateFuncName  = "validate"
 )
 
+// func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
 	fastJsonValue := ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}}
 	var body []ast.Stmt
@@ -127,30 +129,19 @@ func NewFieldFillerStmt(fld *ast.Field) []ast.Stmt {
 }
 
 // func (s *Struct) UnmarshalJSON(data []byte) error {
-
-//
-//	// only if there is a strict rules
-//	return s.FillFromJson(v, "")
-//}
-func NewUnmarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
+func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 	const (
 		parser = "parser"
 	)
+	poolName := fmt.Sprintf("%s%s", structPoolName, structName)
 	var body = []ast.Stmt{
 		//	parser := structPool.Get()
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{ast.NewIdent(parser)},
 			Tok: token.DEFINE,
 			Rhs: []ast.Expr{&ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent(structPoolName), Sel: ast.NewIdent("Get")},
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(poolName), Sel: ast.NewIdent("Get")},
 			}},
-		},
-		//	defer structPool.Put(parser)
-		&ast.DeferStmt{
-			Call: &ast.CallExpr{
-				Fun:  &ast.SelectorExpr{X: ast.NewIdent(structPoolName), Sel: ast.NewIdent("Put")},
-				Args: []ast.Expr{ast.NewIdent(parser)},
-			},
 		},
 		&ast.ExprStmt{X: &ast.BasicLit{Kind: token.COMMENT, Value: "// parses data containing JSON"}},
 		//	v, err := parser.ParseBytes(data)
@@ -175,6 +166,13 @@ func NewUnmarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
 				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(errVarName)}},
 			}},
 		},
+		//	defer structPool.Put(parser)
+		&ast.DeferStmt{
+			Call: &ast.CallExpr{
+				Fun:  &ast.SelectorExpr{X: ast.NewIdent(poolName), Sel: ast.NewIdent("Put")},
+				Args: []ast.Expr{ast.NewIdent(parser)},
+			},
+		},
 		//	return s.FillFromJson(v, "")
 		&ast.ReturnStmt{
 			Results: []ast.Expr{&ast.CallExpr{
@@ -186,55 +184,43 @@ func NewUnmarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
 			}},
 		},
 	}
-	return &ast.FuncDecl{
-		Doc: &ast.CommentGroup{List: []*ast.Comment{
-			{Text: "\n// " + unmarshalFuncName + " implements json.Unmarshaler"},
-		}},
-		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
-		}},
-		Name: ast.NewIdent(unmarshalFuncName),
-		Type: &ast.FuncType{
-			Params: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent(byteDataVarName)}, Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+	return []ast.Decl{
+		// var structPool fastjson.ParserPool
+		&ast.GenDecl{
+			Tok: token.VAR,
+			Doc: &ast.CommentGroup{List: []*ast.Comment{
+				{Text: "// " + poolName + "used for pooling Parsers for " + structName + " JSONs."},
 			}},
-			Results: &ast.FieldList{List: []*ast.Field{
-				{Type: ast.NewIdent("error")},
-			}},
+			Specs: []ast.Spec{
+				&ast.ValueSpec{
+					Names: []*ast.Ident{ast.NewIdent(poolName)},
+					Type:  &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("ParserPool")},
+				},
+			},
 		},
-		Body: &ast.BlockStmt{List: body},
+		// func (s *Struct) UnmarshalJSON(data []byte) error {
+		&ast.FuncDecl{
+			Doc: &ast.CommentGroup{List: []*ast.Comment{
+				{Text: "\n// " + unmarshalFuncName + " implements json.Unmarshaler"},
+			}},
+			Recv: &ast.FieldList{List: []*ast.Field{
+				{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+			}},
+			Name: ast.NewIdent(unmarshalFuncName),
+			Type: &ast.FuncType{
+				Params: &ast.FieldList{List: []*ast.Field{
+					{Names: []*ast.Ident{ast.NewIdent(byteDataVarName)}, Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+				}},
+				Results: &ast.FieldList{List: []*ast.Field{
+					{Type: ast.NewIdent("error")},
+				}},
+			},
+			Body: &ast.BlockStmt{List: body},
+		},
 	}
 }
 
 // func validateStructKeys(v *fastjson.Value, objPath string) error {
-//	o, err := v.Object()
-//	if err != nil {
-//		return err
-//	}
-//	o.Visit(func(key []byte, v *fastjson.Value) {
-//		if err != nil {
-//			return
-//		}
-//		if bytes.Equal(key, []byte{'f', 'i', 'l', 't', 'e', 'r'}) {
-//			return
-//		}
-//		if bytes.Equal(key, []byte{'l', 'i', 'm', 'i', 't'}) {
-//			return
-//		}
-//		if bytes.Equal(key, []byte{'o', 'f', 'f', 's', 'e', 't'}) {
-//			return
-//		}
-//		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd'}) {
-//			return
-//		}
-//		if objPath == "" {
-//			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-//		} else {
-//			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-//		}
-//	})
-//	return err
-//}
 func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
 	const (
 		o   = "o"

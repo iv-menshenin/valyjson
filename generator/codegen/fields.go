@@ -3,7 +3,6 @@ package codegen
 import (
 	"go/ast"
 	"go/token"
-	"strings"
 )
 
 type (
@@ -17,10 +16,12 @@ type (
 )
 
 // 	if offset := v.Get("offset"); offset != nil {
-//		s.Offset, err = offset.Int()
+//      var vOffset int
+//		vOffset, err = offset.Int()
 //		if err != nil {
 //			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //		}
+//      s.Offset = vOffset
 //	} else {
 //		s.Offset = 100
 //	}
@@ -86,6 +87,7 @@ func (f fld) fillFrom(name, v string) []ast.Stmt {
 	var result []ast.Stmt
 	result = append(result, f.typedValue(name, v)...)
 	result = append(result, f.checkErr()...)
+	result = append(result, f.fillField(name, v)...)
 	return result
 }
 
@@ -95,138 +97,44 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 	switch t := f.f.Type.(type) {
 
 	case *ast.Ident:
-		switch t.Name {
-
-		case "int":
-			result = append(result, intExtraction(name, v))
-			return result
-
-		case "int64":
-			result = append(result, int64Extraction(name, v))
-			return result
-
-		case "bool":
-			result = append(result, boolExtraction(name, v))
-			return result
-
-		case "string":
-			result = append(result, stringExtraction(name, v, f.t.jsonName())...)
-			return result
-
-		default:
-			result = append(result, nestedExtraction(name, v, f.t.jsonName()))
-			return result
-
-		}
+		return f.typeExtraction(name, v, t.Name)
 
 	case *ast.StructType:
 		panic("unsupported field type 'struct'")
 
 	case *ast.SelectorExpr:
-		result = append(result, nestedExtraction(name, v, f.t.jsonName()))
+		result = append(result, nestedExtraction(name, v, f.t.jsonName())...)
 		return result
+
+	case *ast.ArrayType:
+		result = append(result, arrayExtraction(name, v, f.t.jsonName())...)
+		return result
+
+	case *ast.StarExpr:
+		return f.typeExtraction(name, v, t.X.(*ast.Ident).Name)
 
 	}
 	panic("unsupported field type")
 }
 
-//	if {v}.Type() != fastjson.TypeString {
-//		err = fmt.Errorf("value doesn't contain string; it contains %s", {v}.Type())
-//		return fmt.Errorf("error parsing '%s{json}' value: %w", objPath, err)
-//	}
-//	s.{name} = {v}.String()
-func stringExtraction(name, v, json string) []ast.Stmt {
-	var result []ast.Stmt
-	var valueType = &ast.CallExpr{
-		Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Type")},
-	}
-	result = append(result, &ast.IfStmt{
-		Cond: &ast.BinaryExpr{
-			X:  valueType,
-			Op: token.NEQ,
-			Y:  &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("TypeString")},
-		},
-		Body: &ast.BlockStmt{List: []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{ast.NewIdent(errVarName)},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{fmtError("value doesn't contain string; it contains %s", valueType)},
-			},
-			&ast.ReturnStmt{Results: []ast.Expr{
-				fmtError("error parsing '%s"+json+"' value: %w", ast.NewIdent(objPathVarName), ast.NewIdent(errVarName)),
-			}},
-		}},
-	})
-	result = append(result, &ast.AssignStmt{
-		Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("String")},
-		}},
-	})
-	return result
-}
+func (f fld) typeExtraction(name, v, t string) []ast.Stmt {
+	switch t {
 
-// s.{name}, err = {v}.Int()
-func intExtraction(name, v string) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}, ast.NewIdent(errVarName)},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int")},
-		}},
-	}
-}
+	case "int":
+		return intExtraction("x"+name, v)
 
-// s.{name}, err = {v}.Int64()
-func int64Extraction(name, v string) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}, ast.NewIdent(errVarName)},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
-		}},
-	}
-}
+	case "int64":
+		return int64Extraction("x"+name, v)
 
-// s.{name}, err = {v}.Bool()
-func boolExtraction(name, v string) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}, ast.NewIdent(errVarName)},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Bool")},
-		}},
-	}
-}
+	case "bool":
+		return boolExtraction("x"+name, v)
 
-// err = s.{name}.fill({v}, objPath+"{json}.")
-func nestedExtraction(name, v, json string) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{ast.NewIdent(errVarName)},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{
-			&ast.CallExpr{
-				Fun: &ast.SelectorExpr{
-					X: &ast.SelectorExpr{
-						X:   ast.NewIdent(recvVarName),
-						Sel: ast.NewIdent(name),
-					},
-					Sel: ast.NewIdent(fillerFuncName),
-				},
-				Args: []ast.Expr{
-					ast.NewIdent(v),
-					&ast.BinaryExpr{
-						X:  ast.NewIdent(objPathVarName),
-						Op: token.ADD,
-						Y: &ast.BasicLit{
-							Kind:  token.STRING,
-							Value: "\"" + strings.Replace(json, "\"", "\\\"", -1) + ".\"",
-						},
-					},
-				},
-			},
-		},
+	case "string":
+		return stringExtraction("x"+name, v, f.t.jsonName())
+
+	default:
+		return nestedExtraction(name, v, f.t.jsonName())
+
 	}
 }
 
@@ -252,6 +160,50 @@ func (f fld) checkErr() []ast.Stmt {
 				},
 			}},
 		},
+	}
+}
+
+func (f fld) fillField(name, v string) []ast.Stmt {
+	var result []ast.Stmt
+	switch t := f.f.Type.(type) {
+
+	case *ast.Ident:
+		return f.typedFillIn(name, t.Name, false)
+
+	case *ast.StructType:
+		return result
+
+	case *ast.SelectorExpr:
+		return result
+
+	case *ast.ArrayType:
+		return result
+
+	case *ast.StarExpr:
+		return f.typedFillIn(name, t.X.(*ast.Ident).Name, true)
+
+	}
+	return nil
+}
+
+func (f fld) typedFillIn(name, t string, amp bool) []ast.Stmt {
+	var rhs ast.Expr = ast.NewIdent("x" + name)
+	if amp {
+		rhs = &ast.UnaryExpr{X: rhs, Op: token.AND}
+	}
+	switch t {
+	case "string", "int", "uint", "int8", "uint8", "int16", "uint16",
+		"int32", "uint32", "int64", "uint64", "float32", "float64", "bool", "byte", "rune":
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{rhs},
+			},
+		}
+
+	default:
+		return nil
 	}
 }
 

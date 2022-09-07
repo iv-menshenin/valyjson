@@ -1,9 +1,5 @@
 package test
 
-import (
-	"github.com/valyala/fastjson"
-)
-
 // Struct contains all fields for struct
 //  valyjson:encode,decode,strict
 type Struct struct {
@@ -14,15 +10,9 @@ type Struct struct {
 	Nested Nested `json:"nested"`
 }
 
+//  valyjson:encode,decode,strict
 type Nested struct {
 	List  []int64 `json:"list"`
 	Count *int64  `json:"count"`
 	Cross *int64  `json:"cross"`
 }
-
-func valueIsNotNull(v *fastjson.Value) bool {
-	return v != nil && v.Type() != fastjson.TypeNull
-}
-
-var structPool fastjson.ParserPool
-var nestedPool fastjson.ParserPool

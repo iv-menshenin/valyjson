@@ -50,6 +50,7 @@ func (g *Gen) Print(name string) {
 		panic(err)
 	}
 	defer f.Close()
+	g.result.Decls = append(g.result.Decls, valueIsNotNullDecl())
 	_, err = fmt.Fprint(f, "// Code generated [github.com/iv-menshenin/valyjson]; DO NOT EDIT.\n")
 	if err != nil {
 		panic(err)
@@ -62,6 +63,51 @@ func (g *Gen) Print(name string) {
 func parseGo(file string) (ast.Node, error) {
 	f := token.NewFileSet()
 	return parser.ParseFile(f, file, nil, parser.ParseComments|parser.AllErrors)
+}
+
+// func valueIsNotNull(v *fastjson.Value) bool {
+//   return v != nil && v.Type() != fastjson.TypeNull
+// }
+func valueIsNotNullDecl() ast.Decl {
+	return &ast.FuncDecl{
+		Doc: &ast.CommentGroup{List: []*ast.Comment{
+			{Text: "\n// valueIsNotNull allows you to determine if the value is contained in a Json structure."},
+			{Text: "// Checks if the structure itself or the value is Null."},
+		}},
+		Name: ast.NewIdent("valueIsNotNull"),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{List: []*ast.Field{
+				{
+					Names: []*ast.Ident{ast.NewIdent("v")},
+					Type:  &ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}},
+				},
+			}},
+			Results: &ast.FieldList{List: []*ast.Field{
+				{Type: ast.NewIdent("bool")},
+			}},
+		},
+		Body: &ast.BlockStmt{List: []ast.Stmt{
+			&ast.ReturnStmt{
+				Results: []ast.Expr{
+					&ast.BinaryExpr{
+						X: &ast.BinaryExpr{
+							X:  ast.NewIdent("v"),
+							Op: token.NEQ,
+							Y:  ast.NewIdent("nil"),
+						},
+						Op: token.LAND,
+						Y: &ast.BinaryExpr{
+							X: &ast.CallExpr{
+								Fun: &ast.SelectorExpr{X: ast.NewIdent("v"), Sel: ast.NewIdent("Type")},
+							},
+							Op: token.NEQ,
+							Y:  &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("TypeNull")},
+						},
+					},
+				},
+			},
+		}},
+	}
 }
 
 func New(file string) *Gen {

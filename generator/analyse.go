@@ -25,7 +25,7 @@ func (g *Gen) Analyse() {
 		case *ast.StructType:
 			g.result.Decls = append(
 				g.result.Decls,
-				codegen.NewUnmarshalFunc(structDecl.spec.Name.Name, structDecl.tags),
+				codegen.NewUnmarshalFunc(structDecl.spec.Name.Name, structDecl.tags)...,
 			)
 			g.result.Decls = append(
 				g.result.Decls,
