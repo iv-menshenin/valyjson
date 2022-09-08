@@ -16,3 +16,15 @@ type Nested struct {
 	Count *int64  `json:"count"`
 	Cross *int64  `json:"cross"`
 }
+
+//  valyjson:encode,decode
+type Person struct {
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
+	// DOB time.Time `json:"dob"`
+	Rate64 float64 `json:"rate64" default:"1"`
+	Rate32 float32 `json:"rate32" default:"1"`
+
+	Height uint32 `json:"height"`
+	Weight uint64 `json:"weight"`
+}

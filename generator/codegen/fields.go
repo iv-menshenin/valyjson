@@ -120,11 +120,20 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 func (f fld) typeExtraction(name, v, t string) []ast.Stmt {
 	switch t {
 
-	case "int":
+	case "int", "int8", "int16", "int32":
 		return intExtraction("x"+name, v)
 
 	case "int64":
 		return int64Extraction("x"+name, v)
+
+	case "uint", "uint8", "uint16", "uint32":
+		return uintExtraction("x"+name, v)
+
+	case "uint64":
+		return uint64Extraction("x"+name, v)
+
+	case "float32", "float64":
+		return floatExtraction("x"+name, v)
 
 	case "bool":
 		return boolExtraction("x"+name, v)
@@ -192,13 +201,24 @@ func (f fld) typedFillIn(name, t string, amp bool) []ast.Stmt {
 		rhs = &ast.UnaryExpr{X: rhs, Op: token.AND}
 	}
 	switch t {
-	case "string", "int", "uint", "int8", "uint8", "int16", "uint16",
-		"int32", "uint32", "int64", "uint64", "float32", "float64", "bool", "byte", "rune":
+	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
 				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{rhs},
+			},
+		}
+
+	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun:  ast.NewIdent(t),
+					Args: []ast.Expr{rhs},
+				}},
 			},
 		}
 

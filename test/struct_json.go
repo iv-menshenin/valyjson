@@ -168,6 +168,114 @@ func (s *Nested) validate(v *fastjson.Value, objPath string) error {
 	})
 	return nil
 }
+// jsonParserPersonused for pooling Parsers for Person JSONs.
+var jsonParserPerson fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *Person) UnmarshalJSON(data []byte) error {
+	parser := jsonParserPerson.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserPerson.Put(parser)
+	return s.FillFromJson(v, "")
+}
+
+// FillFromJson recursively fills the fields with fastjson.Value
+func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	if name := v.Get("name"); name != nil {
+		if name.Type() != fastjson.TypeString {
+			err = fmt.Errorf("value doesn't contain string; it contains %s", name.Type())
+			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
+		}
+		xName := name.String()
+		s.Name = xName
+	}
+	if surname := v.Get("surname"); surname != nil {
+		if surname.Type() != fastjson.TypeString {
+			err = fmt.Errorf("value doesn't contain string; it contains %s", surname.Type())
+			return fmt.Errorf("error parsing '%ssurname' value: %w", objPath, err)
+		}
+		xSurname := surname.String()
+		s.Surname = xSurname
+	}
+	if rate64 := v.Get("rate64"); rate64 != nil {
+		var xRate64 float64
+		xRate64, err = rate64.Float64()
+		if err != nil {
+			return fmt.Errorf("error parsing '%srate64' value: %w", objPath, err)
+		}
+		s.Rate64 = xRate64
+	} else {
+		s.Rate64 = 1
+	}
+	if rate32 := v.Get("rate32"); rate32 != nil {
+		var xRate32 float64
+		xRate32, err = rate32.Float64()
+		if err != nil {
+			return fmt.Errorf("error parsing '%srate32' value: %w", objPath, err)
+		}
+		s.Rate32 = float32(xRate32)
+	} else {
+		s.Rate32 = 1
+	}
+	if height := v.Get("height"); height != nil {
+		var xHeight uint
+		xHeight, err = height.Uint()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sheight' value: %w", objPath, err)
+		}
+		s.Height = uint32(xHeight)
+	}
+	if weight := v.Get("weight"); weight != nil {
+		var xWeight uint64
+		xWeight, err = weight.Uint64()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sweight' value: %w", objPath, err)
+		}
+		s.Weight = xWeight
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *Person) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'n', 'a', 'm', 'e'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'s', 'u', 'r', 'n', 'a', 'm', 'e'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'r', 'a', 't', 'e', '6', '4'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'r', 'a', 't', 'e', '3', '2'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'h', 'e', 'i', 'g', 'h', 't'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'w', 'e', 'i', 'g', 'h', 't'}) {
+			return
+		}
+		if objPath == "" {
+			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
+		} else {
+			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
+		}
+	})
+	return nil
+}
 
 // valueIsNotNull allows you to determine if the value is contained in a Json structure.
 // Checks if the structure itself or the value is Null.

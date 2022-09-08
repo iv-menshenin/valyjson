@@ -87,6 +87,30 @@ func intExtraction(name, v string) []ast.Stmt {
 	}
 }
 
+// x{name}, err = {v}.Uint()
+func uintExtraction(name, v string) []ast.Stmt {
+	return []ast.Stmt{
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent(name)},
+						Type:  ast.NewIdent("uint"),
+					},
+				},
+			},
+		},
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{&ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint")},
+			}},
+		},
+	}
+}
+
 // s.{name}, err = {v}.Int64()
 func int64Extraction(name, v string) []ast.Stmt {
 	return []ast.Stmt{
@@ -106,6 +130,54 @@ func int64Extraction(name, v string) []ast.Stmt {
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
+			}},
+		},
+	}
+}
+
+// s.{name}, err = {v}.Uint64()
+func uint64Extraction(name, v string) []ast.Stmt {
+	return []ast.Stmt{
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent(name)},
+						Type:  ast.NewIdent("uint64"),
+					},
+				},
+			},
+		},
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{&ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint64")},
+			}},
+		},
+	}
+}
+
+// s.{name}, err = {v}.Float64()
+func floatExtraction(name, v string) []ast.Stmt {
+	return []ast.Stmt{
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent(name)},
+						Type:  ast.NewIdent("float64"),
+					},
+				},
+			},
+		},
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{&ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Float64")},
 			}},
 		},
 	}
