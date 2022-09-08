@@ -298,6 +298,63 @@ func (s *Person) validate(v *fastjson.Value, objPath string) error {
 	return nil
 }
 
+// MarshalJSON serializes the structure with all its values into JSON format
+func (s *Struct) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer
+func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		b	[]byte
+		buf	[128]byte
+		err	error
+	)
+	result.WriteRune('{')
+	result.WriteRune('}')
+	return result.Bytes(), nil
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format
+func (s *Nested) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer
+func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		b	[]byte
+		buf	[128]byte
+		err	error
+	)
+	result.WriteRune('{')
+	result.WriteRune('}')
+	return result.Bytes(), nil
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format
+func (s *Person) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer
+func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		b	[]byte
+		buf	[128]byte
+		err	error
+	)
+	result.WriteRune('{')
+	result.WriteRune('}')
+	return result.Bytes(), nil
+}
+
 // valueIsNotNull allows you to determine if the value is contained in a Json structure.
 // Checks if the structure itself or the value is Null.
 func valueIsNotNull(v *fastjson.Value) bool {

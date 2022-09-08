@@ -10,12 +10,15 @@ const (
 	errVarName        = "err"
 	recvVarName       = "s"
 	valVarName        = "v"
+	bufVarName        = "buf"
 	structPoolName    = "jsonParser"
 	objPathVarName    = "objPath"
 	byteDataVarName   = "data"
 	fillerFuncName    = "FillFromJson"
 	unmarshalFuncName = "UnmarshalJSON"
+	marshalFuncName   = "MarshalJSON"
 	validateFuncName  = "validate"
+	jsonerFuncName    = "MarshalAppend"
 )
 
 // func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
@@ -88,7 +91,7 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
 	factory := newField(fld)
 	for _, name := range fld.Names {
-		result = append(result, factory.Explore(name.Name)...)
+		result = append(result, factory.FillField(name.Name)...)
 	}
 	return result
 }
@@ -371,4 +374,151 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 		},
 		Body: &ast.BlockStmt{List: body},
 	}
+}
+
+// func (s *S) MarshalJSON() ([]byte, error) {
+// 	var buf [128]byte
+// 	return s.marshalAppend(buf[:0])
+// }
+func NewMarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
+	return &ast.FuncDecl{
+		Doc: &ast.CommentGroup{List: []*ast.Comment{
+			{Text: "\n// " + marshalFuncName + " serializes the structure with all its values into JSON format"},
+		}},
+		Recv: &ast.FieldList{List: []*ast.Field{
+			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+		}},
+		Name: ast.NewIdent(marshalFuncName),
+		Type: &ast.FuncType{
+			Results: &ast.FieldList{List: []*ast.Field{
+				{Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+				{Type: ast.NewIdent("error")},
+			}},
+		},
+		Body: &ast.BlockStmt{List: []ast.Stmt{
+			&ast.DeclStmt{
+				Decl: &ast.GenDecl{
+					Tok: token.VAR,
+					Specs: []ast.Spec{
+						&ast.ValueSpec{
+							Names: []*ast.Ident{ast.NewIdent(bufVarName)},
+							Type: &ast.ArrayType{
+								// todo @menshenin calculate buffer length
+								Len: &ast.BasicLit{Kind: token.INT, Value: "128"},
+								Elt: ast.NewIdent("byte"),
+							},
+						},
+					},
+				},
+			},
+			&ast.ReturnStmt{
+				Results: []ast.Expr{
+					&ast.CallExpr{
+						Fun: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(jsonerFuncName)},
+						Args: []ast.Expr{
+							&ast.SliceExpr{X: ast.NewIdent(bufVarName), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
+						},
+					},
+				},
+			},
+		}},
+	}
+}
+
+// func (s *S) MarshalAppend(dst []byte) ([]byte, error) {
+func NewAppendJsonFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
+	var body = []ast.Stmt{
+		// var result = bytes.NewBuffer(dst)
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent("result")},
+						Values: []ast.Expr{
+							&ast.CallExpr{
+								Fun:  &ast.SelectorExpr{X: ast.NewIdent("bytes"), Sel: ast.NewIdent("NewBuffer")},
+								Args: []ast.Expr{ast.NewIdent("dst")},
+							},
+						},
+					},
+				},
+			},
+		},
+		// var (
+		// 	b   []byte
+		// 	buf [128]byte
+		// 	err error
+		// )
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent("b")},
+						Type:  &ast.ArrayType{Elt: ast.NewIdent("byte")},
+					},
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent("buf")},
+						Type:  &ast.ArrayType{Elt: ast.NewIdent("byte"), Len: &ast.BasicLit{Kind: token.INT, Value: "128"}},
+					},
+					&ast.ValueSpec{
+						Names: []*ast.Ident{ast.NewIdent(errVarName)},
+						Type:  ast.NewIdent("error"),
+					},
+				},
+			},
+		},
+		// result.WriteRune('{')
+		&ast.ExprStmt{X: &ast.CallExpr{
+			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
+			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "'{'"}},
+		}},
+	}
+	for _, field := range fields {
+		body = append(body, jsonFieldStmts(field)...)
+	}
+	body = append(
+		body,
+		// result.WriteRune('}')
+		// return result.Bytes(), nil
+		&ast.ExprStmt{X: &ast.CallExpr{
+			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
+			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "'}'"}},
+		}},
+		&ast.ReturnStmt{Results: []ast.Expr{
+			&ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Bytes")},
+			},
+			ast.NewIdent("nil"),
+		}},
+	)
+	return &ast.FuncDecl{
+		Doc: &ast.CommentGroup{List: []*ast.Comment{
+			{Text: "\n// " + jsonerFuncName + " serializes all fields of the structure using a buffer"},
+		}},
+		Recv: &ast.FieldList{List: []*ast.Field{
+			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+		}},
+		Name: ast.NewIdent(jsonerFuncName),
+		Type: &ast.FuncType{
+			Params: &ast.FieldList{List: []*ast.Field{
+				{Names: []*ast.Ident{ast.NewIdent("dst")}, Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+			}},
+			Results: &ast.FieldList{List: []*ast.Field{
+				{Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+				{Type: ast.NewIdent("error")},
+			}},
+		},
+		Body: &ast.BlockStmt{List: body},
+	}
+}
+
+func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
+	var result []ast.Stmt
+	factory := newField(fld)
+	for _, name := range fld.Names {
+		result = append(result, factory.MarshalField(name.Name)...)
+	}
+	return result
 }

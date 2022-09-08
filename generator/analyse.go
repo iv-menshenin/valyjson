@@ -3,6 +3,7 @@ package generator
 import (
 	"go/ast"
 	"strings"
+
 	"valyjson/generator/codegen"
 )
 
@@ -34,6 +35,25 @@ func (g *Gen) BuildFillers() {
 			g.result.Decls = append(
 				g.result.Decls,
 				codegen.NewValidatorFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
+			)
+		}
+	}
+}
+
+func (g *Gen) BuildJsoners() {
+	var v visitor
+	ast.Walk(&v, g.parsed)
+	for _, structDecl := range v.decls {
+		switch strc := structDecl.spec.Type.(type) {
+
+		case *ast.StructType:
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewMarshalFunc(structDecl.spec.Name.Name, structDecl.tags),
+			)
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewAppendJsonFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
 			)
 		}
 	}

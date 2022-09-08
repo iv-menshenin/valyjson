@@ -1,7 +1,5 @@
 package test
 
-import "bytes"
-
 // Struct contains all fields for struct
 //  valyjson:encode,decode,strict
 type Struct struct {
@@ -10,38 +8,6 @@ type Struct struct {
 	Offset int    `json:"offset,omitempty" default:"100"`
 
 	Nested Nested `json:"nested"`
-}
-
-// MarshalJSON implements json.Marshaler
-func (s *Struct) MarshalJSON() ([]byte, error) {
-	var out = bytes.NewBuffer(make([]byte, 0, 128))
-	for _, r := range s.Filter {
-		var err error
-		switch r {
-
-		case '\t':
-			_, err = out.WriteString(`\t`)
-
-		case '\r':
-			_, err = out.WriteString(`\r`)
-
-		case '\n':
-			_, err = out.WriteString(`\n`)
-
-		case '\\':
-			_, err = out.WriteString(`\\`)
-
-		case '"':
-			_, err = out.WriteString(`\"`)
-
-		default:
-			_, err = out.WriteRune(r)
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	return nil, nil
 }
 
 //  valyjson:encode,decode,strict

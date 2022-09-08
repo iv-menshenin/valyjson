@@ -8,5 +8,6 @@ func main() {
 		panic(err)
 	}
 	g.BuildFillers()
+	g.BuildJsoners()
 	g.Print("./test/struct_json.go")
 }

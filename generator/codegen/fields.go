@@ -25,7 +25,7 @@ type (
 //	} else {
 //		s.Offset = 100
 //	}
-func (f fld) Explore(name string) []ast.Stmt {
+func (f fld) FillField(name string) []ast.Stmt {
 	if f.t.jsonName() == "" {
 		return nil
 	}
@@ -305,4 +305,8 @@ func newField(f *ast.Field) *fld {
 		f: f,
 		t: parseTags(f.Tag.Value),
 	}
+}
+
+func (f fld) MarshalField(name string) []ast.Stmt {
+	return nil
 }
