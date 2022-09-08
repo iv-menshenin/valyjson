@@ -6,41 +6,6 @@ import (
 	"go/token"
 )
 
-/*
-func (s *Struct) fill(v *fastjson.Value, objPath string) (err error) {
-	if filter := v.Get("filter"); filter != nil {
-		if filter.Type() != fastjson.TypeString {
-			err = fmt.Errorf("value doesn't contain string; it contains %s", v.Type())
-			return fmt.Errorf("error parsing '%sfilter' value: %w", objPath, err)
-		}
-		s.Filter = filter.String()
-	} else {
-		return fmt.Errorf("the '%sfilter' path is required but ommitted", objPath)
-	}
-	if limit := v.Get("limit"); limit != nil {
-		s.Limit, err = limit.Int()
-		if err != nil {
-			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
-		}
-	}
-	if offset := v.Get("offset"); offset != nil {
-		s.Offset, err = offset.Int()
-		if err != nil {
-			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
-		}
-	} else {
-		s.Offset = 100
-	}
-	if nested := v.Get("nested"); nested != nil {
-		err = s.Nested.fill(nested, objPath+"nested.")
-		if err != nil {
-			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
-		}
-	}
-	return nil
-}
-*/
-
 const (
 	errVarName        = "err"
 	recvVarName       = "s"
@@ -91,7 +56,7 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 		)
 	}
 	for _, field := range fields {
-		body = append(body, NewFieldFillerStmt(field)...)
+		body = append(body, fillFieldStmts(field)...)
 	}
 	body = append(
 		body,
@@ -119,7 +84,7 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 	}
 }
 
-func NewFieldFillerStmt(fld *ast.Field) []ast.Stmt {
+func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
 	factory := newField(fld)
 	for _, name := range fld.Names {

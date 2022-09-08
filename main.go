@@ -7,6 +7,6 @@ func main() {
 	if err := g.Parse(); err != nil {
 		panic(err)
 	}
-	g.Analyse()
+	g.BuildFillers()
 	g.Print("./test/struct_json.go")
 }

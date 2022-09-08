@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func (g *Gen) Analyse() {
+func (g *Gen) BuildFillers() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.decls {
