@@ -1,4 +1,4 @@
-package codegen
+package helpers
 
 import (
 	"fmt"
@@ -7,15 +7,13 @@ import (
 	"strings"
 )
 
-func getBasicLitFromString(t ast.Expr, val string) ast.Expr {
+func BasicLiteralFromType(t ast.Expr, val string) ast.Expr {
 	switch i := t.(type) {
 
 	case *ast.Ident:
 		switch i.Name {
 
-		case "int", "int8", "int16", "int32", "int64":
-			fallthrough
-		case "uint", "uint8", "uint16", "uint32", "uint64":
+		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
 			return &ast.BasicLit{
 				Kind:  token.INT,
 				Value: val,
@@ -55,7 +53,7 @@ func getBasicLitFromString(t ast.Expr, val string) ast.Expr {
 }
 
 // fmt.Errorf("{format}", {attrs[0]}, {attrs[1]}, ..., {attrs[n]})
-func fmtError(format string, attrs ...ast.Expr) ast.Expr {
+func FmtError(format string, attrs ...ast.Expr) ast.Expr {
 	var fmtAttrs []ast.Expr
 	fmtAttrs = append(fmtAttrs, &ast.BasicLit{
 		Kind:  token.STRING,

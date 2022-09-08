@@ -1,9 +1,12 @@
-package codegen
+package field
 
 import (
 	"go/ast"
 	"go/token"
 	"strings"
+
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
 // 	if list := v.Get("list"); list != nil {
@@ -44,12 +47,12 @@ func stringExtraction(name, v, json string) []ast.Stmt {
 		},
 		Body: &ast.BlockStmt{List: []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+				Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{fmtError("value doesn't contain string; it contains %s", valueType)},
+				Rhs: []ast.Expr{helpers.FmtError("value doesn't contain string; it contains %s", valueType)},
 			},
 			&ast.ReturnStmt{Results: []ast.Expr{
-				fmtError("error parsing '%s"+json+"' value: %w", ast.NewIdent(objPathVarName), ast.NewIdent(errVarName)),
+				helpers.FmtError("error parsing '%s"+json+"' value: %w", ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError)),
 			}},
 		}},
 	})
@@ -78,7 +81,7 @@ func intExtraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int")},
@@ -102,7 +105,7 @@ func uintExtraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint")},
@@ -126,7 +129,7 @@ func int64Extraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
@@ -150,7 +153,7 @@ func uint64Extraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint64")},
@@ -174,7 +177,7 @@ func floatExtraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Float64")},
@@ -198,7 +201,7 @@ func boolExtraction(name, v string) []ast.Stmt {
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Bool")},
@@ -211,21 +214,21 @@ func boolExtraction(name, v string) []ast.Stmt {
 func nestedExtraction(name, v, json string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{
 				&ast.CallExpr{
 					Fun: &ast.SelectorExpr{
 						X: &ast.SelectorExpr{
-							X:   ast.NewIdent(recvVarName),
+							X:   ast.NewIdent(names.VarNameReceiver),
 							Sel: ast.NewIdent(name),
 						},
-						Sel: ast.NewIdent(fillerFuncName),
+						Sel: ast.NewIdent(names.FuncNameFill),
 					},
 					Args: []ast.Expr{
 						ast.NewIdent(v),
 						&ast.BinaryExpr{
-							X:  ast.NewIdent(objPathVarName),
+							X:  ast.NewIdent(names.VarNameObjPath),
 							Op: token.ADD,
 							Y: &ast.BasicLit{
 								Kind:  token.STRING,

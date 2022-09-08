@@ -1,8 +1,13 @@
-package codegen
+package field
 
 import (
 	"go/ast"
 	"go/token"
+	"strings"
+
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
+	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
 type (
@@ -11,7 +16,7 @@ type (
 		// f contains field AST
 		f *ast.Field
 		// t contains tag descriptor
-		t Tags
+		t tags.Tags
 	}
 )
 
@@ -26,10 +31,10 @@ type (
 //		s.Offset = 100
 //	}
 func (f fld) FillField(name string) []ast.Stmt {
-	if f.t.jsonName() == "" {
+	if f.t.JsonName() == "" {
 		return nil
 	}
-	var v = varName(name, f.t)
+	var v = intermediateVarName(name, f.t)
 	var body *ast.BlockStmt
 	var els ast.Stmt
 	if stmt := f.fillFrom(name, v); len(stmt) > 0 {
@@ -69,12 +74,12 @@ func (f fld) extract(v string) ast.Stmt {
 func (f fld) getValue() ast.Expr {
 	return &ast.CallExpr{
 		Fun: &ast.SelectorExpr{
-			X:   ast.NewIdent(valVarName),
+			X:   ast.NewIdent(names.VarNameJsonValue),
 			Sel: ast.NewIdent("Get"),
 		},
 		Args: []ast.Expr{&ast.BasicLit{
 			Kind:  token.STRING,
-			Value: "\"" + f.t.jsonName() + "\"",
+			Value: "\"" + f.t.JsonName() + "\"",
 		}},
 	}
 }
@@ -103,11 +108,11 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 		panic("unsupported field type 'struct'")
 
 	case *ast.SelectorExpr:
-		result = append(result, nestedExtraction(name, v, f.t.jsonName())...)
+		result = append(result, nestedExtraction(name, v, f.t.JsonName())...)
 		return result
 
 	case *ast.ArrayType:
-		result = append(result, arrayExtraction(name, v, f.t.jsonName())...)
+		result = append(result, arrayExtraction(name, v, f.t.JsonName())...)
 		return result
 
 	case *ast.StarExpr:
@@ -139,10 +144,10 @@ func (f fld) typeExtraction(name, v, t string) []ast.Stmt {
 		return boolExtraction("x"+name, v)
 
 	case "string":
-		return stringExtraction("x"+name, v, f.t.jsonName())
+		return stringExtraction("x"+name, v, f.t.JsonName())
 
 	default:
-		return nestedExtraction(name, v, f.t.jsonName())
+		return nestedExtraction(name, v, f.t.JsonName())
 
 	}
 }
@@ -155,17 +160,17 @@ func (f fld) checkErr() []ast.Stmt {
 		// no error checking for string
 		return nil
 	}
-	format := "error parsing '%s" + f.t.jsonName() + "' value: %w"
+	format := "error parsing '%s" + f.t.JsonName() + "' value: %w"
 	return []ast.Stmt{
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(errVarName),
+				X:  ast.NewIdent(names.VarNameError),
 				Op: token.NEQ,
 				Y:  ast.NewIdent("nil"),
 			},
 			Body: &ast.BlockStmt{List: []ast.Stmt{
 				&ast.ReturnStmt{
-					Results: []ast.Expr{fmtError(format, ast.NewIdent(objPathVarName), ast.NewIdent(errVarName))},
+					Results: []ast.Expr{helpers.FmtError(format, ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError))},
 				},
 			}},
 		},
@@ -201,7 +206,7 @@ func (f fld) typedFillIn(name, t string) []ast.Stmt {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{rhs},
 			},
@@ -210,7 +215,7 @@ func (f fld) typedFillIn(name, t string) []ast.Stmt {
 	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
 					Fun:  ast.NewIdent(t),
@@ -229,7 +234,7 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.UnaryExpr{X: ast.NewIdent("x" + name), Op: token.AND}},
 			},
@@ -241,7 +246,7 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 			result,
 			// s.HeightRef = new(uint32)
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
 					Fun:  ast.NewIdent("new"),
@@ -251,7 +256,7 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 			// *s.HeightRef = uint32(xHeightRef)
 			&ast.AssignStmt{
 				Lhs: []ast.Expr{&ast.StarExpr{
-					X: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)},
+					X: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
 				}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
@@ -271,16 +276,16 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 //		s.{name} = 100
 //	}
 func (f fld) ifDefault(name string) []ast.Stmt {
-	if f.t.defaultValue() == "" {
-		if f.t.jsonTags().Has("required") {
+	if f.t.DefaultValue() == "" {
+		if f.t.JsonTags().Has("required") {
 			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
 			return []ast.Stmt{
 				&ast.ReturnStmt{
 					Results: []ast.Expr{&ast.CallExpr{
 						Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
 						Args: []ast.Expr{
-							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.t.jsonName() + "' is missing\""},
-							ast.NewIdent(objPathVarName),
+							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.t.JsonName() + "' is missing\""},
+							ast.NewIdent(names.VarNameObjPath),
 						},
 					}},
 				},
@@ -290,23 +295,27 @@ func (f fld) ifDefault(name string) []ast.Stmt {
 	}
 	return []ast.Stmt{
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{getBasicLitFromString(f.f.Type, f.t.defaultValue())},
+			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.f.Type, f.t.DefaultValue())},
 		},
 	}
 }
 
-func newField(f *ast.Field) *fld {
+func New(f *ast.Field) *fld {
 	if f.Tag == nil {
 		panic("you must fill in all fields with tags")
 	}
 	return &fld{
 		f: f,
-		t: parseTags(f.Tag.Value),
+		t: tags.Parse(f.Tag.Value),
 	}
 }
 
 func (f fld) MarshalField(name string) []ast.Stmt {
 	return nil
+}
+
+func intermediateVarName(name string, t tags.Tags) string {
+	return strings.ToLower(name)
 }

@@ -4,7 +4,7 @@ import (
 	"go/ast"
 	"strings"
 
-	"valyjson/generator/codegen"
+	"github.com/iv-menshenin/valyjson/generator/codegen"
 )
 
 type (

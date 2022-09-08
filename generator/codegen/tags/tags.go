@@ -1,4 +1,4 @@
-package codegen
+package tags
 
 import (
 	"reflect"
@@ -6,40 +6,40 @@ import (
 )
 
 const (
-	strictRules = "strict"
+	StrictRules = "strict"
 )
 
 type Tags map[string][]string
 
-func (t Tags) jsonName() string {
+func (t Tags) JsonName() string {
 	if v := t["json"]; len(v) > 0 {
 		return v[0]
 	}
 	return ""
 }
 
-func (t Tags) jsonTags() StructTags {
+func (t Tags) JsonTags() StructTags {
 	if v := t["json"]; len(v) > 0 {
 		return StructTags(v)
 	}
 	return nil
 }
 
-func (t Tags) defaultValue() string {
+func (t Tags) DefaultValue() string {
 	if v := t["default"]; len(v) > 0 {
 		return v[0]
 	}
 	return ""
 }
 
-func parseTags(tag string) Tags {
+func Parse(tag string) Tags {
 	var result = make(map[string][]string)
-	result["json"] = strings.Split(structTag(tag).Get("json"), ",")
-	result["default"] = strings.Split(structTag(tag).Get("default"), ",")
+	result["json"] = strings.Split(StructTag(tag).Get("json"), ",")
+	result["default"] = strings.Split(StructTag(tag).Get("default"), ",")
 	return result
 }
 
-func structTag(tag string) reflect.StructTag {
+func StructTag(tag string) reflect.StructTag {
 	if len(tag) < 2 {
 		return ""
 	}
@@ -58,4 +58,8 @@ func (t StructTags) Has(s string) bool {
 		}
 	}
 	return false
+}
+
+func (t StructTags) StrictRules() bool {
+	return t.Has(StrictRules)
 }

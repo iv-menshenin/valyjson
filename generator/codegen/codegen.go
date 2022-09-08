@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+
+	"github.com/iv-menshenin/valyjson/generator/codegen/field"
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
+	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
 const (
-	errVarName        = "err"
-	recvVarName       = "s"
-	valVarName        = "v"
 	bufVarName        = "buf"
 	structPoolName    = "jsonParser"
-	objPathVarName    = "objPath"
 	byteDataVarName   = "data"
-	fillerFuncName    = "FillFromJson"
 	unmarshalFuncName = "UnmarshalJSON"
 	marshalFuncName   = "MarshalJSON"
 	validateFuncName  = "validate"
@@ -22,10 +21,10 @@ const (
 )
 
 // func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
+func NewFillerFunc(structName string, fields []*ast.Field, structTags tags.StructTags) *ast.FuncDecl {
 	fastJsonValue := ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}}
 	var body []ast.Stmt
-	if tags.Has(strictRules) {
+	if structTags.StrictRules() {
 		body = append(
 			body,
 			&ast.ExprStmt{X: &ast.BasicLit{Kind: token.COMMENT, Value: "// only if there is a strict rules"}},
@@ -34,12 +33,12 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 			//	}
 			&ast.IfStmt{
 				Init: &ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 					Tok: token.ASSIGN,
 					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(validateFuncName)},
+						Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(validateFuncName)},
 						Args: []ast.Expr{
-							ast.NewIdent(valVarName),
+							ast.NewIdent(names.VarNameJsonValue),
 							&ast.BasicLit{
 								Kind:  token.STRING,
 								Value: "\"\"",
@@ -48,12 +47,12 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 					}},
 				},
 				Cond: &ast.BinaryExpr{
-					X:  ast.NewIdent(errVarName),
+					X:  ast.NewIdent(names.VarNameError),
 					Op: token.NEQ,
 					Y:  ast.NewIdent("nil"),
 				},
 				Body: &ast.BlockStmt{List: []ast.Stmt{
-					&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(errVarName)}},
+					&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
 				}},
 			},
 		)
@@ -68,19 +67,19 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 	)
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
-			{Text: "\n// " + fillerFuncName + " recursively fills the fields with fastjson.Value"},
+			{Text: "\n// " + names.FuncNameFill + " recursively fills the fields with fastjson.Value"},
 		}},
 		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+			{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
 		}},
-		Name: ast.NewIdent(fillerFuncName),
+		Name: ast.NewIdent(names.FuncNameFill),
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent(valVarName)}, Type: &fastJsonValue},
-				{Names: []*ast.Ident{ast.NewIdent(objPathVarName)}, Type: ast.NewIdent("string")},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameJsonValue)}, Type: &fastJsonValue},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameObjPath)}, Type: ast.NewIdent("string")},
 			}},
 			Results: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent(errVarName)}, Type: ast.NewIdent("error")},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameError)}, Type: ast.NewIdent("error")},
 			}},
 		},
 		Body: &ast.BlockStmt{List: body},
@@ -89,7 +88,7 @@ func NewFillerFunc(structName string, fields []*ast.Field, tags StructTags) *ast
 
 func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
-	factory := newField(fld)
+	factory := field.New(fld)
 	for _, name := range fld.Names {
 		result = append(result, factory.FillField(name.Name)...)
 	}
@@ -97,7 +96,7 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 }
 
 // func (s *Struct) UnmarshalJSON(data []byte) error {
-func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
+func NewUnmarshalFunc(structName string, structTags tags.StructTags) []ast.Decl {
 	const (
 		parser = "parser"
 	)
@@ -114,7 +113,7 @@ func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 		&ast.ExprStmt{X: &ast.BasicLit{Kind: token.COMMENT, Value: "// parses data containing JSON"}},
 		//	v, err := parser.ParseBytes(data)
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(valVarName), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(names.VarNameJsonValue), ast.NewIdent(names.VarNameError)},
 			Tok: token.DEFINE,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun:  &ast.SelectorExpr{X: ast.NewIdent(parser), Sel: ast.NewIdent("ParseBytes")},
@@ -126,12 +125,12 @@ func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 		//	}
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(errVarName),
+				X:  ast.NewIdent(names.VarNameError),
 				Op: token.NEQ,
 				Y:  ast.NewIdent("nil"),
 			},
 			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(errVarName)}},
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
 			}},
 		},
 		//	defer structPool.Put(parser)
@@ -144,8 +143,8 @@ func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 		//	return s.FillFromJson(v, "")
 		&ast.ReturnStmt{
 			Results: []ast.Expr{&ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(fillerFuncName)},
-				Args: []ast.Expr{ast.NewIdent(valVarName), &ast.BasicLit{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(names.FuncNameFill)},
+				Args: []ast.Expr{ast.NewIdent(names.VarNameJsonValue), &ast.BasicLit{
 					Kind:  token.STRING,
 					Value: "\"\"",
 				}},
@@ -172,7 +171,7 @@ func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 				{Text: "\n// " + unmarshalFuncName + " implements json.Unmarshaler"},
 			}},
 			Recv: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
 			}},
 			Name: ast.NewIdent(unmarshalFuncName),
 			Type: &ast.FuncType{
@@ -189,7 +188,7 @@ func NewUnmarshalFunc(structName string, tags StructTags) []ast.Decl {
 }
 
 // func validateStructKeys(v *fastjson.Value, objPath string) error {
-func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
+func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.StructTags) *ast.FuncDecl {
 	const (
 		o   = "o"
 		v   = "_"
@@ -202,7 +201,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 		//		}
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(errVarName),
+				X:  ast.NewIdent(names.VarNameError),
 				Op: token.NEQ,
 				Y:  ast.NewIdent("nil"),
 			},
@@ -210,9 +209,9 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 		},
 	}
 	for _, field := range fields {
-		fTags := parseTags(field.Tag.Value)
+		fieldTags := tags.Parse(field.Tag.Value)
 		var runeArgs []ast.Expr
-		for name, i := []rune(fTags.jsonName()), 0; i < len(name); i++ {
+		for name, i := []rune(fieldTags.JsonName()), 0; i < len(name); i++ {
 			runeArgs = append(runeArgs, &ast.BasicLit{
 				Kind:  token.CHAR,
 				Value: "'" + string(name[i]) + "'",
@@ -247,7 +246,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 		visitBody,
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(objPathVarName),
+				X:  ast.NewIdent(names.VarNameObjPath),
 				Op: token.EQL,
 				Y: &ast.BasicLit{
 					Kind:  token.STRING,
@@ -257,7 +256,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 			// err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
 			Body: &ast.BlockStmt{List: []ast.Stmt{
 				&ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 					Tok: token.ASSIGN,
 					Rhs: []ast.Expr{
 						&ast.CallExpr{
@@ -282,7 +281,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 			// err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
 			Else: &ast.BlockStmt{List: []ast.Stmt{
 				&ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(errVarName)},
+					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 					Tok: token.ASSIGN,
 					Rhs: []ast.Expr{
 						&ast.CallExpr{
@@ -299,7 +298,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 									Fun:  ast.NewIdent("string"),
 									Args: []ast.Expr{ast.NewIdent(key)},
 								},
-								ast.NewIdent(objPathVarName),
+								ast.NewIdent(names.VarNameObjPath),
 							},
 						},
 					},
@@ -313,20 +312,20 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 	//	}
 	var body = []ast.Stmt{
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(o), ast.NewIdent(errVarName)},
+			Lhs: []ast.Expr{ast.NewIdent(o), ast.NewIdent(names.VarNameError)},
 			Tok: token.DEFINE,
 			Rhs: []ast.Expr{
-				&ast.CallExpr{Fun: &ast.SelectorExpr{X: ast.NewIdent(valVarName), Sel: ast.NewIdent("Object")}},
+				&ast.CallExpr{Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameJsonValue), Sel: ast.NewIdent("Object")}},
 			},
 		},
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(errVarName),
+				X:  ast.NewIdent(names.VarNameError),
 				Op: token.NEQ,
 				Y:  ast.NewIdent("nil"),
 			},
 			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(errVarName)}},
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
 			}},
 		},
 		//	o.Visit(func(key []byte, _ *fastjson.Value) {
@@ -360,13 +359,13 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 			{Text: "\n// " + validateFuncName + " checks for correct data structure"},
 		}},
 		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+			{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
 		}},
 		Name: ast.NewIdent(validateFuncName),
 		Type: &ast.FuncType{
 			Params: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent(valVarName)}, Type: &fastJsonValue},
-				{Names: []*ast.Ident{ast.NewIdent(objPathVarName)}, Type: ast.NewIdent("string")},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameJsonValue)}, Type: &fastJsonValue},
+				{Names: []*ast.Ident{ast.NewIdent(names.VarNameObjPath)}, Type: ast.NewIdent("string")},
 			}},
 			Results: &ast.FieldList{List: []*ast.Field{
 				{Type: ast.NewIdent("error")},
@@ -380,13 +379,13 @@ func NewValidatorFunc(structName string, fields []*ast.Field, tags StructTags) *
 // 	var buf [128]byte
 // 	return s.marshalAppend(buf[:0])
 // }
-func NewMarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
+func NewMarshalFunc(structName string, structTags tags.StructTags) *ast.FuncDecl {
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{
 			{Text: "\n// " + marshalFuncName + " serializes the structure with all its values into JSON format"},
 		}},
 		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+			{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
 		}},
 		Name: ast.NewIdent(marshalFuncName),
 		Type: &ast.FuncType{
@@ -414,7 +413,7 @@ func NewMarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
 			&ast.ReturnStmt{
 				Results: []ast.Expr{
 					&ast.CallExpr{
-						Fun: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(jsonerFuncName)},
+						Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(jsonerFuncName)},
 						Args: []ast.Expr{
 							&ast.SliceExpr{X: ast.NewIdent(bufVarName), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
 						},
@@ -426,7 +425,7 @@ func NewMarshalFunc(structName string, tags StructTags) *ast.FuncDecl {
 }
 
 // func (s *S) MarshalAppend(dst []byte) ([]byte, error) {
-func NewAppendJsonFunc(structName string, fields []*ast.Field, tags StructTags) *ast.FuncDecl {
+func NewAppendJsonFunc(structName string, fields []*ast.Field, structTags tags.StructTags) *ast.FuncDecl {
 	var body = []ast.Stmt{
 		// var result = bytes.NewBuffer(dst)
 		&ast.DeclStmt{
@@ -463,7 +462,7 @@ func NewAppendJsonFunc(structName string, fields []*ast.Field, tags StructTags) 
 						Type:  &ast.ArrayType{Elt: ast.NewIdent("byte"), Len: &ast.BasicLit{Kind: token.INT, Value: "128"}},
 					},
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(errVarName)},
+						Names: []*ast.Ident{ast.NewIdent(names.VarNameError)},
 						Type:  ast.NewIdent("error"),
 					},
 				},
@@ -498,7 +497,7 @@ func NewAppendJsonFunc(structName string, fields []*ast.Field, tags StructTags) 
 			{Text: "\n// " + jsonerFuncName + " serializes all fields of the structure using a buffer"},
 		}},
 		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(recvVarName)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
+			{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(structName)}},
 		}},
 		Name: ast.NewIdent(jsonerFuncName),
 		Type: &ast.FuncType{
@@ -516,7 +515,7 @@ func NewAppendJsonFunc(structName string, fields []*ast.Field, tags StructTags) 
 
 func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
-	factory := newField(fld)
+	factory := field.New(fld)
 	for _, name := range fld.Names {
 		result = append(result, factory.MarshalField(name.Name)...)
 	}

@@ -1,4 +1,4 @@
-module valyjson
+module github.com/iv-menshenin/valyjson
 
 go 1.18
 
