@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/valyala/fastjson"
 )
-
 // jsonParserStructused for pooling Parsers for Struct JSONs.
 var jsonParserStruct fastjson.ParserPool
 
@@ -95,7 +94,6 @@ func (s *Struct) validate(v *fastjson.Value, objPath string) error {
 	})
 	return nil
 }
-
 // jsonParserNestedused for pooling Parsers for Nested JSONs.
 var jsonParserNested fastjson.ParserPool
 
@@ -229,6 +227,15 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		s.Height = uint32(xHeight)
 	}
+	if heightref := v.Get("heightRef"); heightref != nil {
+		var xHeightRef uint
+		xHeightRef, err = heightref.Uint()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sheightRef' value: %w", objPath, err)
+		}
+		s.HeightRef = new(uint32)
+		*s.HeightRef = uint32(xHeightRef)
+	}
 	if weight := v.Get("weight"); weight != nil {
 		var xWeight uint64
 		xWeight, err = weight.Uint64()
@@ -236,6 +243,14 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			return fmt.Errorf("error parsing '%sweight' value: %w", objPath, err)
 		}
 		s.Weight = xWeight
+	}
+	if weightref := v.Get("weightRef"); weightref != nil {
+		var xWeightRef uint64
+		xWeightRef, err = weightref.Uint64()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sweightRef' value: %w", objPath, err)
+		}
+		s.WeightRef = &xWeightRef
 	}
 	return nil
 }
@@ -265,7 +280,13 @@ func (s *Person) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'h', 'e', 'i', 'g', 'h', 't'}) {
 			return
 		}
+		if bytes.Equal(key, []byte{'h', 'e', 'i', 'g', 'h', 't', 'R', 'e', 'f'}) {
+			return
+		}
 		if bytes.Equal(key, []byte{'w', 'e', 'i', 'g', 'h', 't'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'w', 'e', 'i', 'g', 'h', 't', 'R', 'e', 'f'}) {
 			return
 		}
 		if objPath == "" {

@@ -177,7 +177,7 @@ func (f fld) fillField(name, v string) []ast.Stmt {
 	switch t := f.f.Type.(type) {
 
 	case *ast.Ident:
-		return f.typedFillIn(name, t.Name, false)
+		return f.typedFillIn(name, t.Name)
 
 	case *ast.StructType:
 		return result
@@ -189,17 +189,14 @@ func (f fld) fillField(name, v string) []ast.Stmt {
 		return result
 
 	case *ast.StarExpr:
-		return f.typedFillIn(name, t.X.(*ast.Ident).Name, true)
+		return f.typedRefFillIn(name, t.X.(*ast.Ident).Name)
 
 	}
 	return nil
 }
 
-func (f fld) typedFillIn(name, t string, amp bool) []ast.Stmt {
+func (f fld) typedFillIn(name, t string) []ast.Stmt {
 	var rhs ast.Expr = ast.NewIdent("x" + name)
-	if amp {
-		rhs = &ast.UnaryExpr{X: rhs, Op: token.AND}
-	}
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
@@ -221,6 +218,49 @@ func (f fld) typedFillIn(name, t string, amp bool) []ast.Stmt {
 				}},
 			},
 		}
+
+	default:
+		return nil
+	}
+}
+
+func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
+	switch t {
+	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.UnaryExpr{X: ast.NewIdent("x" + name), Op: token.AND}},
+			},
+		}
+
+	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
+		var result []ast.Stmt
+		result = append(
+			result,
+			// s.HeightRef = new(uint32)
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun:  ast.NewIdent("new"),
+					Args: []ast.Expr{ast.NewIdent(t)},
+				}},
+			},
+			// *s.HeightRef = uint32(xHeightRef)
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.StarExpr{
+					X: &ast.SelectorExpr{X: ast.NewIdent(recvVarName), Sel: ast.NewIdent(name)},
+				}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun:  ast.NewIdent(t),
+					Args: []ast.Expr{ast.NewIdent("x" + name)},
+				}},
+			},
+		)
+		return result
 
 	default:
 		return nil
