@@ -90,7 +90,7 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
 	factory := field.New(fld)
 	for _, name := range fld.Names {
-		result = append(result, factory.FillField(name.Name)...)
+		result = append(result, factory.FillStatements(name.Name)...)
 	}
 	return result
 }
@@ -517,7 +517,7 @@ func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
 	factory := field.New(fld)
 	for _, name := range fld.Names {
-		result = append(result, factory.MarshalField(name.Name)...)
+		result = append(result, factory.MarshalStatements(name.Name)...)
 	}
 	return result
 }

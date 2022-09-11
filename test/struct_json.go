@@ -4,6 +4,7 @@ package test
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"github.com/valyala/fastjson"
 )
 // jsonParserStructused for pooling Parsers for Struct JSONs.
@@ -313,6 +314,25 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 		err	error
 	)
 	result.WriteRune('{')
+	result.WriteString("\"filter\":")
+	b, err = marshalString(s.Filter, buf[:0])
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"limit\":")
+	b = strconv.AppendInt(buf[:0], int64(s.Limit), 10)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"offset\":")
+	b = strconv.AppendInt(buf[:0], int64(s.Offset), 10)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"nested\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
 	result.WriteRune('}')
 	return result.Bytes(), nil
 }
@@ -332,6 +352,18 @@ func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
 		err	error
 	)
 	result.WriteRune('{')
+	result.WriteString("\"list\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"count\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"cross\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
 	result.WriteRune('}')
 	return result.Bytes(), nil
 }
@@ -351,6 +383,44 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 		err	error
 	)
 	result.WriteRune('{')
+	result.WriteString("\"name\":")
+	b, err = marshalString(s.Name, buf[:0])
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"surname\":")
+	b, err = marshalString(s.Surname, buf[:0])
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"rate64\":")
+	b = strconv.AppendFloat(buf[:0], float64(s.Rate64), 'f', -1, 64)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"rate32\":")
+	b = strconv.AppendFloat(buf[:0], float64(s.Rate32), 'f', -1, 64)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"height\":")
+	b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"heightRef\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"weight\":")
+	b = strconv.AppendUint(buf[:0], s.Weight, 10)
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
+	result.WriteString("\"weightRef\":")
+	if _, err = result.Write(b); err != nil {
+		return nil, err
+	}
 	result.WriteRune('}')
 	return result.Bytes(), nil
 }
