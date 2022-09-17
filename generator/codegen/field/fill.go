@@ -67,16 +67,36 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 		if ident, ok := t.X.(*ast.Ident); ok {
 			tName = ident.Name
 		}
-		return fld{
-			f: &ast.Field{
-				Doc:     f.f.Doc,
-				Names:   f.f.Names,
-				Type:    t,
-				Tag:     f.f.Tag,
-				Comment: f.f.Comment,
-			},
-			t: f.t,
-		}.typeExtraction(name, v, tName)
+		if !helpers.Ordinary(t.X) {
+			result = append(result, &ast.AssignStmt{
+				Lhs: []ast.Expr{
+					&ast.SelectorExpr{
+						X:   ast.NewIdent(names.VarNameReceiver),
+						Sel: ast.NewIdent(name),
+					},
+				},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{
+					&ast.CallExpr{
+						Fun:  ast.NewIdent("new"),
+						Args: []ast.Expr{t.X},
+					},
+				},
+			})
+		}
+		return append(
+			result,
+			fld{
+				f: &ast.Field{
+					Doc:     f.f.Doc,
+					Names:   f.f.Names,
+					Type:    t,
+					Tag:     f.f.Tag,
+					Comment: f.f.Comment,
+				},
+				t: f.t,
+			}.typeExtraction(name, v, tName)...,
+		)
 	}
 	panic("unsupported field type")
 }

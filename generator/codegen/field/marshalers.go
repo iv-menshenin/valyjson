@@ -5,12 +5,12 @@ import (
 	"go/token"
 )
 
-// b, err = marshalString(s.Field, buf[:0])
+// b = marshalString(s.Field, buf[:0])
 func stringMarshal(src ast.Expr) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.AssignStmt{
 			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b"), ast.NewIdent("err")},
+			Lhs: []ast.Expr{ast.NewIdent("b")},
 			Rhs: []ast.Expr{
 				&ast.CallExpr{
 					Fun: ast.NewIdent("marshalString"),
@@ -20,12 +20,6 @@ func stringMarshal(src ast.Expr) []ast.Stmt {
 					},
 				},
 			},
-		},
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil"), ast.NewIdent("err")}},
-			}},
 		},
 	}
 }

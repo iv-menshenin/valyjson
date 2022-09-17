@@ -1,7 +1,6 @@
 package field
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -78,19 +77,16 @@ func (f fld) FillStatements(name string) []ast.Stmt {
 // }
 // result.Write(b)
 func (f fld) MarshalStatements(name string) []ast.Stmt {
-	var mrsh = []ast.Stmt{
-		// result.WriteString("\"field\":")
-		&ast.ExprStmt{X: &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
-			Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":"`, f.t.JsonName())}},
-		}},
-	}
+	var mrsh []ast.Stmt
 	var v = intermediateVarName(name, f.t)
 	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	switch tt := f.f.Type.(type) {
 
 	case *ast.Ident:
-		mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
+		mrsh = append(
+			mrsh,
+			f.typeMarshal(src, v, tt.Name)...,
+		)
 
 	case *ast.StarExpr:
 		var tName = "nested"
@@ -102,13 +98,6 @@ func (f fld) MarshalStatements(name string) []ast.Stmt {
 	default:
 		// todo @menshenin panic
 	}
-	// result.Write(b)
-	mrsh = append(mrsh, &ast.ExprStmt{
-		X: &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Write")},
-			Args: []ast.Expr{ast.NewIdent("b")},
-		},
-	})
 	return mrsh
 }
 
