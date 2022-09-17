@@ -21,6 +21,12 @@ func stringMarshal(src ast.Expr) []ast.Stmt {
 				},
 			},
 		},
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil"), ast.NewIdent("err")}},
+			}},
+		},
 	}
 }
 

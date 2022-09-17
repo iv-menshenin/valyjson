@@ -319,6 +319,9 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 	result.WriteRune('{')
 	result.WriteString("\"filter\":")
 	b, err = marshalString(s.Filter, buf[:0])
+	if err != nil {
+		return nil, err
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
@@ -400,11 +403,17 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 	result.WriteRune('{')
 	result.WriteString("\"name\":")
 	b, err = marshalString(s.Name, buf[:0])
+	if err != nil {
+		return nil, err
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
 	result.WriteString("\"surname\":")
 	b, err = marshalString(s.Surname, buf[:0])
+	if err != nil {
+		return nil, err
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
