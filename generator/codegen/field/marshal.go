@@ -8,9 +8,6 @@ import (
 )
 
 // b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
-// if _, err = result.Write(b); err != nil {
-// 	return nil, err
-// }
 func (f fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	switch t {
 

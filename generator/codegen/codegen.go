@@ -480,7 +480,7 @@ func NewAppendJsonFunc(structName string, fields []*ast.Field, structTags tags.S
 	body = append(
 		body,
 		// result.WriteRune('}')
-		// return result.Bytes(), nil
+		// return result.Bytes(), err
 		&ast.ExprStmt{X: &ast.CallExpr{
 			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
 			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "'}'"}},
@@ -489,7 +489,7 @@ func NewAppendJsonFunc(structName string, fields []*ast.Field, structTags tags.S
 			&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Bytes")},
 			},
-			ast.NewIdent("nil"),
+			ast.NewIdent("err"),
 		}},
 	)
 	return &ast.FuncDecl{

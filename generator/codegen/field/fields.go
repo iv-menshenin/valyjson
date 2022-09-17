@@ -76,9 +76,7 @@ func (f fld) FillStatements(name string) []ast.Stmt {
 // if err != nil {
 // 	return nil, err
 // }
-// if _, err = result.Write(b); err != nil {
-// 	return nil, err
-// }
+// result.Write(b)
 func (f fld) MarshalStatements(name string) []ast.Stmt {
 	var mrsh = []ast.Stmt{
 		// result.WriteString("\"field\":")
@@ -95,33 +93,21 @@ func (f fld) MarshalStatements(name string) []ast.Stmt {
 		mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
 
 	case *ast.StarExpr:
-		mrsh = append(mrsh, f.typeRefMarshal(src, v, tt.X.(*ast.Ident).Name)...)
+		var tName = "nested"
+		if ident, ok := tt.X.(*ast.Ident); ok {
+			tName = ident.Name
+		}
+		mrsh = append(mrsh, f.typeRefMarshal(src, v, tName)...)
 
 	default:
 		// todo @menshenin panic
 	}
-	// if err = result.Write(b); err != nil {
-	// 	return nil, err
-	// }
-	mrsh = append(mrsh, &ast.IfStmt{
-		Init: &ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent("_"), ast.NewIdent("err")},
-			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Write")},
-					Args: []ast.Expr{ast.NewIdent("b")},
-				},
-			},
+	// result.Write(b)
+	mrsh = append(mrsh, &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Write")},
+			Args: []ast.Expr{ast.NewIdent("b")},
 		},
-		Cond: &ast.BinaryExpr{
-			Op: token.NEQ,
-			X:  ast.NewIdent("err"),
-			Y:  ast.NewIdent("nil"),
-		},
-		Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{
-			Results: []ast.Expr{ast.NewIdent("nil"), ast.NewIdent("err")},
-		}}},
 	})
 	return mrsh
 }

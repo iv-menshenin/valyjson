@@ -63,8 +63,20 @@ func (f fld) typedValue(name, v string) []ast.Stmt {
 		return result
 
 	case *ast.StarExpr:
-		return f.typeExtraction(name, v, t.X.(*ast.Ident).Name)
-
+		var tName = "nested"
+		if ident, ok := t.X.(*ast.Ident); ok {
+			tName = ident.Name
+		}
+		return fld{
+			f: &ast.Field{
+				Doc:     f.f.Doc,
+				Names:   f.f.Names,
+				Type:    t,
+				Tag:     f.f.Tag,
+				Comment: f.f.Comment,
+			},
+			t: f.t,
+		}.typeExtraction(name, v, tName)
 	}
 	panic("unsupported field type")
 }
@@ -141,7 +153,11 @@ func (f fld) fillField(name, v string) []ast.Stmt {
 		return result
 
 	case *ast.StarExpr:
-		return f.typedRefFillIn(name, t.X.(*ast.Ident).Name)
+		var tName = "nested"
+		if ident, ok := t.X.(*ast.Ident); ok {
+			tName = ident.Name
+		}
+		return f.typedRefFillIn(name, tName)
 
 	}
 	return nil
