@@ -5,8 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"time"
+
 	"github.com/valyala/fastjson"
 )
+
 // jsonParserStructused for pooling Parsers for Struct JSONs.
 var jsonParserStruct fastjson.ParserPool
 
@@ -256,6 +259,13 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		s.WeightRef = &xWeightRef
 	}
+	if bio := v.Get("bio"); bio != nil {
+		s.Bio = new(Bio)
+		err = s.Bio.FillFromJson(bio, objPath+"bio.")
+		if err != nil {
+			return fmt.Errorf("error parsing '%sbio' value: %w", objPath, err)
+		}
+	}
 	return nil
 }
 
@@ -293,6 +303,97 @@ func (s *Person) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'w', 'e', 'i', 'g', 'h', 't', 'R', 'e', 'f'}) {
 			return
 		}
+		if bytes.Equal(key, []byte{'b', 'i', 'o'}) {
+			return
+		}
+		if objPath == "" {
+			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
+		} else {
+			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
+		}
+	})
+	return nil
+}
+// jsonParserBioused for pooling Parsers for Bio JSONs.
+var jsonParserBio fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *Bio) UnmarshalJSON(data []byte) error {
+	parser := jsonParserBio.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserBio.Put(parser)
+	return s.FillFromJson(v, "")
+}
+
+// FillFromJson recursively fills the fields with fastjson.Value
+func (s *Bio) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	// only if there is a strict rules
+	if err = s.validate(v, ""); err != nil {
+		return err
+	}
+	if description := v.Get("description"); description != nil {
+		if description.Type() != fastjson.TypeString {
+			err = fmt.Errorf("value doesn't contain string; it contains %s", description.Type())
+			return fmt.Errorf("error parsing '%sdescription' value: %w", objPath, err)
+		}
+		xDescription := description.String()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sdescription' value: %w", objPath, err)
+		}
+		s.Description = &xDescription
+	}
+	if changed := v.Get("changed"); changed != nil {
+		xChanged, err := time.Parse(time.RFC3339, changed.String())
+		if err != nil {
+			return fmt.Errorf("error parsing '%schanged' value: %w", objPath, err)
+		}
+		s.Changed = &xChanged
+	}
+	if level := v.Get("level"); level != nil {
+		var xLevel int
+		xLevel, err = level.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%slevel' value: %w", objPath, err)
+		}
+		s.Level = &xLevel
+	}
+	if name := v.Get("name"); name != nil {
+		var xName int
+		xName, err = name.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
+		}
+		s.Name = &xName
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *Bio) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'d', 'e', 's', 'c', 'r', 'i', 'p', 't', 'i', 'o', 'n'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'c', 'h', 'a', 'n', 'g', 'e', 'd'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'l', 'e', 'v', 'e', 'l'}) {
+			return
+		}
+		if bytes.Equal(key, []byte{'n', 'a', 'm', 'e'}) {
+			return
+		}
 		if objPath == "" {
 			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
 		} else {
@@ -318,29 +419,18 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 	)
 	result.WriteRune('{')
 	result.WriteString("\"filter\":")
-	b, err = marshalString(s.Filter, buf[:0])
-	if err != nil {
-		return nil, err
-	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	b = marshalString(s.Filter, buf[:0])
+	result.Write(b)
 	result.WriteString("\"limit\":")
 	b = strconv.AppendInt(buf[:0], int64(s.Limit), 10)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	result.Write(b)
 	result.WriteString("\"offset\":")
 	b = strconv.AppendInt(buf[:0], int64(s.Offset), 10)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	result.Write(b)
 	result.WriteString("\"nested\":")
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	result.Write(b)
 	result.WriteRune('}')
-	return result.Bytes(), nil
+	return result.Bytes(), err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format
@@ -359,31 +449,25 @@ func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
 	)
 	result.WriteRune('{')
 	result.WriteString("\"list\":")
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
-	result.WriteString("\"count\":")
+	result.Write(b)
 	if s.Count != nil {
+		result.WriteString("\"count\":")
 		count := *s.Count
 		b = strconv.AppendInt(buf[:0], count, 10)
+		result.Write(b)
 	} else {
 		result.WriteString("\"count\":null")
 	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
-	result.WriteString("\"cross\":")
 	if s.Cross != nil {
+		result.WriteString("\"cross\":")
 		cross := *s.Cross
 		b = strconv.AppendInt(buf[:0], cross, 10)
+		result.Write(b)
 	} else {
 		result.WriteString("\"cross\":null")
 	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
 	result.WriteRune('}')
-	return result.Bytes(), nil
+	return result.Bytes(), err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format
@@ -402,61 +486,92 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 	)
 	result.WriteRune('{')
 	result.WriteString("\"name\":")
-	b, err = marshalString(s.Name, buf[:0])
-	if err != nil {
-		return nil, err
-	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	b = marshalString(s.Name, buf[:0])
+	result.Write(b)
 	result.WriteString("\"surname\":")
-	b, err = marshalString(s.Surname, buf[:0])
-	if err != nil {
-		return nil, err
-	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	b = marshalString(s.Surname, buf[:0])
+	result.Write(b)
 	result.WriteString("\"rate64\":")
 	b = strconv.AppendFloat(buf[:0], float64(s.Rate64), 'f', -1, 64)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	result.Write(b)
 	result.WriteString("\"rate32\":")
 	b = strconv.AppendFloat(buf[:0], float64(s.Rate32), 'f', -1, 64)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
+	result.Write(b)
 	result.WriteString("\"height\":")
 	b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
-	result.WriteString("\"heightRef\":")
+	result.Write(b)
 	if s.HeightRef != nil {
+		result.WriteString("\"heightRef\":")
 		heightref := *s.HeightRef
 		b = strconv.AppendUint(buf[:0], uint64(heightref), 10)
+		result.Write(b)
 	} else {
 		result.WriteString("\"heightRef\":443")
 	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
 	result.WriteString("\"weight\":")
 	b = strconv.AppendUint(buf[:0], s.Weight, 10)
-	if _, err = result.Write(b); err != nil {
-		return nil, err
-	}
-	result.WriteString("\"weightRef\":")
+	result.Write(b)
 	if s.WeightRef != nil {
+		result.WriteString("\"weightRef\":")
 		weightref := *s.WeightRef
 		b = strconv.AppendUint(buf[:0], weightref, 10)
+		result.Write(b)
 	}
-	if _, err = result.Write(b); err != nil {
-		return nil, err
+	if s.Bio != nil {
+		result.WriteString("\"bio\":")
+		b, err = s.Bio.MarshalAppend(buf[:0])
+		if err != nil {
+			return nil, err
+		}
+		result.Write(b)
 	}
 	result.WriteRune('}')
-	return result.Bytes(), nil
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format
+func (s *Bio) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer
+func (s *Bio) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		b	[]byte
+		buf	[128]byte
+		err	error
+	)
+	result.WriteRune('{')
+	if s.Description != nil {
+		result.WriteString("\"description\":")
+		description := *s.Description
+		b = marshalString(description, buf[:0])
+		result.Write(b)
+	}
+	if s.Changed != nil {
+		result.WriteString("\"changed\":")
+		changed := *s.Changed
+		b = marshalTime(changed, time.RFC3339, buf[:0])
+		result.Write(b)
+	}
+	if s.Level != nil {
+		result.WriteString("\"level\":")
+		level := *s.Level
+		b = strconv.AppendInt(buf[:0], int64(level), 10)
+		result.Write(b)
+	}
+	if s.Name != nil {
+		result.WriteString("\"name\":")
+		name := *s.Name
+		b = strconv.AppendInt(buf[:0], int64(name), 10)
+		result.Write(b)
+	} else {
+		result.WriteString("\"name\":null")
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }
 
 // valueIsNotNull allows you to determine if the value is contained in a Json structure.

@@ -3,41 +3,38 @@ package test
 
 import (
     "bytes"
+	"time"
 )
 
-func marshalString(s string, b []byte) ([]byte, error) {
+func marshalString(s string, b []byte) []byte {
 	var out = bytes.NewBuffer(b)
-	if _, err := out.WriteRune('"'); err != nil {
-		return nil, err
-	}
+	out.WriteRune('"')
 	for _, r := range s {
-		var err error
 		switch r {
 
 		case '\t':
-			_, err = out.WriteString(`\t`)
+			out.WriteString(`\t`)
 
 		case '\r':
-			_, err = out.WriteString(`\r`)
+			out.WriteString(`\r`)
 
 		case '\n':
-			_, err = out.WriteString(`\n`)
+			out.WriteString(`\n`)
 
 		case '\\':
-			_, err = out.WriteString(`\\`)
+			out.WriteString(`\\`)
 
 		case '"':
-			_, err = out.WriteString(`\"`)
+			out.WriteString(`\"`)
 
 		default:
-			_, err = out.WriteRune(r)
-		}
-		if err != nil {
-			return nil, err
+			out.WriteRune(r)
 		}
 	}
-	if _, err := out.WriteRune('"'); err != nil {
-		return nil, err
-	}
-	return out.Bytes(), nil
+	out.WriteRune('"')
+	return out.Bytes()
+}
+
+func marshalTime(t time.Time, layout string, b []byte) []byte {
+	return t.AppendFormat(b, layout)
 }

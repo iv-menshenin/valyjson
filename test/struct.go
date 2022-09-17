@@ -1,5 +1,7 @@
 package test
 
+import "time"
+
 // Struct contains all fields for struct
 //  valyjson:encode,decode,strict
 type Struct struct {
@@ -29,4 +31,14 @@ type Person struct {
 	HeightRef *uint32 `json:"heightRef" default:"443"`
 	Weight    uint64  `json:"weight"`
 	WeightRef *uint64 `json:"weightRef,omitempty"`
+
+	Bio *Bio `json:"bio,omitempty"`
+}
+
+//  valyjson:encode,decode,strict
+type Bio struct {
+	Description *string    `json:"description,omitempty"`
+	Changed     *time.Time `json:"changed,omitempty"`
+	Level       *int       `json:"level,omitempty"`
+	Name        *int       `json:"name"`
 }
