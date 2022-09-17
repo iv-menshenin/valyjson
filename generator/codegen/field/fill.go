@@ -240,6 +240,27 @@ func (f fld) ifDefault(name string) []ast.Stmt {
 		}
 		return nil
 	}
+	if star, ok := f.f.Type.(*ast.StarExpr); ok {
+		return []ast.Stmt{
+			&ast.DeclStmt{
+				Decl: &ast.GenDecl{
+					Tok: token.VAR,
+					Specs: []ast.Spec{
+						&ast.ValueSpec{
+							Names:  []*ast.Ident{ast.NewIdent("x" + name)},
+							Type:   star.X,
+							Values: []ast.Expr{helpers.BasicLiteralFromType(star.X, f.t.DefaultValue())},
+						},
+					},
+				},
+			},
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.UnaryExpr{Op: token.AND, X: ast.NewIdent("x" + name)}},
+			},
+		}
+	}
 	return []ast.Stmt{
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},

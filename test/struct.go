@@ -26,7 +26,7 @@ type Person struct {
 	Rate32 float32 `json:"rate32" default:"1"`
 
 	Height    uint32  `json:"height"`
-	HeightRef *uint32 `json:"heightRef"`
+	HeightRef *uint32 `json:"heightRef" default:"443"`
 	Weight    uint64  `json:"weight"`
-	WeightRef *uint64 `json:"weightRef"`
+	WeightRef *uint64 `json:"weightRef,omitempty"`
 }

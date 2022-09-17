@@ -236,6 +236,9 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		s.HeightRef = new(uint32)
 		*s.HeightRef = uint32(xHeightRef)
+	} else {
+		var xHeightRef uint32 = 443
+		s.HeightRef = &xHeightRef
 	}
 	if weight := v.Get("weight"); weight != nil {
 		var xWeight uint64
@@ -357,10 +360,22 @@ func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
 		return nil, err
 	}
 	result.WriteString("\"count\":")
+	if s.Count != nil {
+		count := *s.Count
+		b = strconv.AppendInt(buf[:0], count, 10)
+	} else {
+		result.WriteString("\"count\":null")
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
 	result.WriteString("\"cross\":")
+	if s.Cross != nil {
+		cross := *s.Cross
+		b = strconv.AppendInt(buf[:0], cross, 10)
+	} else {
+		result.WriteString("\"cross\":null")
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
@@ -409,6 +424,12 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 		return nil, err
 	}
 	result.WriteString("\"heightRef\":")
+	if s.HeightRef != nil {
+		heightref := *s.HeightRef
+		b = strconv.AppendUint(buf[:0], uint64(heightref), 10)
+	} else {
+		result.WriteString("\"heightRef\":443")
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}
@@ -418,6 +439,10 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 		return nil, err
 	}
 	result.WriteString("\"weightRef\":")
+	if s.WeightRef != nil {
+		weightref := *s.WeightRef
+		b = strconv.AppendUint(buf[:0], weightref, 10)
+	}
 	if _, err = result.Write(b); err != nil {
 		return nil, err
 	}

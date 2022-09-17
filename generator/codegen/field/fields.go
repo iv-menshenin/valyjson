@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"strings"
 
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
@@ -87,10 +88,14 @@ func (f fld) MarshalStatements(name string) []ast.Stmt {
 		}},
 	}
 	var v = intermediateVarName(name, f.t)
+	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	switch tt := f.f.Type.(type) {
 
 	case *ast.Ident:
-		mrsh = append(mrsh, f.typeMarshal(name, v, tt.Name)...)
+		mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
+
+	case *ast.StarExpr:
+		mrsh = append(mrsh, f.typeRefMarshal(src, v, tt.X.(*ast.Ident).Name)...)
 
 	default:
 		// todo @menshenin panic

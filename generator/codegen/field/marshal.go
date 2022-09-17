@@ -4,32 +4,36 @@ import (
 	"go/ast"
 	"go/token"
 
-	"github.com/iv-menshenin/valyjson/generator/codegen/names"
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 )
 
-func (f fld) typeMarshal(name, v, t string) []ast.Stmt {
+// b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
+// if _, err = result.Write(b); err != nil {
+// 	return nil, err
+// }
+func (f fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	switch t {
 
 	case "int", "int8", "int16", "int32":
-		return intMarshal(name, v)
+		return intMarshal(src)
 
 	case "int64":
-		return int64Marshal(name, v)
+		return int64Marshal(src)
 
 	case "uint", "uint8", "uint16", "uint32":
-		return uintMarshal(name, v)
+		return uintMarshal(src)
 
 	case "uint64":
-		return uint64Marshal(name, v)
+		return uint64Marshal(src)
 
 	case "float32", "float64":
-		return floatMarshal(name, v)
+		return floatMarshal(src)
 
 	case "bool":
-		return boolMarshal(name, v)
+		return boolMarshal(src)
 
 	case "string":
-		return stringMarshal(name, v, f.t.JsonName())
+		return stringMarshal(src)
 
 	default:
 		// todo @menshenin return nestedMarshal(name, v, f.t.JsonName())
@@ -38,155 +42,69 @@ func (f fld) typeMarshal(name, v, t string) []ast.Stmt {
 	}
 }
 
-// b, err = marshalString(s.Field, buf[:0])
-func stringMarshal(name, v, json string) []ast.Stmt {
-	return []ast.Stmt{
+// if s.HeightRef != nil {
+// 	result.WriteString("\"heightRef\":")
+// 	b = strconv.AppendUint(buf[:0], uint64(*s.HeightRef), 10)
+// 	if _, err = result.Write(b); err != nil {
+// 		return nil, err
+// 	}
+// } else {
+// 	result.WriteString("\"heightRef\":null")
+// }
+func (f fld) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
+	var els ast.Stmt
+	if stmt := f.ifNil(); len(stmt) > 0 {
+		els = &ast.BlockStmt{List: stmt}
+	}
+	var result = []ast.Stmt{
 		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b"), ast.NewIdent("err")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: ast.NewIdent("marshalString"),
-					Args: []ast.Expr{
-						&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-					},
-				},
+			Lhs: []ast.Expr{ast.NewIdent(v)},
+			Tok: token.DEFINE,
+			Rhs: []ast.Expr{&ast.StarExpr{X: src}},
+		},
+	}
+	result = append(
+		result,
+		f.typeMarshal(ast.NewIdent(v), v, t)...,
+	)
+
+	return []ast.Stmt{
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  src,
+				Op: token.NEQ,
+				Y:  ast.NewIdent("nil"),
 			},
+			Body: &ast.BlockStmt{List: result},
+			Else: els,
 		},
 	}
 }
 
-// b = strconv.AppendInt(buf[:0], int64(s.Height), 10)
-func intMarshal(name, v string) []ast.Stmt {
-	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendInt")},
+// result.WriteString("\"{name}\":{default}")
+func (f fld) ifNil() []ast.Stmt {
+	if f.t.DefaultValue() == "" {
+		if f.t.JsonTags().Has("omitempty") {
+			return nil
+		}
+		// result.WriteString("\"{name}\":null")
+		return []ast.Stmt{
+			&ast.ExprStmt{
+				X: &ast.CallExpr{
+					Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
 					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.CallExpr{
-							Fun: ast.NewIdent("int64"),
-							Args: []ast.Expr{
-								&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-							},
-						},
-						&ast.BasicLit{Kind: token.INT, Value: "10"},
+						&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":null"`},
 					},
 				},
 			},
-		},
+		}
 	}
-}
-
-// b = strconv.AppendInt(buf[:0], s.Height, 10)
-func int64Marshal(name, v string) []ast.Stmt {
 	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendInt")},
-					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-						&ast.BasicLit{Kind: token.INT, Value: "10"},
-					},
-				},
-			},
-		},
-	}
-}
-
-// b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
-func uintMarshal(name, v string) []ast.Stmt {
-	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendUint")},
-					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.CallExpr{
-							Fun: ast.NewIdent("uint64"),
-							Args: []ast.Expr{
-								&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-							},
-						},
-						&ast.BasicLit{Kind: token.INT, Value: "10"},
-					},
-				},
-			},
-		},
-	}
-}
-
-// b = strconv.AppendUint(buf[:0], s.Height, 10)
-func uint64Marshal(name, v string) []ast.Stmt {
-	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendUint")},
-					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-						&ast.BasicLit{Kind: token.INT, Value: "10"},
-					},
-				},
-			},
-		},
-	}
-}
-
-// b = strconv.AppendFloat(buf[:0], float64(s.Height), 'f', 10, 64)
-func floatMarshal(name, v string) []ast.Stmt {
-	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendFloat")},
-					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.CallExpr{
-							Fun: ast.NewIdent("float64"),
-							Args: []ast.Expr{
-								&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-							},
-						},
-						&ast.BasicLit{Kind: token.CHAR, Value: "'f'"},
-						&ast.BasicLit{Kind: token.INT, Value: "-1"}, // todo @menshenin pass precision through structTags
-						&ast.BasicLit{Kind: token.INT, Value: "64"},
-					},
-				},
-			},
-		},
-	}
-}
-
-// b = strconv.AppendBool(buf[:0], s.Admin)
-func boolMarshal(name, v string) []ast.Stmt {
-	return []ast.Stmt{
-		&ast.AssignStmt{
-			Tok: token.ASSIGN,
-			Lhs: []ast.Expr{ast.NewIdent("b")},
-			Rhs: []ast.Expr{
-				&ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("strconv"), Sel: ast.NewIdent("AppendBool")},
-					Args: []ast.Expr{
-						&ast.SliceExpr{X: ast.NewIdent("buf"), High: &ast.BasicLit{Kind: token.INT, Value: "0"}},
-						&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-					},
+		&ast.ExprStmt{
+			X: &ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
+				Args: []ast.Expr{
+					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":` + helpers.StringFromType(f.f.Type, f.t.DefaultValue()) + `"`},
 				},
 			},
 		},
