@@ -36,34 +36,36 @@ func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			err = fmt.Errorf("value doesn't contain string; it contains %s", filter.Type())
 			return fmt.Errorf("error parsing '%sfilter' value: %w", objPath, err)
 		}
-		xFilter := filter.String()
-		s.Filter = xFilter
+		valFilter := filter.String()
+		s.Filter = valFilter
 	} else {
 		return fmt.Errorf("required element '%sfilter' is missing", objPath)
 	}
 	if limit := v.Get("limit"); limit != nil {
-		var xLimit int
-		xLimit, err = limit.Int()
+		var valLimit int
+		valLimit, err = limit.Int()
 		if err != nil {
 			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 		}
-		s.Limit = xLimit
+		s.Limit = valLimit
 	}
 	if offset := v.Get("offset"); offset != nil {
-		var xOffset int
-		xOffset, err = offset.Int()
+		var valOffset int
+		valOffset, err = offset.Int()
 		if err != nil {
 			return fmt.Errorf("error parsing '%soffset' value: %w", objPath, err)
 		}
-		s.Offset = xOffset
+		s.Offset = valOffset
 	} else {
 		s.Offset = 100
 	}
 	if nested := v.Get("nested"); nested != nil {
-		err = s.Nested.FillFromJson(nested, objPath+"nested.")
+		var valNested Nested
+		err = valNested.FillFromJson(nested, objPath+"nested.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%snested' value: %w", objPath, err)
 		}
+		s.Nested = valNested
 	}
 	return nil
 }
@@ -125,20 +127,22 @@ func (s *Nested) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 	}
 	if count := v.Get("count"); count != nil {
-		var xCount int64
-		xCount, err = count.Int64()
+		var valCount int64
+		valCount, err = count.Int64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%scount' value: %w", objPath, err)
 		}
-		s.Count = &xCount
+		s.Count = new(int64)
+		*s.Count = valCount
 	}
 	if cross := v.Get("cross"); cross != nil {
-		var xCross int64
-		xCross, err = cross.Int64()
+		var valCross int64
+		valCross, err = cross.Int64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%scross' value: %w", objPath, err)
 		}
-		s.Cross = &xCross
+		s.Count = new(int64)
+		*s.Cross = valCross
 	}
 	return nil
 }
@@ -192,79 +196,80 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			err = fmt.Errorf("value doesn't contain string; it contains %s", name.Type())
 			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
 		}
-		xName := name.String()
-		s.Name = xName
+		valName := name.String()
+		s.Name = valName
 	}
 	if surname := v.Get("surname"); surname != nil {
 		if surname.Type() != fastjson.TypeString {
 			err = fmt.Errorf("value doesn't contain string; it contains %s", surname.Type())
 			return fmt.Errorf("error parsing '%ssurname' value: %w", objPath, err)
 		}
-		xSurname := surname.String()
-		s.Surname = xSurname
+		valSurname := surname.String()
+		s.Surname = valSurname
 	}
 	if rate64 := v.Get("rate64"); rate64 != nil {
-		var xRate64 float64
-		xRate64, err = rate64.Float64()
+		var valRate64 float64
+		valRate64, err = rate64.Float64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%srate64' value: %w", objPath, err)
 		}
-		s.Rate64 = xRate64
+		s.Rate64 = valRate64
 	} else {
 		s.Rate64 = 1
 	}
 	if rate32 := v.Get("rate32"); rate32 != nil {
-		var xRate32 float64
-		xRate32, err = rate32.Float64()
+		var valRate32 float64
+		valRate32, err = rate32.Float64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%srate32' value: %w", objPath, err)
 		}
-		s.Rate32 = float32(xRate32)
+		s.Rate32 = float32(valRate32)
 	} else {
 		s.Rate32 = 1
 	}
 	if height := v.Get("height"); height != nil {
-		var xHeight uint
-		xHeight, err = height.Uint()
+		var valHeight uint
+		valHeight, err = height.Uint()
 		if err != nil {
 			return fmt.Errorf("error parsing '%sheight' value: %w", objPath, err)
 		}
-		s.Height = uint32(xHeight)
+		s.Height = uint32(valHeight)
 	}
 	if heightref := v.Get("heightRef"); heightref != nil {
-		var xHeightRef uint
-		xHeightRef, err = heightref.Uint()
+		var valHeightRef uint
+		valHeightRef, err = heightref.Uint()
 		if err != nil {
 			return fmt.Errorf("error parsing '%sheightRef' value: %w", objPath, err)
 		}
 		s.HeightRef = new(uint32)
-		*s.HeightRef = uint32(xHeightRef)
+		*s.HeightRef = uint32(valHeightRef)
 	} else {
-		var xHeightRef uint32 = 443
-		s.HeightRef = &xHeightRef
+		s.HeightRef = new(uint32)
+		*s.HeightRef = 443
 	}
 	if weight := v.Get("weight"); weight != nil {
-		var xWeight uint64
-		xWeight, err = weight.Uint64()
+		var valWeight uint64
+		valWeight, err = weight.Uint64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%sweight' value: %w", objPath, err)
 		}
-		s.Weight = xWeight
+		s.Weight = valWeight
 	}
 	if weightref := v.Get("weightRef"); weightref != nil {
-		var xWeightRef uint64
-		xWeightRef, err = weightref.Uint64()
+		var valWeightRef uint64
+		valWeightRef, err = weightref.Uint64()
 		if err != nil {
 			return fmt.Errorf("error parsing '%sweightRef' value: %w", objPath, err)
 		}
-		s.WeightRef = &xWeightRef
+		s.WeightRef = &valWeightRef
 	}
 	if bio := v.Get("bio"); bio != nil {
-		s.Bio = new(Bio)
-		err = s.Bio.FillFromJson(bio, objPath+"bio.")
+		var valBio Bio
+		err = valBio.FillFromJson(bio, objPath+"bio.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%sbio' value: %w", objPath, err)
 		}
+		s.Bio = &valBio
 	}
 	return nil
 }
@@ -340,34 +345,31 @@ func (s *Bio) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			err = fmt.Errorf("value doesn't contain string; it contains %s", description.Type())
 			return fmt.Errorf("error parsing '%sdescription' value: %w", objPath, err)
 		}
-		xDescription := description.String()
-		if err != nil {
-			return fmt.Errorf("error parsing '%sdescription' value: %w", objPath, err)
-		}
-		s.Description = &xDescription
+		valDescription := description.String()
+		s.Description = &valDescription
 	}
 	if changed := v.Get("changed"); changed != nil {
-		xChanged, err := time.Parse(time.RFC3339, changed.String())
+		valChanged, err := time.Parse(time.RFC3339, changed.String())
 		if err != nil {
 			return fmt.Errorf("error parsing '%schanged' value: %w", objPath, err)
 		}
-		s.Changed = &xChanged
+		s.Changed = &valChanged
 	}
 	if level := v.Get("level"); level != nil {
-		var xLevel int
-		xLevel, err = level.Int()
+		var valLevel int
+		valLevel, err = level.Int()
 		if err != nil {
 			return fmt.Errorf("error parsing '%slevel' value: %w", objPath, err)
 		}
-		s.Level = &xLevel
+		s.Level = &valLevel
 	}
 	if name := v.Get("name"); name != nil {
-		var xName int
-		xName, err = name.Int()
+		var valName int
+		valName, err = name.Int()
 		if err != nil {
 			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
 		}
-		s.Name = &xName
+		s.Name = &valName
 	}
 	return nil
 }
@@ -428,6 +430,7 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 	b = strconv.AppendInt(buf[:0], int64(s.Offset), 10)
 	result.Write(b)
 	result.WriteString("\"nested\":")
+	// ?
 	result.Write(b)
 	result.WriteRune('}')
 	return result.Bytes(), err

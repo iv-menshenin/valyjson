@@ -36,97 +36,73 @@ func (f fld) getValue() ast.Expr {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f fld) fillFrom(name, v string) []ast.Stmt {
+	var dstType = f.f.Type
+	star, isStar := dstType.(*ast.StarExpr)
+	if isStar {
+		dstType = star.X
+		f.f.Type = dstType
+	}
+	var bufVariable = ast.NewIdent("val" + name)
 	var result []ast.Stmt
-	result = append(result, f.typedValue(name, v)...)
+	result = append(result, f.typedValue(bufVariable, v)...)
 	result = append(result, f.checkErr()...)
-	result = append(result, f.fillField(name, v)...)
+
+	var fldExpr = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
+	result = append(result, f.fillField(bufVariable, fldExpr, v)...)
 	return result
 }
 
-//	s.{name}, err = {v}.(Int|Int64|String|Bool)()
-func (f fld) typedValue(name, v string) []ast.Stmt {
+//  var val{name} {type}
+//	val{name}, err = {v}.(Int|Int64|String|Bool)()
+func (f fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.f.Type.(type) {
 
 	case *ast.Ident:
-		return f.typeExtraction(name, v, t.Name)
+		result = append(result, f.typeExtraction(dst, v, t.Name)...)
 
 	case *ast.StructType:
 		panic("unsupported field type 'struct'")
 
 	case *ast.SelectorExpr:
-		result = append(result, nestedExtraction(name, v, f.t.JsonName())...)
-		return result
+		result = append(result, nestedExtraction(dst, f.f.Type, v, f.t.JsonName())...)
 
 	case *ast.ArrayType:
-		result = append(result, arrayExtraction(name, v, f.t.JsonName())...)
+		result = append(result, arrayExtraction(dst, v, f.t.JsonName())...)
 		return result
 
-	case *ast.StarExpr:
-		var tName = "nested"
-		if ident, ok := t.X.(*ast.Ident); ok {
-			tName = ident.Name
-		}
-		if !helpers.Ordinary(t.X) {
-			result = append(result, &ast.AssignStmt{
-				Lhs: []ast.Expr{
-					&ast.SelectorExpr{
-						X:   ast.NewIdent(names.VarNameReceiver),
-						Sel: ast.NewIdent(name),
-					},
-				},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{
-					&ast.CallExpr{
-						Fun:  ast.NewIdent("new"),
-						Args: []ast.Expr{t.X},
-					},
-				},
-			})
-		}
-		return append(
-			result,
-			fld{
-				f: &ast.Field{
-					Doc:     f.f.Doc,
-					Names:   f.f.Names,
-					Type:    t,
-					Tag:     f.f.Tag,
-					Comment: f.f.Comment,
-				},
-				t: f.t,
-			}.typeExtraction(name, v, tName)...,
-		)
+	default:
+		panic("unsupported field type")
 	}
-	panic("unsupported field type")
+	return result
 }
 
-func (f fld) typeExtraction(name, v, t string) []ast.Stmt {
+func (f fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 	switch t {
 
 	case "int", "int8", "int16", "int32":
-		return intExtraction("x"+name, v)
+		return intExtraction(dst, v)
 
 	case "int64":
-		return int64Extraction("x"+name, v)
+		return int64Extraction(dst, v)
 
 	case "uint", "uint8", "uint16", "uint32":
-		return uintExtraction("x"+name, v)
+		return uintExtraction(dst, v)
 
 	case "uint64":
-		return uint64Extraction("x"+name, v)
+		return uint64Extraction(dst, v)
 
 	case "float32", "float64":
-		return floatExtraction("x"+name, v)
+		return floatExtraction(dst, v)
 
 	case "bool":
-		return boolExtraction("x"+name, v)
+		return boolExtraction(dst, v)
 
 	case "string":
-		return stringExtraction("x"+name, v, f.t.JsonName())
+		return stringExtraction(dst, v, f.t.JsonName())
 
 	default:
-		return nestedExtraction(name, v, f.t.JsonName())
+		return nestedExtraction(dst, f.f.Type, v, f.t.JsonName())
 
 	}
 }
@@ -156,12 +132,12 @@ func (f fld) checkErr() []ast.Stmt {
 	}
 }
 
-func (f fld) fillField(name, v string) []ast.Stmt {
+func (f fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.f.Type.(type) {
 
 	case *ast.Ident:
-		return f.typedFillIn(name, t.Name)
+		return f.typedFillIn(rhs, dst, t.Name)
 
 	case *ast.StructType:
 		return result
@@ -177,19 +153,18 @@ func (f fld) fillField(name, v string) []ast.Stmt {
 		if ident, ok := t.X.(*ast.Ident); ok {
 			tName = ident.Name
 		}
-		return f.typedRefFillIn(name, tName)
+		return f.typedRefFillIn(rhs, dst, tName)
 
 	}
 	return nil
 }
 
-func (f fld) typedFillIn(name, t string) []ast.Stmt {
-	var rhs ast.Expr = ast.NewIdent("x" + name)
+func (f fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{rhs},
 			},
@@ -198,7 +173,7 @@ func (f fld) typedFillIn(name, t string) []ast.Stmt {
 	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
 					Fun:  ast.NewIdent(t),
@@ -208,18 +183,24 @@ func (f fld) typedFillIn(name, t string) []ast.Stmt {
 		}
 
 	default:
-		return nil
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{dst},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{rhs},
+			},
+		}
 	}
 }
 
-func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
+func (f fld) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.UnaryExpr{X: ast.NewIdent("x" + name), Op: token.AND}},
+				Rhs: []ast.Expr{&ast.UnaryExpr{X: rhs, Op: token.AND}},
 			},
 		}
 
@@ -229,7 +210,7 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 			result,
 			// s.HeightRef = new(uint32)
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
+				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
 					Fun:  ast.NewIdent("new"),
@@ -238,13 +219,11 @@ func (f fld) typedRefFillIn(name, t string) []ast.Stmt {
 			},
 			// *s.HeightRef = uint32(xHeightRef)
 			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.StarExpr{
-					X: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)},
-				}},
+				Lhs: []ast.Expr{&ast.StarExpr{X: dst}},
 				Tok: token.ASSIGN,
 				Rhs: []ast.Expr{&ast.CallExpr{
 					Fun:  ast.NewIdent(t),
-					Args: []ast.Expr{ast.NewIdent("x" + name)},
+					Args: []ast.Expr{rhs},
 				}},
 			},
 		)

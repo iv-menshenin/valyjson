@@ -25,7 +25,7 @@ import (
 //			s.List = append(s.List, listElemVal)
 //		}
 //	}
-func arrayExtraction(name, v, json string) []ast.Stmt {
+func arrayExtraction(dst ast.Expr, v, json string) []ast.Stmt {
 	return nil
 }
 
@@ -33,8 +33,8 @@ func arrayExtraction(name, v, json string) []ast.Stmt {
 //		err = fmt.Errorf("value doesn't contain string; it contains %s", {v}.Type())
 //		return fmt.Errorf("error parsing '%s{json}' value: %w", objPath, err)
 //	}
-//	s.{name} = {v}.String()
-func stringExtraction(name, v, json string) []ast.Stmt {
+//	{dst} = {v}.String()
+func stringExtraction(dst ast.Expr, v, json string) []ast.Stmt {
 	var result []ast.Stmt
 	var valueType = &ast.CallExpr{
 		Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Type")},
@@ -57,7 +57,7 @@ func stringExtraction(name, v, json string) []ast.Stmt {
 		}},
 	})
 	result = append(result, &ast.AssignStmt{
-		Lhs: []ast.Expr{ast.NewIdent(name)},
+		Lhs: []ast.Expr{dst},
 		Tok: token.DEFINE,
 		Rhs: []ast.Expr{&ast.CallExpr{
 			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("String")},
@@ -66,22 +66,23 @@ func stringExtraction(name, v, json string) []ast.Stmt {
 	return result
 }
 
-// x{name}, err = {v}.Int()
-func intExtraction(name, v string) []ast.Stmt {
+// var {dst} int
+// {dst}, err = {v}.Int()
+func intExtraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("int"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int")},
@@ -90,22 +91,23 @@ func intExtraction(name, v string) []ast.Stmt {
 	}
 }
 
-// x{name}, err = {v}.Uint()
-func uintExtraction(name, v string) []ast.Stmt {
+// var {dst} uint
+// {dst}, err = {v}.Uint()
+func uintExtraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("uint"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint")},
@@ -114,22 +116,23 @@ func uintExtraction(name, v string) []ast.Stmt {
 	}
 }
 
-// s.{name}, err = {v}.Int64()
-func int64Extraction(name, v string) []ast.Stmt {
+// var {dst} int64
+// {dst}, err = {v}.Int64()
+func int64Extraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("int64"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Int64")},
@@ -138,22 +141,23 @@ func int64Extraction(name, v string) []ast.Stmt {
 	}
 }
 
-// s.{name}, err = {v}.Uint64()
-func uint64Extraction(name, v string) []ast.Stmt {
+// var {dst} uint64
+// {dst}, err = {v}.Uint64()
+func uint64Extraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("uint64"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Uint64")},
@@ -162,22 +166,23 @@ func uint64Extraction(name, v string) []ast.Stmt {
 	}
 }
 
-// s.{name}, err = {v}.Float64()
-func floatExtraction(name, v string) []ast.Stmt {
+// var {dst} float64
+// {dst}, err = {v}.Float64()
+func floatExtraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("float64"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Float64")},
@@ -186,22 +191,23 @@ func floatExtraction(name, v string) []ast.Stmt {
 	}
 }
 
-// s.{name}, err = {v}.Bool()
-func boolExtraction(name, v string) []ast.Stmt {
+// var {dst} bool
+// {dst}, err = {v}.Bool()
+func boolExtraction(dst *ast.Ident, v string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
 			Decl: &ast.GenDecl{
 				Tok: token.VAR,
 				Specs: []ast.Spec{
 					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(name)},
+						Names: []*ast.Ident{dst},
 						Type:  ast.NewIdent("bool"),
 					},
 				},
 			},
 		},
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent(name), ast.NewIdent(names.VarNameError)},
+			Lhs: []ast.Expr{dst, ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Bool")},
@@ -210,19 +216,27 @@ func boolExtraction(name, v string) []ast.Stmt {
 	}
 }
 
-// err = s.{name}.fill({v}, objPath+"{json}.")
-func nestedExtraction(name, v, json string) []ast.Stmt {
+// err = {dst}.fill({v}, objPath+"{json}.")
+func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 	return []ast.Stmt{
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{dst},
+						Type:  t,
+					},
+				},
+			},
+		},
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{
 				&ast.CallExpr{
 					Fun: &ast.SelectorExpr{
-						X: &ast.SelectorExpr{
-							X:   ast.NewIdent(names.VarNameReceiver),
-							Sel: ast.NewIdent(name),
-						},
+						X:   dst,
 						Sel: ast.NewIdent(names.FuncNameFill),
 					},
 					Args: []ast.Expr{
