@@ -16,6 +16,8 @@ type (
 		f *ast.Field
 		// t contains tag descriptor
 		t tags.Tags
+		// isStar is type is ref
+		isStar bool
 	}
 )
 
@@ -23,10 +25,12 @@ func New(f *ast.Field) *fld {
 	if f.Tag == nil {
 		panic("you must fill in all fields with tags")
 	}
-	return &fld{
+	var ff = fld{
 		f: f,
 		t: tags.Parse(f.Tag.Value),
 	}
+	ff.prepareRef()
+	return &ff
 }
 
 // 	if offset := v.Get("offset"); offset != nil {

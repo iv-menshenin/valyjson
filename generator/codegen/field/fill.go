@@ -9,7 +9,7 @@ import (
 )
 
 // offset := v.Get("offset")
-func (f fld) extract(v string) ast.Stmt {
+func (f *fld) extract(v string) ast.Stmt {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{ast.NewIdent(v)},
 		Tok: token.DEFINE,
@@ -18,7 +18,7 @@ func (f fld) extract(v string) ast.Stmt {
 }
 
 // v.Get("offset")
-func (f fld) getValue() ast.Expr {
+func (f *fld) getValue() ast.Expr {
 	return &ast.CallExpr{
 		Fun: &ast.SelectorExpr{
 			X:   ast.NewIdent(names.VarNameJsonValue),
@@ -31,30 +31,38 @@ func (f fld) getValue() ast.Expr {
 	}
 }
 
-//	s.Offset, err = offset.Int()
-//	if err != nil {
-//		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
-//	}
-func (f fld) fillFrom(name, v string) []ast.Stmt {
+func (f *fld) prepareRef() {
 	var dstType = f.f.Type
 	star, isStar := dstType.(*ast.StarExpr)
 	if isStar {
 		dstType = star.X
 		f.f.Type = dstType
+		f.isStar = true
 	}
+}
+
+//	s.Offset, err = offset.Int()
+//	if err != nil {
+//		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//	}
+func (f *fld) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = ast.NewIdent("val" + name)
 	var result []ast.Stmt
 	result = append(result, f.typedValue(bufVariable, v)...)
 	result = append(result, f.checkErr()...)
 
 	var fldExpr = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
-	result = append(result, f.fillField(bufVariable, fldExpr, v)...)
+	if f.isStar {
+		result = append(result, f.fillRefField(bufVariable, fldExpr, v)...)
+	} else {
+		result = append(result, f.fillField(bufVariable, fldExpr, v)...)
+	}
 	return result
 }
 
 //  var val{name} {type}
 //	val{name}, err = {v}.(Int|Int64|String|Bool)()
-func (f fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
+func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.f.Type.(type) {
 
@@ -77,7 +85,7 @@ func (f fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	return result
 }
 
-func (f fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
+func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 	switch t {
 
 	case "int", "int8", "int16", "int32":
@@ -110,7 +118,7 @@ func (f fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //	if err != nil {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
-func (f fld) checkErr() []ast.Stmt {
+func (f *fld) checkErr() []ast.Stmt {
 	if t, ok := f.f.Type.(*ast.Ident); ok && t.Name == "string" {
 		// no error checking for string
 		return nil
@@ -132,7 +140,48 @@ func (f fld) checkErr() []ast.Stmt {
 	}
 }
 
-func (f fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
+func (f *fld) fillRefField(rhs, dst ast.Expr, t string) []ast.Stmt {
+	switch t := f.f.Type.(type) {
+
+	case *ast.Ident:
+		switch t.Name {
+
+		case "bool", "int64", "int", "float64":
+			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name)
+
+		default:
+			return f.newAndFillIn(rhs, dst, ast.NewIdent(t.Name))
+
+		}
+
+	default:
+		return f.newAndFillIn(rhs, dst, f.f.Type)
+
+	}
+}
+
+// {dst} = new({t})
+// *{dst} = {t}({rhs})
+func (f *fld) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
+	return []ast.Stmt{
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{dst},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{Fun: ast.NewIdent("new"), Args: []ast.Expr{t}},
+			},
+		},
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{&ast.StarExpr{X: dst}},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{Fun: t, Args: []ast.Expr{rhs}},
+			},
+		},
+	}
+}
+
+func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.f.Type.(type) {
 
@@ -159,7 +208,7 @@ func (f fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	return nil
 }
 
-func (f fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
+func (f *fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
@@ -193,7 +242,7 @@ func (f fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	}
 }
 
-func (f fld) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
+func (f *fld) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
@@ -237,7 +286,7 @@ func (f fld) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 //	} else {
 //		s.{name} = 100
 //	}
-func (f fld) ifDefault(name string) []ast.Stmt {
+func (f *fld) ifDefault(name string) []ast.Stmt {
 	if f.t.DefaultValue() == "" {
 		if f.t.JsonTags().Has("required") {
 			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
