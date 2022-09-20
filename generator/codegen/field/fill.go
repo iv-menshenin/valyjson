@@ -35,8 +35,10 @@ func (f *fld) prepareRef() {
 	var dstType = f.f.Type
 	star, isStar := dstType.(*ast.StarExpr)
 	if isStar {
-		dstType = star.X
-		f.f.Type = dstType
+		// copy the field, keeping the source unchanged
+		var tf = *f.f
+		f.f = &tf
+		f.f.Type = star.X
 		f.isStar = true
 	}
 }
@@ -304,7 +306,7 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 		}
 		return nil
 	}
-	if star, ok := f.f.Type.(*ast.StarExpr); ok {
+	if f.isStar {
 		return []ast.Stmt{
 			&ast.DeclStmt{
 				Decl: &ast.GenDecl{
@@ -312,8 +314,8 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 					Specs: []ast.Spec{
 						&ast.ValueSpec{
 							Names:  []*ast.Ident{ast.NewIdent("x" + name)},
-							Type:   star.X,
-							Values: []ast.Expr{helpers.BasicLiteralFromType(star.X, f.t.DefaultValue())},
+							Type:   f.f.Type,
+							Values: []ast.Expr{helpers.BasicLiteralFromType(f.f.Type, f.t.DefaultValue())},
 						},
 					},
 				},

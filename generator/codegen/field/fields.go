@@ -43,7 +43,7 @@ func New(f *ast.Field) *fld {
 //	} else {
 //		s.Offset = 100
 //	}
-func (f fld) FillStatements(name string) []ast.Stmt {
+func (f *fld) FillStatements(name string) []ast.Stmt {
 	if f.t.JsonName() == "" {
 		return nil
 	}
@@ -80,24 +80,18 @@ func (f fld) FillStatements(name string) []ast.Stmt {
 // 	return nil, err
 // }
 // result.Write(b)
-func (f fld) MarshalStatements(name string) []ast.Stmt {
+func (f *fld) MarshalStatements(name string) []ast.Stmt {
 	var mrsh []ast.Stmt
 	var v = intermediateVarName(name, f.t)
 	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	switch tt := f.f.Type.(type) {
 
 	case *ast.Ident:
-		mrsh = append(
-			mrsh,
-			f.typeMarshal(src, v, tt.Name)...,
-		)
-
-	case *ast.StarExpr:
-		var tName = "nested"
-		if ident, ok := tt.X.(*ast.Ident); ok {
-			tName = ident.Name
+		if f.isStar {
+			mrsh = append(mrsh, f.typeRefMarshal(src, v, tt.Name)...)
+		} else {
+			mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
 		}
-		mrsh = append(mrsh, f.typeRefMarshal(src, v, tName)...)
 
 	default:
 		// todo @menshenin panic
