@@ -132,8 +132,7 @@ func (s *Nested) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%scount' value: %w", objPath, err)
 		}
-		s.Count = new(int64)
-		*s.Count = valCount
+		s.Count = &valCount
 	}
 	if cross := v.Get("cross"); cross != nil {
 		var valCross int64
@@ -141,8 +140,7 @@ func (s *Nested) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%scross' value: %w", objPath, err)
 		}
-		s.Count = new(int64)
-		*s.Cross = valCross
+		s.Cross = &valCross
 	}
 	return nil
 }
@@ -244,8 +242,8 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		s.HeightRef = new(uint32)
 		*s.HeightRef = uint32(valHeightRef)
 	} else {
-		s.HeightRef = new(uint32)
-		*s.HeightRef = 443
+		var xHeightRef uint32 = 443
+		s.HeightRef = &xHeightRef
 	}
 	if weight := v.Get("weight"); weight != nil {
 		var valWeight uint64
@@ -261,7 +259,8 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%sweightRef' value: %w", objPath, err)
 		}
-		s.WeightRef = &valWeightRef
+		s.WeightRef = new(uint64)
+		*s.WeightRef = uint64(valWeightRef)
 	}
 	if bio := v.Get("bio"); bio != nil {
 		var valBio Bio
@@ -269,7 +268,8 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%sbio' value: %w", objPath, err)
 		}
-		s.Bio = &valBio
+		s.Bio = new(Bio)
+		*s.Bio = Bio(valBio)
 	}
 	return nil
 }
@@ -346,14 +346,16 @@ func (s *Bio) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 			return fmt.Errorf("error parsing '%sdescription' value: %w", objPath, err)
 		}
 		valDescription := description.String()
-		s.Description = &valDescription
+		s.Description = new(string)
+		*s.Description = string(valDescription)
 	}
 	if changed := v.Get("changed"); changed != nil {
 		valChanged, err := time.Parse(time.RFC3339, changed.String())
 		if err != nil {
 			return fmt.Errorf("error parsing '%schanged' value: %w", objPath, err)
 		}
-		s.Changed = &valChanged
+		s.Changed = new(time.Time)
+		*s.Changed = time.Time(valChanged)
 	}
 	if level := v.Get("level"); level != nil {
 		var valLevel int
@@ -430,7 +432,7 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 	b = strconv.AppendInt(buf[:0], int64(s.Offset), 10)
 	result.Write(b)
 	result.WriteString("\"nested\":")
-	// ?
+	// TODO nested
 	result.Write(b)
 	result.WriteRune('}')
 	return result.Bytes(), err
@@ -451,19 +453,18 @@ func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
 		err	error
 	)
 	result.WriteRune('{')
-	result.WriteString("\"list\":")
-	result.Write(b)
+	// todo List
 	if s.Count != nil {
-		result.WriteString("\"count\":")
 		count := *s.Count
+		result.WriteString("\"count\":")
 		b = strconv.AppendInt(buf[:0], count, 10)
 		result.Write(b)
 	} else {
 		result.WriteString("\"count\":null")
 	}
 	if s.Cross != nil {
-		result.WriteString("\"cross\":")
 		cross := *s.Cross
+		result.WriteString("\"cross\":")
 		b = strconv.AppendInt(buf[:0], cross, 10)
 		result.Write(b)
 	} else {
@@ -504,8 +505,8 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 	b = strconv.AppendUint(buf[:0], uint64(s.Height), 10)
 	result.Write(b)
 	if s.HeightRef != nil {
-		result.WriteString("\"heightRef\":")
 		heightref := *s.HeightRef
+		result.WriteString("\"heightRef\":")
 		b = strconv.AppendUint(buf[:0], uint64(heightref), 10)
 		result.Write(b)
 	} else {
@@ -515,8 +516,8 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 	b = strconv.AppendUint(buf[:0], s.Weight, 10)
 	result.Write(b)
 	if s.WeightRef != nil {
-		result.WriteString("\"weightRef\":")
 		weightref := *s.WeightRef
+		result.WriteString("\"weightRef\":")
 		b = strconv.AppendUint(buf[:0], weightref, 10)
 		result.Write(b)
 	}
@@ -548,26 +549,20 @@ func (s *Bio) MarshalAppend(dst []byte) ([]byte, error) {
 	)
 	result.WriteRune('{')
 	if s.Description != nil {
-		result.WriteString("\"description\":")
 		description := *s.Description
+		result.WriteString("\"description\":")
 		b = marshalString(description, buf[:0])
 		result.Write(b)
 	}
-	if s.Changed != nil {
-		result.WriteString("\"changed\":")
-		changed := *s.Changed
-		b = marshalTime(changed, time.RFC3339, buf[:0])
-		result.Write(b)
-	}
 	if s.Level != nil {
-		result.WriteString("\"level\":")
 		level := *s.Level
+		result.WriteString("\"level\":")
 		b = strconv.AppendInt(buf[:0], int64(level), 10)
 		result.Write(b)
 	}
 	if s.Name != nil {
-		result.WriteString("\"name\":")
 		name := *s.Name
+		result.WriteString("\"name\":")
 		b = strconv.AppendInt(buf[:0], int64(name), 10)
 		result.Write(b)
 	} else {

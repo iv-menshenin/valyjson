@@ -1,6 +1,7 @@
 package field
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -247,6 +248,48 @@ func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 							Y: &ast.BasicLit{
 								Kind:  token.STRING,
 								Value: "\"" + strings.Replace(json, "\"", "\\\"", -1) + ".\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// {dst}, err := time.Parse({layout}, {v}.String())
+func timeExtraction(dst *ast.Ident, v, layout string) []ast.Stmt {
+	const (
+		defLayout = "time.RFC3339"
+	)
+	if layout == "" {
+		layout = defLayout
+	}
+	var layoutExpr ast.Expr
+	if l := strings.Split(layout, "."); len(l) == 2 && l[0] == "time" {
+		layoutExpr = &ast.SelectorExpr{
+			X:   ast.NewIdent(l[0]),
+			Sel: ast.NewIdent(l[1]),
+		}
+	} else {
+		layoutExpr = &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"%s"`, strings.Replace(layout, "\"", "\\\"", -1))}
+	}
+	return []ast.Stmt{
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{dst, ast.NewIdent("err")},
+			Tok: token.DEFINE,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent("time"),
+						Sel: ast.NewIdent("Parse"),
+					},
+					Args: []ast.Expr{
+						layoutExpr,
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								Sel: ast.NewIdent("String"),
+								X:   ast.NewIdent(v),
 							},
 						},
 					},

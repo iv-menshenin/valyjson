@@ -32,6 +32,13 @@ func (t Tags) DefaultValue() string {
 	return ""
 }
 
+func (t Tags) Layout() string {
+	if v := t["layout"]; len(v) > 0 {
+		return v[0]
+	}
+	return ""
+}
+
 func Parse(tag string) Tags {
 	var result = make(map[string][]string)
 	result["json"] = strings.Split(StructTag(tag).Get("json"), ",")

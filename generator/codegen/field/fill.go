@@ -75,6 +75,10 @@ func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 		panic("unsupported field type 'struct'")
 
 	case *ast.SelectorExpr:
+		if t.Sel.Name == "Time" {
+			result = append(result, timeExtraction(dst, v, f.t.Layout())...)
+			break
+		}
 		result = append(result, nestedExtraction(dst, f.f.Type, v, f.t.JsonName())...)
 
 	case *ast.ArrayType:
@@ -199,15 +203,9 @@ func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	case *ast.ArrayType:
 		return result
 
-	case *ast.StarExpr:
-		var tName = "nested"
-		if ident, ok := t.X.(*ast.Ident); ok {
-			tName = ident.Name
-		}
-		return f.typedRefFillIn(rhs, dst, tName)
-
+	default:
+		return nil
 	}
-	return nil
 }
 
 func (f *fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
