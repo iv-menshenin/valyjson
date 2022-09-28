@@ -432,7 +432,10 @@ func (s *Struct) MarshalAppend(dst []byte) ([]byte, error) {
 	b = strconv.AppendInt(buf[:0], int64(s.Offset), 10)
 	result.Write(b)
 	result.WriteString("\"nested\":")
-	// TODO nested
+	b, err = s.Nested.MarshalAppend(buf[:0])
+	if err != nil {
+		return nil, err
+	}
 	result.Write(b)
 	result.WriteRune('}')
 	return result.Bytes(), err
@@ -522,8 +525,9 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 		result.Write(b)
 	}
 	if s.Bio != nil {
+		bio := *s.Bio
 		result.WriteString("\"bio\":")
-		b, err = s.Bio.MarshalAppend(buf[:0])
+		b, err = bio.MarshalAppend(buf[:0])
 		if err != nil {
 			return nil, err
 		}

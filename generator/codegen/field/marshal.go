@@ -43,8 +43,7 @@ func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		result = append(result, stringMarshal(src)...)
 
 	default:
-		// todo @menshenin return nestedMarshal(name, v, f.t.JsonName())
-		return nil
+		result = append(result, nestedMarshal(src)...)
 	}
 	// result.Write(b)
 	result = append(
@@ -57,6 +56,34 @@ func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		},
 	)
 	return result
+}
+
+// b, err = {src}.MarshalAppend(buf[:0])
+// if err != nil {
+// 	return nil, err
+// }
+func nestedMarshal(src ast.Expr) []ast.Stmt {
+	return []ast.Stmt{
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent("b"), ast.NewIdent("err")},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{X: src, Sel: ast.NewIdent("MarshalAppend")},
+					Args: []ast.Expr{&ast.SliceExpr{
+						X:    ast.NewIdent("buf"),
+						High: &ast.BasicLit{Kind: token.INT, Value: "0"},
+					}},
+				},
+			},
+		},
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil"), ast.NewIdent("err")}},
+			}},
+		},
+	}
 }
 
 // if s.HeightRef != nil {
