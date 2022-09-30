@@ -147,7 +147,7 @@ func (f *fld) ifNil() []ast.Stmt {
 			X: &ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
 				Args: []ast.Expr{
-					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":` + helpers.StringFromType(f.f.Type, f.t.DefaultValue()) + `"`},
+					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":` + helpers.StringFromType(f.x, f.t.DefaultValue()) + `"`},
 				},
 			},
 		},

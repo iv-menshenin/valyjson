@@ -1,11 +1,13 @@
 package field
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
+	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
 // offset := v.Get("offset")
@@ -32,13 +34,10 @@ func (f *fld) getValue() ast.Expr {
 }
 
 func (f *fld) prepareRef() {
-	var dstType = f.f.Type
+	var dstType = f.x
 	star, isStar := dstType.(*ast.StarExpr)
 	if isStar {
-		// copy the field, keeping the source unchanged
-		var tf = *f.f
-		f.f = &tf
-		f.f.Type = star.X
+		f.x = star.X
 		f.isStar = true
 	}
 }
@@ -62,11 +61,40 @@ func (f *fld) fillFrom(name, v string) []ast.Stmt {
 	return result
 }
 
+// var elem int
+// if elem, err = listElem.Int(); err != nil {
+// 	break
+// }
+// valList = append(valList, int32(elem))
+func (f *fld) fillElem(name, v string) []ast.Stmt {
+	var bufVariable = ast.NewIdent("elem")
+	var result []ast.Stmt
+	result = append(result, f.typedValue(bufVariable, v)...)
+	result = append(result, f.breakErr()...)
+
+	// valList = append(valList, int32(elem))
+	result = append(result, &ast.AssignStmt{
+		Lhs: []ast.Expr{ast.NewIdent(name)},
+		Tok: token.ASSIGN,
+		Rhs: []ast.Expr{&ast.CallExpr{
+			Fun: ast.NewIdent("append"),
+			Args: []ast.Expr{
+				ast.NewIdent(name),
+				&ast.CallExpr{
+					Fun:  f.x,
+					Args: []ast.Expr{ast.NewIdent("elem")},
+				},
+			},
+		}},
+	})
+	return result
+}
+
 //  var val{name} {type}
 //	val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.f.Type.(type) {
+	switch t := f.x.(type) {
 
 	case *ast.Ident:
 		result = append(result, f.typeExtraction(dst, v, t.Name)...)
@@ -79,10 +107,14 @@ func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 			result = append(result, timeExtraction(dst, v, f.t.Layout())...)
 			break
 		}
-		result = append(result, nestedExtraction(dst, f.f.Type, v, f.t.JsonName())...)
+		result = append(result, nestedExtraction(dst, f.x, v, f.t.JsonName())...)
 
 	case *ast.ArrayType:
-		result = append(result, arrayExtraction(dst, v, f.t.JsonName())...)
+		intF := fld{
+			x: t.Elt,
+			t: tags.Parse(fmt.Sprintf(`json:"%s"`, f.t.JsonName())),
+		}
+		result = append(result, arrayExtraction(dst, f.t.JsonName(), t.Elt, intF.fillElem("valList", "listElem"))...)
 		return result
 
 	default:
@@ -116,7 +148,7 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 		return stringExtraction(dst, v, f.t.JsonName())
 
 	default:
-		return nestedExtraction(dst, f.f.Type, v, f.t.JsonName())
+		return nestedExtraction(dst, f.x, v, f.t.JsonName())
 
 	}
 }
@@ -125,7 +157,7 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *fld) checkErr() []ast.Stmt {
-	if t, ok := f.f.Type.(*ast.Ident); ok && t.Name == "string" {
+	if t, ok := f.x.(*ast.Ident); ok && t.Name == "string" {
 		// no error checking for string
 		return nil
 	}
@@ -146,8 +178,30 @@ func (f *fld) checkErr() []ast.Stmt {
 	}
 }
 
+//	if err != nil {
+//		break
+//	}
+func (f *fld) breakErr() []ast.Stmt {
+	if t, ok := f.x.(*ast.Ident); ok && t.Name == "string" {
+		// no error checking for string
+		return nil
+	}
+	return []ast.Stmt{
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  ast.NewIdent(names.VarNameError),
+				Op: token.NEQ,
+				Y:  ast.NewIdent("nil"),
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.BranchStmt{Tok: token.BREAK},
+			}},
+		},
+	}
+}
+
 func (f *fld) fillRefField(rhs, dst ast.Expr, t string) []ast.Stmt {
-	switch t := f.f.Type.(type) {
+	switch t := f.x.(type) {
 
 	case *ast.Ident:
 		switch t.Name {
@@ -161,7 +215,7 @@ func (f *fld) fillRefField(rhs, dst ast.Expr, t string) []ast.Stmt {
 		}
 
 	default:
-		return f.newAndFillIn(rhs, dst, f.f.Type)
+		return f.newAndFillIn(rhs, dst, f.x)
 
 	}
 }
@@ -189,7 +243,7 @@ func (f *fld) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
 
 func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.f.Type.(type) {
+	switch t := f.x.(type) {
 
 	case *ast.Ident:
 		return f.typedFillIn(rhs, dst, t.Name)
@@ -201,6 +255,15 @@ func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 		return result
 
 	case *ast.ArrayType:
+		// s.List = valList
+		result = append(
+			result,
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{dst},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{rhs},
+			},
+		)
 		return result
 
 	default:
@@ -312,8 +375,8 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 					Specs: []ast.Spec{
 						&ast.ValueSpec{
 							Names:  []*ast.Ident{ast.NewIdent("x" + name)},
-							Type:   f.f.Type,
-							Values: []ast.Expr{helpers.BasicLiteralFromType(f.f.Type, f.t.DefaultValue())},
+							Type:   f.x,
+							Values: []ast.Expr{helpers.BasicLiteralFromType(f.x, f.t.DefaultValue())},
 						},
 					},
 				},
@@ -329,7 +392,7 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.f.Type, f.t.DefaultValue())},
+			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.x, f.t.DefaultValue())},
 		},
 	}
 }

@@ -14,7 +14,7 @@ type Struct struct {
 
 //  valyjson:encode,decode,strict
 type Nested struct {
-	List  []int64 `json:"list"`
+	List  []int32 `json:"list-i"`
 	Count *int64  `json:"count"`
 	Cross *int64  `json:"cross"`
 }

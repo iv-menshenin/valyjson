@@ -121,10 +121,25 @@ func (s *Nested) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, ""); err != nil {
 		return err
 	}
-	if list := v.Get("list"); list != nil {
+	if list := v.Get("list-i"); list != nil {
+		var listA []*fastjson.Value
+		listA, err = list.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%slist-i' value: %w", objPath, err)
 		}
+		valList := make([]int32, 0, len(listA))
+		for _, listElem := range listA {
+			var elem int
+			elem, err = listElem.Int()
+			if err != nil {
+				break
+			}
+			valList = append(valList, int32(elem))
+		}
+		if err != nil {
+			return fmt.Errorf("error parsing '%slist-i' value: %w", objPath, err)
+		}
+		s.List = valList
 	}
 	if count := v.Get("count"); count != nil {
 		var valCount int64
@@ -155,7 +170,7 @@ func (s *Nested) validate(v *fastjson.Value, objPath string) error {
 		if err != nil {
 			return
 		}
-		if bytes.Equal(key, []byte{'l', 'i', 's', 't'}) {
+		if bytes.Equal(key, []byte{'l', 'i', 's', 't', '-', 'i'}) {
 			return
 		}
 		if bytes.Equal(key, []byte{'c', 'o', 'u', 'n', 't'}) {
@@ -456,7 +471,6 @@ func (s *Nested) MarshalAppend(dst []byte) ([]byte, error) {
 		err	error
 	)
 	result.WriteRune('{')
-	// todo List
 	if s.Count != nil {
 		count := *s.Count
 		result.WriteString("\"count\":")

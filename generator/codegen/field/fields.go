@@ -12,8 +12,8 @@ import (
 type (
 	// fld render helper for ast.Field
 	fld struct {
-		// f contains field AST
-		f *ast.Field
+		// x represents field type expression
+		x ast.Expr
 		// t contains tag descriptor
 		t tags.Tags
 		// isStar is type is ref
@@ -26,7 +26,7 @@ func New(f *ast.Field) *fld {
 		panic("you must fill in all fields with tags")
 	}
 	var ff = fld{
-		f: f,
+		x: f.Type,
 		t: tags.Parse(f.Tag.Value),
 	}
 	ff.prepareRef()
@@ -84,7 +84,7 @@ func (f *fld) MarshalStatements(name string) []ast.Stmt {
 	var mrsh []ast.Stmt
 	var v = intermediateVarName(name, f.t)
 	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
-	switch tt := f.f.Type.(type) {
+	switch tt := f.x.(type) {
 
 	case *ast.Ident:
 		if f.isStar {

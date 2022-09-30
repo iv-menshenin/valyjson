@@ -10,24 +10,89 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
-// 	if list := v.Get("list"); list != nil {
-//		var listA []*fastjson.Value
-//		listA, err = list.Array()
-//		if err != nil {
-//			return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
-//		}
-//		s.List = make([]int64, 0, len(listA))
-//		for listElemNum, listElem := range listA {
-//			var listElemVal int64
-//			listElemVal, err = listElem.Int64()
-//			if err != nil {
-//				return fmt.Errorf("error parsing '%slist[%d]' value: %w", objPath, listElemNum, err)
-//			}
-//			s.List = append(s.List, listElemVal)
-//		}
-//	}
-func arrayExtraction(dst ast.Expr, v, json string) []ast.Stmt {
-	return nil
+// if list := v.Get("list"); list != nil {
+// 	var listA []*fastjson.Value
+// 	listA, err = list.Array()
+// 	if err != nil {
+// 		return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
+// 	}
+// 	s.List = make([]int32, 0, len(listA))
+// 	for listElemNum, listElem := range listA {
+// 		var listElemVal int64
+// 		listElemVal, err = listElem.Int64()
+// 		if err != nil {
+// 			return fmt.Errorf("error parsing '%slist[%d]' value: %w", objPath, listElemNum, err)
+// 		}
+// 		s.List = append(s.List, int32(listElemVal))
+// 	}
+// }
+func arrayExtraction(dst ast.Expr, json string, t ast.Expr, stmtExtr []ast.Stmt) []ast.Stmt {
+	var body = []ast.Stmt{
+		// var listA []*fastjson.Value
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.TypeSpec{
+						Name: ast.NewIdent("listA"),
+						Type: &ast.ArrayType{Elt: &ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}}},
+					},
+				},
+			},
+		},
+		// listA, err = list.Array()
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent("listA"), ast.NewIdent("err")},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{&ast.CallExpr{
+				Fun: &ast.SelectorExpr{X: ast.NewIdent("list"), Sel: ast.NewIdent("Array")},
+			}},
+		},
+		// 	if err != nil {
+		// 		return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
+		// 	}
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{
+						&ast.CallExpr{
+							Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
+							Args: []ast.Expr{
+								&ast.BasicLit{Kind: token.STRING, Value: `"error parsing '%s` + json + `' value: %w"`},
+								ast.NewIdent("objPath"),
+								ast.NewIdent("err"),
+							},
+						},
+					},
+				},
+			}},
+		},
+		// valList := make([]int32, 0, len(listA))
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{dst},
+			Tok: token.DEFINE,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{
+					Fun: ast.NewIdent("make"),
+					Args: []ast.Expr{
+						&ast.ArrayType{Elt: t},
+						&ast.BasicLit{Kind: token.INT, Value: "0"},
+						&ast.CallExpr{Fun: ast.NewIdent("len"), Args: []ast.Expr{ast.NewIdent("listA")}},
+					},
+				},
+			},
+		},
+		// for _, listElem := range listA {
+		&ast.RangeStmt{
+			Key:   ast.NewIdent("_"),
+			Value: ast.NewIdent("listElem"),
+			Tok:   token.DEFINE,
+			X:     ast.NewIdent("listA"),
+			Body:  &ast.BlockStmt{List: stmtExtr},
+		},
+	}
+	return body
 }
 
 //	if {v}.Type() != fastjson.TypeString {
