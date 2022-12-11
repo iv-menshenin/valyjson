@@ -40,11 +40,31 @@ func (f *fld) prepareRef() {
 		f.x = star.X
 		f.isStar = true
 	}
+	f.fillDenotedType()
 }
 
+func (f *fld) fillDenotedType() {
+	if i, ok := f.x.(*ast.Ident); ok {
+		f.d = denotedType(i)
+	} else {
+		f.d = f.x
+	}
+}
+
+func denotedType(t *ast.Ident) ast.Expr {
+	if t.Obj != nil {
+		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
+		if ok {
+			return ts.Type
+		}
+	}
+	return t
+}
+
+// fillFrom makes statements to fill some field according to its type
 //	s.Offset, err = offset.Int()
 //	if err != nil {
-//		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//	    return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *fld) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = ast.NewIdent("val" + name)
@@ -94,26 +114,33 @@ func (f *fld) fillElem(name, v string) []ast.Stmt {
 //	val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.x.(type) {
+	switch t := f.d.(type) {
 
 	case *ast.Ident:
 		result = append(result, f.typeExtraction(dst, v, t.Name)...)
 
 	case *ast.StructType:
-		panic("unsupported field type 'struct'")
+		result = append(result, f.typeExtraction(dst, v, "?")...)
 
 	case *ast.SelectorExpr:
-		if t.Sel.Name == "Time" {
+		switch t.Sel.Name {
+
+		case "Time":
 			result = append(result, timeExtraction(dst, v, f.t.Layout())...)
-			break
+
+		case "UUID":
+			result = append(result, uuidExtraction(dst, f.d, v, f.t.JsonName())...)
+
+		default:
+			result = append(result, nestedExtraction(dst, f.x, v, f.t.JsonName())...)
 		}
-		result = append(result, nestedExtraction(dst, f.x, v, f.t.JsonName())...)
 
 	case *ast.ArrayType:
 		intF := fld{
 			x: t.Elt,
 			t: tags.Parse(fmt.Sprintf(`json:"%s"`, f.t.JsonName())),
 		}
+		intF.prepareRef()
 		result = append(result, arrayExtraction(dst, f.t.JsonName(), t.Elt, intF.fillElem("valList", "listElem"))...)
 		return result
 
@@ -157,7 +184,7 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *fld) checkErr() []ast.Stmt {
-	if t, ok := f.x.(*ast.Ident); ok && t.Name == "string" {
+	if t, ok := f.d.(*ast.Ident); ok && t.Name == "string" {
 		// no error checking for string
 		return nil
 	}
@@ -252,6 +279,24 @@ func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 		return result
 
 	case *ast.SelectorExpr:
+		// Structures that support the Unmarshaler interface do not require an assignment operation,
+		// because they are decoded directly into the target field
+		switch t.Sel.Name {
+
+		case "Time":
+			fallthrough
+		case "UUID":
+			result = append(
+				result,
+				&ast.AssignStmt{
+					Lhs: []ast.Expr{dst},
+					Tok: token.ASSIGN,
+					Rhs: []ast.Expr{rhs},
+				},
+			)
+		default:
+
+		}
 		return result
 
 	case *ast.ArrayType:
@@ -299,7 +344,10 @@ func (f *fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 			&ast.AssignStmt{
 				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{rhs},
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun:  ast.NewIdent(t),
+					Args: []ast.Expr{rhs},
+				}},
 			},
 		}
 	}

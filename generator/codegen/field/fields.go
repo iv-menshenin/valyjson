@@ -1,6 +1,7 @@
 package field
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -14,6 +15,8 @@ type (
 	fld struct {
 		// x represents field type expression
 		x ast.Expr
+		// d represents field type denoted value
+		d ast.Expr
 		// t contains tag descriptor
 		t tags.Tags
 		// isStar is type is ref
@@ -33,15 +36,16 @@ func New(f *ast.Field) *fld {
 	return &ff
 }
 
+// FillStatements makes statements processed data-filling for struct field
 // 	if offset := v.Get("offset"); offset != nil {
 //      var vOffset int
-//		vOffset, err = offset.Int()
-//		if err != nil {
-//			return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
-//		}
+//      vOffset, err = offset.Int()
+//      if err != nil {
+//          return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//      }
 //      s.Offset = vOffset
 //	} else {
-//		s.Offset = 100
+//      s.Offset = 100
 //	}
 func (f *fld) FillStatements(name string) []ast.Stmt {
 	if f.t.JsonName() == "" {
@@ -57,8 +61,7 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 		els = &ast.BlockStmt{List: stmt}
 	}
 	if body == nil {
-		// todo @menshenin panic?
-		return nil
+		panic(fmt.Errorf("can`t prepare AST for '%s'", name))
 	}
 	return []ast.Stmt{
 		&ast.IfStmt{
@@ -100,5 +103,13 @@ func (f *fld) MarshalStatements(name string) []ast.Stmt {
 }
 
 func intermediateVarName(name string, t tags.Tags) string {
-	return strings.ToLower(name)
+	varName := strings.ToLower(name)
+	switch varName {
+	// reserved words
+	case "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func",
+		"go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select", "struct", "switch",
+		"type", "var":
+		varName = "_" + varName
+	}
+	return varName
 }

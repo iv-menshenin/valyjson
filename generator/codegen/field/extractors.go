@@ -51,23 +51,7 @@ func arrayExtraction(dst ast.Expr, json string, t ast.Expr, stmtExtr []ast.Stmt)
 		// 	if err != nil {
 		// 		return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
 		// 	}
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{
-					Results: []ast.Expr{
-						&ast.CallExpr{
-							Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
-							Args: []ast.Expr{
-								&ast.BasicLit{Kind: token.STRING, Value: `"error parsing '%s` + json + `' value: %w"`},
-								ast.NewIdent("objPath"),
-								ast.NewIdent("err"),
-							},
-						},
-					},
-				},
-			}},
-		},
+		checkErrAnd(json),
 		// valList := make([]int32, 0, len(listA))
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{dst},
@@ -93,6 +77,30 @@ func arrayExtraction(dst ast.Expr, json string, t ast.Expr, stmtExtr []ast.Stmt)
 		},
 	}
 	return body
+}
+
+// checkErrAnd generates a decoding error check
+// 	if err != nil {
+// 	    return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
+// 	}
+func checkErrAnd(jsonFieldName string) ast.Stmt {
+	return &ast.IfStmt{
+		Cond: &ast.BinaryExpr{X: ast.NewIdent("err"), Op: token.NEQ, Y: ast.NewIdent("nil")},
+		Body: &ast.BlockStmt{List: []ast.Stmt{
+			&ast.ReturnStmt{
+				Results: []ast.Expr{
+					&ast.CallExpr{
+						Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
+						Args: []ast.Expr{
+							&ast.BasicLit{Kind: token.STRING, Value: `"error parsing '%s` + jsonFieldName + `' value: %w"`},
+							ast.NewIdent("objPath"),
+							ast.NewIdent("err"),
+						},
+					},
+				},
+			},
+		}},
+	}
 }
 
 //	if {v}.Type() != fastjson.TypeString {
@@ -320,6 +328,50 @@ func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 			},
 		},
 	}
+}
+
+// uuidExtraction generates the code of the standard conversion process from string to UUID format
+//  var valfield uuid.UUID
+//  b, err := field.StringBytes()
+//  if err != nil {
+//      return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+//  }
+//  err = valfield.UnmarshalText(b)
+func uuidExtraction(dst *ast.Ident, t ast.Expr, v, name string) []ast.Stmt {
+	var stmt = []ast.Stmt{
+		&ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{
+					&ast.ValueSpec{
+						Names: []*ast.Ident{dst},
+						Type:  t,
+					},
+				},
+			},
+		},
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent("b"), ast.NewIdent("err")},
+			Tok: token.DEFINE,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{
+					Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("StringBytes")},
+				},
+			},
+		},
+		checkErrAnd(name),
+		&ast.AssignStmt{
+			Lhs: []ast.Expr{ast.NewIdent("err")},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{
+				&ast.CallExpr{
+					Fun:  &ast.SelectorExpr{X: dst, Sel: ast.NewIdent("UnmarshalText")},
+					Args: []ast.Expr{ast.NewIdent("b")},
+				},
+			},
+		},
+	}
+	return stmt
 }
 
 // {dst}, err := time.Parse({layout}, {v}.String())
