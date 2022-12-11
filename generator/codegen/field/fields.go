@@ -13,12 +13,12 @@ import (
 type (
 	// fld render helper for ast.Field
 	fld struct {
-		// x represents field type expression
-		x ast.Expr
-		// d represents field type denoted value
-		d ast.Expr
-		// t contains tag descriptor
-		t tags.Tags
+		// expr represents field type expression
+		expr ast.Expr
+		// refx represents field type denoted value
+		refx ast.Expr
+		// tags contains tag descriptor
+		tags tags.Tags
 		// isStar is type is ref
 		isStar bool
 	}
@@ -29,8 +29,8 @@ func New(f *ast.Field) *fld {
 		panic("you must fill in all fields with tags")
 	}
 	var ff = fld{
-		x: f.Type,
-		t: tags.Parse(f.Tag.Value),
+		expr: f.Type,
+		tags: tags.Parse(f.Tag.Value),
 	}
 	ff.prepareRef()
 	return &ff
@@ -48,10 +48,10 @@ func New(f *ast.Field) *fld {
 //      s.Offset = 100
 //	}
 func (f *fld) FillStatements(name string) []ast.Stmt {
-	if f.t.JsonName() == "" {
+	if f.tags.JsonName() == "" {
 		return nil
 	}
-	var v = intermediateVarName(name, f.t)
+	var v = intermediateVarName(name, f.tags)
 	var body *ast.BlockStmt
 	var els ast.Stmt
 	if stmt := f.fillFrom(name, v); len(stmt) > 0 {
@@ -85,9 +85,9 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 // result.Write(b)
 func (f *fld) MarshalStatements(name string) []ast.Stmt {
 	var mrsh []ast.Stmt
-	var v = intermediateVarName(name, f.t)
+	var v = intermediateVarName(name, f.tags)
 	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
-	switch tt := f.x.(type) {
+	switch tt := f.expr.(type) {
 
 	case *ast.Ident:
 		if f.isStar {

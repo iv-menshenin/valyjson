@@ -28,26 +28,26 @@ func (f *fld) getValue() ast.Expr {
 		},
 		Args: []ast.Expr{&ast.BasicLit{
 			Kind:  token.STRING,
-			Value: "\"" + f.t.JsonName() + "\"",
+			Value: "\"" + f.tags.JsonName() + "\"",
 		}},
 	}
 }
 
 func (f *fld) prepareRef() {
-	var dstType = f.x
+	var dstType = f.expr
 	star, isStar := dstType.(*ast.StarExpr)
 	if isStar {
-		f.x = star.X
+		f.expr = star.X
 		f.isStar = true
 	}
 	f.fillDenotedType()
 }
 
 func (f *fld) fillDenotedType() {
-	if i, ok := f.x.(*ast.Ident); ok {
-		f.d = denotedType(i)
+	if i, ok := f.expr.(*ast.Ident); ok {
+		f.refx = denotedType(i)
 	} else {
-		f.d = f.x
+		f.refx = f.expr
 	}
 }
 
@@ -101,7 +101,7 @@ func (f *fld) fillElem(dst ast.Expr, v string) []ast.Stmt {
 			Args: []ast.Expr{
 				dst,
 				&ast.CallExpr{
-					Fun:  f.x,
+					Fun:  f.expr,
 					Args: []ast.Expr{ast.NewIdent("elem")},
 				},
 			},
@@ -114,7 +114,7 @@ func (f *fld) fillElem(dst ast.Expr, v string) []ast.Stmt {
 //	val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.d.(type) {
+	switch t := f.refx.(type) {
 
 	case *ast.Ident:
 		result = append(result, f.typeExtraction(dst, v, t.Name)...)
@@ -126,22 +126,22 @@ func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 		switch t.Sel.Name {
 
 		case "Time":
-			result = append(result, timeExtraction(dst, v, f.t.Layout())...)
+			result = append(result, timeExtraction(dst, v, f.tags.Layout())...)
 
 		case "UUID":
-			result = append(result, uuidExtraction(dst, f.d, v, f.t.JsonName())...)
+			result = append(result, uuidExtraction(dst, f.refx, v, f.tags.JsonName())...)
 
 		default:
-			result = append(result, nestedExtraction(dst, f.x, v, f.t.JsonName())...)
+			result = append(result, nestedExtraction(dst, f.expr, v, f.tags.JsonName())...)
 		}
 
 	case *ast.ArrayType:
 		intF := fld{
-			x: t.Elt,
-			t: tags.Parse(fmt.Sprintf(`json:"%s"`, f.t.JsonName())),
+			expr: t.Elt,
+			tags: tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
 		}
 		intF.prepareRef()
-		result = append(result, arrayExtraction(dst, v, f.t.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
+		result = append(result, arrayExtraction(dst, v, f.tags.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
 		return result
 
 	default:
@@ -172,10 +172,10 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 		return boolExtraction(dst, v)
 
 	case "string":
-		return stringExtraction(dst, v, f.t.JsonName())
+		return stringExtraction(dst, v, f.tags.JsonName())
 
 	default:
-		return nestedExtraction(dst, f.x, v, f.t.JsonName())
+		return nestedExtraction(dst, f.expr, v, f.tags.JsonName())
 
 	}
 }
@@ -184,11 +184,11 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *fld) checkErr() []ast.Stmt {
-	if t, ok := f.d.(*ast.Ident); ok && t.Name == "string" {
+	if t, ok := f.refx.(*ast.Ident); ok && t.Name == "string" {
 		// no error checking for string
 		return nil
 	}
-	format := "error parsing '%s" + f.t.JsonName() + "' value: %w"
+	format := "error parsing '%s" + f.tags.JsonName() + "' value: %w"
 	return []ast.Stmt{
 		&ast.IfStmt{
 			Cond: &ast.BinaryExpr{
@@ -209,7 +209,7 @@ func (f *fld) checkErr() []ast.Stmt {
 //		break
 //	}
 func (f *fld) breakErr() []ast.Stmt {
-	if t, ok := f.x.(*ast.Ident); ok && t.Name == "string" {
+	if t, ok := f.expr.(*ast.Ident); ok && t.Name == "string" {
 		// no error checking for string
 		return nil
 	}
@@ -228,7 +228,7 @@ func (f *fld) breakErr() []ast.Stmt {
 }
 
 func (f *fld) fillRefField(rhs, dst ast.Expr, t string) []ast.Stmt {
-	switch t := f.x.(type) {
+	switch t := f.expr.(type) {
 
 	case *ast.Ident:
 		switch t.Name {
@@ -242,7 +242,7 @@ func (f *fld) fillRefField(rhs, dst ast.Expr, t string) []ast.Stmt {
 		}
 
 	default:
-		return f.newAndFillIn(rhs, dst, f.x)
+		return f.newAndFillIn(rhs, dst, f.expr)
 
 	}
 }
@@ -270,7 +270,7 @@ func (f *fld) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
 
 func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.x.(type) {
+	switch t := f.expr.(type) {
 
 	case *ast.Ident:
 		return f.typedFillIn(rhs, dst, t.Name)
@@ -398,15 +398,15 @@ func (f *fld) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 //		s.{name} = 100
 //	}
 func (f *fld) ifDefault(name string) []ast.Stmt {
-	if f.t.DefaultValue() == "" {
-		if f.t.JsonTags().Has("required") {
+	if f.tags.DefaultValue() == "" {
+		if f.tags.JsonTags().Has("required") {
 			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
 			return []ast.Stmt{
 				&ast.ReturnStmt{
 					Results: []ast.Expr{&ast.CallExpr{
 						Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
 						Args: []ast.Expr{
-							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.t.JsonName() + "' is missing\""},
+							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.tags.JsonName() + "' is missing\""},
 							ast.NewIdent(names.VarNameObjPath),
 						},
 					}},
@@ -423,8 +423,8 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 					Specs: []ast.Spec{
 						&ast.ValueSpec{
 							Names:  []*ast.Ident{ast.NewIdent("x" + name)},
-							Type:   f.x,
-							Values: []ast.Expr{helpers.BasicLiteralFromType(f.x, f.t.DefaultValue())},
+							Type:   f.expr,
+							Values: []ast.Expr{helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())},
 						},
 					},
 				},
@@ -440,7 +440,7 @@ func (f *fld) ifDefault(name string) []ast.Stmt {
 		&ast.AssignStmt{
 			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
 			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.x, f.t.DefaultValue())},
+			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())},
 		},
 	}
 }

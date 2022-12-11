@@ -132,9 +132,9 @@ func checkCode(t *testing.T, generated, reference string) {
 }
 
 var stringFld = fld{
-	x: ast.NewIdent("string"),
-	d: ast.NewIdent("string"),
-	t: map[string][]string{
+	expr: ast.NewIdent("string"),
+	refx: ast.NewIdent("string"),
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -151,9 +151,9 @@ const stringFiller = `{
 }`
 
 var refStringFld = fld{
-	x: ast.NewIdent("string"),
-	d: ast.NewIdent("string"),
-	t: map[string][]string{
+	expr: ast.NewIdent("string"),
+	refx: ast.NewIdent("string"),
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 	isStar: true,
@@ -172,9 +172,9 @@ const refStringFiller = `{
 }`
 
 var subStringFld = fld{
-	x: ast.NewIdent("SubGroup"),
-	d: ast.NewIdent("string"),
-	t: map[string][]string{
+	expr: ast.NewIdent("SubGroup"),
+	refx: ast.NewIdent("string"),
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -191,9 +191,9 @@ const subStringFiller = `{
 }`
 
 var intFld = fld{
-	x: ast.NewIdent("int"),
-	d: ast.NewIdent("int"),
-	t: map[string][]string{
+	expr: ast.NewIdent("int"),
+	refx: ast.NewIdent("int"),
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -210,9 +210,9 @@ const intFiller = `{
 }`
 
 var subIntFld = fld{
-	x: ast.NewIdent("SubInt"),
-	d: ast.NewIdent("int64"),
-	t: map[string][]string{
+	expr: ast.NewIdent("SubInt"),
+	refx: ast.NewIdent("int64"),
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -229,15 +229,15 @@ const subIntFiller = `{
 }`
 
 var uuidFld = fld{
-	x: &ast.SelectorExpr{
+	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("uuid"),
 		Sel: ast.NewIdent("UUID"),
 	},
-	d: &ast.SelectorExpr{
+	refx: &ast.SelectorExpr{
 		X:   ast.NewIdent("uuid"),
 		Sel: ast.NewIdent("UUID"),
 	},
-	t: map[string][]string{
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -258,15 +258,15 @@ const uuidFiller = `{
 }`
 
 var timeFld = fld{
-	x: &ast.SelectorExpr{
+	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
 	},
-	d: &ast.SelectorExpr{
+	refx: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
 	},
-	t: map[string][]string{
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }
@@ -282,15 +282,15 @@ const timeFiller = `{
 }`
 
 var refTimeFld = fld{
-	x: &ast.SelectorExpr{
+	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
 	},
-	d: &ast.SelectorExpr{
+	refx: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
 	},
-	t: map[string][]string{
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 	isStar: true,
@@ -308,13 +308,13 @@ const refTimeFiller = `{
 }`
 
 var arrayFld = fld{
-	x: &ast.ArrayType{
+	expr: &ast.ArrayType{
 		Elt: ast.NewIdent("DatarentPixelItemsValue"),
 	},
-	d: &ast.ArrayType{
+	refx: &ast.ArrayType{
 		Elt: ast.NewIdent("DatarentPixelItemsValue"),
 	},
-	t: map[string][]string{
+	tags: map[string][]string{
 		"json": {"field"},
 	},
 }

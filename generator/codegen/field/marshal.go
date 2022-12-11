@@ -16,7 +16,7 @@ func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		// result.WriteString("\"field\":")
 		&ast.ExprStmt{X: &ast.CallExpr{
 			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
-			Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":"`, f.t.JsonName())}},
+			Args: []ast.Expr{&ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":"`, f.tags.JsonName())}},
 		}},
 	}
 	switch t {
@@ -126,8 +126,8 @@ func (f *fld) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 
 // result.WriteString("\"{name}\":{default}")
 func (f *fld) ifNil() []ast.Stmt {
-	if f.t.DefaultValue() == "" {
-		if f.t.JsonTags().Has("omitempty") {
+	if f.tags.DefaultValue() == "" {
+		if f.tags.JsonTags().Has("omitempty") {
 			return nil
 		}
 		// result.WriteString("\"{name}\":null")
@@ -136,7 +136,7 @@ func (f *fld) ifNil() []ast.Stmt {
 				X: &ast.CallExpr{
 					Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
 					Args: []ast.Expr{
-						&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":null"`},
+						&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.tags.JsonName() + `\":null"`},
 					},
 				},
 			},
@@ -147,7 +147,7 @@ func (f *fld) ifNil() []ast.Stmt {
 			X: &ast.CallExpr{
 				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
 				Args: []ast.Expr{
-					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.t.JsonName() + `\":` + helpers.StringFromType(f.x, f.t.DefaultValue()) + `"`},
+					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.tags.JsonName() + `\":` + helpers.StringFromType(f.expr, f.tags.DefaultValue()) + `"`},
 				},
 			},
 		},
