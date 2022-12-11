@@ -86,7 +86,7 @@ func (f *fld) fillFrom(name, v string) []ast.Stmt {
 // 	break
 // }
 // valList = append(valList, int32(elem))
-func (f *fld) fillElem(name, v string) []ast.Stmt {
+func (f *fld) fillElem(dst ast.Expr, v string) []ast.Stmt {
 	var bufVariable = ast.NewIdent("elem")
 	var result []ast.Stmt
 	result = append(result, f.typedValue(bufVariable, v)...)
@@ -94,12 +94,12 @@ func (f *fld) fillElem(name, v string) []ast.Stmt {
 
 	// valList = append(valList, int32(elem))
 	result = append(result, &ast.AssignStmt{
-		Lhs: []ast.Expr{ast.NewIdent(name)},
+		Lhs: []ast.Expr{dst},
 		Tok: token.ASSIGN,
 		Rhs: []ast.Expr{&ast.CallExpr{
 			Fun: ast.NewIdent("append"),
 			Args: []ast.Expr{
-				ast.NewIdent(name),
+				dst,
 				&ast.CallExpr{
 					Fun:  f.x,
 					Args: []ast.Expr{ast.NewIdent("elem")},
@@ -141,7 +141,7 @@ func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 			t: tags.Parse(fmt.Sprintf(`json:"%s"`, f.t.JsonName())),
 		}
 		intF.prepareRef()
-		result = append(result, arrayExtraction(dst, f.t.JsonName(), t.Elt, intF.fillElem("valList", "listElem"))...)
+		result = append(result, arrayExtraction(dst, v, f.t.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
 		return result
 
 	default:

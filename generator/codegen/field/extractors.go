@@ -26,7 +26,7 @@ import (
 // 		s.List = append(s.List, int32(listElemVal))
 // 	}
 // }
-func arrayExtraction(dst ast.Expr, json string, t ast.Expr, stmtExtr []ast.Stmt) []ast.Stmt {
+func arrayExtraction(dst ast.Expr, v, json string, t ast.Expr, stmtExtr []ast.Stmt) []ast.Stmt {
 	var body = []ast.Stmt{
 		// var listA []*fastjson.Value
 		&ast.DeclStmt{
@@ -45,7 +45,7 @@ func arrayExtraction(dst ast.Expr, json string, t ast.Expr, stmtExtr []ast.Stmt)
 			Lhs: []ast.Expr{ast.NewIdent("listA"), ast.NewIdent("err")},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{&ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent("list"), Sel: ast.NewIdent("Array")},
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Array")},
 			}},
 		},
 		// 	if err != nil {

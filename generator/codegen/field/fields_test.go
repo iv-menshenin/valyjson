@@ -66,6 +66,12 @@ func Test_fld_FillStatements(t *testing.T) {
 			fName: "field",
 			need:  refTimeFiller,
 		},
+		{
+			name:  "array_Struct",
+			argm:  arrayFld,
+			fName: "items",
+			need:  arrayFiller,
+		},
 	}
 	for i := range cases {
 		test := cases[i]
@@ -298,5 +304,40 @@ const refTimeFiller = `{
 		}
 		s.field = new(time.Time)
 		*s.field = time.Time(valfield)
+	}
+}`
+
+var arrayFld = fld{
+	x: &ast.ArrayType{
+		Elt: ast.NewIdent("DatarentPixelItemsValue"),
+	},
+	d: &ast.ArrayType{
+		Elt: ast.NewIdent("DatarentPixelItemsValue"),
+	},
+	t: map[string][]string{
+		"json": {"field"},
+	},
+}
+
+const arrayFiller = `{
+	if items := v.Get("field"); items != nil {
+		var listA []*fastjson.Value
+		listA, err = items.Array()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+		}
+		valitems := make([]DatarentPixelItemsValue, 0, len(listA))
+		for _, listElem := range listA {
+			var elem DatarentPixelItemsValue
+			err = elem.FillFromJson(listElem, objPath+".")
+			if err != nil {
+				break
+			}
+			valitems = append(valitems, DatarentPixelItemsValue(elem))
+		}
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+		}
+		s.items = valitems
 	}
 }`
