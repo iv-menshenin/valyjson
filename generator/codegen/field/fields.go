@@ -85,6 +85,7 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 // result.Write(b)
 func (f *fld) MarshalStatements(name string) []ast.Stmt {
 	var mrsh []ast.Stmt
+	var elseStmt ast.Stmt
 	var v = intermediateVarName(name, f.tags)
 	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	switch tt := f.expr.(type) {
@@ -95,11 +96,26 @@ func (f *fld) MarshalStatements(name string) []ast.Stmt {
 		} else {
 			mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
 		}
+		if !f.tags.JsonTags().Has("omitempty") {
+			elseStmt = &ast.BlockStmt{
+				List: f.typeMarshalDefault(src, v, tt.Name),
+			}
+		}
 
 	default:
 		// todo @menshenin panic
 	}
-	return mrsh
+	return []ast.Stmt{
+		&ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  src,
+				Op: token.NEQ,
+				Y:  &ast.BasicLit{Kind: token.STRING, Value: "\"\""},
+			},
+			Body: &ast.BlockStmt{List: mrsh},
+			Else: elseStmt,
+		},
+	}
 }
 
 func intermediateVarName(name string, t tags.Tags) string {

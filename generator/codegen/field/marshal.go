@@ -13,6 +13,21 @@ import (
 // result.Write(b)
 func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var result = []ast.Stmt{
+		&ast.IfStmt{
+			// if result.Len() > 1 {
+			Cond: &ast.BinaryExpr{
+				X:  &ast.CallExpr{Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Len")}},
+				Op: token.GTR,
+				Y:  &ast.BasicLit{Kind: token.INT, Value: "1"},
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				// result.WriteRune(',')
+				&ast.ExprStmt{X: &ast.CallExpr{
+					Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
+					Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: `','`}},
+				}},
+			}},
+		},
 		// result.WriteString("\"field\":")
 		&ast.ExprStmt{X: &ast.CallExpr{
 			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
@@ -55,6 +70,39 @@ func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 			},
 		},
 	)
+	return result
+}
+
+// result.WriteString("\"field\":\"\"")
+func (f *fld) typeMarshalDefault(src ast.Expr, v, t string) []ast.Stmt {
+	var result []ast.Stmt
+	var args []ast.Expr
+	switch t {
+
+	case "int", "int8", "int16", "int32", "int64":
+		args = append(args, &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":0"`, v)})
+
+	case "uint", "uint8", "uint16", "uint32", "uint64":
+		args = append(args, &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":0"`, v)})
+
+	case "float32", "float64":
+		args = append(args, &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":0.0"`, v)})
+
+	case "bool":
+		args = append(args, &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":false"`, v)})
+
+	case "string":
+		args = append(args, &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf(`"\"%s\":\"\""`, v)})
+
+	default:
+		panic("not implemented")
+	}
+	result = append(result, &ast.ExprStmt{
+		X: &ast.CallExpr{
+			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
+			Args: args,
+		},
+	})
 	return result
 }
 

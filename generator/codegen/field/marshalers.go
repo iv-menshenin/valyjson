@@ -5,11 +5,11 @@ import (
 	"go/token"
 )
 
-// b = marshalString(s.Field, buf[:0])
+// b := marshalString(s.Field, buf[:0])
 func stringMarshal(src ast.Expr) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.AssignStmt{
-			Tok: token.ASSIGN,
+			Tok: token.DEFINE,
 			Lhs: []ast.Expr{ast.NewIdent("b")},
 			Rhs: []ast.Expr{
 				&ast.CallExpr{

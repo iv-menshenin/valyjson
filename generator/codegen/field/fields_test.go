@@ -1,12 +1,13 @@
 package field
 
 import (
-	"bufio"
 	"go/ast"
 	"go/printer"
 	"go/token"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_fld_FillStatements(t *testing.T) {
@@ -78,7 +79,39 @@ func Test_fld_FillStatements(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			got := printAST(t, &ast.BlockStmt{List: test.argm.FillStatements(test.fName)})
-			checkCode(t, got, test.need)
+			require.Equal(t, test.need, got)
+		})
+	}
+}
+
+func Test_MarshalStatements(t *testing.T) {
+	t.Parallel()
+	type testCase struct {
+		name  string
+		argm  fld
+		fName string
+		need  string
+	}
+	var cases = []testCase{
+		{
+			name:  "string_as_string",
+			argm:  stringFldMrsh,
+			fName: "Field",
+			need:  stringFillerMrsh,
+		},
+		{
+			name:  "string_as_string_omit",
+			argm:  omitStringFldMrsh,
+			fName: "Field",
+			need:  omitStringFillerMrsh,
+		},
+	}
+	for i := range cases {
+		test := cases[i]
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			got := printAST(t, &ast.BlockStmt{List: test.argm.MarshalStatements(test.fName)})
+			require.Equal(t, test.need, got)
 		})
 	}
 }
@@ -89,46 +122,6 @@ func printAST(t *testing.T, a ast.Node) string {
 		t.Fatal(err)
 	}
 	return b.String()
-}
-
-func checkCode(t *testing.T, generated, reference string) {
-	t.Helper()
-	a := bufio.NewScanner(strings.NewReader(generated))
-	b := bufio.NewScanner(strings.NewReader(reference))
-	var isError bool
-	var lines []string
-	for {
-		if !a.Scan() {
-			lines = append(lines, "===END OF GENERATED===")
-			for b.Scan() {
-				if strings.TrimSpace(b.Text()) != "" {
-					isError = true
-					lines = append(lines, ">"+b.Text())
-				}
-			}
-			break
-		}
-		if !b.Scan() {
-			lines = append(lines, "===END OF REFERENCED===")
-			for a.Scan() {
-				if strings.TrimSpace(b.Text()) != "" {
-					isError = true
-					lines = append(lines, "<"+b.Text())
-				}
-			}
-			break
-		}
-		if a.Text() != b.Text() {
-			lines = append(lines, "-"+b.Text())
-			lines = append(lines, "+"+a.Text())
-			isError = true
-		} else {
-			lines = append(lines, "="+a.Text())
-		}
-	}
-	if isError {
-		t.Errorf("Matching error:\n%s\n%s", strings.Join(lines, "\n"), generated)
-	}
 }
 
 var stringFld = fld{
@@ -339,5 +332,45 @@ const arrayFiller = `{
 			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
 		}
 		s.items = valitems
+	}
+}`
+
+var stringFldMrsh = fld{
+	expr: ast.NewIdent("string"),
+	refx: ast.NewIdent("string"),
+	tags: map[string][]string{
+		"json": {"field"},
+	},
+}
+
+const stringFillerMrsh = `{
+	if s.Field != "" {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString("\"field\":")
+		b := marshalString(s.Field, buf[:0])
+		result.Write(b)
+	} else {
+		result.WriteString("\"field\":\"\"")
+	}
+}`
+
+var omitStringFldMrsh = fld{
+	expr: ast.NewIdent("string"),
+	refx: ast.NewIdent("string"),
+	tags: map[string][]string{
+		"json": {"field", "omitempty"},
+	},
+}
+
+const omitStringFillerMrsh = `{
+	if s.Field != "" {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString("\"field\":")
+		b := marshalString(s.Field, buf[:0])
+		result.Write(b)
 	}
 }`
