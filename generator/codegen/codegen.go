@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"strconv"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/field"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
@@ -156,7 +157,7 @@ func NewUnmarshalFunc(structName string, structTags tags.StructTags) []ast.Decl 
 		&ast.GenDecl{
 			Tok: token.VAR,
 			Doc: &ast.CommentGroup{List: []*ast.Comment{
-				{Text: "// " + poolName + "used for pooling Parsers for " + structName + " JSONs."},
+				{Text: "\n// " + poolName + "used for pooling Parsers for " + structName + " JSONs."},
 			}},
 			Specs: []ast.Spec{
 				&ast.ValueSpec{
@@ -187,7 +188,7 @@ func NewUnmarshalFunc(structName string, structTags tags.StructTags) []ast.Decl 
 	}
 }
 
-// func validateStructKeys(v *fastjson.Value, objPath string) error {
+// func validate(v *fastjson.Value, objPath string) error {
 func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.StructTags) *ast.FuncDecl {
 	const (
 		o   = "o"
@@ -208,7 +209,19 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 			Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{}}},
 		},
 	}
-	for _, field := range fields {
+	var varCheckFields ast.Stmt = &ast.EmptyStmt{}
+	if len(fields) > 0 {
+		varCheckFields = &ast.DeclStmt{
+			Decl: &ast.GenDecl{
+				Tok: token.VAR,
+				Specs: []ast.Spec{&ast.ValueSpec{
+					Names: []*ast.Ident{ast.NewIdent("checkFields")},
+					Type:  &ast.ArrayType{Len: &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(len(fields))}, Elt: ast.NewIdent("int")},
+				}},
+			},
+		}
+	}
+	for i, field := range fields {
 		fieldTags := tags.Parse(field.Tag.Value)
 		var runeArgs []ast.Expr
 		for name, i := []rune(fieldTags.JsonName()), 0; i < len(name); i++ {
@@ -233,7 +246,51 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 						},
 					},
 				},
-				Body: &ast.BlockStmt{List: []ast.Stmt{&ast.ReturnStmt{}}},
+				Body: &ast.BlockStmt{List: []ast.Stmt{
+					// 			checkFields[0]++
+					//			if checkFields[0] > 1 {
+					//				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+					//			}
+					//			return
+					&ast.IncDecStmt{
+						Tok: token.INC,
+						X:   &ast.IndexExpr{X: ast.NewIdent("checkFields"), Index: &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(i)}},
+					},
+					&ast.IfStmt{
+						Cond: &ast.BinaryExpr{
+							X:  &ast.IndexExpr{X: ast.NewIdent("checkFields"), Index: &ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(i)}},
+							Op: token.GTR,
+							Y:  &ast.BasicLit{Kind: token.INT, Value: "1"},
+						},
+						Body: &ast.BlockStmt{List: []ast.Stmt{
+							// err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+							&ast.AssignStmt{
+								Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
+								Tok: token.ASSIGN,
+								Rhs: []ast.Expr{
+									&ast.CallExpr{
+										Fun: &ast.SelectorExpr{
+											X:   ast.NewIdent("fmt"),
+											Sel: ast.NewIdent("Errorf"),
+										},
+										Args: []ast.Expr{
+											&ast.BasicLit{
+												Kind:  token.STRING,
+												Value: "\"the '%s' field appears in the object twice [%s]\"",
+											},
+											&ast.CallExpr{
+												Fun:  ast.NewIdent("string"),
+												Args: []ast.Expr{ast.NewIdent(key)},
+											},
+											ast.NewIdent(names.VarNameObjPath),
+										},
+									},
+								},
+							},
+						}},
+					},
+					&ast.ReturnStmt{},
+				}},
 			},
 		)
 	}
@@ -328,6 +385,8 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
 			}},
 		},
+		// var checkFields [1]int
+		varCheckFields,
 		//	o.Visit(func(key []byte, _ *fastjson.Value) {
 		&ast.ExprStmt{X: &ast.CallExpr{
 			Fun: &ast.SelectorExpr{X: ast.NewIdent(o), Sel: ast.NewIdent("Visit")},
@@ -352,7 +411,7 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 			},
 		}},
 		// return nil
-		&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("nil")}},
+		&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent("err")}},
 	}
 	return &ast.FuncDecl{
 		Doc: &ast.CommentGroup{List: []*ast.Comment{

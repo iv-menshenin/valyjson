@@ -2,8 +2,10 @@
 package {{ .Package }}
 
 import (
-    "bytes"
+	"bytes"
 	"time"
+
+	"github.com/valyala/fastjson"
 )
 
 func marshalString(s string, b []byte) []byte {
@@ -37,4 +39,8 @@ func marshalString(s string, b []byte) []byte {
 
 func marshalTime(t time.Time, layout string, b []byte) []byte {
 	return t.AppendFormat(b, layout)
+}
+
+func valueIsNotNull(v *fastjson.Value) bool {
+	return v != nil && v.Type() != fastjson.TypeNull
 }

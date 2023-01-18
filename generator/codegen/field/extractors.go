@@ -110,31 +110,33 @@ func checkErrAnd(jsonFieldName string) ast.Stmt {
 //	{dst} = {v}.String()
 func stringExtraction(dst ast.Expr, v, json string) []ast.Stmt {
 	var result []ast.Stmt
-	var valueType = &ast.CallExpr{
-		Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("Type")},
-	}
+	result = append(result, &ast.DeclStmt{
+		// var valField []byte
+		Decl: &ast.GenDecl{
+			Tok: token.VAR,
+			Specs: []ast.Spec{
+				&ast.TypeSpec{Name: dst.(*ast.Ident), Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
+			},
+		},
+	})
 	result = append(result, &ast.IfStmt{
+		Init: &ast.AssignStmt{
+			Lhs: []ast.Expr{dst, ast.NewIdent("err")},
+			Tok: token.ASSIGN,
+			Rhs: []ast.Expr{&ast.CallExpr{
+				// field.StringBytes()
+				Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("StringBytes")},
+			}},
+		},
 		Cond: &ast.BinaryExpr{
-			X:  valueType,
+			X:  ast.NewIdent("err"),
 			Op: token.NEQ,
-			Y:  &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("TypeString")},
+			Y:  ast.NewIdent("nil"),
 		},
 		Body: &ast.BlockStmt{List: []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{helpers.FmtError("value doesn't contain string; it contains %s", valueType)},
-			},
 			&ast.ReturnStmt{Results: []ast.Expr{
 				helpers.FmtError("error parsing '%s"+json+"' value: %w", ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError)),
 			}},
-		}},
-	})
-	result = append(result, &ast.AssignStmt{
-		Lhs: []ast.Expr{dst},
-		Tok: token.DEFINE,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: &ast.SelectorExpr{X: ast.NewIdent(v), Sel: ast.NewIdent("String")},
 		}},
 	})
 	return result

@@ -70,7 +70,7 @@ func (f *fld) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = ast.NewIdent("val" + name)
 	var result []ast.Stmt
 	result = append(result, f.typedValue(bufVariable, v)...)
-	result = append(result, f.checkErr()...)
+	result = append(result, f.checkErr(bufVariable)...)
 
 	var fldExpr = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	if f.isStar {
@@ -183,11 +183,35 @@ func (f *fld) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //	if err != nil {
 //		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
-func (f *fld) checkErr() []ast.Stmt {
-	if t, ok := f.refx.(*ast.Ident); ok && t.Name == "string" {
-		// no error checking for string
+//	if valIntFld8 > math.MaxInt8 {
+//		return fmt.Errorf("error parsing '%sint_fld8' value %d exceeds maximum for data type uint8", objPath, valIntFld8)
+//	}
+func (f *fld) checkErr(val *ast.Ident) []ast.Stmt {
+	var checkOverflow ast.Stmt = &ast.EmptyStmt{}
+	ident, isIdent := f.refx.(*ast.Ident)
+	if isIdent && ident.Name == "string" {
 		return nil
 	}
+	if maxExp := getMaxByType(ident); maxExp != nil {
+		phldr := "%d"
+		if ident.Name == "float32" {
+			phldr = "%f"
+		}
+		maxExceeded := "error parsing '%s" + f.tags.JsonName() + "' value " + phldr + " exceeds maximum for data type " + ident.Name
+		checkOverflow = &ast.IfStmt{
+			Cond: &ast.BinaryExpr{
+				X:  val,
+				Op: token.GTR,
+				Y:  maxExp,
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{
+					Results: []ast.Expr{helpers.FmtError(maxExceeded, ast.NewIdent(names.VarNameObjPath), val)},
+				},
+			}},
+		}
+	}
+
 	format := "error parsing '%s" + f.tags.JsonName() + "' value: %w"
 	return []ast.Stmt{
 		&ast.IfStmt{
@@ -202,7 +226,30 @@ func (f *fld) checkErr() []ast.Stmt {
 				},
 			}},
 		},
+		checkOverflow,
 	}
+}
+func getMaxByType(t *ast.Ident) ast.Expr {
+	if t == nil {
+		return nil
+	}
+	switch t.Name {
+	case "float32":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxFloat32")}
+	case "int8":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt8")}
+	case "int16":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt16")}
+	case "int32":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt32")}
+	case "uint8":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint8")}
+	case "uint16":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint16")}
+	case "uint32":
+		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint32")}
+	}
+	return nil
 }
 
 //	if err != nil {
@@ -318,7 +365,19 @@ func (f *fld) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 
 func (f *fld) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
-	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
+	case "string":
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{dst},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun:  ast.NewIdent("string"),
+					Args: []ast.Expr{rhs},
+				}},
+			},
+		}
+
+	case "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
 			&ast.AssignStmt{
 				Lhs: []ast.Expr{dst},

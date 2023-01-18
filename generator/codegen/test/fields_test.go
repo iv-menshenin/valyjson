@@ -2,6 +2,8 @@ package test
 
 import (
 	"io/ioutil"
+	"path"
+	"strings"
 	"testing"
 
 	"github.com/iv-menshenin/valyjson/generator"
@@ -18,10 +20,23 @@ func Test_fld_FillStatements(t *testing.T) {
 
 	var cnt int
 	for _, f := range files {
+		if path.Ext(f.Name()) != ".go" {
+			continue
+		}
+		if strings.HasSuffix(f.Name(), ".out.go") {
+			continue
+		}
+		if strings.HasSuffix(f.Name(), "_test.go") {
+			continue
+		}
+		if f.Name() == "valyjson_utils.go" {
+			continue
+		}
 		cnt++
+		fileName := f.Name()
 		t.Run(f.Name(), func(t *testing.T) {
 			t.Parallel()
-			caseTestFillStatements(t, fillTestsDir+f.Name())
+			caseTestFillStatements(t, fillTestsDir+fileName)
 		})
 	}
 	if cnt == 0 {
@@ -34,5 +49,6 @@ func caseTestFillStatements(t *testing.T, testFile string) {
 		t.Fatal(err)
 	}
 	g.BuildFillers()
-	g.Print(testFile + ".out")
+	g.FixImports()
+	g.Print(testFile + ".out.go")
 }
