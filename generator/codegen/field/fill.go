@@ -93,25 +93,61 @@ func (f *fld) fillFrom(name, v string) []ast.Stmt {
 func (f *fld) fillElem(dst ast.Expr, v string) []ast.Stmt {
 	var bufVariable = ast.NewIdent("elem")
 	var result []ast.Stmt
+	if f.isNullable {
+		//if !valueIsNotNull(listElem) {
+		//	valFieldRef = append(valFieldRef, nil)
+		//	continue
+		//}
+		result = append(result, &ast.IfStmt{
+			Cond: &ast.UnaryExpr{
+				Op: token.NOT,
+				X:  &ast.CallExpr{Fun: ast.NewIdent("valueIsNotNull"), Args: []ast.Expr{ast.NewIdent("listElem")}},
+			},
+			Body: &ast.BlockStmt{
+				List: []ast.Stmt{
+					appendStmt(dst, ast.NewIdent("nil")),
+					&ast.BranchStmt{Tok: token.CONTINUE},
+				},
+			},
+		})
+	}
 	result = append(result, f.typedValue(bufVariable, v)...)
 	result = append(result, f.breakErr()...)
 
 	// valList = append(valList, int32(elem))
-	result = append(result, &ast.AssignStmt{
+	if f.isStar {
+		result = append(
+			result,
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{ast.NewIdent("newElem")},
+				Tok: token.DEFINE,
+				Rhs: []ast.Expr{
+					&ast.CallExpr{
+						Fun:  f.expr,
+						Args: []ast.Expr{ast.NewIdent("elem")},
+					},
+				},
+			},
+			appendStmt(dst, &ast.UnaryExpr{X: ast.NewIdent("newElem"), Op: token.AND}),
+		)
+		return result
+	}
+	result = append(result, appendStmt(dst, &ast.CallExpr{
+		Fun:  f.expr,
+		Args: []ast.Expr{ast.NewIdent("elem")},
+	}))
+	return result
+}
+
+func appendStmt(dst, el ast.Expr) ast.Stmt {
+	return &ast.AssignStmt{
 		Lhs: []ast.Expr{dst},
 		Tok: token.ASSIGN,
 		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun: ast.NewIdent("append"),
-			Args: []ast.Expr{
-				dst,
-				&ast.CallExpr{
-					Fun:  f.expr,
-					Args: []ast.Expr{ast.NewIdent("elem")},
-				},
-			},
+			Fun:  ast.NewIdent("append"),
+			Args: []ast.Expr{dst, el},
 		}},
-	})
-	return result
+	}
 }
 
 //  var val{name} {type}
