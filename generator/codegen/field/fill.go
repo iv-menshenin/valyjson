@@ -40,6 +40,10 @@ func (f *fld) prepareRef() {
 		f.expr = star.X
 		f.isStar = true
 	}
+	_, isArray := dstType.(*ast.ArrayType)
+	_, isMap := dstType.(*ast.MapType)
+	_, isStruct := dstType.(*ast.StructType)
+	f.isNullable = isStar || isArray || isMap || isStruct
 	f.fillDenotedType()
 }
 

@@ -21,6 +21,8 @@ type (
 		tags tags.Tags
 		// isStar is type is ref
 		isStar bool
+		// isNullable is type nullable
+		isNullable bool
 	}
 )
 
@@ -68,7 +70,7 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 		Op: token.NEQ,
 		Y:  ast.NewIdent("nil"),
 	}
-	if f.isStar {
+	if f.isNullable {
 		condition = &ast.CallExpr{
 			Fun:  ast.NewIdent("valueIsNotNull"),
 			Args: []ast.Expr{ast.NewIdent(v)},
