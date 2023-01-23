@@ -80,11 +80,11 @@ func (i *Discoverer) Spec() []ast.Spec {
 	for _, pkg := range i.imports {
 		imports = append(imports, pkg)
 	}
-	sort.Slice(imports, func(i, j int) bool {
-		if imports[i].Kind < imports[j].Kind {
-			return true
+	sort.SliceStable(imports, func(i, j int) bool {
+		if imports[i].Kind == imports[j].Kind {
+			return imports[i].Path < imports[j].Path
 		}
-		return imports[i].Path < imports[j].Path
+		return imports[i].Kind < imports[j].Kind
 	})
 
 	var (
