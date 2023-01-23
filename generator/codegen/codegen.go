@@ -26,38 +26,38 @@ func NewFillerFunc(structName string, fields []*ast.Field, structTags tags.Struc
 	fastJsonValue := ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("fastjson"), Sel: ast.NewIdent("Value")}}
 	var body []ast.Stmt
 	if structTags.StrictRules() {
-		body = append(
-			body,
-			&ast.ExprStmt{X: &ast.BasicLit{Kind: token.COMMENT, Value: "// only if there is a strict rules"}},
-			// if err = validateStructKeys(v, ""); err != nil {
-			//		return err
-			//	}
-			&ast.IfStmt{
-				Init: &ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
-					Tok: token.ASSIGN,
-					Rhs: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(validateFuncName)},
-						Args: []ast.Expr{
-							ast.NewIdent(names.VarNameJsonValue),
-							&ast.BasicLit{
-								Kind:  token.STRING,
-								Value: "\"\"",
-							},
+		body = append(body, &ast.ExprStmt{X: &ast.BasicLit{Kind: token.COMMENT, Value: "// strict rules"}})
+	}
+	body = append(
+		body,
+		// 	if err = s.validate(v, ""); err != nil {
+		//		return err
+		//	}
+		&ast.IfStmt{
+			Init: &ast.AssignStmt{
+				Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{&ast.CallExpr{
+					Fun: &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(validateFuncName)},
+					Args: []ast.Expr{
+						ast.NewIdent(names.VarNameJsonValue),
+						&ast.BasicLit{
+							Kind:  token.STRING,
+							Value: "\"\"",
 						},
-					}},
-				},
-				Cond: &ast.BinaryExpr{
-					X:  ast.NewIdent(names.VarNameError),
-					Op: token.NEQ,
-					Y:  ast.NewIdent("nil"),
-				},
-				Body: &ast.BlockStmt{List: []ast.Stmt{
-					&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
+					},
 				}},
 			},
-		)
-	}
+			Cond: &ast.BinaryExpr{
+				X:  ast.NewIdent(names.VarNameError),
+				Op: token.NEQ,
+				Y:  ast.NewIdent("nil"),
+			},
+			Body: &ast.BlockStmt{List: []ast.Stmt{
+				&ast.ReturnStmt{Results: []ast.Expr{ast.NewIdent(names.VarNameError)}},
+			}},
+		},
+	)
 	for _, field := range fields {
 		body = append(body, fillFieldStmts(field)...)
 	}
@@ -299,70 +299,72 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 	//		} else {
 	//			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
 	//		}
-	visitBody = append(
-		visitBody,
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(names.VarNameObjPath),
-				Op: token.EQL,
-				Y: &ast.BasicLit{
-					Kind:  token.STRING,
-					Value: "\"\"",
+	if structTags.StrictRules() {
+		visitBody = append(
+			visitBody,
+			&ast.IfStmt{
+				Cond: &ast.BinaryExpr{
+					X:  ast.NewIdent(names.VarNameObjPath),
+					Op: token.EQL,
+					Y: &ast.BasicLit{
+						Kind:  token.STRING,
+						Value: "\"\"",
+					},
 				},
+				// err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
+				Body: &ast.BlockStmt{List: []ast.Stmt{
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
+						Tok: token.ASSIGN,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X:   ast.NewIdent("fmt"),
+									Sel: ast.NewIdent("Errorf"),
+								},
+								Args: []ast.Expr{
+									&ast.BasicLit{
+										Kind:  token.STRING,
+										Value: "\"unexpected field '%s' in the root of the object\"",
+									},
+									&ast.CallExpr{
+										Fun:  ast.NewIdent("string"),
+										Args: []ast.Expr{ast.NewIdent(key)},
+									},
+								},
+							},
+						},
+					},
+				}},
+				// err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
+				Else: &ast.BlockStmt{List: []ast.Stmt{
+					&ast.AssignStmt{
+						Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
+						Tok: token.ASSIGN,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X:   ast.NewIdent("fmt"),
+									Sel: ast.NewIdent("Errorf"),
+								},
+								Args: []ast.Expr{
+									&ast.BasicLit{
+										Kind:  token.STRING,
+										Value: "\"unexpected field '%s' in the '%s' path\"",
+									},
+									&ast.CallExpr{
+										Fun:  ast.NewIdent("string"),
+										Args: []ast.Expr{ast.NewIdent(key)},
+									},
+									ast.NewIdent(names.VarNameObjPath),
+								},
+							},
+						},
+					},
+				}},
 			},
-			// err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
-					Tok: token.ASSIGN,
-					Rhs: []ast.Expr{
-						&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   ast.NewIdent("fmt"),
-								Sel: ast.NewIdent("Errorf"),
-							},
-							Args: []ast.Expr{
-								&ast.BasicLit{
-									Kind:  token.STRING,
-									Value: "\"unexpected field '%s' in the root of the object\"",
-								},
-								&ast.CallExpr{
-									Fun:  ast.NewIdent("string"),
-									Args: []ast.Expr{ast.NewIdent(key)},
-								},
-							},
-						},
-					},
-				},
-			}},
-			// err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-			Else: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{ast.NewIdent(names.VarNameError)},
-					Tok: token.ASSIGN,
-					Rhs: []ast.Expr{
-						&ast.CallExpr{
-							Fun: &ast.SelectorExpr{
-								X:   ast.NewIdent("fmt"),
-								Sel: ast.NewIdent("Errorf"),
-							},
-							Args: []ast.Expr{
-								&ast.BasicLit{
-									Kind:  token.STRING,
-									Value: "\"unexpected field '%s' in the '%s' path\"",
-								},
-								&ast.CallExpr{
-									Fun:  ast.NewIdent("string"),
-									Args: []ast.Expr{ast.NewIdent(key)},
-								},
-								ast.NewIdent(names.VarNameObjPath),
-							},
-						},
-					},
-				},
-			}},
-		},
-	)
+		)
+	}
 	//	o, err := v.Object()
 	//	if err != nil {
 	//		return err

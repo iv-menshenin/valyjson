@@ -26,6 +26,9 @@ func (s *NumStruct01) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	if err = s.validate(v, ""); err != nil {
+		return err
+	}
 	if intfld := v.Get("int_fld"); intfld != nil {
 		var valIntFld int
 		valIntFld, err = intfld.Int()
@@ -451,11 +454,6 @@ func (s *NumStruct01) validate(v *fastjson.Value, objPath string) error {
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
 	})
 	return err
 }
@@ -477,7 +475,7 @@ func (s *NumStruct02) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	// only if there is a strict rules
+	// strict rules
 	if err = s.validate(v, ""); err != nil {
 		return err
 	}

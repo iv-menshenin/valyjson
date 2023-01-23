@@ -25,6 +25,9 @@ func (s *TestStr01) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestStr01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	if err = s.validate(v, ""); err != nil {
+		return err
+	}
 	if field := v.Get("field"); field != nil {
 		var valField []byte
 		if valField, err = field.StringBytes(); err != nil {
@@ -68,11 +71,6 @@ func (s *TestStr01) validate(v *fastjson.Value, objPath string) error {
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
 	})
 	return err
 }
@@ -94,7 +92,7 @@ func (s *TestStr02) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestStr02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	// only if there is a strict rules
+	// strict rules
 	if err = s.validate(v, ""); err != nil {
 		return err
 	}
