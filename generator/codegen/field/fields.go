@@ -63,14 +63,21 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 	if body == nil {
 		panic(fmt.Errorf("can`t prepare AST for '%s'", name))
 	}
+	var condition ast.Expr = &ast.BinaryExpr{
+		X:  ast.NewIdent(v),
+		Op: token.NEQ,
+		Y:  ast.NewIdent("nil"),
+	}
+	if f.isStar {
+		condition = &ast.CallExpr{
+			Fun:  ast.NewIdent("valueIsNotNull"),
+			Args: []ast.Expr{ast.NewIdent(v)},
+		}
+	}
 	return []ast.Stmt{
 		&ast.IfStmt{
 			Init: f.extract(v),
-			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(v),
-				Op: token.NEQ,
-				Y:  ast.NewIdent("nil"),
-			},
+			Cond: condition,
 			Body: body,
 			Else: els,
 		},

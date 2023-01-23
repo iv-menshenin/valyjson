@@ -146,7 +146,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.FloatFld64 = valFloatFld64
 	}
-	if refintfld := v.Get("ref_int_fld"); refintfld != nil {
+	if refintfld := v.Get("ref_int_fld"); valueIsNotNull(refintfld) {
 		var valRefIntFld int
 		valRefIntFld, err = refintfld.Int()
 		if err != nil {
@@ -154,7 +154,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefIntFld = &valRefIntFld
 	}
-	if refintfld8 := v.Get("ref_int_fld8"); refintfld8 != nil {
+	if refintfld8 := v.Get("ref_int_fld8"); valueIsNotNull(refintfld8) {
 		var valRefIntFld8 int
 		valRefIntFld8, err = refintfld8.Int()
 		if err != nil {
@@ -166,7 +166,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld8 = new(int8)
 		*s.RefIntFld8 = int8(valRefIntFld8)
 	}
-	if refintfld16 := v.Get("ref_int_fld16"); refintfld16 != nil {
+	if refintfld16 := v.Get("ref_int_fld16"); valueIsNotNull(refintfld16) {
 		var valRefIntFld16 int
 		valRefIntFld16, err = refintfld16.Int()
 		if err != nil {
@@ -178,7 +178,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld16 = new(int16)
 		*s.RefIntFld16 = int16(valRefIntFld16)
 	}
-	if refintfld32 := v.Get("ref_int_fld32"); refintfld32 != nil {
+	if refintfld32 := v.Get("ref_int_fld32"); valueIsNotNull(refintfld32) {
 		var valRefIntFld32 int
 		valRefIntFld32, err = refintfld32.Int()
 		if err != nil {
@@ -190,7 +190,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld32 = new(int32)
 		*s.RefIntFld32 = int32(valRefIntFld32)
 	}
-	if refintfld64 := v.Get("ref_int_fld64"); refintfld64 != nil {
+	if refintfld64 := v.Get("ref_int_fld64"); valueIsNotNull(refintfld64) {
 		var valRefIntFld64 int64
 		valRefIntFld64, err = refintfld64.Int64()
 		if err != nil {
@@ -198,7 +198,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefIntFld64 = &valRefIntFld64
 	}
-	if refuintfld := v.Get("ref_Uint_fld"); refuintfld != nil {
+	if refuintfld := v.Get("ref_Uint_fld"); valueIsNotNull(refuintfld) {
 		var valRefUintFld uint
 		valRefUintFld, err = refuintfld.Uint()
 		if err != nil {
@@ -207,7 +207,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld = new(uint)
 		*s.RefUintFld = uint(valRefUintFld)
 	}
-	if refuintfld8 := v.Get("ref_Uint_fld8"); refuintfld8 != nil {
+	if refuintfld8 := v.Get("ref_Uint_fld8"); valueIsNotNull(refuintfld8) {
 		var valRefUintFld8 uint
 		valRefUintFld8, err = refuintfld8.Uint()
 		if err != nil {
@@ -219,7 +219,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld8 = new(uint8)
 		*s.RefUintFld8 = uint8(valRefUintFld8)
 	}
-	if refuintfld16 := v.Get("ref_Uint_fld16"); refuintfld16 != nil {
+	if refuintfld16 := v.Get("ref_Uint_fld16"); valueIsNotNull(refuintfld16) {
 		var valRefUintFld16 uint
 		valRefUintFld16, err = refuintfld16.Uint()
 		if err != nil {
@@ -231,7 +231,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld16 = new(uint16)
 		*s.RefUintFld16 = uint16(valRefUintFld16)
 	}
-	if refuintfld32 := v.Get("ref_Uint_fld32"); refuintfld32 != nil {
+	if refuintfld32 := v.Get("ref_Uint_fld32"); valueIsNotNull(refuintfld32) {
 		var valRefUintFld32 uint
 		valRefUintFld32, err = refuintfld32.Uint()
 		if err != nil {
@@ -243,7 +243,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld32 = new(uint32)
 		*s.RefUintFld32 = uint32(valRefUintFld32)
 	}
-	if refuintfld64 := v.Get("ref_Uint_fld64"); refuintfld64 != nil {
+	if refuintfld64 := v.Get("ref_Uint_fld64"); valueIsNotNull(refuintfld64) {
 		var valRefUintFld64 uint64
 		valRefUintFld64, err = refuintfld64.Uint64()
 		if err != nil {
@@ -252,7 +252,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld64 = new(uint64)
 		*s.RefUintFld64 = uint64(valRefUintFld64)
 	}
-	if reffloatfld32 := v.Get("ref_fl23"); reffloatfld32 != nil {
+	if reffloatfld32 := v.Get("ref_fl23"); valueIsNotNull(reffloatfld32) {
 		var valRefFloatFld32 float64
 		valRefFloatFld32, err = reffloatfld32.Float64()
 		if err != nil {
@@ -264,7 +264,7 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefFloatFld32 = new(float32)
 		*s.RefFloatFld32 = float32(valRefFloatFld32)
 	}
-	if reffloatfld64 := v.Get("ref_fl64"); reffloatfld64 != nil {
+	if reffloatfld64 := v.Get("ref_fl64"); valueIsNotNull(reffloatfld64) {
 		var valRefFloatFld64 float64
 		valRefFloatFld64, err = reffloatfld64.Float64()
 		if err != nil {
@@ -596,7 +596,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.FloatFld64 = valFloatFld64
 	}
-	if refintfld := v.Get("ref_int_fld"); refintfld != nil {
+	if refintfld := v.Get("ref_int_fld"); valueIsNotNull(refintfld) {
 		var valRefIntFld int
 		valRefIntFld, err = refintfld.Int()
 		if err != nil {
@@ -604,7 +604,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefIntFld = &valRefIntFld
 	}
-	if refintfld8 := v.Get("ref_int_fld8"); refintfld8 != nil {
+	if refintfld8 := v.Get("ref_int_fld8"); valueIsNotNull(refintfld8) {
 		var valRefIntFld8 int
 		valRefIntFld8, err = refintfld8.Int()
 		if err != nil {
@@ -616,7 +616,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld8 = new(int8)
 		*s.RefIntFld8 = int8(valRefIntFld8)
 	}
-	if refintfld16 := v.Get("ref_int_fld16"); refintfld16 != nil {
+	if refintfld16 := v.Get("ref_int_fld16"); valueIsNotNull(refintfld16) {
 		var valRefIntFld16 int
 		valRefIntFld16, err = refintfld16.Int()
 		if err != nil {
@@ -628,7 +628,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld16 = new(int16)
 		*s.RefIntFld16 = int16(valRefIntFld16)
 	}
-	if refintfld32 := v.Get("ref_int_fld32"); refintfld32 != nil {
+	if refintfld32 := v.Get("ref_int_fld32"); valueIsNotNull(refintfld32) {
 		var valRefIntFld32 int
 		valRefIntFld32, err = refintfld32.Int()
 		if err != nil {
@@ -640,7 +640,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld32 = new(int32)
 		*s.RefIntFld32 = int32(valRefIntFld32)
 	}
-	if refintfld64 := v.Get("ref_int_fld64"); refintfld64 != nil {
+	if refintfld64 := v.Get("ref_int_fld64"); valueIsNotNull(refintfld64) {
 		var valRefIntFld64 int64
 		valRefIntFld64, err = refintfld64.Int64()
 		if err != nil {
@@ -648,7 +648,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefIntFld64 = &valRefIntFld64
 	}
-	if refuintfld := v.Get("ref_Uint_fld"); refuintfld != nil {
+	if refuintfld := v.Get("ref_Uint_fld"); valueIsNotNull(refuintfld) {
 		var valRefUintFld uint
 		valRefUintFld, err = refuintfld.Uint()
 		if err != nil {
@@ -657,7 +657,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld = new(uint)
 		*s.RefUintFld = uint(valRefUintFld)
 	}
-	if refuintfld8 := v.Get("ref_Uint_fld8"); refuintfld8 != nil {
+	if refuintfld8 := v.Get("ref_Uint_fld8"); valueIsNotNull(refuintfld8) {
 		var valRefUintFld8 uint
 		valRefUintFld8, err = refuintfld8.Uint()
 		if err != nil {
@@ -669,7 +669,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld8 = new(uint8)
 		*s.RefUintFld8 = uint8(valRefUintFld8)
 	}
-	if refuintfld16 := v.Get("ref_Uint_fld16"); refuintfld16 != nil {
+	if refuintfld16 := v.Get("ref_Uint_fld16"); valueIsNotNull(refuintfld16) {
 		var valRefUintFld16 uint
 		valRefUintFld16, err = refuintfld16.Uint()
 		if err != nil {
@@ -681,7 +681,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld16 = new(uint16)
 		*s.RefUintFld16 = uint16(valRefUintFld16)
 	}
-	if refuintfld32 := v.Get("ref_Uint_fld32"); refuintfld32 != nil {
+	if refuintfld32 := v.Get("ref_Uint_fld32"); valueIsNotNull(refuintfld32) {
 		var valRefUintFld32 uint
 		valRefUintFld32, err = refuintfld32.Uint()
 		if err != nil {
@@ -693,7 +693,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld32 = new(uint32)
 		*s.RefUintFld32 = uint32(valRefUintFld32)
 	}
-	if refuintfld64 := v.Get("ref_Uint_fld64"); refuintfld64 != nil {
+	if refuintfld64 := v.Get("ref_Uint_fld64"); valueIsNotNull(refuintfld64) {
 		var valRefUintFld64 uint64
 		valRefUintFld64, err = refuintfld64.Uint64()
 		if err != nil {
@@ -702,7 +702,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefUintFld64 = new(uint64)
 		*s.RefUintFld64 = uint64(valRefUintFld64)
 	}
-	if reffloatfld32 := v.Get("ref_fl23"); reffloatfld32 != nil {
+	if reffloatfld32 := v.Get("ref_fl23"); valueIsNotNull(reffloatfld32) {
 		var valRefFloatFld32 float64
 		valRefFloatFld32, err = reffloatfld32.Float64()
 		if err != nil {
@@ -714,7 +714,7 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefFloatFld32 = new(float32)
 		*s.RefFloatFld32 = float32(valRefFloatFld32)
 	}
-	if reffloatfld64 := v.Get("ref_fl64"); reffloatfld64 != nil {
+	if reffloatfld64 := v.Get("ref_fl64"); valueIsNotNull(reffloatfld64) {
 		var valRefFloatFld64 float64
 		valRefFloatFld64, err = reffloatfld64.Float64()
 		if err != nil {

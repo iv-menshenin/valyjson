@@ -48,6 +48,19 @@ func TestNumStruct01(t *testing.T) {
 		require.NotNil(t, *num.RefUintFld8)
 		require.Equal(t, *num.RefUintFld8, uint8(45))
 	})
+	t.Run("null_filled_part", func(t *testing.T) {
+		var num NumStruct01
+		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld32": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
+		require.NoError(t, err)
+		require.Nil(t, num.RefIntFld8)
+		require.Nil(t, num.RefUintFld8)
+		require.Nil(t, num.RefIntFld16)
+		require.Nil(t, num.RefUintFld16)
+		require.Nil(t, num.RefIntFld32)
+		require.Nil(t, num.RefUintFld32)
+		require.Nil(t, num.RefIntFld64)
+		require.Nil(t, num.RefUintFld64)
+	})
 	t.Run("overflow-int8", func(t *testing.T) {
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld8": 98765}`))
@@ -193,6 +206,19 @@ func TestNumStruct02(t *testing.T) {
 		require.Equal(t, *num.RefIntFld8, int8(33))
 		require.NotNil(t, *num.RefUintFld8)
 		require.Equal(t, *num.RefUintFld8, uint8(45))
+	})
+	t.Run("null_filled_part", func(t *testing.T) {
+		var num NumStruct02
+		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld32": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
+		require.NoError(t, err)
+		require.Nil(t, num.RefIntFld8)
+		require.Nil(t, num.RefUintFld8)
+		require.Nil(t, num.RefIntFld16)
+		require.Nil(t, num.RefUintFld16)
+		require.Nil(t, num.RefIntFld32)
+		require.Nil(t, num.RefUintFld32)
+		require.Nil(t, num.RefIntFld64)
+		require.Nil(t, num.RefUintFld64)
 	})
 	t.Run("overflow-int8", func(t *testing.T) {
 		var num NumStruct02

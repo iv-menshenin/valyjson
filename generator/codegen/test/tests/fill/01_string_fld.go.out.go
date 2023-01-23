@@ -35,7 +35,7 @@ func (s *TestStr01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		}
 		s.Field = string(valField)
 	}
-	if fieldref := v.Get("fieldRef"); fieldref != nil {
+	if fieldref := v.Get("fieldRef"); valueIsNotNull(fieldref) {
 		var valFieldRef []byte
 		if valFieldRef, err = fieldref.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfieldRef' value: %w", objPath, err)
@@ -103,7 +103,7 @@ func (s *TestStr02) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		}
 		s.Field = string(valField)
 	}
-	if fieldref := v.Get("fieldRef"); fieldref != nil {
+	if fieldref := v.Get("fieldRef"); valueIsNotNull(fieldref) {
 		var valFieldRef []byte
 		if valFieldRef, err = fieldref.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfieldRef' value: %w", objPath, err)

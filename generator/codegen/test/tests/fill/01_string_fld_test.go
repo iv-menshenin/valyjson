@@ -36,10 +36,11 @@ func TestTestStr01(t *testing.T) {
 		require.Equal(t, "test_field_filled", test1.Field)
 		require.Nil(t, test1.FieldRef)
 	})
-	t.Run("wrong-type-for-ref-field", func(t *testing.T) {
+	t.Run("null-for-ref-field", func(t *testing.T) {
 		var test1 TestStr01
-		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": nil}`))
-		require.Error(t, err)
+		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": null}`))
+		require.NoError(t, err)
+		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("wrong-type-for-field", func(t *testing.T) {
 		var test1 TestStr01
@@ -62,7 +63,7 @@ func TestTestStr02(t *testing.T) {
 		require.Empty(t, test1.Field)
 		require.Nil(t, test1.FieldRef)
 	})
-	t.Run("nil-ref-omitted", func(t *testing.T) {
+	t.Run("field-omitted", func(t *testing.T) {
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled"}`))
 		require.NoError(t, err)
@@ -77,10 +78,11 @@ func TestTestStr02(t *testing.T) {
 		require.NotNil(t, test1.FieldRef)
 		require.Equal(t, "test_fieldRef", *test1.FieldRef)
 	})
-	t.Run("wrong-type-for-ref-field", func(t *testing.T) {
+	t.Run("null-for-ref-field", func(t *testing.T) {
 		var test1 TestStr02
-		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": nil}`))
-		require.Error(t, err)
+		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": null}`))
+		require.NoError(t, err)
+		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("wrong-type-for-field", func(t *testing.T) {
 		var test1 TestStr02
