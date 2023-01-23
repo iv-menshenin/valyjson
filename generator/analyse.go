@@ -86,6 +86,8 @@ func (v *visitor) Visit(node ast.Node) (w ast.Visitor) {
 	return v
 }
 
+var jsonTag = "json:"
+
 func extractTags(comment *ast.CommentGroup) []string {
 	if comment == nil {
 		return nil
@@ -95,8 +97,8 @@ func extractTags(comment *ast.CommentGroup) []string {
 		if text == nil {
 			continue
 		}
-		if commentLine := strings.TrimLeft(text.Text, "/ \t"); strings.HasPrefix(commentLine, "valyjson:") {
-			splitPostfix := strings.Split(commentLine[9:], ",")
+		if commentLine := strings.TrimLeft(text.Text, "/ \t"); strings.HasPrefix(commentLine, jsonTag) {
+			splitPostfix := strings.Split(commentLine[len(jsonTag):], ",")
 			for _, tagRaw := range splitPostfix {
 				if tag := strings.ToLower(strings.TrimSpace(tagRaw)); tag != "" {
 					tags = append(tags, tag)

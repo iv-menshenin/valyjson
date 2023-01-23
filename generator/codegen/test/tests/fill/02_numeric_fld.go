@@ -1,6 +1,6 @@
 package testo
 
-//valyjson:optional
+//json:optional
 type NumStruct01 struct {
 	IntFld        int      `json:"int_fld"`
 	IntFld8       int8     `json:"int_fld8"`
@@ -28,7 +28,7 @@ type NumStruct01 struct {
 	RefFloatFld64 *float64 `json:"ref_fl64"`
 }
 
-//valyjson:strict
+//json:strict
 type NumStruct02 struct {
 	IntFld        int      `json:"int_fld"`
 	IntFld8       int8     `json:"int_fld8"`

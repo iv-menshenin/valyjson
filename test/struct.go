@@ -3,7 +3,7 @@ package test
 import "time"
 
 // Struct contains all fields for struct
-//  valyjson:encode,decode,strict
+//  json:encode,decode,strict
 type Struct struct {
 	Filter string `json:"filter,required"`
 	Limit  int    `json:"limit,omitempty"`
@@ -12,14 +12,14 @@ type Struct struct {
 	Nested Nested `json:"nested"`
 }
 
-//  valyjson:encode,decode,strict
+//  json:encode,decode,strict
 type Nested struct {
 	List  []int32 `json:"list-i"`
 	Count *int64  `json:"count"`
 	Cross *int64  `json:"cross"`
 }
 
-//  valyjson:encode,decode
+//  json:encode,decode
 type Person struct {
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
@@ -35,7 +35,7 @@ type Person struct {
 	Bio *Bio `json:"bio,omitempty"`
 }
 
-//  valyjson:encode,decode,strict
+//  json:encode,decode,strict
 type Bio struct {
 	Description *string    `json:"description,omitempty"`
 	Changed     *time.Time `json:"changed,omitempty"`
