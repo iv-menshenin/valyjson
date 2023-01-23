@@ -12,7 +12,7 @@ type (
 		imports map[string]Package
 	}
 	Package struct {
-		Name string
+		Path string
 		Kind PkgKind
 	}
 	PkgKind int8
@@ -26,22 +26,22 @@ const (
 
 var (
 	knownPackages = map[string]Package{
-		"bytes":    {Name: "bytes", Kind: PkgKindSystem},
-		"context":  {Name: "context", Kind: PkgKindSystem},
-		"errors":   {Name: "errors", Kind: PkgKindSystem},
-		"http":     {Name: "net/http", Kind: PkgKindSystem},
-		"json":     {Name: "encoding/json", Kind: PkgKindSystem},
-		"reflect":  {Name: "reflect", Kind: PkgKindSystem},
-		"time":     {Name: "time", Kind: PkgKindSystem},
-		"fmt":      {Name: "fmt", Kind: PkgKindSystem},
-		"strconv":  {Name: "strconv", Kind: PkgKindSystem},
-		"net":      {Name: "net", Kind: PkgKindSystem},
-		"math":     {Name: "math", Kind: PkgKindSystem},
-		"url":      {Name: "net/url", Kind: PkgKindSystem},
-		"fasthttp": {Name: "github.com/valyala/fasthttp", Kind: PkgKindExternal},
-		"fastjson": {Name: "github.com/valyala/fastjson", Kind: PkgKindExternal},
-		"router":   {Name: "github.com/fasthttp/router", Kind: PkgKindExternal},
-		"uuid":     {Name: "github.com/google/uuid", Kind: PkgKindExternal},
+		"bytes":    {Path: "bytes", Kind: PkgKindSystem},
+		"context":  {Path: "context", Kind: PkgKindSystem},
+		"errors":   {Path: "errors", Kind: PkgKindSystem},
+		"http":     {Path: "net/http", Kind: PkgKindSystem},
+		"json":     {Path: "encoding/json", Kind: PkgKindSystem},
+		"reflect":  {Path: "reflect", Kind: PkgKindSystem},
+		"time":     {Path: "time", Kind: PkgKindSystem},
+		"fmt":      {Path: "fmt", Kind: PkgKindSystem},
+		"strconv":  {Path: "strconv", Kind: PkgKindSystem},
+		"net":      {Path: "net", Kind: PkgKindSystem},
+		"math":     {Path: "math", Kind: PkgKindSystem},
+		"url":      {Path: "net/url", Kind: PkgKindSystem},
+		"fasthttp": {Path: "github.com/valyala/fasthttp", Kind: PkgKindExternal},
+		"fastjson": {Path: "github.com/valyala/fastjson", Kind: PkgKindExternal},
+		"router":   {Path: "github.com/fasthttp/router", Kind: PkgKindExternal},
+		"uuid":     {Path: "github.com/google/uuid", Kind: PkgKindExternal},
 	}
 )
 
@@ -70,7 +70,7 @@ func (i *Discoverer) Visit(node ast.Node) (w ast.Visitor) {
 	}
 	pack, ok := knownPackages[x.String()]
 	if ok {
-		i.imports[pack.Name] = pack
+		i.imports[pack.Path] = pack
 	}
 	return i
 }
@@ -80,11 +80,11 @@ func (i *Discoverer) Spec() []ast.Spec {
 	for _, pkg := range i.imports {
 		imports = append(imports, pkg)
 	}
-	sort.SliceStable(imports, func(i, j int) bool {
+	sort.Slice(imports, func(i, j int) bool {
 		if imports[i].Kind < imports[j].Kind {
 			return true
 		}
-		return imports[i].Name < imports[j].Name
+		return imports[i].Path < imports[j].Path
 	})
 
 	var (
@@ -99,7 +99,7 @@ func (i *Discoverer) Spec() []ast.Spec {
 		}
 		specs = append(specs, &ast.ImportSpec{Path: &ast.BasicLit{
 			Kind:  token.STRING,
-			Value: fmt.Sprintf("%s\"%s\"", addLine, imp.Name),
+			Value: fmt.Sprintf("%s\"%s\"", addLine, imp.Path),
 		}})
 	}
 	return specs
