@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/iv-menshenin/valyjson/generator/codegen/impcovery"
+	"github.com/iv-menshenin/go-ast/explorer"
 	"github.com/iv-menshenin/valyjson/generator/static"
 )
 
@@ -34,13 +34,13 @@ func (g *Gen) Parse() (err error) {
 
 func (g *Gen) FixImports() {
 	// discovery used imports and build their declaration
-	discovery := impcovery.New()
+	discovery := explorer.New()
 	discovery.Explore(&g.result)
 	var decls = make([]ast.Decl, 0, len(g.result.Decls)+1)
 
 	decls = append(decls, &ast.GenDecl{
 		Tok:   token.IMPORT,
-		Specs: discovery.Spec(),
+		Specs: discovery.ImportSpec(),
 	})
 	decls = append(decls, g.result.Decls...)
 	g.result.Decls = decls

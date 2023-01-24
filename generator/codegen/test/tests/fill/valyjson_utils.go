@@ -3,6 +3,7 @@ package testo
 
 import (
 	"bytes"
+	"fmt"
 	"time"
 
 	"github.com/valyala/fastjson"
@@ -43,4 +44,34 @@ func marshalTime(t time.Time, layout string, b []byte) []byte {
 
 func valueIsNotNull(v *fastjson.Value) bool {
 	return v != nil && v.Type() != fastjson.TypeNull
+}
+
+func parseDateTime(s string) (time.Time, error) {
+	knownFormats := []string{
+		time.RFC3339,
+		time.RFC3339Nano,
+		"2006-01-02 15:04:05Z07:00",
+		"02.01.2006 15:04:05Z07:00",
+	}
+	for _, format := range knownFormats {
+		if value, err := time.Parse(format, s); err == nil {
+			return value, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("can't parse date-time from string '%s'", s)
+}
+
+func parseDate(s string) (time.Time, error) {
+	knownFormats := []string{
+		time.RFC3339,
+		time.RFC3339Nano,
+		"2006-01-02",
+		"02.01.2006",
+	}
+	for _, format := range knownFormats {
+		if value, err := time.Parse(format, s); err == nil {
+			return value.Truncate(24 * time.Hour), nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("can't parse date from string '%s'", s)
 }

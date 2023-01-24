@@ -18,9 +18,16 @@ func (t Tags) JsonName() string {
 	return ""
 }
 
+func (t Tags) JsonAppendix() string {
+	if v := t["json"]; len(v) > 1 {
+		return v[1]
+	}
+	return ""
+}
+
 func (t Tags) JsonTags() StructTags {
 	if v := t["json"]; len(v) > 0 {
-		return StructTags(v)
+		return v
 	}
 	return nil
 }
@@ -42,6 +49,7 @@ func (t Tags) Layout() string {
 func Parse(tag string) Tags {
 	var result = make(map[string][]string)
 	result["json"] = strings.Split(StructTag(tag).Get("json"), ",")
+	result["layout"] = strings.Split(StructTag(tag).Get("layout"), ",")
 	result["default"] = strings.Split(StructTag(tag).Get("default"), ",")
 	return result
 }

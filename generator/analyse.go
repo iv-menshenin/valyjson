@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 	"go/ast"
 	"strings"
 
@@ -20,42 +21,34 @@ type (
 func (g *Gen) BuildFillers() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
-	for _, structDecl := range v.decls {
-		switch strc := structDecl.spec.Type.(type) {
-
-		case *ast.StructType:
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewUnmarshalFunc(structDecl.spec.Name.Name, structDecl.tags)...,
-			)
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewFillerFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
-			)
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewValidatorFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
-			)
-		}
+	for _, structDecl := range v.getNormalized() {
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
+		)
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+		)
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+		)
 	}
 }
 
 func (g *Gen) BuildJsoners() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
-	for _, structDecl := range v.decls {
-		switch strc := structDecl.spec.Type.(type) {
-
-		case *ast.StructType:
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewMarshalFunc(structDecl.spec.Name.Name, structDecl.tags),
-			)
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewAppendJsonFunc(structDecl.spec.Name.Name, strc.Fields.List, structDecl.tags),
-			)
-		}
+	for _, structDecl := range v.getNormalized() {
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewMarshalFunc(structDecl.name, structDecl.tags),
+		)
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewAppendJsonFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+		)
 	}
 }
 
@@ -107,4 +100,66 @@ func extractTags(comment *ast.CommentGroup) []string {
 		}
 	}
 	return tags
+}
+
+func (v *visitor) getNormalized() []taggedStruct {
+	var result []taggedStruct
+	for _, decl := range v.decls {
+		s := v.structFromDecl(decl)
+		if s == nil {
+			continue
+		}
+		result = append(result, *s)
+	}
+	return result
+}
+
+func (v *visitor) getDeclByName(name string) *taggedDecl {
+	for i, decl := range v.decls {
+		if decl.spec.Name.Name == name {
+			return &v.decls[i]
+		}
+	}
+	return nil
+}
+
+func (v *visitor) structFromDecl(decl taggedDecl) *taggedStruct {
+	stct, ok := decl.spec.Type.(*ast.StructType)
+	if !ok {
+		return nil
+	}
+	return &taggedStruct{
+		tags: decl.tags,
+		name: decl.spec.Name.Name,
+		spec: &ast.StructType{
+			Fields: &ast.FieldList{List: v.collectFields(stct.Fields.List)},
+		},
+	}
+}
+
+func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
+	var flds = make([]*ast.Field, 0, len(src))
+	for _, fld := range src {
+		tag := tags.Parse(fld.Tag.Value)
+		if tag.JsonAppendix() == "inline" {
+			inlined := v.getDeclByName(fld.Type.(*ast.Ident).Name)
+			if inlined == nil {
+				panic("can't resolve inlined field by name")
+			}
+			inlStruct := v.structFromDecl(*inlined)
+			if inlStruct == nil {
+				panic("can't inline")
+			}
+			flds = append(flds, v.collectFields(inlStruct.spec.Fields.List)...)
+			continue
+		}
+		flds = append(flds, fld)
+	}
+	return flds
+}
+
+type taggedStruct struct {
+	tags []string
+	name string
+	spec *ast.StructType
 }

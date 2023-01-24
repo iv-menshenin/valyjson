@@ -71,7 +71,7 @@ func denotedType(t *ast.Ident) ast.Expr {
 //	    return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *fld) fillFrom(name, v string) []ast.Stmt {
-	var bufVariable = ast.NewIdent("val" + name)
+	var bufVariable = makeBufVariable(name)
 	var result []ast.Stmt
 	result = append(result, f.typedValue(bufVariable, v)...)
 	result = append(result, f.checkErr(bufVariable)...)
@@ -83,6 +83,10 @@ func (f *fld) fillFrom(name, v string) []ast.Stmt {
 		result = append(result, f.fillField(bufVariable, fldExpr, v)...)
 	}
 	return result
+}
+
+func makeBufVariable(name string) *ast.Ident {
+	return ast.NewIdent("val" + name)
 }
 
 // var elem int
@@ -166,7 +170,7 @@ func (f *fld) typedValue(dst *ast.Ident, v string) []ast.Stmt {
 		switch t.Sel.Name {
 
 		case "Time":
-			result = append(result, timeExtraction(dst, v, f.tags.Layout())...)
+			result = append(result, timeExtraction(dst, v, f.tags.JsonName(), f.tags.Layout())...)
 
 		case "UUID":
 			result = append(result, uuidExtraction(dst, f.refx, v, f.tags.JsonName())...)
