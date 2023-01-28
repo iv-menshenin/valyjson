@@ -25,6 +25,9 @@ type (
 
 func (g *Gen) Parse() (err error) {
 	g.parsed, err = parseGo(g.fileName)
+	if err != nil {
+		return err
+	}
 	g.packageN = g.parsed.(*ast.File).Name.Name
 	if err == nil {
 		g.result.Name = g.parsed.(*ast.File).Name

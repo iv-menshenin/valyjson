@@ -23,6 +23,8 @@ type (
 		isStar bool
 		// isNullable is type nullable
 		isNullable bool
+		// dontCheckErr do not check error and not to return
+		dontCheckErr bool
 	}
 )
 

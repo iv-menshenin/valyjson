@@ -27,7 +27,7 @@ func (s *TestInh01) UnmarshalJSON(data []byte) error {
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestInh01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if testinh02 := v.Get("injected"); testinh02 != nil {
@@ -102,50 +102,46 @@ func (s *TestInh01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
 }
@@ -168,7 +164,7 @@ func (s *TestInh02) UnmarshalJSON(data []byte) error {
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestInh02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if _int32 := v.Get("int_32"); _int32 != nil {
@@ -199,15 +195,11 @@ func (s *TestInh02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
 }
@@ -230,7 +222,7 @@ func (s *TestInh03) UnmarshalJSON(data []byte) error {
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestInh03) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if _int16 := v.Get("int_16"); _int16 != nil {
@@ -269,22 +261,18 @@ func (s *TestInh03) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
 }
@@ -307,7 +295,7 @@ func (s *TestInh04) UnmarshalJSON(data []byte) error {
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *TestInh04) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if foobar := v.Get("foo-bar"); foobar != nil {
@@ -338,15 +326,11 @@ func (s *TestInh04) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'o', 'o', '-', 'b', 'a', 'r'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
 }

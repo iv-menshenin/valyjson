@@ -26,7 +26,7 @@ func (s *NumStruct01) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if intfld := v.Get("int_fld"); intfld != nil {
@@ -289,168 +289,168 @@ func (s *NumStruct01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[6]++
 			if checkFields[6] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[7]++
 			if checkFields[7] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[8]++
 			if checkFields[8] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[9]++
 			if checkFields[9] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'l', '2', '3'}) {
 			checkFields[10]++
 			if checkFields[10] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'l', '6', '4'}) {
 			checkFields[11]++
 			if checkFields[11] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[12]++
 			if checkFields[12] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[13]++
 			if checkFields[13] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[14]++
 			if checkFields[14] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[15]++
 			if checkFields[15] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[16]++
 			if checkFields[16] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[17]++
 			if checkFields[17] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[18]++
 			if checkFields[18] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[19]++
 			if checkFields[19] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[20]++
 			if checkFields[20] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[21]++
 			if checkFields[21] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'f', 'l', '2', '3'}) {
 			checkFields[22]++
 			if checkFields[22] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'f', 'l', '6', '4'}) {
 			checkFields[23]++
 			if checkFields[23] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
@@ -476,7 +476,7 @@ func (s *NumStruct02) UnmarshalJSON(data []byte) error {
 // FillFromJson recursively fills the fields with fastjson.Value
 func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
-	if err = s.validate(v, ""); err != nil {
+	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if intfld := v.Get("int_fld"); intfld != nil {
@@ -739,176 +739,172 @@ func (s *NumStruct02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[6]++
 			if checkFields[6] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[7]++
 			if checkFields[7] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[8]++
 			if checkFields[8] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[9]++
 			if checkFields[9] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'l', '2', '3'}) {
 			checkFields[10]++
 			if checkFields[10] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'l', '6', '4'}) {
 			checkFields[11]++
 			if checkFields[11] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[12]++
 			if checkFields[12] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[13]++
 			if checkFields[13] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[14]++
 			if checkFields[14] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[15]++
 			if checkFields[15] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[16]++
 			if checkFields[16] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd'}) {
 			checkFields[17]++
 			if checkFields[17] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '8'}) {
 			checkFields[18]++
 			if checkFields[18] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '1', '6'}) {
 			checkFields[19]++
 			if checkFields[19] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '3', '2'}) {
 			checkFields[20]++
 			if checkFields[20] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'U', 'i', 'n', 't', '_', 'f', 'l', 'd', '6', '4'}) {
 			checkFields[21]++
 			if checkFields[21] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'f', 'l', '2', '3'}) {
 			checkFields[22]++
 			if checkFields[22] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', '_', 'f', 'l', '6', '4'}) {
 			checkFields[23]++
 			if checkFields[23] > 1 {
-				err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if objPath == "" {
-			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-		} else {
-			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
 }

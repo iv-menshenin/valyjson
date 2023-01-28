@@ -56,25 +56,21 @@ func (v *visitor) Visit(node ast.Node) (w ast.Visitor) {
 	switch currNode := node.(type) {
 
 	case *ast.GenDecl:
-		if tags := extractTags(currNode.Doc); len(tags) > 0 {
-			for _, declSpec := range currNode.Specs {
-				switch spec := declSpec.(type) {
-				case *ast.TypeSpec:
-					v.decls = append(v.decls, taggedDecl{
-						spec: spec,
-						tags: tags,
-					})
-				}
+		for _, declSpec := range currNode.Specs {
+			switch spec := declSpec.(type) {
+			case *ast.TypeSpec:
+				v.decls = append(v.decls, taggedDecl{
+					spec: spec,
+					tags: extractTags(currNode.Doc),
+				})
 			}
 		}
 
 	case *ast.TypeSpec:
-		if tags := extractTags(currNode.Doc); len(tags) > 0 {
-			v.decls = append(v.decls, taggedDecl{
-				spec: currNode,
-				tags: tags,
-			})
-		}
+		v.decls = append(v.decls, taggedDecl{
+			spec: currNode,
+			tags: extractTags(currNode.Doc),
+		})
 	}
 	return v
 }
@@ -105,6 +101,10 @@ func extractTags(comment *ast.CommentGroup) []string {
 func (v *visitor) getNormalized() []taggedStruct {
 	var result []taggedStruct
 	for _, decl := range v.decls {
+		if len(decl.tags) == 0 {
+			// only tagged structures
+			continue
+		}
 		s := v.structFromDecl(decl)
 		if s == nil {
 			continue

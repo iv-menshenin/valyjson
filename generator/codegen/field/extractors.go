@@ -100,6 +100,19 @@ func stringExtraction(dst *ast.Ident, v, jsonFieldName string) []ast.Stmt {
 	).List
 }
 
+func stringExtractionWithoutErrChecking(dst *ast.Ident, v, jsonFieldName string) []ast.Stmt {
+	return asthlp.Block(
+		// var valField []byte
+		asthlp.Var(asthlp.VariableType(dst.Name, asthlp.ArrayType(asthlp.Byte))),
+		// valField, err = field.StringBytes()
+		asthlp.Assign(
+			asthlp.MakeVarNames(dst.Name, names.VarNameError),
+			asthlp.Assignment,
+			asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(v, "StringBytes"))),
+		),
+	).List
+}
+
 // intExtraction makes a block of code that extracts an integer from json element into int variable
 //   var {dst} int
 //   {dst}, err = {v}.Int()

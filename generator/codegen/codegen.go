@@ -33,7 +33,7 @@ func NewFillerFunc(structName string, fields []*ast.Field, structTags tags.Struc
 		asthlp.MakeCallReturnIfError(nil, asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameValidate)),
 			asthlp.NewIdent(names.VarNameJsonValue),
-			asthlp.EmptyString,
+			asthlp.NewIdent(names.VarNameObjPath),
 		)),
 	)
 	for _, f := range fields {
@@ -150,42 +150,26 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 					// err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
 					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 						asthlp.FmtErrorfFn,
-						asthlp.StringConstant("the '%s' field appears in the object twice [%s]").Expr(),
-						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
+						asthlp.StringConstant("the '%s%s' field appears in the object twice").Expr(),
 						ast.NewIdent(names.VarNameObjPath),
+						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
 					)),
 				),
 				asthlp.ReturnEmpty(),
 			),
 		)
 	}
-	//		if objPath == "" {
-	//			err = fmt.Errorf("unexpected field '%s' in the root of the object", string(key))
-	//		} else {
-	//			err = fmt.Errorf("unexpected field '%s' in the '%s' path", string(key), objPath)
-	//		}
+	//	err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	if structTags.StrictRules() {
 		// If there were unregistered data fields in the JSON object, execution will surely get to that point.
 		// With strict rules it is necessary to register an error
 		visitFunc.AppendStmt(
-			asthlp.IfElse(
-				asthlp.Equal(ast.NewIdent(names.VarNameObjPath), asthlp.EmptyString),
-				asthlp.Block(
-					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
-						asthlp.FmtErrorfFn,
-						asthlp.StringConstant("unexpected field '%s' in the root of the object").Expr(),
-						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
-					)),
-				),
-				asthlp.Block(
-					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
-						asthlp.FmtErrorfFn,
-						asthlp.StringConstant("unexpected field '%s' in the '%s' path").Expr(),
-						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
-						asthlp.NewIdent(names.VarNameObjPath),
-					)),
-				),
-			),
+			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
+				asthlp.FmtErrorfFn,
+				asthlp.StringConstant("unexpected field '%s%s'").Expr(),
+				asthlp.NewIdent(names.VarNameObjPath),
+				asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
+			)),
 		)
 	}
 	fn.AppendStmt(

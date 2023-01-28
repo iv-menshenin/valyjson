@@ -43,6 +43,7 @@ func Test_fld_FillStatements(t *testing.T) {
 		t.Error("there is no tests")
 	}
 }
+
 func caseTestFillStatements(t *testing.T, testFile string) {
 	g := generator.New(testFile)
 	if err := g.Parse(); err != nil {
@@ -51,4 +52,8 @@ func caseTestFillStatements(t *testing.T, testFile string) {
 	g.BuildFillers()
 	g.FixImports()
 	g.Print(testFile + ".out.go")
+}
+
+func Test_GenerateVJson(t *testing.T) {
+	caseTestFillStatements(t, "./vjson/types.go")
 }
