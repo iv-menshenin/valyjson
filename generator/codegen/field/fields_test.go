@@ -14,7 +14,7 @@ func Test_fld_FillStatements(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		name  string
-		argm  fld
+		argm  Field
 		fName string
 		need  string
 	}
@@ -88,7 +88,7 @@ func Test_MarshalStatements(t *testing.T) {
 	t.Parallel()
 	type testCase struct {
 		name  string
-		argm  fld
+		argm  Field
 		fName string
 		need  string
 	}
@@ -124,7 +124,7 @@ func printAST(t *testing.T, a ast.Node) string {
 	return b.String()
 }
 
-var stringFld = fld{
+var stringFld = Field{
 	expr: ast.NewIdent("string"),
 	refx: ast.NewIdent("string"),
 	tags: map[string][]string{
@@ -143,7 +143,7 @@ const stringFiller = `{
 	}
 }`
 
-var refStringFld = fld{
+var refStringFld = Field{
 	expr: ast.NewIdent("string"),
 	refx: ast.NewIdent("string"),
 	tags: map[string][]string{
@@ -164,7 +164,7 @@ const refStringFiller = `{
 	}
 }`
 
-var subStringFld = fld{
+var subStringFld = Field{
 	expr: ast.NewIdent("SubGroup"),
 	refx: ast.NewIdent("string"),
 	tags: map[string][]string{
@@ -183,7 +183,7 @@ const subStringFiller = `{
 	}
 }`
 
-var intFld = fld{
+var intFld = Field{
 	expr: ast.NewIdent("int"),
 	refx: ast.NewIdent("int"),
 	tags: map[string][]string{
@@ -202,7 +202,7 @@ const intFiller = `{
 	}
 }`
 
-var subIntFld = fld{
+var subIntFld = Field{
 	expr: ast.NewIdent("SubInt"),
 	refx: ast.NewIdent("int64"),
 	tags: map[string][]string{
@@ -221,7 +221,7 @@ const subIntFiller = `{
 	}
 }`
 
-var uuidFld = fld{
+var uuidFld = Field{
 	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("uuid"),
 		Sel: ast.NewIdent("UUID"),
@@ -250,7 +250,7 @@ const uuidFiller = `{
 	}
 }`
 
-var timeFld = fld{
+var timeFld = Field{
 	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
@@ -274,7 +274,7 @@ const timeFiller = `{
 	}
 }`
 
-var refTimeFld = fld{
+var refTimeFld = Field{
 	expr: &ast.SelectorExpr{
 		X:   ast.NewIdent("time"),
 		Sel: ast.NewIdent("Time"),
@@ -300,7 +300,7 @@ const refTimeFiller = `{
 	}
 }`
 
-var arrayFld = fld{
+var arrayFld = Field{
 	expr: &ast.ArrayType{
 		Elt: ast.NewIdent("DatarentPixelItemsValue"),
 	},
@@ -335,7 +335,7 @@ const arrayFiller = `{
 	}
 }`
 
-var stringFldMrsh = fld{
+var stringFldMrsh = Field{
 	expr: ast.NewIdent("string"),
 	refx: ast.NewIdent("string"),
 	tags: map[string][]string{
@@ -356,7 +356,7 @@ const stringFillerMrsh = `{
 	}
 }`
 
-var omitStringFldMrsh = fld{
+var omitStringFldMrsh = Field{
 	expr: ast.NewIdent("string"),
 	refx: ast.NewIdent("string"),
 	tags: map[string][]string{

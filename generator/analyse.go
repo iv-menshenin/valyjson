@@ -140,7 +140,14 @@ func (v *visitor) structFromDecl(decl taggedDecl) *taggedStruct {
 func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 	var flds = make([]*ast.Field, 0, len(src))
 	for _, fld := range src {
-		tag := tags.Parse(fld.Tag.Value)
+		var tag tags.Tags
+		if fld.Tag != nil {
+			tag = tags.Parse(fld.Tag.Value)
+		} else {
+			if len(fld.Names) > 0 {
+				panic("all fields should have tags")
+			}
+		}
 		if tag.JsonAppendix() == "inline" {
 			inlined := v.getDeclByName(fld.Type.(*ast.Ident).Name)
 			if inlined == nil {

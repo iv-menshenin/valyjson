@@ -11,7 +11,7 @@ import (
 // result.WriteString("\"{json}\":")
 // b = strconv.AppendUint(buf[:0], uint64({src}), 10)
 // result.Write(b)
-func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
+func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var result = []ast.Stmt{
 		&ast.IfStmt{
 			// if result.Len() > 1 {
@@ -74,7 +74,7 @@ func (f *fld) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 }
 
 // result.WriteString("\"field\":\"\"")
-func (f *fld) typeMarshalDefault(src ast.Expr, v, t string) []ast.Stmt {
+func (f *Field) typeMarshalDefault(src ast.Expr, v, t string) []ast.Stmt {
 	var result []ast.Stmt
 	var args []ast.Expr
 	switch t {
@@ -142,7 +142,7 @@ func nestedMarshal(src ast.Expr) []ast.Stmt {
 // } else {
 //     result.WriteString("\"{json}\":{default}")
 // }
-func (f *fld) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
+func (f *Field) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var els ast.Stmt
 	if stmt := f.ifNil(); len(stmt) > 0 {
 		els = &ast.BlockStmt{List: stmt}
@@ -173,7 +173,7 @@ func (f *fld) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 }
 
 // result.WriteString("\"{name}\":{default}")
-func (f *fld) ifNil() []ast.Stmt {
+func (f *Field) ifNil() []ast.Stmt {
 	if f.tags.DefaultValue() == "" {
 		if f.tags.JsonTags().Has("omitempty") {
 			return nil

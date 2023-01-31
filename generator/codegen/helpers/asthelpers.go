@@ -90,36 +90,6 @@ func StringFromType(t ast.Expr, val string) string {
 	}
 }
 
-func Ordinary(t ast.Expr) bool {
-	switch i := t.(type) {
-
-	case *ast.Ident:
-		switch i.Name {
-
-		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
-			return true
-
-		case "float32", "float64":
-			return true
-
-		case "string":
-			return true
-
-		case "rune":
-			return true
-
-		case "bool":
-			return true
-
-		default:
-			return false
-		}
-
-	default:
-		return false
-	}
-}
-
 // fmt.Errorf("{format}", {attrs[0]}, {attrs[1]}, ..., {attrs[n]})
 func FmtError(format string, attrs ...ast.Expr) ast.Expr {
 	var fmtAttrs []ast.Expr

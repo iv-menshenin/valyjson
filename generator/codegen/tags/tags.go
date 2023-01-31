@@ -12,6 +12,9 @@ const (
 type Tags map[string][]string
 
 func (t Tags) JsonName() string {
+	if t == nil {
+		return ""
+	}
 	if v := t["json"]; len(v) > 0 {
 		return v[0]
 	}
@@ -19,6 +22,9 @@ func (t Tags) JsonName() string {
 }
 
 func (t Tags) JsonAppendix() string {
+	if t == nil {
+		return ""
+	}
 	if v := t["json"]; len(v) > 1 {
 		return v[1]
 	}
@@ -26,6 +32,9 @@ func (t Tags) JsonAppendix() string {
 }
 
 func (t Tags) JsonTags() StructTags {
+	if t == nil {
+		return nil
+	}
 	if v := t["json"]; len(v) > 0 {
 		return v
 	}
@@ -33,6 +42,9 @@ func (t Tags) JsonTags() StructTags {
 }
 
 func (t Tags) DefaultValue() string {
+	if t == nil {
+		return ""
+	}
 	if v := t["default"]; len(v) > 0 {
 		return v[0]
 	}
@@ -40,6 +52,9 @@ func (t Tags) DefaultValue() string {
 }
 
 func (t Tags) Layout() string {
+	if t == nil {
+		return ""
+	}
 	if v := t["layout"]; len(v) > 0 {
 		return v[0]
 	}

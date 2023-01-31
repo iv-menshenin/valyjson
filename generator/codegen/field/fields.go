@@ -2,6 +2,7 @@ package field
 
 import (
 	"fmt"
+	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -11,8 +12,8 @@ import (
 )
 
 type (
-	// fld render helper for ast.Field
-	fld struct {
+	// Field render helper for ast.Field
+	Field struct {
 		// expr represents field type expression
 		expr ast.Expr
 		// refx represents field type denoted value
@@ -28,13 +29,15 @@ type (
 	}
 )
 
-func New(f *ast.Field) *fld {
-	if f.Tag == nil {
+func New(f *ast.Field) *Field {
+	if f.Tag == nil && len(f.Names) > 0 {
 		panic("you must fill in all fields with tags")
 	}
-	var ff = fld{
+	var ff = Field{
 		expr: f.Type,
-		tags: tags.Parse(f.Tag.Value),
+	}
+	if f.Tag != nil {
+		ff.tags = tags.Parse(f.Tag.Value)
 	}
 	ff.prepareRef()
 	return &ff
@@ -51,13 +54,13 @@ func New(f *ast.Field) *fld {
 //	} else {
 //      s.Offset = 100
 //	}
-func (f *fld) FillStatements(name string) []ast.Stmt {
+func (f *Field) FillStatements(name string) []ast.Stmt {
 	if f.tags.JsonName() == "-" {
 		return nil
 	}
 	var v = intermediateVarName(name, f.tags)
 	var body *ast.BlockStmt
-	var els ast.Stmt
+	var els *ast.BlockStmt
 	if stmt := f.fillFrom(name, v); len(stmt) > 0 {
 		body = &ast.BlockStmt{List: stmt}
 	}
@@ -78,14 +81,14 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 			Args: []ast.Expr{ast.NewIdent(v)},
 		}
 	}
-	return []ast.Stmt{
-		&ast.IfStmt{
-			Init: f.extract(v),
-			Cond: condition,
-			Body: body,
-			Else: els,
-		},
-	}
+	return asthlp.Block(
+		asthlp.IfInitElse(
+			f.extract(v),
+			condition,
+			body,
+			els,
+		),
+	).List
 }
 
 // result.WriteString("\"field\":")
@@ -94,7 +97,7 @@ func (f *fld) FillStatements(name string) []ast.Stmt {
 // 	return nil, err
 // }
 // result.Write(b)
-func (f *fld) MarshalStatements(name string) []ast.Stmt {
+func (f *Field) MarshalStatements(name string) []ast.Stmt {
 	var mrsh []ast.Stmt
 	var elseStmt ast.Stmt
 	var v = intermediateVarName(name, f.tags)

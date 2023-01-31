@@ -51,7 +51,10 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	}
 	if len(fld.Names) == 0 {
 		// composited struct
-		tag := tags.Parse(fld.Tag.Value)
+		var tag tags.Tags
+		if fld.Tag != nil {
+			tag = tags.Parse(fld.Tag.Value)
+		}
 		if tag.JsonAppendix() == "inline" {
 			// panic("dfs")
 		}
@@ -134,7 +137,10 @@ func NewValidatorFunc(structName string, fields []*ast.Field, structTags tags.St
 		),
 	)
 	for i, field := range fields {
-		fieldTags := tags.Parse(field.Tag.Value)
+		var fieldTags tags.Tags
+		if field.Tag != nil {
+			fieldTags = tags.Parse(field.Tag.Value)
+		}
 		visitFunc.AppendStmt(
 			//		if bytes.Equal(key, []byte{'f', 'i', 'l', 't', 'e', 'r'}) {
 			//			. . .
