@@ -35,8 +35,14 @@ func (g *Gen) Parse() (err error) {
 	return
 }
 
-func (g *Gen) FixImports() {
+func (g *Gen) FixImports(internals ...string) {
 	// discovery used imports and build their declaration
+	for i := 0; i < len(internals); i += 2 {
+		explorer.RegisterPackage(internals[i], explorer.Package{
+			Path: internals[i+1],
+			Kind: explorer.PkgKindInternal,
+		})
+	}
 	discovery := explorer.New()
 	discovery.Explore(&g.result)
 	var decls = make([]ast.Decl, 0, len(g.result.Decls)+1)

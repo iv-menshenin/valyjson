@@ -151,8 +151,8 @@ func (v *visitor) structFromDecl(decl taggedDecl) *taggedStruct {
 }
 
 func (v *visitor) transitFromDecl(decl taggedDecl) *taggedStruct {
-	_, ok := decl.spec.Type.(*ast.Ident)
-	if !ok {
+	_, ok := decl.spec.Type.(*ast.StructType)
+	if ok {
 		return nil
 	}
 	if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
