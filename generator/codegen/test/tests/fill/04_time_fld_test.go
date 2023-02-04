@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestTestTime01(t *testing.T) {
+func Test_TestTime01(t *testing.T) {
 	t.Run("test-all-empty", func(t *testing.T) {
 		var test1 TestTime01
 		err := test1.UnmarshalJSON([]byte(`{}`))

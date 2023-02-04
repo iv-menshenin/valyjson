@@ -9,7 +9,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserTestInh01used for pooling Parsers for TestInh01 JSONs.
+// jsonParserTestInh01 used for pooling Parsers for TestInh01 JSONs.
 var jsonParserTestInh01 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -146,7 +146,7 @@ func (s *TestInh01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTestInh02used for pooling Parsers for TestInh02 JSONs.
+// jsonParserTestInh02 used for pooling Parsers for TestInh02 JSONs.
 var jsonParserTestInh02 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -204,7 +204,7 @@ func (s *TestInh02) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTestInh03used for pooling Parsers for TestInh03 JSONs.
+// jsonParserTestInh03 used for pooling Parsers for TestInh03 JSONs.
 var jsonParserTestInh03 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -277,7 +277,7 @@ func (s *TestInh03) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTestInh04used for pooling Parsers for TestInh04 JSONs.
+// jsonParserTestInh04 used for pooling Parsers for TestInh04 JSONs.
 var jsonParserTestInh04 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

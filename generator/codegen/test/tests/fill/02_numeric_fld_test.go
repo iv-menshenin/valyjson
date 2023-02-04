@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNumStruct01(t *testing.T) {
+func Test_NumStruct01(t *testing.T) {
 	t.Run("empty_struct", func(t *testing.T) {
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{}`))
@@ -165,7 +165,7 @@ func TestNumStruct01(t *testing.T) {
 	})
 }
 
-func TestNumStruct02(t *testing.T) {
+func Test_NumStruct02(t *testing.T) {
 	t.Run("empty_struct", func(t *testing.T) {
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{}`))

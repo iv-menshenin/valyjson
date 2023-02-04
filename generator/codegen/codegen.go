@@ -43,6 +43,31 @@ func NewFillerFunc(structName string, fields []*ast.Field, structTags tags.Struc
 	return fn.Decl()
 }
 
+// NewFillerTranFunc generates function code that will fill in all fields of the structure with the fastjson.Value attribute
+//   func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+//       return (*StructElem)(s).FillFromJson(v, objPath)
+//   }
+func NewFillerTranFunc(structName string, parent ast.Expr, structTags tags.StructTags) ast.Decl {
+	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameFill))
+	fn.Comments("// " + names.MethodNameFill + " recursively fills the fields with fastjson.Value")
+	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(structName))))
+	fn.Params(
+		asthlp.Field(names.VarNameJsonValue, nil, asthlp.Star(names.FastJsonValue)),
+		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
+	)
+	fn.Results(
+		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
+	)
+	fn.AppendStmt(asthlp.Return(
+		asthlp.Call(
+			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(parent)), "FillFromJson")),
+			asthlp.NewIdent(names.VarNameJsonValue),
+			asthlp.NewIdent(names.VarNameObjPath),
+		),
+	))
+	return fn.Decl()
+}
+
 func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 	var result []ast.Stmt
 	factory := field.New(fld)
@@ -96,7 +121,7 @@ func NewUnmarshalFunc(structName string, _ tags.StructTags) []ast.Decl {
 
 	return []ast.Decl{
 		asthlp.DeclareVariable().
-			Comments("// " + poolName + "used for pooling Parsers for " + structName + " JSONs.").
+			Comments("// " + poolName + " used for pooling Parsers for " + structName + " JSONs.").
 			AppendSpec(asthlp.VariableType(poolName, names.FastJsonParserPool)).
 			Decl(),
 		fn.Decl(),

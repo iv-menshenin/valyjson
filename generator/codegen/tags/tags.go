@@ -10,6 +10,8 @@ const (
 	StrictRules = "strict"
 	// CustomHandlers tag says that json.Unmarshaler and json.Marshaler are already implemented
 	CustomHandlers = "custom"
+	// TransitHandlers tag says that structure will pass the processing to the parent class
+	TransitHandlers = "transit"
 )
 
 type Tags map[string][]string

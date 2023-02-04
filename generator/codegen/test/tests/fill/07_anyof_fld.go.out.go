@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserTestAllOfSecondused for pooling Parsers for TestAllOfSecond JSONs.
+// jsonParserTestAllOfSecond used for pooling Parsers for TestAllOfSecond JSONs.
 var jsonParserTestAllOfSecond fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -75,7 +75,7 @@ func (s *TestAllOfSecond) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTestAllOfThirdused for pooling Parsers for TestAllOfThird JSONs.
+// jsonParserTestAllOfThird used for pooling Parsers for TestAllOfThird JSONs.
 var jsonParserTestAllOfThird fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

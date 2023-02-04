@@ -9,7 +9,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserNumStruct01used for pooling Parsers for NumStruct01 JSONs.
+// jsonParserNumStruct01 used for pooling Parsers for NumStruct01 JSONs.
 var jsonParserNumStruct01 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -458,7 +458,7 @@ func (s *NumStruct01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserNumStruct02used for pooling Parsers for NumStruct02 JSONs.
+// jsonParserNumStruct02 used for pooling Parsers for NumStruct02 JSONs.
 var jsonParserNumStruct02 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

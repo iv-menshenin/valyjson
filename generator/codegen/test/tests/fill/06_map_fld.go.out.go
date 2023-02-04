@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserTestMap01used for pooling Parsers for TestMap01 JSONs.
+// jsonParserTestMap01 used for pooling Parsers for TestMap01 JSONs.
 var jsonParserTestMap01 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -132,7 +132,7 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserPropertyused for pooling Parsers for Property JSONs.
+// jsonParserProperty used for pooling Parsers for Property JSONs.
 var jsonParserProperty fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

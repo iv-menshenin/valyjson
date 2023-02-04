@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTestStr01(t *testing.T) {
+func Test_TestStr01(t *testing.T) {
 	t.Run("test-all-omitted", func(t *testing.T) {
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{}`))
@@ -55,7 +55,7 @@ func TestTestStr01(t *testing.T) {
 	})
 }
 
-func TestTestStr02(t *testing.T) {
+func Test_TestStr02(t *testing.T) {
 	t.Run("test-all-omitted", func(t *testing.T) {
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{}`))

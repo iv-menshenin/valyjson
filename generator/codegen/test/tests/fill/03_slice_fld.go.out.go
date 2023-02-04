@@ -8,7 +8,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserTestSlice01used for pooling Parsers for TestSlice01 JSONs.
+// jsonParserTestSlice01 used for pooling Parsers for TestSlice01 JSONs.
 var jsonParserTestSlice01 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

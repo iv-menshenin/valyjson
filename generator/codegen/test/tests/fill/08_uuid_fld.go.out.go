@@ -9,7 +9,7 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-// jsonParserTestUUIDused for pooling Parsers for TestUUID JSONs.
+// jsonParserTestUUID used for pooling Parsers for TestUUID JSONs.
 var jsonParserTestUUID fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler

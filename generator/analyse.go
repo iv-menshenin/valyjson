@@ -22,20 +22,30 @@ func (g *Gen) BuildFillers() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
-		if !tags.StructTags(structDecl.tags).Custom() {
+		if tags.StructTags(structDecl.tags).Custom() {
+			continue
+		}
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
+		)
+		if structDecl.tran != nil {
 			g.result.Decls = append(
 				g.result.Decls,
-				codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
-			)
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
-			)
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+				codegen.NewFillerTranFunc(structDecl.name, structDecl.tran, structDecl.tags),
 			)
 		}
+		if structDecl.spec == nil {
+			continue
+		}
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+		)
+		g.result.Decls = append(
+			g.result.Decls,
+			codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+		)
 	}
 }
 
@@ -83,7 +93,7 @@ func extractTags(comment *ast.CommentGroup) []string {
 	if comment == nil {
 		return nil
 	}
-	var tags []string
+	var commentTags []string
 	for _, text := range comment.List {
 		if text == nil {
 			continue
@@ -92,12 +102,12 @@ func extractTags(comment *ast.CommentGroup) []string {
 			splitPostfix := strings.Split(commentLine[len(jsonTag):], ",")
 			for _, tagRaw := range splitPostfix {
 				if tag := strings.ToLower(strings.TrimSpace(tagRaw)); tag != "" {
-					tags = append(tags, tag)
+					commentTags = append(commentTags, tag)
 				}
 			}
 		}
 	}
-	return tags
+	return commentTags
 }
 
 func (v *visitor) getNormalized() []taggedStruct {
@@ -107,11 +117,12 @@ func (v *visitor) getNormalized() []taggedStruct {
 			// only tagged structures
 			continue
 		}
-		s := v.structFromDecl(decl)
-		if s == nil {
-			continue
+		if structObj := v.structFromDecl(decl); structObj != nil {
+			result = append(result, *structObj)
 		}
-		result = append(result, *s)
+		if transitObj := v.transitFromDecl(decl); transitObj != nil {
+			result = append(result, *transitObj)
+		}
 	}
 	return result
 }
@@ -137,6 +148,21 @@ func (v *visitor) structFromDecl(decl taggedDecl) *taggedStruct {
 			Fields: &ast.FieldList{List: v.collectFields(stct.Fields.List)},
 		},
 	}
+}
+
+func (v *visitor) transitFromDecl(decl taggedDecl) *taggedStruct {
+	_, ok := decl.spec.Type.(*ast.Ident)
+	if !ok {
+		return nil
+	}
+	if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
+		return &taggedStruct{
+			tags: decl.tags,
+			name: decl.spec.Name.Name,
+			tran: decl.spec.Type,
+		}
+	}
+	return nil
 }
 
 func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
@@ -171,4 +197,5 @@ type taggedStruct struct {
 	tags []string
 	name string
 	spec *ast.StructType
+	tran ast.Expr
 }
