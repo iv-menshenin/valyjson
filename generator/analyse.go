@@ -22,18 +22,20 @@ func (g *Gen) BuildFillers() {
 	var v visitor
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
-		)
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
-		)
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
-		)
+		if !tags.StructTags(structDecl.tags).Custom() {
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
+			)
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+			)
+			g.result.Decls = append(
+				g.result.Decls,
+				codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+			)
+		}
 	}
 }
 

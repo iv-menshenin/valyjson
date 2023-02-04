@@ -6,7 +6,10 @@ import (
 )
 
 const (
+	// StrictRules tag says that any unknown fields violate the specification rules
 	StrictRules = "strict"
+	// CustomHandlers tag says that json.Unmarshaler and json.Marshaler are already implemented
+	CustomHandlers = "custom"
 )
 
 type Tags map[string][]string
@@ -92,4 +95,8 @@ func (t StructTags) Has(s string) bool {
 
 func (t StructTags) StrictRules() bool {
 	return t.Has(StrictRules)
+}
+
+func (t StructTags) Custom() bool {
+	return t.Has(CustomHandlers)
 }

@@ -5,83 +5,92 @@ import (
 	"fmt"
 )
 
-// TestAnyOf01 tests allOf
-//json:strict
-type TestAnyOf01 struct {
-	TestAnyOfUplevel
-	TestAllOfUplevel1
-	TestAllOfUplevel2
+// TestAllOf01 tests allOf
+//json:custom
+type TestAllOf01 struct {
+	TestAllOfFirstIsOne
+	TestAllOfSecond
+	TestAllOfThird
 }
 
-type TestAnyOfUplevel struct {
-	Any `json:"value"`
+// TestAllOfFirstIsOne tests oneOf
+//json:custom
+type TestAllOfFirstIsOne struct {
+	OneOf `json:"value"`
 }
 
-type Any interface{}
+// OneOf tests oneOf with
+type OneOf interface{}
 
 type (
-	TestAnyOfInteger int64
-	TestAnyOfString  string
-	TestAnyOfStruct  struct {
+	TestOneOfInteger int64
+	TestOneOfString  string
+	TestOneOfStruct  struct {
 		Class string  `json:"class"`
 		Value float64 `json:"width"`
 	}
 )
 
-func (t *TestAnyOfUplevel) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON unmarshalls data to one of known structs
+func (t *TestAllOfFirstIsOne) UnmarshalJSON(data []byte) error {
 	var (
 		err error
 		v1  struct {
-			TestAnyOfInteger `json:"value"`
+			TestOneOfInteger `json:"value"`
 		}
 		v2 struct {
-			TestAnyOfString `json:"value"`
+			TestOneOfString `json:"value"`
 		}
 		v3 struct {
-			TestAnyOfStruct `json:"value"`
+			TestOneOfStruct `json:"value"`
 		}
 	)
 	err = json.Unmarshal(data, &v1)
 	if err == nil {
-		t.Any = v1.TestAnyOfInteger
+		t.OneOf = v1.TestOneOfInteger
 		return nil
 	}
 	err = json.Unmarshal(data, &v2)
 	if err == nil {
-		t.Any = v2.TestAnyOfString
+		t.OneOf = v2.TestOneOfString
 		return nil
 	}
 	err = json.Unmarshal(data, &v3)
 	if err == nil {
-		t.Any = v3.TestAnyOfStruct
+		t.OneOf = v3.TestOneOfStruct
 		return nil
 	}
-	return fmt.Errorf("can't unmarshal '%s' into any of [TestAnyOfInteger, TestAnyOfString]", string(data))
+	return fmt.Errorf("can't unmarshal '%s' into one of [TestOneOfInteger, TestOneOfString, TestOneOfStruct]", string(data))
 }
 
-func (t *TestAnyOfUplevel) MarshalJSON() ([]byte, error) {
-	return json.Marshal(t.Any)
+func (t *TestAllOfFirstIsOne) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.OneOf)
 }
 
 type (
-	TestAllOfUplevel1 struct {
+	// TestAllOfSecond tests allOf option
+	//json:optional
+	TestAllOfSecond struct {
 		Comment string `json:"comment"`
 		Level   int64  `json:"level,omitempty"`
 	}
-	TestAllOfUplevel2 struct {
+	// TestAllOfThird tests allOf option
+	//json:optional
+	TestAllOfThird struct {
 		Command string `json:"command,omitempty"`
 		Range   int64  `json:"range,omitempty"`
 	}
 )
 
-func (t *TestAnyOf01) UnmarshalJSON(data []byte) (err error) {
-	if err = json.Unmarshal(data, &t.TestAnyOfUplevel); err != nil {
+// UnmarshalJSON unmarshalls data to all subtypes (inlined structures)
+func (t *TestAllOf01) UnmarshalJSON(data []byte) (err error) {
+	if err = t.TestAllOfFirstIsOne.UnmarshalJSON(data); err != nil {
 		return
 	}
-	if err = json.Unmarshal(data, &t.TestAllOfUplevel1); err != nil {
+	if err = t.TestAllOfSecond.UnmarshalJSON(data); err != nil {
 		return
 	}
-	if err = json.Unmarshal(data, &t.TestAllOfUplevel2); err != nil {
+	if err = t.TestAllOfThird.UnmarshalJSON(data); err != nil {
 		return
 	}
 	return nil
