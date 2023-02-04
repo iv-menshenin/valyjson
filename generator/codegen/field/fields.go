@@ -138,7 +138,7 @@ func intermediateVarName(name string, t tags.Tags) string {
 	// reserved words
 	case "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func",
 		"go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select", "struct", "switch",
-		"type", "var", "bool", "string",
+		"type", "var", "bool", "string", "uuid",
 		"int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64",
 		"float32", "float64":
 		varName = "_" + varName

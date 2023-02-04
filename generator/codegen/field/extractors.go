@@ -215,7 +215,7 @@ func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 //  if err != nil {
 //      return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
 //  }
-//  err = valfield.UnmarshalText(b)
+//  valfield, err = uuid.ParseBytes(b)
 func uuidExtraction(dst *ast.Ident, t ast.Expr, v, name string) []ast.Stmt {
 	var stmt = []ast.Stmt{
 		&ast.DeclStmt{
@@ -240,11 +240,11 @@ func uuidExtraction(dst *ast.Ident, t ast.Expr, v, name string) []ast.Stmt {
 		},
 		checkErrAndReturnParsingError(name),
 		&ast.AssignStmt{
-			Lhs: []ast.Expr{ast.NewIdent("err")},
+			Lhs: []ast.Expr{dst, ast.NewIdent("err")},
 			Tok: token.ASSIGN,
 			Rhs: []ast.Expr{
 				&ast.CallExpr{
-					Fun:  &ast.SelectorExpr{X: dst, Sel: ast.NewIdent("UnmarshalText")},
+					Fun:  asthlp.SimpleSelector("uuid", "ParseBytes"),
 					Args: []ast.Expr{ast.NewIdent("b")},
 				},
 			},
