@@ -1,7 +1,6 @@
 package discoverer
 
 import (
-	"fmt"
 	"go/parser"
 	"go/token"
 	"io"
@@ -96,7 +95,9 @@ func (d *Discoverer) discoverPackage(goFilePath string) error {
 		if packPath == goFileDir {
 			return nil
 		}
-		return fmt.Errorf("package name `%s` appears twice, first in `%s` and then in `%s`", f.Name.Name, packPath, goFileDir)
+		// TODO
+		//   return fmt.Errorf("package name `%s` appears twice, first in `%s` and then in `%s`", f.Name.Name, packPath, goFileDir)
+		return nil
 	}
 	d.packages[f.Name.Name] = goFileDir
 	return nil
