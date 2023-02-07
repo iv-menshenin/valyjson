@@ -11,6 +11,7 @@ import (
 	"path"
 
 	"github.com/iv-menshenin/go-ast/explorer"
+	"github.com/iv-menshenin/valyjson/generator/discoverer"
 	"github.com/iv-menshenin/valyjson/generator/static"
 )
 
@@ -20,10 +21,15 @@ type (
 		parsed   ast.Node
 		result   ast.File
 		packageN string
+
+		discovery *discoverer.Discoverer
 	}
 )
 
 func (g *Gen) Parse() (err error) {
+	if err = g.discovery.Discover(); err != nil {
+		panic(err)
+	}
 	g.parsed, err = parseGo(g.fileName)
 	if err != nil {
 		return err
@@ -103,6 +109,7 @@ func parseGo(file string) (ast.Node, error) {
 
 func New(file string) *Gen {
 	return &Gen{
-		fileName: file,
+		fileName:  file,
+		discovery: discoverer.New(path.Dir(file)),
 	}
 }

@@ -459,24 +459,14 @@ func (f *Field) fillField(rhs, dst ast.Expr, t string) []ast.Stmt {
 		return result
 
 	case *ast.SelectorExpr:
-		// Structures that support the Unmarshaler interface do not require an assignment operation,
-		// because they are decoded directly into the target field
-		switch t.Sel.Name {
-
-		case "Time":
-			fallthrough
-		case "UUID":
-			result = append(
-				result,
-				&ast.AssignStmt{
-					Lhs: []ast.Expr{dst},
-					Tok: token.ASSIGN,
-					Rhs: []ast.Expr{rhs},
-				},
-			)
-		default:
-
-		}
+		result = append(
+			result,
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{dst},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{rhs},
+			},
+		)
 		return result
 
 	case *ast.ArrayType:

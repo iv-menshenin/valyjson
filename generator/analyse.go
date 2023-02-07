@@ -1,15 +1,19 @@
 package generator
 
 import (
-	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
+	"fmt"
 	"go/ast"
 	"strings"
+	"unicode"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen"
+	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
 type (
 	visitor struct {
+		g     *Gen
+		over  *ast.Ident
 		decls []taggedDecl
 	}
 	taggedDecl struct {
@@ -19,7 +23,7 @@ type (
 )
 
 func (g *Gen) BuildFillers() {
-	var v visitor
+	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
 		if tags.StructTags(structDecl.tags).Custom() {
@@ -177,20 +181,60 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 			}
 		}
 		if tag.JsonAppendix() == "inline" {
-			inlined := v.getDeclByName(fld.Type.(*ast.Ident).Name)
-			if inlined == nil {
-				panic("can't resolve inlined field by name")
-			}
-			inlStruct := v.structFromDecl(*inlined)
-			if inlStruct == nil {
-				panic("can't inline")
-			}
-			flds = append(flds, v.collectFields(inlStruct.spec.Fields.List)...)
+			flds = append(flds, v.exploreInlined(fld)...)
 			continue
+		}
+		if v.over != nil {
+			if i, ok := fld.Type.(*ast.Ident); ok && unicode.IsUpper([]rune(i.Name)[0]) {
+				fld.Type = &ast.SelectorExpr{
+					X:   v.over,
+					Sel: i,
+				}
+			}
 		}
 		flds = append(flds, fld)
 	}
 	return flds
+}
+
+func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
+	switch inlined := fld.Type.(type) {
+
+	case *ast.Ident:
+		decl := v.getDeclByName(inlined.Name)
+		if decl == nil {
+			panic("can't resolve inlined field by name")
+		}
+		inlStruct := v.structFromDecl(*decl)
+		if inlStruct == nil {
+			panic("can't inline")
+		}
+		return v.collectFields(inlStruct.spec.Fields.List)
+
+	case *ast.SelectorExpr:
+		packIdent, ok := inlined.X.(*ast.Ident)
+		if !ok {
+			panic(fmt.Errorf("can't inline struct kind %+v; can't recognize %+v expression", fld.Type, inlined.X))
+		}
+		pkg, err := v.g.discovery.GetPackage(packIdent.Name)
+		if err != nil {
+			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package", fld.Type, packIdent.Name))
+		}
+		var v1 = visitor{g: v.g, over: packIdent}
+		ast.Walk(&v1, pkg)
+		decl := v1.getDeclByName(inlined.Sel.Name)
+		if decl == nil {
+			panic("can't resolve inlined field by name")
+		}
+		inlStruct := v1.structFromDecl(*decl)
+		if inlStruct == nil {
+			panic("can't inline")
+		}
+		return v.collectFields(inlStruct.spec.Fields.List)
+
+	default:
+		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
+	}
 }
 
 type taggedStruct struct {

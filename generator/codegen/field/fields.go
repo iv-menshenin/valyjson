@@ -2,11 +2,11 @@ package field
 
 import (
 	"fmt"
-	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
-	"strings"
+	"unicode"
 
+	asthlp "github.com/iv-menshenin/go-ast"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
@@ -133,15 +133,5 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 }
 
 func intermediateVarName(name string, t tags.Tags) string {
-	varName := strings.ToLower(name)
-	switch varName {
-	// reserved words
-	case "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for", "func",
-		"go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select", "struct", "switch",
-		"type", "var", "bool", "string", "uuid",
-		"int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64",
-		"float32", "float64":
-		varName = "_" + varName
-	}
-	return varName
+	return "_" + string(unicode.ToLower([]rune(name)[0])) + string([]rune(name)[1:])
 }
