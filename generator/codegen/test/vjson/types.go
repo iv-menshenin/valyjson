@@ -8,10 +8,10 @@ type (
 	//json:strict
 	Person struct {
 		OriginName `json:",inline"`
-		Middle     *string            `json:"middle,omitempty"`
-		DOB        *time.Time         `json:"dob,omitempty"`
-		Passport   *Passport          `json:"passport"`
-		Tables     map[string]TableOf `json:"tables"`
+		Middle     *string    `json:"middle,omitempty"`
+		DOB        *time.Time `json:"dob,omitempty"`
+		Passport   *Passport  `json:"passport"`
+		Tables     MapTable   `json:"tables"`
 	}
 	OriginName struct {
 		OriginNameName    `json:",inline"`
@@ -46,4 +46,8 @@ type (
 		TagName  string `json:"tagName"`
 		TagValue string `json:"tagValue"`
 	}
+	//json:strict
+	MapTable map[string]TableOf
+	//json:strict
+	MapInt64 map[string]int64
 )

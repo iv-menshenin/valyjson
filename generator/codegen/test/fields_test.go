@@ -12,32 +12,40 @@ import (
 const fillTestsDir = "./tests/fill/"
 
 func Test_fld_FillStatements(t *testing.T) {
-	t.Parallel()
-	files, err := ioutil.ReadDir(fillTestsDir)
+	dirs, err := ioutil.ReadDir(fillTestsDir)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var cnt int
-	for _, f := range files {
-		if path.Ext(f.Name()) != ".go" {
+	for _, d := range dirs {
+		if !d.IsDir() {
 			continue
 		}
-		if strings.HasSuffix(f.Name(), ".out.go") {
-			continue
+		dirPath := path.Join(fillTestsDir, d.Name())
+		files, err := ioutil.ReadDir(dirPath)
+		if err != nil {
+			t.Fatal(err)
 		}
-		if strings.HasSuffix(f.Name(), "_test.go") {
-			continue
+		for _, f := range files {
+			if path.Ext(f.Name()) != ".go" {
+				continue
+			}
+			if strings.HasSuffix(f.Name(), ".out.go") {
+				continue
+			}
+			if strings.HasSuffix(f.Name(), "_test.go") {
+				continue
+			}
+			if f.Name() == "valyjson_utils.go" {
+				continue
+			}
+			cnt++
+			fileName := f.Name()
+			t.Run(f.Name(), func(t *testing.T) {
+				caseTestFillStatements(t, path.Join(dirPath, fileName))
+			})
 		}
-		if f.Name() == "valyjson_utils.go" {
-			continue
-		}
-		cnt++
-		fileName := f.Name()
-		t.Run(f.Name(), func(t *testing.T) {
-			t.Parallel()
-			caseTestFillStatements(t, fillTestsDir+fileName)
-		})
 	}
 	if cnt == 0 {
 		t.Error("there is no tests")

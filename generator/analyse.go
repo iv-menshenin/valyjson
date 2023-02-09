@@ -20,36 +20,33 @@ type (
 		spec *ast.TypeSpec
 		tags []string
 	}
+	renderer interface {
+		Name() string
+		Tags() tags.StructTags
+		UnmarshalFunc() []ast.Decl
+		FillerFunc() ast.Decl
+		ValidatorFunc() ast.Decl
+		MarshalFunc() ast.Decl
+		AppendJsonFunc() ast.Decl
+	}
 )
 
 func (g *Gen) BuildFillers() {
 	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
-		if tags.StructTags(structDecl.tags).Custom() {
+		if structDecl.Tags().Custom() {
 			continue
 		}
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewUnmarshalFunc(structDecl.name, structDecl.tags)...,
-		)
-		if structDecl.tran != nil {
-			g.result.Decls = append(
-				g.result.Decls,
-				codegen.NewFillerTranFunc(structDecl.name, structDecl.tran, structDecl.tags),
-			)
+		if unm := structDecl.UnmarshalFunc(); len(unm) > 0 {
+			g.result.Decls = append(g.result.Decls, unm...)
 		}
-		if structDecl.spec == nil {
-			continue
+		if fil := structDecl.FillerFunc(); fil != nil {
+			g.result.Decls = append(g.result.Decls, fil)
 		}
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewFillerFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
-		)
-		g.result.Decls = append(
-			g.result.Decls,
-			codegen.NewValidatorFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
-		)
+		if val := structDecl.ValidatorFunc(); val != nil {
+			g.result.Decls = append(g.result.Decls, val)
+		}
 	}
 }
 
@@ -59,11 +56,11 @@ func (g *Gen) BuildJsoners() {
 	for _, structDecl := range v.getNormalized() {
 		g.result.Decls = append(
 			g.result.Decls,
-			codegen.NewMarshalFunc(structDecl.name, structDecl.tags),
+			structDecl.MarshalFunc(),
 		)
 		g.result.Decls = append(
 			g.result.Decls,
-			codegen.NewAppendJsonFunc(structDecl.name, structDecl.spec.Fields.List, structDecl.tags),
+			structDecl.AppendJsonFunc(),
 		)
 	}
 }
@@ -114,18 +111,36 @@ func extractTags(comment *ast.CommentGroup) []string {
 	return commentTags
 }
 
-func (v *visitor) getNormalized() []taggedStruct {
-	var result []taggedStruct
+func (v *visitor) getNormalized() []renderer {
+	var result []renderer
 	for _, decl := range v.decls {
 		if len(decl.tags) == 0 {
 			// only tagged structures
 			continue
 		}
-		if structObj := v.structFromDecl(decl); structObj != nil {
-			result = append(result, *structObj)
-		}
-		if transitObj := v.transitFromDecl(decl); transitObj != nil {
-			result = append(result, *transitObj)
+		switch typed := decl.spec.Type.(type) {
+
+		case *ast.StructType:
+			if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
+				result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+				break
+			}
+			stct := &ast.StructType{
+				Fields: &ast.FieldList{List: v.collectFields(typed.Fields.List)}, // uninline
+			}
+			result = append(result, codegen.NewStruct(decl.spec.Name.Name, decl.tags, stct))
+
+		case *ast.MapType:
+			result = append(result, codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
+
+		case *ast.ArrayType:
+			result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
+
+		case *ast.Ident:
+			result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+
+		default:
+			panic("unsupported")
 		}
 	}
 	return result
@@ -135,35 +150,6 @@ func (v *visitor) getDeclByName(name string) *taggedDecl {
 	for i, decl := range v.decls {
 		if decl.spec.Name.Name == name {
 			return &v.decls[i]
-		}
-	}
-	return nil
-}
-
-func (v *visitor) structFromDecl(decl taggedDecl) *taggedStruct {
-	stct, ok := decl.spec.Type.(*ast.StructType)
-	if !ok {
-		return nil
-	}
-	return &taggedStruct{
-		tags: decl.tags,
-		name: decl.spec.Name.Name,
-		spec: &ast.StructType{
-			Fields: &ast.FieldList{List: v.collectFields(stct.Fields.List)},
-		},
-	}
-}
-
-func (v *visitor) transitFromDecl(decl taggedDecl) *taggedStruct {
-	_, ok := decl.spec.Type.(*ast.StructType)
-	if ok {
-		return nil
-	}
-	if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
-		return &taggedStruct{
-			tags: decl.tags,
-			name: decl.spec.Name.Name,
-			tran: decl.spec.Type,
 		}
 	}
 	return nil
@@ -205,11 +191,11 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if decl == nil {
 			panic("can't resolve inlined field by name")
 		}
-		inlStruct := v.structFromDecl(*decl)
-		if inlStruct == nil {
+		stct, ok := decl.spec.Type.(*ast.StructType)
+		if !ok {
 			panic("can't inline")
 		}
-		return v.collectFields(inlStruct.spec.Fields.List)
+		return v.collectFields(stct.Fields.List)
 
 	case *ast.SelectorExpr:
 		packIdent, ok := inlined.X.(*ast.Ident)
@@ -218,7 +204,7 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		}
 		pkg, err := v.g.discovery.GetPackage(packIdent.Name)
 		if err != nil {
-			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package", fld.Type, packIdent.Name))
+			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package: %+v", fld.Type, packIdent.Name, err))
 		}
 		var v1 = visitor{g: v.g, over: packIdent}
 		ast.Walk(&v1, pkg)
@@ -226,20 +212,13 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if decl == nil {
 			panic("can't resolve inlined field by name")
 		}
-		inlStruct := v1.structFromDecl(*decl)
-		if inlStruct == nil {
+		stct, ok := decl.spec.Type.(*ast.StructType)
+		if !ok {
 			panic("can't inline")
 		}
-		return v.collectFields(inlStruct.spec.Fields.List)
+		return v.collectFields(stct.Fields.List)
 
 	default:
 		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
 	}
-}
-
-type taggedStruct struct {
-	tags []string
-	name string
-	spec *ast.StructType
-	tran ast.Expr
 }

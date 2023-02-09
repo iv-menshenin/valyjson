@@ -43,6 +43,10 @@ func New(f *ast.Field) *Field {
 	return &ff
 }
 
+func (f *Field) DontCheckErr() {
+	f.dontCheckErr = true
+}
+
 // FillStatements makes statements processed data-filling for struct field
 // 	if offset := v.Get("offset"); offset != nil {
 //      var vOffset int
@@ -132,6 +136,6 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 	}
 }
 
-func intermediateVarName(name string, t tags.Tags) string {
+func intermediateVarName(name string, _ tags.Tags) string {
 	return "_" + string(unicode.ToLower([]rune(name)[0])) + string([]rune(name)[1:])
 }

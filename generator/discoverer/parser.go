@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/fs"
-	"strings"
 )
 
 func (d *Discoverer) GetPackage(packageName string) (ast.Node, error) {
@@ -14,9 +12,7 @@ func (d *Discoverer) GetPackage(packageName string) (ast.Node, error) {
 	if !ok {
 		return nil, fmt.Errorf("can't find package '%s'", packageName)
 	}
-	pkgs, err := parser.ParseDir(token.NewFileSet(), packagePath, func(info fs.FileInfo) bool {
-		return !strings.HasSuffix(info.Name(), "_test.go")
-	}, parser.AllErrors)
+	pkgs, err := parser.ParseDir(token.NewFileSet(), packagePath, nil, parser.AllErrors)
 	if err != nil {
 		return nil, err
 	}

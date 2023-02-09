@@ -8,6 +8,38 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestMapTable_UnmarshalJSON(t *testing.T) {
+	var table MapTable
+	require.NoError(t, table.UnmarshalJSON([]byte(`{
+    "math": {
+      "tableName": "Mathematics",
+      "tables": [
+        {
+          "counter": 3,
+          "assessments": [
+            3,
+            3,
+            4
+          ],
+          "time": "2023-01-09T01:01:01.000000001Z",
+          "avg": 3.3333,
+          "tags": [
+            {
+              "tagName": "test-name",
+              "tagValue": "Person-Struct"
+            },
+            {
+              "tagName": "author",
+              "tagValue": "valyjson"
+            }
+          ]
+        }
+      ]
+    }
+  }`)))
+	require.Equal(t, fulfilledPerson().Tables, table)
+}
+
 func TestPerson_MarshalJSON(t *testing.T) {
 	person := fulfilledPerson()
 	data, err := json.Marshal(person)

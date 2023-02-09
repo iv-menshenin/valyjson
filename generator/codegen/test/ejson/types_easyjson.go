@@ -74,7 +74,7 @@ func easyjson6601e8cdDecodeEjson(in *jlexer.Lexer, out *Person) {
 				in.Skip()
 			} else {
 				in.Delim('{')
-				out.Tables = make(map[string]TableOf)
+				out.Tables = make(MapTable)
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()

@@ -53,10 +53,13 @@ func (g *Gen) FixImports(internals ...string) {
 	discovery.Explore(&g.result)
 	var decls = make([]ast.Decl, 0, len(g.result.Decls)+1)
 
-	decls = append(decls, &ast.GenDecl{
-		Tok:   token.IMPORT,
-		Specs: discovery.ImportSpec(),
-	})
+	imports := discovery.ImportSpec()
+	if len(imports) > 0 {
+		decls = append(decls, &ast.GenDecl{
+			Tok:   token.IMPORT,
+			Specs: discovery.ImportSpec(),
+		})
+	}
 	decls = append(decls, g.result.Decls...)
 	g.result.Decls = decls
 }

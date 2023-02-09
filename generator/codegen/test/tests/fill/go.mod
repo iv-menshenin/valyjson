@@ -1,12 +1,11 @@
-module github.com/iv-menshenin/valyjson
+module fill
 
 go 1.18
 
 require (
-	github.com/iv-menshenin/go-ast v0.0.1
+	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.8.1
 	github.com/valyala/fastjson v1.6.4
-	golang.org/x/mod v0.7.0
 )
 
 require (
