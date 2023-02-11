@@ -136,7 +136,7 @@ func (v *visitor) getNormalized() []renderer {
 		case *ast.ArrayType:
 			result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
 
-		case *ast.Ident:
+		case *ast.Ident, *ast.SelectorExpr:
 			result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
 
 		default:
