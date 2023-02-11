@@ -166,10 +166,6 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 				panic("all fields should have tags")
 			}
 		}
-		if tag.JsonAppendix() == "inline" {
-			flds = append(flds, v.exploreInlined(fld)...)
-			continue
-		}
 		if v.over != nil {
 			if i, ok := fld.Type.(*ast.Ident); ok && unicode.IsUpper([]rune(i.Name)[0]) {
 				fld.Type = &ast.SelectorExpr{
@@ -177,6 +173,10 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 					Sel: i,
 				}
 			}
+		}
+		if tag.JsonAppendix() == "inline" {
+			flds = append(flds, v.exploreInlined(fld)...)
+			continue
 		}
 		flds = append(flds, fld)
 	}
@@ -216,7 +216,7 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if !ok {
 			panic("can't inline")
 		}
-		return v.collectFields(stct.Fields.List)
+		return v1.collectFields(stct.Fields.List)
 
 	default:
 		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
