@@ -406,7 +406,7 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 		switch t.Name {
 
 		case "bool", "int64", "int", "float64":
-			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name)
+			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name, false)
 
 		default:
 			return f.newAndFillIn(rhs, dst, ast.NewIdent(t.Name))
@@ -454,7 +454,11 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	switch t := f.expr.(type) {
 
 	case *ast.Ident:
-		return f.typedFillIn(rhs, dst, t.Name)
+		var isString bool
+		if i, ok := f.refx.(*ast.Ident); ok && i.Name == "string" {
+			isString = true
+		}
+		return f.typedFillIn(rhs, dst, t.Name, isString)
 
 	case *ast.StructType:
 		return result
@@ -499,7 +503,23 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	}
 }
 
-func (f *Field) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
+func (f *Field) typedFillIn(rhs, dst ast.Expr, t string, isString bool) []ast.Stmt {
+	if isString {
+		return []ast.Stmt{
+			&ast.AssignStmt{
+				Lhs: []ast.Expr{dst},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{asthlp.Star(asthlp.Call(
+					asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent(t)))),
+					asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+						asthlp.Ref(rhs),
+					),
+				))},
+			},
+		}
+	}
+
 	switch t {
 	case "string":
 		return []ast.Stmt{

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"time"
+	"unsafe"
 
 	"github.com/valyala/fastjson"
 )
@@ -35,14 +36,14 @@ func (s *Person) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
 		}
-		s.Name = string(valName)
+		s.Name = *(*string)(unsafe.Pointer(&valName))
 	}
 	if _surname := v.Get("surname"); _surname != nil {
 		var valSurname []byte
 		if valSurname, err = _surname.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%ssurname' value: %w", objPath, err)
 		}
-		s.Surname = string(valSurname)
+		s.Surname = *(*string)(unsafe.Pointer(&valSurname))
 	}
 	if _middle := v.Get("middle"); valueIsNotNull(_middle) {
 		var valMiddle []byte
@@ -181,7 +182,7 @@ func (s *Passport) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if valNumber, err = _number.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%snumber' value: %w", objPath, err)
 		}
-		s.Number = string(valNumber)
+		s.Number = *(*string)(unsafe.Pointer(&valNumber))
 	}
 	if _dateDoc := v.Get("dateDoc"); _dateDoc != nil {
 		b, err := _dateDoc.StringBytes()
@@ -253,7 +254,7 @@ func (s *TableOf) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if valTableName, err = _tableName.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%stableName' value: %w", objPath, err)
 		}
-		s.TableName = string(valTableName)
+		s.TableName = *(*string)(unsafe.Pointer(&valTableName))
 	}
 	if _tables := v.Get("tables"); valueIsNotNull(_tables) {
 		var listA []*fastjson.Value
@@ -261,7 +262,10 @@ func (s *TableOf) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%stables' value: %w", objPath, err)
 		}
-		valTables := make([]*Table, 0, len(listA))
+		valTables := s.Tables[:0]
+		if l := len(listA); cap(valTables) < l || (l == 0 && s.Tables == nil) {
+			valTables = make([]*Table, 0, len(listA))
+		}
 		for _, listElem := range listA {
 			if !valueIsNotNull(listElem) {
 				valTables = append(valTables, nil)
@@ -348,7 +352,10 @@ func (s *Table) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%sassessments' value: %w", objPath, err)
 		}
-		valAssessments := make([]int, 0, len(listA))
+		valAssessments := s.Assessments[:0]
+		if l := len(listA); cap(valAssessments) < l || (l == 0 && s.Assessments == nil) {
+			valAssessments = make([]int, 0, len(listA))
+		}
 		for _, listElem := range listA {
 			var elem int
 			elem, err = listElem.Int()
@@ -387,7 +394,10 @@ func (s *Table) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing '%stags' value: %w", objPath, err)
 		}
-		valTags := make([]Tag, 0, len(listA))
+		valTags := s.Tags[:0]
+		if l := len(listA); cap(valTags) < l || (l == 0 && s.Tags == nil) {
+			valTags = make([]Tag, 0, len(listA))
+		}
 		for _, listElem := range listA {
 			var elem Tag
 			err = elem.FillFromJson(listElem, objPath+".")
@@ -481,14 +491,14 @@ func (s *Tag) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if valTagName, err = _tagName.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%stagName' value: %w", objPath, err)
 		}
-		s.TagName = string(valTagName)
+		s.TagName = *(*string)(unsafe.Pointer(&valTagName))
 	}
 	if _tagValue := v.Get("tagValue"); _tagValue != nil {
 		var valTagValue []byte
 		if valTagValue, err = _tagValue.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%stagValue' value: %w", objPath, err)
 		}
-		s.TagValue = string(valTagValue)
+		s.TagValue = *(*string)(unsafe.Pointer(&valTagValue))
 	}
 	return nil
 }
@@ -540,7 +550,6 @@ func (s *MapTable) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the keys with fastjson.Value
 func (s *MapTable) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	// strict rules
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -552,11 +561,13 @@ func (s *MapTable) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		var value TableOf
 		err = value.FillFromJson(v, objPath+".")
-		if err == nil {
-			(*s)[string(key)] = TableOf(value)
+		if err != nil {
+			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			return
 		}
+		(*s)[string(key)] = TableOf(value)
 	})
-	return nil
+	return err
 }
 
 // jsonParserMapInt64 used for pooling Parsers for MapInt64 JSONs.
@@ -576,7 +587,6 @@ func (s *MapInt64) UnmarshalJSON(data []byte) error {
 
 // FillFromJson recursively fills the keys with fastjson.Value
 func (s *MapInt64) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	// strict rules
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -588,9 +598,11 @@ func (s *MapInt64) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		}
 		var value int64
 		value, err = v.Int64()
-		if err == nil {
-			(*s)[string(key)] = int64(value)
+		if err != nil {
+			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			return
 		}
+		(*s)[string(key)] = int64(value)
 	})
-	return nil
+	return err
 }

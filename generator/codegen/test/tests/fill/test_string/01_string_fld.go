@@ -8,6 +8,9 @@ type TestStr01 struct {
 
 //json:strict
 type TestStr02 struct {
-	Field    string  `json:"field"`
-	FieldRef *string `json:"fieldRef"`
+	Field    string           `json:"field"`
+	FieldRef *string          `json:"fieldRef"`
+	String   FieldValueString `json:"string"`
 }
+
+type FieldValueString string

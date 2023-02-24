@@ -103,3 +103,19 @@ func Test_TestStr02(t *testing.T) {
 		require.ErrorContains(t, err, "the 'field' field appears in the object twice")
 	})
 }
+
+func Test_TestSubTypeString(t *testing.T) {
+	t.Run("check_type", func(t *testing.T) {
+		var test1 TestStr02
+		err := test1.UnmarshalJSON([]byte(`{"string": "filled well"}`))
+		require.NoError(t, err)
+		require.Equal(t, FieldValueString("filled well"), test1.String)
+	})
+	t.Run("test-allocs", func(t *testing.T) {
+		n := testing.AllocsPerRun(100, func() {
+			var test1 TestStr02
+			_ = test1.UnmarshalJSON([]byte(`{"string": "filled well foo/bar"}`))
+		})
+		require.LessOrEqual(t, n, float64(0))
+	})
+}

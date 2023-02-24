@@ -4,9 +4,11 @@ package test_extr
 import (
 	"bytes"
 	"fmt"
-	"unsafe"
 
 	"github.com/valyala/fastjson"
+
+	"fill/test_any"
+	"fill/test_string"
 )
 
 // jsonParserExternal used for pooling Parsers for External JSONs.
@@ -29,20 +31,21 @@ func (s *External) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
-	if _field := v.Get("field"); _field != nil {
-		var valField []byte
-		if valField, err = _field.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+	if _test01 := v.Get("test1"); _test01 != nil {
+		var valTest01 test_any.TestAllOfSecond
+		err = valTest01.FillFromJson(_test01, objPath+"test1.")
+		if err != nil {
+			return fmt.Errorf("error parsing '%stest1' value: %w", objPath, err)
 		}
-		s.Field = *(*string)(unsafe.Pointer(&valField))
+		s.Test01 = valTest01
 	}
-	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
-		var valFieldRef []byte
-		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%sfieldRef' value: %w", objPath, err)
+	if _test02 := v.Get("test2"); _test02 != nil {
+		var valTest02 test_string.TestStr01
+		err = valTest02.FillFromJson(_test02, objPath+"test2.")
+		if err != nil {
+			return fmt.Errorf("error parsing '%stest2' value: %w", objPath, err)
 		}
-		s.FieldRef = new(string)
-		*s.FieldRef = string(valFieldRef)
+		s.Test02 = valTest02
 	}
 	return nil
 }
@@ -53,42 +56,21 @@ func (s *External) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [5]int
+	var checkFields [2]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
 		}
-		if bytes.Equal(key, []byte{}) {
+		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '1'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
 				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{}) {
+		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '2'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
-			}
-			return
-		}
-		if bytes.Equal(key, []byte{}) {
-			checkFields[2]++
-			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
-			}
-			return
-		}
-		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd'}) {
-			checkFields[3]++
-			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
-			}
-			return
-		}
-		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', 'R', 'e', 'f'}) {
-			checkFields[4]++
-			if checkFields[4] > 1 {
 				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return

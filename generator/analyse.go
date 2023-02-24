@@ -216,7 +216,13 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if !ok {
 			panic("can't inline")
 		}
-		return v1.collectFields(stct.Fields.List)
+		if len(fld.Names) == 0 {
+			return v1.collectFields(stct.Fields.List)
+		}
+		if len(fld.Names) > 1 {
+			panic("can't inline named fields")
+		}
+		return []*ast.Field{fld}
 
 	default:
 		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
