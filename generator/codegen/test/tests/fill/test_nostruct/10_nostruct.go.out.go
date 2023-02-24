@@ -2,7 +2,6 @@
 package test_nostruct
 
 import (
-	"fill/test_extr"
 	"fmt"
 	"time"
 

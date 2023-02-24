@@ -28,30 +28,6 @@ func (s *External) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
-	if _testAllOfFirstIsOne := v.Get(""); _testAllOfFirstIsOne != nil {
-		var valTestAllOfFirstIsOne TestAllOfFirstIsOne
-		err = valTestAllOfFirstIsOne.FillFromJson(_testAllOfFirstIsOne, objPath+".")
-		if err != nil {
-			return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
-		}
-		s.TestAllOfFirstIsOne = TestAllOfFirstIsOne(valTestAllOfFirstIsOne)
-	}
-	if _testAllOfSecond := v.Get(""); _testAllOfSecond != nil {
-		var valTestAllOfSecond TestAllOfSecond
-		err = valTestAllOfSecond.FillFromJson(_testAllOfSecond, objPath+".")
-		if err != nil {
-			return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
-		}
-		s.TestAllOfSecond = TestAllOfSecond(valTestAllOfSecond)
-	}
-	if _testAllOfThird := v.Get(""); _testAllOfThird != nil {
-		var valTestAllOfThird TestAllOfThird
-		err = valTestAllOfThird.FillFromJson(_testAllOfThird, objPath+".")
-		if err != nil {
-			return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
-		}
-		s.TestAllOfThird = TestAllOfThird(valTestAllOfThird)
-	}
 	if _field := v.Get("field"); _field != nil {
 		var valField []byte
 		if valField, err = _field.StringBytes(); err != nil {

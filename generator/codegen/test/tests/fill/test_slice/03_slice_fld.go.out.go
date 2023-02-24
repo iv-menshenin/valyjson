@@ -36,7 +36,7 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 			return fmt.Errorf("error parsing '%sstrs' value: %w", objPath, err)
 		}
 		valField := s.Field[:0]
-		if l := len(listA); cap(listA) < l || (l == 0 && s.Field == nil) {
+		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
 			valField = make([]string, 0, len(listA))
 		}
 		for _, listElem := range listA {
@@ -58,7 +58,7 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 			return fmt.Errorf("error parsing '%sints' value: %w", objPath, err)
 		}
 		valFieldRef := s.FieldRef[:0]
-		if l := len(listA); cap(listA) < l || (l == 0 && s.FieldRef == nil) {
+		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
 			valFieldRef = make([]*int, 0, len(listA))
 		}
 		for _, listElem := range listA {

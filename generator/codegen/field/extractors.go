@@ -41,13 +41,13 @@ func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, b
 		checkErrAndReturnParsingError(json),
 		//	valList := s.Field[:0]
 		valListSliceDeclare,
-		//	if l := len(listA); cap(listA) < l || (l == 0 && s.Field == nil) {
+		//	if l := len(listA); cap(valList) < l || (l == 0 && s.Field == nil) {
 		//		valList = make([]string, 0, l)
 		//	}
 		asthlp.IfInit(
 			asthlp.Assign(asthlp.MakeVarNames("l"), asthlp.Definition, asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues))),
 			asthlp.Or(
-				asthlp.Binary(asthlp.Call(asthlp.CapFn, asthlp.NewIdent(names.VarNameListOfArrayValues)), asthlp.NewIdent("l"), token.LSS),
+				asthlp.Binary(asthlp.Call(asthlp.CapFn, dst), asthlp.NewIdent("l"), token.LSS),
 				asthlp.ParenExpr(
 					asthlp.And(
 						asthlp.Equal(asthlp.NewIdent("l"), asthlp.Zero),
