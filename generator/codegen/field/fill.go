@@ -506,10 +506,13 @@ func (f *Field) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 			&ast.AssignStmt{
 				Lhs: []ast.Expr{dst},
 				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.CallExpr{
-					Fun:  ast.NewIdent("string"),
-					Args: []ast.Expr{rhs},
-				}},
+				Rhs: []ast.Expr{asthlp.Star(asthlp.Call(
+					asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent("string")))),
+					asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+						asthlp.Ref(rhs),
+					),
+				))},
 			},
 		}
 

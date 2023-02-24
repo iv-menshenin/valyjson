@@ -4,6 +4,7 @@ package test_map
 import (
 	"bytes"
 	"fmt"
+	"unsafe"
 
 	"github.com/valyala/fastjson"
 )
@@ -158,14 +159,14 @@ func (s *Property) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
 		}
-		s.Name = string(valName)
+		s.Name = *(*string)(unsafe.Pointer(&valName))
 	}
 	if _value := v.Get("value"); _value != nil {
 		var valValue []byte
 		if valValue, err = _value.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%svalue' value: %w", objPath, err)
 		}
-		s.Value = string(valValue)
+		s.Value = *(*string)(unsafe.Pointer(&valValue))
 	}
 	return nil
 }

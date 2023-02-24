@@ -4,6 +4,7 @@ package test_any
 import (
 	"bytes"
 	"fmt"
+	"unsafe"
 
 	"github.com/valyala/fastjson"
 )
@@ -33,7 +34,7 @@ func (s *TestAllOfSecond) FillFromJson(v *fastjson.Value, objPath string) (err e
 		if valComment, err = _comment.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%scomment' value: %w", objPath, err)
 		}
-		s.Comment = string(valComment)
+		s.Comment = *(*string)(unsafe.Pointer(&valComment))
 	}
 	if _level := v.Get("level"); _level != nil {
 		var valLevel int64
@@ -100,7 +101,7 @@ func (s *TestAllOfThird) FillFromJson(v *fastjson.Value, objPath string) (err er
 		if valCommand, err = _command.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%scommand' value: %w", objPath, err)
 		}
-		s.Command = string(valCommand)
+		s.Command = *(*string)(unsafe.Pointer(&valCommand))
 	}
 	if _range := v.Get("range"); _range != nil {
 		var valRange int64

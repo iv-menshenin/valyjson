@@ -58,7 +58,11 @@ func caseTestFillStatements(t *testing.T, testFile string) {
 		t.Fatal(err)
 	}
 	g.BuildFillers()
-	g.FixImports()
+	g.FixImports(
+		"test_extr", "fill/test_extr",
+		"test_any", "fill/test_any",
+		"test_string", "fill/test_string",
+	)
 	g.Print(testFile + ".out.go")
 }
 

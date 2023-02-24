@@ -4,6 +4,7 @@ package test_string
 import (
 	"bytes"
 	"fmt"
+	"unsafe"
 
 	"github.com/valyala/fastjson"
 )
@@ -33,7 +34,7 @@ func (s *TestStr01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		if valField, err = _field.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
 		}
-		s.Field = string(valField)
+		s.Field = *(*string)(unsafe.Pointer(&valField))
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
@@ -101,7 +102,7 @@ func (s *TestStr02) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		if valField, err = _field.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
 		}
-		s.Field = string(valField)
+		s.Field = *(*string)(unsafe.Pointer(&valField))
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
