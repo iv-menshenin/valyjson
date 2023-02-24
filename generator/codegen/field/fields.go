@@ -14,6 +14,7 @@ import (
 type (
 	// Field render helper for ast.Field
 	Field struct {
+		// field
 		field ast.Expr
 		// expr represents field type expression
 		expr ast.Expr
@@ -42,6 +43,38 @@ func New(f *ast.Field) *Field {
 	}
 	ff.prepareRef()
 	return &ff
+}
+
+func (f *Field) prepareRef() {
+	var dstType = f.expr
+	star, isStar := dstType.(*ast.StarExpr)
+	if isStar {
+		f.expr = star.X
+		f.isStar = true
+	}
+	_, isArray := dstType.(*ast.ArrayType)
+	_, isMap := dstType.(*ast.MapType)
+	_, isStruct := dstType.(*ast.StructType)
+	f.isNullable = isStar || isArray || isMap || isStruct
+	f.fillDenotedType()
+}
+
+func (f *Field) fillDenotedType() {
+	if i, ok := f.expr.(*ast.Ident); ok {
+		f.refx = denotedType(i)
+	} else {
+		f.refx = f.expr
+	}
+}
+
+func denotedType(t *ast.Ident) ast.Expr {
+	if t.Obj != nil {
+		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
+		if ok {
+			return ts.Type
+		}
+	}
+	return t
 }
 
 func (f *Field) DontCheckErr() {

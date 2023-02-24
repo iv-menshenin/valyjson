@@ -3,7 +3,7 @@ module github.com/iv-menshenin/valyjson
 go 1.18
 
 require (
-	github.com/iv-menshenin/go-ast v0.0.0-20230224132105-6f0fb417ec4d
+	github.com/iv-menshenin/go-ast v0.0.2
 	github.com/stretchr/testify v1.8.1
 	github.com/valyala/fastjson v1.6.4
 	golang.org/x/mod v0.7.0

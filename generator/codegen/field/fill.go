@@ -12,59 +12,21 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
+var (
+	// jsonGet gets json attribute value from json object
+	//  v.Get(name)
+	jsonGet        = asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameJsonValue, "Get"))
+	valueIsNotNull = asthlp.InlineFunc(ast.NewIdent("valueIsNotNull"))
+)
+
 // offset := v.Get("offset")
 func (f *Field) extract(v string) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{ast.NewIdent(v)},
-		Tok: token.DEFINE,
-		Rhs: []ast.Expr{f.getValue()},
-	}
+	return asthlp.Assign(asthlp.MakeVarNames(v), asthlp.Definition, f.getValue())
 }
 
 // v.Get("offset")
 func (f *Field) getValue() ast.Expr {
-	return &ast.CallExpr{
-		Fun: &ast.SelectorExpr{
-			X:   ast.NewIdent(names.VarNameJsonValue),
-			Sel: ast.NewIdent("Get"),
-		},
-		Args: []ast.Expr{&ast.BasicLit{
-			Kind:  token.STRING,
-			Value: "\"" + f.tags.JsonName() + "\"",
-		}},
-	}
-}
-
-func (f *Field) prepareRef() {
-	var dstType = f.expr
-	star, isStar := dstType.(*ast.StarExpr)
-	if isStar {
-		f.expr = star.X
-		f.isStar = true
-	}
-	_, isArray := dstType.(*ast.ArrayType)
-	_, isMap := dstType.(*ast.MapType)
-	_, isStruct := dstType.(*ast.StructType)
-	f.isNullable = isStar || isArray || isMap || isStruct
-	f.fillDenotedType()
-}
-
-func (f *Field) fillDenotedType() {
-	if i, ok := f.expr.(*ast.Ident); ok {
-		f.refx = denotedType(i)
-	} else {
-		f.refx = f.expr
-	}
-}
-
-func denotedType(t *ast.Ident) ast.Expr {
-	if t.Obj != nil {
-		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
-		if ok {
-			return ts.Type
-		}
-	}
-	return t
+	return asthlp.Call(jsonGet, asthlp.StringConstant(f.tags.JsonName()).Expr())
 }
 
 // fillFrom makes statements to fill some field according to its type
@@ -89,7 +51,7 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 }
 
 func makeBufVariable(name string) *ast.Ident {
-	return ast.NewIdent("val" + name)
+	return asthlp.NewIdent("val" + name)
 }
 
 // var elem int
@@ -98,63 +60,42 @@ func makeBufVariable(name string) *ast.Ident {
 // }
 // valList = append(valList, int32(elem))
 func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
-	var bufVariable = ast.NewIdent("elem")
+	var bufVariable = asthlp.NewIdent("elem")
 	var result []ast.Stmt
 	if f.isNullable {
 		//if !valueIsNotNull(listElem) {
 		//	valFieldRef = append(valFieldRef, nil)
 		//	continue
 		//}
-		result = append(result, &ast.IfStmt{
-			Cond: &ast.UnaryExpr{
-				Op: token.NOT,
-				X:  &ast.CallExpr{Fun: ast.NewIdent("valueIsNotNull"), Args: []ast.Expr{ast.NewIdent("listElem")}},
-			},
-			Body: &ast.BlockStmt{
-				List: []ast.Stmt{
-					appendStmt(dst, ast.NewIdent("nil")),
-					&ast.BranchStmt{Tok: token.CONTINUE},
-				},
-			},
-		})
+		result = append(result, asthlp.If(
+			asthlp.Not(asthlp.Call(valueIsNotNull, ast.NewIdent(v))),
+			appendStmt(dst, ast.NewIdent("nil")),
+			asthlp.Continue(),
+		))
 	}
 	result = append(result, f.TypedValue(bufVariable, v)...)
 	result = append(result, f.breakErr()...)
 
+	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
 	// valList = append(valList, int32(elem))
 	if f.isStar {
+		const newElem = "newElem"
 		result = append(
 			result,
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{ast.NewIdent("newElem")},
-				Tok: token.DEFINE,
-				Rhs: []ast.Expr{
-					&ast.CallExpr{
-						Fun:  f.expr,
-						Args: []ast.Expr{ast.NewIdent("elem")},
-					},
-				},
-			},
-			appendStmt(dst, &ast.UnaryExpr{X: ast.NewIdent("newElem"), Op: token.AND}),
+			asthlp.Assign(asthlp.MakeVarNames(newElem), asthlp.Definition, elemAsParticularType),
+			appendStmt(dst, asthlp.Ref(ast.NewIdent(newElem))),
 		)
 		return result
 	}
-	result = append(result, appendStmt(dst, &ast.CallExpr{
-		Fun:  f.expr,
-		Args: []ast.Expr{ast.NewIdent("elem")},
-	}))
-	return result
+	return append(result, appendStmt(dst, elemAsParticularType))
 }
 
 func appendStmt(dst, el ast.Expr) ast.Stmt {
-	return &ast.AssignStmt{
-		Lhs: []ast.Expr{dst},
-		Tok: token.ASSIGN,
-		Rhs: []ast.Expr{&ast.CallExpr{
-			Fun:  ast.NewIdent("append"),
-			Args: []ast.Expr{dst, el},
-		}},
-	}
+	return asthlp.Assign(
+		asthlp.VarNames{dst},
+		asthlp.Assignment,
+		asthlp.Call(asthlp.AppendFn, dst, el),
+	)
 }
 
 //  var val{name} {type}
@@ -312,7 +253,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 //		return fmt.Errorf("error parsing '%sint_fld8' value %d exceeds maximum for data type uint8", objPath, valIntFld8)
 //	}
 func (f *Field) checkErr(val *ast.Ident) []ast.Stmt {
-	var checkOverflow ast.Stmt = &ast.EmptyStmt{}
+	var checkOverflow = asthlp.EmptyStmt()
 	ident, isIdent := f.refx.(*ast.Ident)
 	if isIdent && ident.Name == "string" {
 		return nil
@@ -323,34 +264,18 @@ func (f *Field) checkErr(val *ast.Ident) []ast.Stmt {
 			phldr = "%f"
 		}
 		maxExceeded := "error parsing '%s" + f.tags.JsonName() + "' value " + phldr + " exceeds maximum for data type " + ident.Name
-		checkOverflow = &ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  val,
-				Op: token.GTR,
-				Y:  maxExp,
-			},
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{
-					Results: []ast.Expr{helpers.FmtError(maxExceeded, ast.NewIdent(names.VarNameObjPath), val)},
-				},
-			}},
-		}
+		checkOverflow = asthlp.If(
+			asthlp.Great(val, maxExp),
+			asthlp.Return(helpers.FmtError(maxExceeded, ast.NewIdent(names.VarNameObjPath), val)),
+		)
 	}
 
 	format := "error parsing '%s" + f.tags.JsonName() + "' value: %w"
 	return []ast.Stmt{
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(names.VarNameError),
-				Op: token.NEQ,
-				Y:  ast.NewIdent("nil"),
-			},
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.ReturnStmt{
-					Results: []ast.Expr{helpers.FmtError(format, ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError))},
-				},
-			}},
-		},
+		asthlp.If(
+			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
+			asthlp.Return(helpers.FmtError(format, ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError))),
+		),
 		checkOverflow,
 	}
 }
@@ -359,43 +284,46 @@ func getMaxByType(t *ast.Ident) ast.Expr {
 		return nil
 	}
 	switch t.Name {
+
 	case "float32":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxFloat32")}
+
 	case "int8":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt8")}
+
 	case "int16":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt16")}
+
 	case "int32":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxInt32")}
+
 	case "uint8":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint8")}
+
 	case "uint16":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint16")}
+
 	case "uint32":
 		return &ast.SelectorExpr{X: ast.NewIdent("math"), Sel: ast.NewIdent("MaxUint32")}
+
+	default:
+		return nil
 	}
-	return nil
 }
 
 //	if err != nil {
 //		break
 //	}
 func (f *Field) breakErr() []ast.Stmt {
-	if t, ok := f.expr.(*ast.Ident); ok && t.Name == "string" {
+	if helpers.IsIdent(f.expr, "string") {
 		// no error checking for string
 		return nil
 	}
 	return []ast.Stmt{
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  ast.NewIdent(names.VarNameError),
-				Op: token.NEQ,
-				Y:  ast.NewIdent("nil"),
-			},
-			Body: &ast.BlockStmt{List: []ast.Stmt{
-				&ast.BranchStmt{Tok: token.BREAK},
-			}},
-		},
+		asthlp.If(
+			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
+			asthlp.Break(),
+		),
 	}
 }
 
@@ -406,7 +334,7 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 		switch t.Name {
 
 		case "bool", "int64", "int", "float64":
-			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name, false)
+			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name)
 
 		default:
 			return f.newAndFillIn(rhs, dst, ast.NewIdent(t.Name))
@@ -415,16 +343,11 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 
 	case *ast.MapType:
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{asthlp.Ref(rhs)},
-			},
+			asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, asthlp.Ref(rhs)),
 		}
 
 	default:
 		return f.newAndFillIn(rhs, dst, f.expr)
-
 	}
 }
 
@@ -432,20 +355,8 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 // *{dst} = {t}({rhs})
 func (f *Field) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
 	return []ast.Stmt{
-		&ast.AssignStmt{
-			Lhs: []ast.Expr{dst},
-			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{
-				&ast.CallExpr{Fun: ast.NewIdent("new"), Args: []ast.Expr{t}},
-			},
-		},
-		&ast.AssignStmt{
-			Lhs: []ast.Expr{&ast.StarExpr{X: dst}},
-			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{
-				&ast.CallExpr{Fun: t, Args: []ast.Expr{rhs}},
-			},
-		},
+		assign(dst, asthlp.Call(asthlp.NewFn, t)),
+		assign(asthlp.Star(dst), asthlp.ExpressionTypeConvert(rhs, t)),
 	}
 }
 
@@ -454,48 +365,17 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	switch t := f.expr.(type) {
 
 	case *ast.Ident:
-		var isString bool
-		if i, ok := f.refx.(*ast.Ident); ok && i.Name == "string" {
-			isString = true
+		if helpers.IsIdent(f.refx, "string") {
+			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
 		}
-		return f.typedFillIn(rhs, dst, t.Name, isString)
+		return f.typedFillIn(rhs, dst, t.Name)
 
 	case *ast.StructType:
 		return result
 
-	case *ast.SelectorExpr:
-		result = append(
-			result,
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{rhs},
-			},
-		)
-		return result
-
-	case *ast.ArrayType:
-		// s.List = valList
-		result = append(
-			result,
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{rhs},
-			},
-		)
-		return result
-
-	case *ast.MapType:
-		// s.List = valList
-		result = append(
-			result,
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{rhs},
-			},
-		)
+	case *ast.MapType, *ast.ArrayType, *ast.SelectorExpr:
+		// {dst} = {rhs}
+		result = append(result, assign(dst, rhs))
 		return result
 
 	default:
@@ -503,109 +383,62 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	}
 }
 
-func (f *Field) typedFillIn(rhs, dst ast.Expr, t string, isString bool) []ast.Stmt {
-	if isString {
-		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{asthlp.Star(asthlp.Call(
-					asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent(t)))),
-					asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-						asthlp.Ref(rhs),
-					),
-				))},
-			},
-		}
-	}
-
+func (f *Field) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string":
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{asthlp.Star(asthlp.Call(
-					asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent("string")))),
-					asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-						asthlp.Ref(rhs),
-					),
-				))},
-			},
+			unsafeTypeConversion(dst, rhs, asthlp.NewIdent("string")),
 		}
 
 	case "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{rhs},
-			},
+			assign(dst, rhs),
 		}
 
 	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.CallExpr{
-					Fun:  ast.NewIdent(t),
-					Args: []ast.Expr{rhs},
-				}},
-			},
+			assign(dst, asthlp.ExpressionTypeConvert(rhs, ast.NewIdent(t))),
 		}
 
 	default:
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.CallExpr{
-					Fun:  ast.NewIdent(t),
-					Args: []ast.Expr{rhs},
-				}},
-			},
+			assign(dst, asthlp.ExpressionTypeConvert(rhs, ast.NewIdent(t))),
 		}
 	}
+}
+
+func unsafeTypeConversion(dst, rhs, t ast.Expr) ast.Stmt {
+	return asthlp.Assign(
+		asthlp.VarNames{dst},
+		asthlp.Assignment,
+		asthlp.Star(asthlp.Call(
+			asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(t))),
+			asthlp.Call(
+				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+				asthlp.Ref(rhs),
+			),
+		)),
+	)
+}
+
+func assign(dst, rhs ast.Expr) ast.Stmt {
+	return asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, rhs)
 }
 
 func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
 		return []ast.Stmt{
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.UnaryExpr{X: rhs, Op: token.AND}},
-			},
+			assign(dst, asthlp.Star(rhs)),
 		}
 
 	case "int8", "uint8", "int16", "uint16", "int32", "uint32", "float32":
-		var result []ast.Stmt
-		result = append(
-			result,
+		return []ast.Stmt{
 			// s.HeightRef = new(uint32)
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{dst},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.CallExpr{
-					Fun:  ast.NewIdent("new"),
-					Args: []ast.Expr{ast.NewIdent(t)},
-				}},
-			},
+			assign(dst, asthlp.Call(asthlp.NewFn, ast.NewIdent(t))),
 			// *s.HeightRef = uint32(xHeightRef)
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.StarExpr{X: dst}},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.CallExpr{
-					Fun:  ast.NewIdent(t),
-					Args: []ast.Expr{rhs},
-				}},
-			},
-		)
-		return result
+			assign(asthlp.Star(dst), asthlp.ExpressionTypeConvert(rhs, ast.NewIdent(t))),
+		}
 
 	default:
 		return nil
@@ -620,45 +453,23 @@ func (f *Field) ifDefault(name string) []ast.Stmt {
 		if f.tags.JsonTags().Has("required") {
 			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
 			return []ast.Stmt{
-				&ast.ReturnStmt{
-					Results: []ast.Expr{&ast.CallExpr{
-						Fun: &ast.SelectorExpr{X: ast.NewIdent("fmt"), Sel: ast.NewIdent("Errorf")},
-						Args: []ast.Expr{
-							&ast.BasicLit{Kind: token.STRING, Value: "\"required element '%s" + f.tags.JsonName() + "' is missing\""},
-							ast.NewIdent(names.VarNameObjPath),
-						},
-					}},
-				},
+				asthlp.Return(
+					helpers.FmtError("\"required element '%s"+f.tags.JsonName()+"' is missing\"", ast.NewIdent(names.VarNameObjPath)),
+				),
 			}
 		}
 		return nil
 	}
 	if f.isStar {
+		var tmpVarName = "__" + name
 		return []ast.Stmt{
-			&ast.DeclStmt{
-				Decl: &ast.GenDecl{
-					Tok: token.VAR,
-					Specs: []ast.Spec{
-						&ast.ValueSpec{
-							Names:  []*ast.Ident{ast.NewIdent("x" + name)},
-							Type:   f.expr,
-							Values: []ast.Expr{helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())},
-						},
-					},
-				},
-			},
-			&ast.AssignStmt{
-				Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
-				Tok: token.ASSIGN,
-				Rhs: []ast.Expr{&ast.UnaryExpr{Op: token.AND, X: ast.NewIdent("x" + name)}},
-			},
+			asthlp.Var(
+				asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue()))),
+			),
+			assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(tmpVarName))),
 		}
 	}
 	return []ast.Stmt{
-		&ast.AssignStmt{
-			Lhs: []ast.Expr{&ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}},
-			Tok: token.ASSIGN,
-			Rhs: []ast.Expr{helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())},
-		},
+		assign(asthlp.SimpleSelector(names.VarNameReceiver, name), helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())),
 	}
 }

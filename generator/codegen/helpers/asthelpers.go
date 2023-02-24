@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+func IsIdent(expr ast.Expr, ident string) bool {
+	if i, ok := expr.(*ast.Ident); ok {
+		return i.Name == ident
+	}
+	return false
+}
+
 func BasicLiteralFromType(t ast.Expr, val string) ast.Expr {
 	switch i := t.(type) {
 
