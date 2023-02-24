@@ -128,7 +128,7 @@ func (m *Map) FillerFunc() ast.Decl {
 					asthlp.Assign(
 						asthlp.VarNames{
 							asthlp.Index(
-								&ast.ParenExpr{X: asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))},
+								asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
 								asthlp.FreeExpression(asthlp.VariableTypeConvert("key", m.spec.Key)),
 							),
 						},

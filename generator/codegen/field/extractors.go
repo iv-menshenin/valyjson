@@ -11,18 +11,7 @@ import (
 )
 
 // arrayExtraction makes a block of code that extracts values from json array
-//   if list := v.Get("list"); list != nil {
-//     var listA []*fastjson.Value
-//     listA, err = list.Array()
-//     if err != nil {
-//       return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
-//     }
-//     s.List = make([]int32, 0, len(listA))
-//     for listElemNum, listElem := range listA {
-//       . . .
-//     }
-//   }
-func arrayExtraction(dst *ast.Ident, v, json string, t ast.Expr, body []ast.Stmt) []ast.Stmt {
+func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, body []ast.Stmt) []ast.Stmt {
 	varListA := asthlp.Var(
 		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
 	)
@@ -30,15 +19,16 @@ func arrayExtraction(dst *ast.Ident, v, json string, t ast.Expr, body []ast.Stmt
 		asthlp.MakeVarNames(names.VarNameListOfArrayValues, names.VarNameError),
 		asthlp.Assignment, asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(v, "Array"))),
 	)
+	valListSliceMake := asthlp.Call(
+		asthlp.MakeFn,
+		asthlp.ArrayType(t),
+		asthlp.IntegerConstant(0).Expr(),
+		asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues)),
+	)
 	valListSliceDeclare := asthlp.Assign(
 		asthlp.VarNames{dst},
 		asthlp.Definition,
-		asthlp.Call(
-			asthlp.MakeFn,
-			asthlp.ArrayType(t),
-			asthlp.IntegerConstant(0).Expr(),
-			asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues)),
-		),
+		asthlp.SliceExpr(fld, nil, asthlp.IntegerConstant(0)),
 	)
 	return asthlp.Block(
 		// var listA []*fastjson.Value
@@ -49,8 +39,24 @@ func arrayExtraction(dst *ast.Ident, v, json string, t ast.Expr, body []ast.Stmt
 		// 		return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
 		// 	}
 		checkErrAndReturnParsingError(json),
-		// valList := make([]int32, 0, len(listA))
+		//	valList := s.Field[:0]
 		valListSliceDeclare,
+		//	if l := len(listA); cap(listA) < l || (l == 0 && s.Field == nil) {
+		//		valList = make([]string, 0, l)
+		//	}
+		asthlp.IfInit(
+			asthlp.Assign(asthlp.MakeVarNames("l"), asthlp.Definition, asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues))),
+			asthlp.Or(
+				asthlp.Binary(asthlp.Call(asthlp.CapFn, asthlp.NewIdent(names.VarNameListOfArrayValues)), asthlp.NewIdent("l"), token.LSS),
+				asthlp.ParenExpr(
+					asthlp.And(
+						asthlp.Equal(asthlp.NewIdent("l"), asthlp.Zero),
+						asthlp.IsNil(fld),
+					),
+				),
+			),
+			asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, valListSliceMake),
+		),
 		// for _, listElem := range listA {
 		asthlp.Range(true, asthlp.Blank.Name, names.VarNameListElem, asthlp.NewIdent(names.VarNameListOfArrayValues), body...),
 	).List

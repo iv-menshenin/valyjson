@@ -73,16 +73,17 @@ func denotedType(t *ast.Ident) ast.Expr {
 //	    return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
 //	}
 func (f *Field) fillFrom(name, v string) []ast.Stmt {
+	f.field = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	var bufVariable = makeBufVariable(name)
 	var result []ast.Stmt
+
 	result = append(result, f.TypedValue(bufVariable, v)...)
 	result = append(result, f.checkErr(bufVariable)...)
 
-	var fldExpr = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
 	if f.isStar {
-		result = append(result, f.fillRefField(bufVariable, fldExpr)...)
+		result = append(result, f.fillRefField(bufVariable, f.field)...)
 	} else {
-		result = append(result, f.fillField(bufVariable, fldExpr)...)
+		result = append(result, f.fillField(bufVariable, f.field)...)
 	}
 	return result
 }
@@ -187,7 +188,7 @@ func (f *Field) TypedValue(dst *ast.Ident, v string) []ast.Stmt {
 			tags: tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
 		}
 		intF.prepareRef()
-		result = append(result, arrayExtraction(dst, v, f.tags.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
+		result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
 		return result
 
 	case *ast.MapType:

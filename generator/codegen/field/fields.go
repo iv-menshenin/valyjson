@@ -14,6 +14,7 @@ import (
 type (
 	// Field render helper for ast.Field
 	Field struct {
+		field ast.Expr
 		// expr represents field type expression
 		expr ast.Expr
 		// refx represents field type denoted value
