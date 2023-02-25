@@ -41,19 +41,19 @@ func (s *TestStr01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfieldRef' value: %w", objPath, err)
 		}
-		s.FieldRef = new(string)
-		*s.FieldRef = string(valFieldRef)
+		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
 	}
 	if _defRef := v.Get("defRef"); valueIsNotNull(_defRef) {
 		var valDefRef []byte
 		if valDefRef, err = _defRef.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sdefRef' value: %w", objPath, err)
 		}
-		s.DefRef = new(string)
-		*s.DefRef = string(valDefRef)
+		s.DefRef = (*string)(unsafe.Pointer(&valDefRef))
 	} else {
-		var __DefRef string = "default"
-		s.DefRef = &__DefRef
+		if _defRef == nil {
+			var __DefRef string = "default"
+			s.DefRef = &__DefRef
+		}
 	}
 	return nil
 }
@@ -127,8 +127,7 @@ func (s *TestStr02) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
 			return fmt.Errorf("error parsing '%sfieldRef' value: %w", objPath, err)
 		}
-		s.FieldRef = new(string)
-		*s.FieldRef = string(valFieldRef)
+		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
 	}
 	if _string := v.Get("string"); _string != nil {
 		var valString []byte
@@ -177,4 +176,100 @@ func (s *TestStr02) validate(v *fastjson.Value, objPath string) error {
 		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestStr01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Field != "" {
+		result.WriteString(`"field":"`)
+		buf = marshalString(buf[:0], s.Field)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"field":""`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FieldRef != nil {
+		result.WriteString(`"fieldRef":"`)
+		buf = marshalString(buf[:0], *s.FieldRef)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fieldRef":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.DefRef != nil {
+		result.WriteString(`"defRef":"`)
+		buf = marshalString(buf[:0], *s.DefRef)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"defRef":null`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestStr02) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Field != "" {
+		result.WriteString(`"field":"`)
+		buf = marshalString(buf[:0], s.Field)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"field":""`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FieldRef != nil {
+		result.WriteString(`"fieldRef":"`)
+		buf = marshalString(buf[:0], *s.FieldRef)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fieldRef":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.String != "" {
+		result.WriteString(`"string":"`)
+		buf = marshalString(buf[:0], string(s.String))
+		result.Write(buf)
+	} else {
+		result.WriteString(`"string":""`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

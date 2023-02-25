@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"strconv"
+	"time"
 
 	"github.com/valyala/fastjson"
 )
@@ -277,64 +279,6 @@ func (s *TestInh03) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTestInh04 used for pooling Parsers for TestInh04 JSONs.
-var jsonParserTestInh04 fastjson.ParserPool
-
-// UnmarshalJSON implements json.Unmarshaler
-func (s *TestInh04) UnmarshalJSON(data []byte) error {
-	parser := jsonParserTestInh04.Get()
-	// parses data containing JSON
-	v, err := parser.ParseBytes(data)
-	if err != nil {
-		return err
-	}
-	defer jsonParserTestInh04.Put(parser)
-	return s.FillFromJson(v, "")
-}
-
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestInh04) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	// strict rules
-	if err = s.validate(v, objPath); err != nil {
-		return err
-	}
-	if _fooBar := v.Get("foo-bar"); _fooBar != nil {
-		var valFooBar int
-		valFooBar, err = _fooBar.Int()
-		if err != nil {
-			return fmt.Errorf("error parsing '%sfoo-bar' value: %w", objPath, err)
-		}
-		if valFooBar > math.MaxInt16 {
-			return fmt.Errorf("error parsing '%sfoo-bar' value %d exceeds maximum for data type int16", objPath, valFooBar)
-		}
-		s.FooBar = int16(valFooBar)
-	}
-	return nil
-}
-
-// validate checks for correct data structure
-func (s *TestInh04) validate(v *fastjson.Value, objPath string) error {
-	o, err := v.Object()
-	if err != nil {
-		return err
-	}
-	var checkFields [1]int
-	o.Visit(func(key []byte, _ *fastjson.Value) {
-		if err != nil {
-			return
-		}
-		if bytes.Equal(key, []byte{'f', 'o', 'o', '-', 'b', 'a', 'r'}) {
-			checkFields[0]++
-			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
-			}
-			return
-		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
-	})
-	return err
-}
-
 // jsonParserTestNested01 used for pooling Parsers for TestNested01 JSONs.
 var jsonParserTestNested01 fastjson.ParserPool
 
@@ -507,4 +451,234 @@ func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
 		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestInh01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if buf, err = s.TestInh02.MarshalAppend(buf[:0]); err != nil {
+		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+	} else {
+		if len(buf) > 2 {
+			result.WriteString(`"injected":`)
+			result.Write(buf)
+		}
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Int16 != 0 {
+		result.WriteString(`"int_16":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Int16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Random != 0 {
+		result.WriteString(`"random":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Random), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"random":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if !s.DateBegin.IsZero() {
+		result.WriteString(`"date_begin":"`)
+		buf = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
+		result.Write(buf)
+		result.WriteRune('"')
+	} else {
+		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if buf, err = s.Nested1.MarshalAppend(buf[:0]); err != nil {
+		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+	} else {
+		result.WriteString(`"nested1":`)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Nested2 != nil {
+		if buf, err = s.Nested2.MarshalAppend(buf[:0]); err != nil {
+			return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		} else {
+			result.WriteString(`"nested2":`)
+			result.Write(buf)
+		}
+	} else {
+		result.WriteString(`"nested2":null`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestInh02) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if s.Int32 != 0 {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"int_32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Int32), 10)
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestInh03) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Int16 != 0 {
+		result.WriteString(`"int_16":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Int16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Random != 0 {
+		result.WriteString(`"random":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Random), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"random":0`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestNested01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Field32 != 0 {
+		result.WriteString(`"field_32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"field_32":0`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestNested02) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Field32 != 0 {
+		result.WriteString(`"field_32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"field_32":0`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestNested03) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s TestNested03) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Field32 != 0 {
+		result.WriteString(`"field_32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"field_32":0`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

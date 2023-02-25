@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_NumStruct01(t *testing.T) {
+func Test_NumStruct01_Unmarshal(t *testing.T) {
 	t.Run("empty_struct", func(t *testing.T) {
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{}`))
@@ -50,7 +50,7 @@ func Test_NumStruct01(t *testing.T) {
 	})
 	t.Run("null_filled_part", func(t *testing.T) {
 		var num NumStruct01
-		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld32": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
+		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
 		require.NoError(t, err)
 		require.Nil(t, num.RefIntFld8)
 		require.Nil(t, num.RefUintFld8)
@@ -165,7 +165,66 @@ func Test_NumStruct01(t *testing.T) {
 	})
 }
 
-func Test_NumStruct02(t *testing.T) {
+func Test_NumStruct01_Marshal(t *testing.T) {
+	t.Run("filled-nonref", func(t *testing.T) {
+		var test = NumStruct01{
+			IntFld:     -12,
+			IntFld8:    78,
+			IntFld16:   -133,
+			IntFld32:   65536,
+			IntFld64:   -1,
+			UintFld:    0,
+			UintFld8:   255,
+			UintFld16:  6780,
+			UintFld32:  4294967295,
+			UintFld64:  4294967296,
+			FloatFld32: 123.00,
+			FloatFld64: -456.123,
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		var expected = `{
+"int_fld": -12, "int_fld8": 78, "int_fld16": -133, "int_fld32": 65536, "int_fld64": -1,
+"Uint_fld": 0, "Uint_fld8": 255, "Uint_fld16": 6780, "Uint_fld32": 4294967295, "Uint_fld64": 4294967296, 
+"fl23": 123.00, "fl64": -456.123,
+"ref_int_fld": null, "ref_int_fld16": null, "ref_int_fld32": null, "ref_int_fld64": null,
+"ref_Uint_fld": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null,
+"ref_fl23": null, "ref_fl64": null}`
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("filled-refs", func(t *testing.T) {
+		var test = NumStruct01{
+			RefIntFld:     ref(133),
+			RefIntFld8:    ref(int8(-4)),
+			RefIntFld16:   ref(int16(0)),
+			RefIntFld32:   ref(int32(2147483647)),
+			RefIntFld64:   ref(int64(-999)),
+			RefUintFld:    ref(uint(0)),
+			RefUintFld8:   ref(uint8(254)),
+			RefUintFld16:  ref(uint16(65535)),
+			RefUintFld32:  ref(uint32(65537)),
+			RefUintFld64:  ref(uint64(1)),
+			RefFloatFld32: ref(float32(-1)),
+			RefFloatFld64: ref(float64(-1)),
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		var expected = `{
+"int_fld": 0, "int_fld16": 0, "int_fld32": 0, "int_fld64": 0,
+"Uint_fld": 0, "Uint_fld16": 0, "Uint_fld32": 0, "Uint_fld64": 0, 
+"fl23": 0, "fl64": 0,
+"ref_int_fld": 133, "ref_int_fld8": -4, "ref_int_fld16": 0, "ref_int_fld32": 2147483647, "ref_int_fld64": -999,
+"ref_Uint_fld": 0, "ref_Uint_fld8": 254, "ref_Uint_fld16": 65535, "ref_Uint_fld32": 65537, "ref_Uint_fld64": 1,
+"ref_fl23": -1, "ref_fl64": -1}`
+		require.JSONEq(t, expected, string(b))
+	})
+}
+
+func ref[T any](a T) *T {
+	return &a
+}
+
+func Test_NumStruct02_Unmarshal(t *testing.T) {
 	t.Run("empty_struct", func(t *testing.T) {
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{}`))

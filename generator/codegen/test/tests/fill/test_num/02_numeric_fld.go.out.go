@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"strconv"
 
 	"github.com/valyala/fastjson"
 )
@@ -192,8 +193,10 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefIntFld32 = new(int32)
 		*s.RefIntFld32 = int32(valRefIntFld32)
 	} else {
-		var __RefIntFld32 int32 = 456
-		s.RefIntFld32 = &__RefIntFld32
+		if _refIntFld32 == nil {
+			var __RefIntFld32 int32 = 456
+			s.RefIntFld32 = &__RefIntFld32
+		}
 	}
 	if _refIntFld64 := v.Get("ref_int_fld64"); valueIsNotNull(_refIntFld64) {
 		var valRefIntFld64 int64
@@ -721,8 +724,10 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		s.RefFloatFld32 = new(float32)
 		*s.RefFloatFld32 = float32(valRefFloatFld32)
 	} else {
-		var __RefFloatFld32 float32 = 1.234
-		s.RefFloatFld32 = &__RefFloatFld32
+		if _refFloatFld32 == nil {
+			var __RefFloatFld32 float32 = 1.234
+			s.RefFloatFld32 = &__RefFloatFld32
+		}
 	}
 	if _refFloatFld64 := v.Get("ref_fl64"); valueIsNotNull(_refFloatFld64) {
 		var valRefFloatFld64 float64
@@ -917,4 +922,512 @@ func (s *NumStruct02) validate(v *fastjson.Value, objPath string) error {
 		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *NumStruct01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld != 0 {
+		result.WriteString(`"int_fld":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld":0`)
+	}
+	if s.IntFld8 != 0 {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"int_fld8":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld8), 10)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld16 != 0 {
+		result.WriteString(`"int_fld16":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld32 != 0 {
+		result.WriteString(`"int_fld32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld32":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld64 != 0 {
+		result.WriteString(`"int_fld64":`)
+		buf = strconv.AppendInt(buf[:0], s.IntFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld != 0 {
+		result.WriteString(`"Uint_fld":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld":0`)
+	}
+	if s.UintFld8 != 0 {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"Uint_fld8":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld8), 10)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld16 != 0 {
+		result.WriteString(`"Uint_fld16":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld32 != 0 {
+		result.WriteString(`"Uint_fld32":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld32":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld64 != 0 {
+		result.WriteString(`"Uint_fld64":`)
+		buf = strconv.AppendUint(buf[:0], s.UintFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FloatFld32 != 0 {
+		result.WriteString(`"fl23":`)
+		buf = strconv.AppendFloat(buf[:0], float64(s.FloatFld32), 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fl23":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FloatFld64 != 0 {
+		result.WriteString(`"fl64":`)
+		buf = strconv.AppendFloat(buf[:0], s.FloatFld64, 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fl64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld != nil {
+		result.WriteString(`"ref_int_fld":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld":null`)
+	}
+	if s.RefIntFld8 != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"ref_int_fld8":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld8), 10)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld16 != nil {
+		result.WriteString(`"ref_int_fld16":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld16":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld32 != nil {
+		result.WriteString(`"ref_int_fld32":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld32":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld64 != nil {
+		result.WriteString(`"ref_int_fld64":`)
+		buf = strconv.AppendInt(buf[:0], *s.RefIntFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld64":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld != nil {
+		result.WriteString(`"ref_Uint_fld":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld":null`)
+	}
+	if s.RefUintFld8 != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"ref_Uint_fld8":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld8), 10)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld16 != nil {
+		result.WriteString(`"ref_Uint_fld16":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld16":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld32 != nil {
+		result.WriteString(`"ref_Uint_fld32":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld32":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld64 != nil {
+		result.WriteString(`"ref_Uint_fld64":`)
+		buf = strconv.AppendUint(buf[:0], *s.RefUintFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld64":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefFloatFld32 != nil {
+		result.WriteString(`"ref_fl23":`)
+		buf = strconv.AppendFloat(buf[:0], float64(*s.RefFloatFld32), 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_fl23":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefFloatFld64 != nil {
+		result.WriteString(`"ref_fl64":`)
+		buf = strconv.AppendFloat(buf[:0], *s.RefFloatFld64, 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_fl64":null`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *NumStruct02) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld != 0 {
+		result.WriteString(`"int_fld":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld8 != 0 {
+		result.WriteString(`"int_fld8":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld8), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld8":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld16 != 0 {
+		result.WriteString(`"int_fld16":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld32 != 0 {
+		result.WriteString(`"int_fld32":`)
+		buf = strconv.AppendInt(buf[:0], int64(s.IntFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld32":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.IntFld64 != 0 {
+		result.WriteString(`"int_fld64":`)
+		buf = strconv.AppendInt(buf[:0], s.IntFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"int_fld64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld != 0 {
+		result.WriteString(`"Uint_fld":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld8 != 0 {
+		result.WriteString(`"Uint_fld8":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld8), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld8":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld16 != 0 {
+		result.WriteString(`"Uint_fld16":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld16":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld32 != 0 {
+		result.WriteString(`"Uint_fld32":`)
+		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld32":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.UintFld64 != 0 {
+		result.WriteString(`"Uint_fld64":`)
+		buf = strconv.AppendUint(buf[:0], s.UintFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"Uint_fld64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FloatFld32 != 0 {
+		result.WriteString(`"fl23":`)
+		buf = strconv.AppendFloat(buf[:0], float64(s.FloatFld32), 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fl23":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.FloatFld64 != 0 {
+		result.WriteString(`"fl64":`)
+		buf = strconv.AppendFloat(buf[:0], s.FloatFld64, 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"fl64":0`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld != nil {
+		result.WriteString(`"ref_int_fld":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld8 != nil {
+		result.WriteString(`"ref_int_fld8":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld8), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld8":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld16 != nil {
+		result.WriteString(`"ref_int_fld16":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld16":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld32 != nil {
+		result.WriteString(`"ref_int_fld32":`)
+		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld32":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefIntFld64 != nil {
+		result.WriteString(`"ref_int_fld64":`)
+		buf = strconv.AppendInt(buf[:0], *s.RefIntFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_int_fld64":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld != nil {
+		result.WriteString(`"ref_Uint_fld":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld8 != nil {
+		result.WriteString(`"ref_Uint_fld8":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld8), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld8":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld16 != nil {
+		result.WriteString(`"ref_Uint_fld16":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld16), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld16":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld32 != nil {
+		result.WriteString(`"ref_Uint_fld32":`)
+		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld32), 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld32":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefUintFld64 != nil {
+		result.WriteString(`"ref_Uint_fld64":`)
+		buf = strconv.AppendUint(buf[:0], *s.RefUintFld64, 10)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_Uint_fld64":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefFloatFld32 != nil {
+		result.WriteString(`"ref_fl23":`)
+		buf = strconv.AppendFloat(buf[:0], float64(*s.RefFloatFld32), 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_fl23":null`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.RefFloatFld64 != nil {
+		result.WriteString(`"ref_fl64":`)
+		buf = strconv.AppendFloat(buf[:0], *s.RefFloatFld64, 'f', -1, 64)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"ref_fl64":null`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

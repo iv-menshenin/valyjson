@@ -6,7 +6,7 @@ import (
 )
 
 // TestAllOf01 tests allOf
-//json:custom
+//json:custom,decode
 type TestAllOf01 struct {
 	TestAllOfFirstIsOne
 	TestAllOfSecond
@@ -14,7 +14,7 @@ type TestAllOf01 struct {
 }
 
 // TestAllOfFirstIsOne tests oneOf
-//json:custom
+//json:custom,decode
 type TestAllOfFirstIsOne struct {
 	OneOf `json:"value"`
 }
@@ -69,13 +69,13 @@ func (t *TestAllOfFirstIsOne) MarshalJSON() ([]byte, error) {
 
 type (
 	// TestAllOfSecond tests allOf option
-	//json:optional
+	//json:optional,decode
 	TestAllOfSecond struct {
 		Comment string `json:"comment"`
 		Level   int64  `json:"level,omitempty"`
 	}
 	// TestAllOfThird tests allOf option
-	//json:optional
+	//json:optional,decode
 	TestAllOfThird struct {
 		Command string `json:"command,omitempty"`
 		Range   int64  `json:"range,omitempty"`

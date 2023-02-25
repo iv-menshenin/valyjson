@@ -199,10 +199,10 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 //   }
 func (s *Struct) MarshalFunc() ast.Decl {
 	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
-		Comments(names.MethodNameMarshal+" serializes the structure with all its values into JSON format").
+		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(s.name)))).
 		Results(
-			asthlp.Field("", nil, asthlp.Byte),
+			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
 			asthlp.Field("", nil, asthlp.ErrorType),
 		).
 		AppendStmt(
@@ -217,10 +217,16 @@ func (s *Struct) MarshalFunc() ast.Decl {
 		).Decl()
 }
 
-// func (s *S) MarshalAppend(dst []byte) ([]byte, error) {
+// AppendJsonFunc produces MarshalAppend(dst []byte) ([]byte, error)
 func (s *Struct) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend)).
-		Comments(names.MethodNameAppend + " serializes all fields of the structure using a buffer")
+		Comments("// "+names.MethodNameAppend+" serializes all fields of the structure using a buffer.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(s.name))).
+		Params(asthlp.Field("dst", nil, asthlp.ArrayType(asthlp.Byte))).
+		Results(
+			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
+			asthlp.Field("", nil, asthlp.ErrorType),
+		)
 
 	fn.AppendStmt(
 		// var result = bytes.NewBuffer(dst)
@@ -233,39 +239,27 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		// 	buf [128]byte
 		// 	err error
 		// )
-		&ast.DeclStmt{
-			Decl: &ast.GenDecl{
-				Tok: token.VAR,
-				Specs: []ast.Spec{
-					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent("b")},
-						Type:  &ast.ArrayType{Elt: ast.NewIdent("byte")},
-					},
-					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent("buf")},
-						Type:  &ast.ArrayType{Elt: ast.NewIdent("byte"), Len: &ast.BasicLit{Kind: token.INT, Value: "128"}},
-					},
-					&ast.ValueSpec{
-						Names: []*ast.Ident{ast.NewIdent(names.VarNameError)},
-						Type:  ast.NewIdent("error"),
-					},
-				},
-			},
-		},
+		asthlp.Var(
+			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
+			asthlp.VariableValue("buf", asthlp.FreeExpression(asthlp.Call(
+				asthlp.MakeFn,
+				asthlp.ArrayType(asthlp.Byte),
+				asthlp.IntegerConstant(0).Expr(),
+				asthlp.IntegerConstant(128).Expr(),
+			))),
+		),
 		// result.WriteRune('{')
-		&ast.ExprStmt{X: &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
-			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "'{'"}},
-		}},
+		asthlp.CallStmt(asthlp.Call(
+			asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune")),
+			asthlp.RuneConstant('{').Expr(),
+		)),
 	)
 
-	var body = []ast.Stmt{}
-
-	for _, field := range s.spec.Fields.List {
-		body = append(body, jsonFieldStmts(field)...)
+	for _, fld := range s.spec.Fields.List {
+		fn.AppendStmt(jsonFieldStmts(fld)...)
 	}
-	body = append(
-		body,
+
+	fn.AppendStmt(
 		// result.WriteRune('}')
 		// return result.Bytes(), err
 		&ast.ExprStmt{X: &ast.CallExpr{
@@ -279,28 +273,23 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 			ast.NewIdent("err"),
 		}},
 	)
-	return &ast.FuncDecl{
-		Doc: &ast.CommentGroup{List: []*ast.Comment{
-			{Text: "\n// " + names.MethodNameAppend + " serializes all fields of the structure using a buffer"},
-		}},
-		Recv: &ast.FieldList{List: []*ast.Field{
-			{Names: []*ast.Ident{ast.NewIdent(names.VarNameReceiver)}, Type: &ast.StarExpr{X: ast.NewIdent(s.name)}},
-		}},
-		Name: ast.NewIdent(names.MethodNameAppend),
-		Type: &ast.FuncType{
-			Params: &ast.FieldList{List: []*ast.Field{
-				{Names: []*ast.Ident{ast.NewIdent("dst")}, Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
-			}},
-			Results: &ast.FieldList{List: []*ast.Field{
-				{Type: &ast.ArrayType{Elt: ast.NewIdent("byte")}},
-				{Type: ast.NewIdent("error")},
-			}},
-		},
-		Body: &ast.BlockStmt{List: body},
-	}
+	return fn.Decl()
 }
 
 func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
+	if len(fld.Names) == 0 {
+		factory := field.New(fld)
+		name := ""
+		switch t := fld.Type.(type) {
+
+		case *ast.Ident:
+			name = t.Name
+
+		case *ast.SelectorExpr:
+			name = t.Sel.Name
+		}
+		return factory.MarshalStatements(name)
+	}
 	var result []ast.Stmt
 	factory := field.New(fld)
 	for _, name := range fld.Names {

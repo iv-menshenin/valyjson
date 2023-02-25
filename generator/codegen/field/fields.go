@@ -3,7 +3,6 @@ package field
 import (
 	"fmt"
 	"go/ast"
-	"go/token"
 	"unicode"
 
 	asthlp "github.com/iv-menshenin/go-ast"
@@ -102,22 +101,15 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 	if stmt := f.fillFrom(name, v); len(stmt) > 0 {
 		body = &ast.BlockStmt{List: stmt}
 	}
-	if stmt := f.ifDefault(name); len(stmt) > 0 {
+	if stmt := f.ifDefault(v, name); len(stmt) > 0 {
 		els = &ast.BlockStmt{List: stmt}
 	}
 	if body == nil {
 		panic(fmt.Errorf("can`t prepare AST for '%s'", name))
 	}
-	var condition ast.Expr = &ast.BinaryExpr{
-		X:  ast.NewIdent(v),
-		Op: token.NEQ,
-		Y:  ast.NewIdent("nil"),
-	}
+	var condition = asthlp.NotNil(ast.NewIdent(v))
 	if f.isNullable {
-		condition = &ast.CallExpr{
-			Fun:  ast.NewIdent("valueIsNotNull"),
-			Args: []ast.Expr{ast.NewIdent(v)},
-		}
+		condition = asthlp.Call(asthlp.InlineFunc(asthlp.NewIdent("valueIsNotNull")), ast.NewIdent(v))
 	}
 	return asthlp.Block(
 		asthlp.IfInitElse(
@@ -136,37 +128,60 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 // }
 // result.Write(b)
 func (f *Field) MarshalStatements(name string) []ast.Stmt {
-	var mrsh []ast.Stmt
-	var elseStmt ast.Stmt
 	var v = intermediateVarName(name, f.tags)
-	var src = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
-	switch tt := f.expr.(type) {
+	var src = asthlp.SimpleSelector(names.VarNameReceiver, name)
+	switch tt := f.refx.(type) {
 
 	case *ast.Ident:
+		return f.typeMarshal(src, v, tt.Name)
+
+	case *ast.SelectorExpr:
+		if tt.Sel.Name == "Time" {
+			block := timeMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
+			return block.Render(putCommaFirstIf)
+		}
+		panic("d")
+
+	case *ast.StructType:
+		var block WriteBlock
 		if f.isStar {
-			mrsh = append(mrsh, f.typeRefMarshal(src, v, tt.Name)...)
+			block = refStructMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
 		} else {
-			mrsh = append(mrsh, f.typeMarshal(src, v, tt.Name)...)
+			block = structMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
 		}
-		if !f.tags.JsonTags().Has("omitempty") {
-			elseStmt = &ast.BlockStmt{
-				List: f.typeMarshalDefault(src, v, tt.Name),
-			}
-		}
+		return block.Render(putCommaFirstIf)
 
 	default:
 		// todo @menshenin panic
+		panic("not implemented")
 	}
-	return []ast.Stmt{
-		&ast.IfStmt{
-			Cond: &ast.BinaryExpr{
-				X:  src,
-				Op: token.NEQ,
-				Y:  &ast.BasicLit{Kind: token.STRING, Value: "\"\""},
-			},
-			Body: &ast.BlockStmt{List: mrsh},
-			Else: elseStmt,
-		},
+}
+
+func (f *Field) notEmptyCondition(src ast.Expr) ast.Expr {
+	i, ok := f.refx.(*ast.Ident)
+	if !ok {
+		return src
+		// TODO panic("expected ident")
+	}
+	switch i.Name {
+
+	case "int", "int8", "int16", "int32", "int64":
+		return asthlp.NotEqual(src, asthlp.Zero)
+
+	case "uint", "uint8", "uint16", "uint32", "uint64":
+		return asthlp.NotEqual(src, asthlp.Zero)
+
+	case "float32", "float64":
+		return asthlp.NotEqual(src, asthlp.Zero)
+
+	case "bool":
+		return src
+
+	case "string":
+		return asthlp.NotEqual(src, asthlp.EmptyString)
+
+	default:
+		panic("not implemented")
 	}
 }
 

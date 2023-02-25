@@ -38,6 +38,9 @@ func (g *Gen) BuildFillers() {
 		if structDecl.Tags().Custom() {
 			continue
 		}
+		if structDecl.Tags().EncodersOnly() {
+			continue
+		}
 		if unm := structDecl.UnmarshalFunc(); len(unm) > 0 {
 			g.result.Decls = append(g.result.Decls, unm...)
 		}
@@ -51,17 +54,21 @@ func (g *Gen) BuildFillers() {
 }
 
 func (g *Gen) BuildJsoners() {
-	var v visitor
+	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
-		g.result.Decls = append(
-			g.result.Decls,
-			structDecl.MarshalFunc(),
-		)
-		g.result.Decls = append(
-			g.result.Decls,
-			structDecl.AppendJsonFunc(),
-		)
+		if structDecl.Tags().Custom() {
+			continue
+		}
+		if structDecl.Tags().DecodersOnly() {
+			continue
+		}
+		if marshalFn := structDecl.MarshalFunc(); marshalFn != nil {
+			g.result.Decls = append(g.result.Decls, marshalFn)
+		}
+		if appendFn := structDecl.AppendJsonFunc(); appendFn != nil {
+			g.result.Decls = append(g.result.Decls, appendFn)
+		}
 	}
 }
 

@@ -336,6 +336,22 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 		case "bool", "int64", "int", "float64":
 			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name)
 
+		case "string":
+			// s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
+			return []ast.Stmt{
+				asthlp.Assign(
+					asthlp.VarNames{dst},
+					asthlp.Assignment,
+					asthlp.Call(
+						asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(t))),
+						asthlp.Call(
+							asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+							asthlp.Ref(rhs),
+						),
+					),
+				),
+			}
+
 		default:
 			return f.newAndFillIn(rhs, dst, ast.NewIdent(t.Name))
 
@@ -425,6 +441,10 @@ func assign(dst, rhs ast.Expr) ast.Stmt {
 	return asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, rhs)
 }
 
+func define(dst, rhs ast.Expr) ast.Stmt {
+	return asthlp.Assign(asthlp.VarNames{dst}, asthlp.Definition, rhs)
+}
+
 func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string", "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
@@ -448,7 +468,7 @@ func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 //	} else {
 //		s.{name} = 100
 //	}
-func (f *Field) ifDefault(name string) []ast.Stmt {
+func (f *Field) ifDefault(varName, name string) []ast.Stmt {
 	if f.tags.DefaultValue() == "" {
 		if f.tags.JsonTags().Has("required") {
 			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
@@ -463,10 +483,14 @@ func (f *Field) ifDefault(name string) []ast.Stmt {
 	if f.isStar {
 		var tmpVarName = "__" + name
 		return []ast.Stmt{
-			asthlp.Var(
-				asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue()))),
+			// if {tmp} = nil {
+			asthlp.If(
+				asthlp.IsNil(asthlp.NewIdent(varName)),
+				asthlp.Var(
+					asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue()))),
+				),
+				assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(tmpVarName))),
 			),
-			assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(tmpVarName))),
 		}
 	}
 	return []ast.Stmt{
