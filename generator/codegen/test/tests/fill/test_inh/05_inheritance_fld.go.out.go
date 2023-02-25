@@ -334,3 +334,177 @@ func (s *TestInh04) validate(v *fastjson.Value, objPath string) error {
 	})
 	return err
 }
+
+// jsonParserTestNested01 used for pooling Parsers for TestNested01 JSONs.
+var jsonParserTestNested01 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestNested01) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestNested01.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestNested01.Put(parser)
+	return s.FillFromJson(v, "")
+}
+
+// FillFromJson recursively fills the fields with fastjson.Value
+func (s *TestNested01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	// strict rules
+	if err = s.validate(v, objPath); err != nil {
+		return err
+	}
+	if _field32 := v.Get("field_32"); _field32 != nil {
+		var valField32 int
+		valField32, err = _field32.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+		}
+		if valField32 > math.MaxInt32 {
+			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+		}
+		s.Field32 = int32(valField32)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestNested01) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+	})
+	return err
+}
+
+// jsonParserTestNested02 used for pooling Parsers for TestNested02 JSONs.
+var jsonParserTestNested02 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestNested02) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestNested02.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestNested02.Put(parser)
+	return s.FillFromJson(v, "")
+}
+
+// FillFromJson recursively fills the fields with fastjson.Value
+func (s *TestNested02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	// strict rules
+	if err = s.validate(v, objPath); err != nil {
+		return err
+	}
+	if _field32 := v.Get("field_32"); _field32 != nil {
+		var valField32 int
+		valField32, err = _field32.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+		}
+		if valField32 > math.MaxInt32 {
+			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+		}
+		s.Field32 = int32(valField32)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestNested02) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+	})
+	return err
+}
+
+// jsonParserTestNested03 used for pooling Parsers for TestNested03 JSONs.
+var jsonParserTestNested03 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestNested03) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestNested03.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestNested03.Put(parser)
+	return s.FillFromJson(v, "")
+}
+
+// FillFromJson recursively fills the fields with fastjson.Value
+func (s *TestNested03) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+	// strict rules
+	if err = s.validate(v, objPath); err != nil {
+		return err
+	}
+	if _field32 := v.Get("field_32"); _field32 != nil {
+		var valField32 int
+		valField32, err = _field32.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+		}
+		if valField32 > math.MaxInt32 {
+			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+		}
+		s.Field32 = int32(valField32)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+	})
+	return err
+}

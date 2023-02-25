@@ -62,4 +62,9 @@ func Test_TestTime01(t *testing.T) {
 		require.NoError(t, err)
 		require.Nil(t, test1.DateEnd)
 	})
+	t.Run("wrong-json", func(t *testing.T) {
+		var test1 TestTime01
+		err := test1.UnmarshalJSON([]byte(`{"date_end": null`))
+		require.Error(t, err)
+	})
 }

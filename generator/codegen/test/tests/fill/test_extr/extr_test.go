@@ -12,6 +12,7 @@ func TestExternalFill(t *testing.T) {
 	t.Run("unmarshal", func(t *testing.T) {
 		t.Parallel()
 		var test External
+		var def = "default"
 		err := test.UnmarshalJSON([]byte(`{"test1":{"comment":"test","level":444},"test2":{"field":"foo","fieldRef":"bar"}}`))
 		require.NoError(t, err)
 		var expected = External{
@@ -22,6 +23,7 @@ func TestExternalFill(t *testing.T) {
 			Test02: test_string.TestStr01{
 				Field:    "foo",
 				FieldRef: nil,
+				DefRef:   &def,
 			},
 		}
 		expected.Test02.FieldRef = new(string)

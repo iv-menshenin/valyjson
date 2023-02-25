@@ -464,12 +464,12 @@ func (f *Field) ifDefault(name string) []ast.Stmt {
 		var tmpVarName = "__" + name
 		return []ast.Stmt{
 			asthlp.Var(
-				asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue()))),
+				asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue()))),
 			),
 			assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(tmpVarName))),
 		}
 	}
 	return []ast.Stmt{
-		assign(asthlp.SimpleSelector(names.VarNameReceiver, name), helpers.BasicLiteralFromType(f.expr, f.tags.DefaultValue())),
+		assign(asthlp.SimpleSelector(names.VarNameReceiver, name), helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue())),
 	}
 }

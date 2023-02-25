@@ -59,3 +59,36 @@ func Test_Inheritance(t *testing.T) {
 		require.ErrorContains(t, err, "error parsing 'nested1.random' value")
 	})
 }
+
+func Test_TestNested01(t *testing.T) {
+	t.Run("zero", func(t *testing.T) {
+		var test1 TestNested01
+		err := test1.UnmarshalJSON([]byte(`{}`))
+		require.NoError(t, err)
+		require.Zero(t, test1.TestNested02.TestNested03)
+	})
+	t.Run("check-type", func(t *testing.T) {
+		var test1 TestNested01
+		err := test1.UnmarshalJSON([]byte(`{"field_32": 2147483648}`))
+		require.Error(t, err)
+		require.Zero(t, test1.TestNested02.TestNested03.Field32)
+	})
+	t.Run("filled-1", func(t *testing.T) {
+		var test1 TestNested01
+		err := test1.UnmarshalJSON([]byte(`{"field_32": 490}`))
+		require.NoError(t, err)
+		require.EqualValues(t, 490, test1.TestNested02.TestNested03.Field32)
+	})
+	t.Run("filled-2", func(t *testing.T) {
+		var test1 TestNested02
+		err := test1.UnmarshalJSON([]byte(`{"field_32": 491}`))
+		require.NoError(t, err)
+		require.EqualValues(t, 491, test1.TestNested03.Field32)
+	})
+	t.Run("filled-3", func(t *testing.T) {
+		var test1 TestNested03
+		err := test1.UnmarshalJSON([]byte(`{"field_32": 492}`))
+		require.NoError(t, err)
+		require.EqualValues(t, 492, test1.Field32)
+	})
+}

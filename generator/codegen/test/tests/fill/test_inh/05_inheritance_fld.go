@@ -30,3 +30,21 @@ type TestInh03 struct {
 type TestInh04 struct {
 	FooBar int16 `json:"foo-bar"`
 }
+
+// TestNested01 tests inheritance
+//json:strict
+type TestNested01 struct {
+	TestNested02 `json:",inline"`
+}
+
+// TestNested02 tests inheritance
+//json:strict
+type TestNested02 struct {
+	TestNested03 `json:",inline"`
+}
+
+// TestNested03 tests inheritance
+//json:strict
+type TestNested03 struct {
+	Field32 int32 `json:"field_32"`
+}

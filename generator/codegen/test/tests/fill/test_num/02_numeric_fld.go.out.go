@@ -107,6 +107,8 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 			return fmt.Errorf("error parsing '%sUint_fld16' value %d exceeds maximum for data type uint16", objPath, valUintFld16)
 		}
 		s.UintFld16 = uint16(valUintFld16)
+	} else {
+		s.UintFld16 = 333
 	}
 	if _uintFld32 := v.Get("Uint_fld32"); _uintFld32 != nil {
 		var valUintFld32 uint
@@ -189,6 +191,9 @@ func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefIntFld32 = new(int32)
 		*s.RefIntFld32 = int32(valRefIntFld32)
+	} else {
+		var __RefIntFld32 int32 = 456
+		s.RefIntFld32 = &__RefIntFld32
 	}
 	if _refIntFld64 := v.Get("ref_int_fld64"); valueIsNotNull(_refIntFld64) {
 		var valRefIntFld64 int64
@@ -519,6 +524,8 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 			return fmt.Errorf("error parsing '%sint_fld32' value %d exceeds maximum for data type int32", objPath, valIntFld32)
 		}
 		s.IntFld32 = int32(valIntFld32)
+	} else {
+		s.IntFld32 = 16
 	}
 	if _intFld64 := v.Get("int_fld64"); _intFld64 != nil {
 		var valIntFld64 int64
@@ -713,6 +720,9 @@ func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error
 		}
 		s.RefFloatFld32 = new(float32)
 		*s.RefFloatFld32 = float32(valRefFloatFld32)
+	} else {
+		var __RefFloatFld32 float32 = 1.234
+		s.RefFloatFld32 = &__RefFloatFld32
 	}
 	if _refFloatFld64 := v.Get("ref_fl64"); valueIsNotNull(_refFloatFld64) {
 		var valRefFloatFld64 float64
