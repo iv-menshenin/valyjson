@@ -132,7 +132,7 @@ func (s *TestBool01) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestBool01) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestBool01) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error

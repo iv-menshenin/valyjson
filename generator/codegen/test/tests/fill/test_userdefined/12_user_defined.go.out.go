@@ -157,7 +157,7 @@ func (s *TestUserDefined) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -204,7 +204,7 @@ func (s TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.String != "" {
-		result.WriteString(`"f_string":"`)
+		result.WriteString(`"f_string":`)
 		buf = marshalString(buf[:0], string(s.String))
 		result.Write(buf)
 	} else {

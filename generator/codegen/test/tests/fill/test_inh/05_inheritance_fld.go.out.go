@@ -460,7 +460,7 @@ func (s *TestInh01) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -542,7 +542,7 @@ func (s *TestInh02) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -568,7 +568,7 @@ func (s *TestInh03) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -606,7 +606,7 @@ func (s *TestNested01) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -634,7 +634,7 @@ func (s *TestNested02) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -662,7 +662,7 @@ func (s *TestNested03) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestNested03) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestNested03) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error

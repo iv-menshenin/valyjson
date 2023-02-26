@@ -32,8 +32,8 @@ var (
 	writeBytesFn  = asthlp.InlineFunc(asthlp.SimpleSelector("result", "Write"))
 	writeRuneFn   = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune"))
 
-	buffVar  = asthlp.NewIdent("buf")
-	buffExpr = asthlp.SliceExpr(buffVar, nil, asthlp.IntegerConstant(0))
+	bufVar  = asthlp.NewIdent("buf")
+	bufExpr = asthlp.SliceExpr(bufVar, nil, asthlp.IntegerConstant(0))
 )
 
 // result.WriteString("\"{json}\":")
@@ -76,7 +76,7 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	if f.isStar {
 		wb.NotZero = asthlp.NotNil(src)
 		if f.tags.JsonAppendix() != "omitempty" {
-			wb.Default = []ast.Stmt{
+			wb.IfZero = []ast.Stmt{
 				asthlp.CallStmt(asthlp.Call(
 					writeStringFn,
 					asthlp.StringConstant(fmt.Sprintf(`"%s":null`, f.tags.JsonName())).Expr(),

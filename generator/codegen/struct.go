@@ -221,7 +221,7 @@ func (s *Struct) MarshalFunc() ast.Decl {
 func (s *Struct) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend)).
 		Comments("// "+names.MethodNameAppend+" serializes all fields of the structure using a buffer.").
-		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(s.name))).
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name)))).
 		Params(asthlp.Field("dst", nil, asthlp.ArrayType(asthlp.Byte))).
 		Results(
 			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),

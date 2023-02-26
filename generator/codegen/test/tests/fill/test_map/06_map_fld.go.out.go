@@ -4,6 +4,7 @@ package test_map
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -93,6 +94,69 @@ func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		}
 		s.KeyTypedProperties = valKeyTypedProperties
 	}
+	if _integerVal := v.Get("integerVal"); valueIsNotNull(_integerVal) {
+		o, err := _integerVal.Object()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sintegerVal' value: %w", objPath, err)
+		}
+		var valIntegerVal = make(map[Key]int32, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value int
+			value, err = v.Int()
+			if err == nil {
+				valIntegerVal[Key(key)] = int32(value)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("error parsing '%sintegerVal' value: %w", objPath, err)
+		}
+		s.IntegerVal = valIntegerVal
+	}
+	if _floatVal := v.Get("floatVal"); valueIsNotNull(_floatVal) {
+		o, err := _floatVal.Object()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfloatVal' value: %w", objPath, err)
+		}
+		var valFloatVal = make(map[Key]float64, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value float64
+			value, err = v.Float64()
+			if err == nil {
+				valFloatVal[Key(key)] = float64(value)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("error parsing '%sfloatVal' value: %w", objPath, err)
+		}
+		s.FloatVal = valFloatVal
+	}
+	if _uintVal := v.Get("uintVal"); valueIsNotNull(_uintVal) {
+		o, err := _uintVal.Object()
+		if err != nil {
+			return fmt.Errorf("error parsing '%suintVal' value: %w", objPath, err)
+		}
+		var valUintVal = make(map[Key]uint16, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value uint
+			value, err = v.Uint()
+			if err == nil {
+				valUintVal[Key(key)] = uint16(value)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("error parsing '%suintVal' value: %w", objPath, err)
+		}
+		s.UintVal = valUintVal
+	}
 	return nil
 }
 
@@ -102,7 +166,7 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [3]int
+	var checkFields [6]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
@@ -124,6 +188,27 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'k', 'e', 'y', '_', 't', 'y', 'p', 'e', 'd', '_', 'p', 'r', 'o', 'p', 'e', 'r', 't', 'i', 'e', 's'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'i', 'n', 't', 'e', 'g', 'e', 'r', 'V', 'a', 'l'}) {
+			checkFields[3]++
+			if checkFields[3] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'f', 'l', 'o', 'a', 't', 'V', 'a', 'l'}) {
+			checkFields[4]++
+			if checkFields[4] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'u', 'i', 'n', 't', 'V', 'a', 'l'}) {
+			checkFields[5]++
+			if checkFields[5] > 1 {
 				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
@@ -199,4 +284,190 @@ func (s *Property) validate(v *fastjson.Value, objPath string) error {
 		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestMap01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Tags != nil {
+		buf = buf[:0]
+		result.WriteString(`"tags":{`)
+		var _filled bool
+		for _k, _v := range s.Tags {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(_k)
+			result.WriteString(`":`)
+			buf = marshalString(buf[:0], _v)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	} else {
+		result.WriteString(`"tags":null`)
+	}
+	if s.Properties != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"properties":{`)
+		var _filled bool
+		for _k, _v := range s.Properties {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(_k)
+			result.WriteString(`":`)
+			buf, err = _v.MarshalAppend(buf[:0])
+			if err != nil {
+				return nil, fmt.Errorf(`can't marshal "properties" attrbute %q: %w`, _k, err)
+			}
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.KeyTypedProperties != nil {
+		buf = buf[:0]
+		result.WriteString(`"key_typed_properties":{`)
+		var _filled bool
+		for _k, _v := range s.KeyTypedProperties {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			buf, err = _v.MarshalAppend(buf[:0])
+			if err != nil {
+				return nil, fmt.Errorf(`can't marshal "key_typed_properties" attrbute %q: %w`, _k, err)
+			}
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	} else {
+		result.WriteString(`"key_typed_properties":null`)
+	}
+	if s.IntegerVal != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"integerVal":{`)
+		var _filled bool
+		for _k, _v := range s.IntegerVal {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			buf = strconv.AppendInt(buf[:0], int64(_v), 10)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	if s.FloatVal != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"floatVal":{`)
+		var _filled bool
+		for _k, _v := range s.FloatVal {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			buf = strconv.AppendFloat(buf[:0], float64(_v), 'f', -1, 64)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	if s.UintVal != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"uintVal":{`)
+		var _filled bool
+		for _k, _v := range s.UintVal {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			buf = strconv.AppendUint(buf[:0], uint64(_v), 10)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *Property) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *Property) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Name != "" {
+		result.WriteString(`"name":`)
+		buf = marshalString(buf[:0], s.Name)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"name":""`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if s.Value != "" {
+		result.WriteString(`"value":`)
+		buf = marshalString(buf[:0], s.Value)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"value":""`)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

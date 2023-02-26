@@ -185,7 +185,7 @@ func (s *TestStr01) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -196,7 +196,7 @@ func (s TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.Field != "" {
-		result.WriteString(`"field":"`)
+		result.WriteString(`"field":`)
 		buf = marshalString(buf[:0], s.Field)
 		result.Write(buf)
 	} else {
@@ -206,7 +206,7 @@ func (s TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.FieldRef != nil {
-		result.WriteString(`"fieldRef":"`)
+		result.WriteString(`"fieldRef":`)
 		buf = marshalString(buf[:0], *s.FieldRef)
 		result.Write(buf)
 	} else {
@@ -216,7 +216,7 @@ func (s TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.DefRef != nil {
-		result.WriteString(`"defRef":"`)
+		result.WriteString(`"defRef":`)
 		buf = marshalString(buf[:0], *s.DefRef)
 		result.Write(buf)
 	} else {
@@ -233,7 +233,7 @@ func (s *TestStr02) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalAppend serializes all fields of the structure using a buffer.
-func (s TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
+func (s *TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
 	var result = bytes.NewBuffer(dst)
 	var (
 		err error
@@ -244,7 +244,7 @@ func (s TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.Field != "" {
-		result.WriteString(`"field":"`)
+		result.WriteString(`"field":`)
 		buf = marshalString(buf[:0], s.Field)
 		result.Write(buf)
 	} else {
@@ -254,7 +254,7 @@ func (s TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.FieldRef != nil {
-		result.WriteString(`"fieldRef":"`)
+		result.WriteString(`"fieldRef":`)
 		buf = marshalString(buf[:0], *s.FieldRef)
 		result.Write(buf)
 	} else {
@@ -264,7 +264,7 @@ func (s TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if s.String != "" {
-		result.WriteString(`"string":"`)
+		result.WriteString(`"string":`)
 		buf = marshalString(buf[:0], string(s.String))
 		result.Write(buf)
 	} else {

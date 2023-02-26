@@ -10,20 +10,20 @@ import (
 type WriteBlock struct {
 	NotZero ast.Expr
 	Block   []ast.Stmt
-	Default []ast.Stmt
+	IfZero  []ast.Stmt
 }
 
 func (w WriteBlock) Render(putComma ast.Stmt) []ast.Stmt {
 	if w.NotZero == nil {
 		return append([]ast.Stmt{putComma}, w.Block...)
 	}
-	if len(w.Default) > 0 {
+	if len(w.IfZero) > 0 {
 		return []ast.Stmt{
 			putComma,
 			asthlp.IfElse(
 				w.NotZero,
 				asthlp.Block(w.Block...),
-				asthlp.Block(w.Default...),
+				asthlp.Block(w.IfZero...),
 			),
 		}
 	}
@@ -53,18 +53,18 @@ func timeMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 			asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":"`, jsonName)).Expr())),
 			// b = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
 			asthlp.Assign(
-				asthlp.VarNames{buffVar},
+				asthlp.VarNames{bufVar},
 				asthlp.Assignment,
-				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), buffExpr, asthlp.SimpleSelector("time", "RFC3339")),
+				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), bufExpr, asthlp.SimpleSelector("time", "RFC3339")),
 			),
 			// result.Write(b)
-			asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+			asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 			// result.WriteRune('"')
 			asthlp.CallStmt(asthlp.Call(writeRuneFn, asthlp.RuneConstant('"').Expr())),
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":"0000-00-00T00:00:00Z"`, jsonName)).Expr(),
@@ -85,18 +85,18 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 			// result.WriteString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
 			// b = strconv.AppendInt(buf[:0], int64({src}), 10)
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, asthlp.Call(
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendInt")),
-				buffExpr,                          // buf[:0]
+				bufExpr,                           // buf[:0]
 				srcInt64,                          // int64({src})
 				asthlp.IntegerConstant(10).Expr(), // 10
 			)),
 			// result.Write(b)
-			asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+			asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
@@ -118,18 +118,18 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 			// result.WriteString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
 			// b = strconv.AppendUint(buf[:0], uint64({src}), 10)
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, asthlp.Call(
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendUint")),
-				buffExpr,                          // buf[:0]
+				bufExpr,                           // buf[:0]
 				srcUint64,                         // uint64({src})
 				asthlp.IntegerConstant(10).Expr(), // 10
 			)),
 			// result.Write(b)
-			asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+			asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
@@ -151,20 +151,20 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 			// result.WriteString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
 			// b = strconv.AppendFloat(buf[:0], float64({src}), 'f', -1, 64)
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, asthlp.Call(
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendFloat")),
-				buffExpr,                          // buf[:0]
+				bufExpr,                           // buf[:0]
 				srcFloat64,                        // float64({src})
 				asthlp.RuneConstant('f').Expr(),   // 'f'
 				asthlp.IntegerConstant(-1).Expr(), // -1 // todo @menshenin pass precision through structTags
 				asthlp.IntegerConstant(64).Expr(), // 64
 			)),
 			// result.Write(b)
-			asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+			asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
@@ -180,7 +180,7 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 		NotZero: src,
 		Block: []ast.Stmt{
 			// buf = buf[:0]
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, buffExpr),
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, bufExpr),
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":true`, jsonName)).Expr(),
@@ -188,7 +188,7 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":false`, jsonName)).Expr(),
@@ -211,7 +211,7 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 	return WriteBlock{
 		Block: []ast.Stmt{
 			// buf = buf[:0]
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, buffExpr),
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, bufExpr),
 			asthlp.IfElse(
 				src,
 				asthlp.Block(asthlp.CallStmt(asthlp.Call(
@@ -224,7 +224,7 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				))),
 			),
 		},
-		Default: def,
+		IfZero: def,
 	}
 }
 
@@ -239,18 +239,18 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 		Block: []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
-				asthlp.StringConstant(fmt.Sprintf(`"%s":"`, jsonName)).Expr(),
+				asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr(),
 			)),
-			asthlp.Assign(asthlp.VarNames{buffVar}, asthlp.Assignment, asthlp.Call(
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.NewIdent("marshalString")),
-				buffExpr, srcString,
+				bufExpr, srcString,
 			)),
 			// result.Write(b)
-			asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+			asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 		},
 	}
 	if !omitempty {
-		w.Default = []ast.Stmt{
+		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":""`, jsonName)).Expr(),
@@ -276,7 +276,7 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				// if len(b) > 2 {
 				asthlp.If(
 					asthlp.Great(
-						asthlp.Call(asthlp.LengthFn, buffVar),
+						asthlp.Call(asthlp.LengthFn, bufVar),
 						asthlp.IntegerConstant(2).Expr(),
 					),
 					block...,
@@ -287,9 +287,9 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 	return WriteBlock{
 		Block: []ast.Stmt{
 			asthlp.IfInitElse(
-				asthlp.Assign(asthlp.VarNames{buffVar, asthlp.NewIdent("err")}, asthlp.Assignment, asthlp.Call(
+				asthlp.Assign(asthlp.VarNames{bufVar, asthlp.NewIdent("err")}, asthlp.Assignment, asthlp.Call(
 					asthlp.InlineFunc(asthlp.Selector(src, "MarshalAppend")),
-					buffExpr,
+					bufExpr,
 				)),
 				asthlp.NotNil(asthlp.NewIdent("err")),
 				asthlp.Block(
@@ -310,7 +310,7 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 						asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr(),
 					)),
 					// result.Write(b)
-					asthlp.CallStmt(asthlp.Call(writeBytesFn, buffVar)),
+					asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
 				)...),
 			),
 		},
@@ -321,7 +321,7 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 	var blockWriter = structMarshal(src, jsonName, omitempty)
 	blockWriter.NotZero = asthlp.NotNil(src)
 	if !omitempty {
-		blockWriter.Default = []ast.Stmt{
+		blockWriter.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				writeStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
@@ -329,4 +329,82 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 		}
 	}
 	return blockWriter
+}
+
+//	if s.Tags != nil {
+//		buf = buf[:0]
+//		result.WriteString(`"tags":{`)
+//		var filled bool
+//		for k, v := range s.Tags {
+//			if filled {
+//				result.WriteRune(',')
+//			}
+//			filled = true
+//			result.WriteRune('"')
+//			result.WriteString(k)
+//			result.WriteString(`":"`)
+//			result.WriteString(v)
+//			result.WriteRune('"')
+//		}
+//		result.WriteRune('}')
+//	} else {
+//		result.WriteString(`"tags":null`)
+//	}
+func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve valueExtractor) WriteBlock {
+	const (
+		filled = "_filled"
+		key    = "_k"
+		val    = "_v"
+	)
+	var keyAsString ast.Expr = asthlp.NewIdent(key)
+	if !isStringKey {
+		keyAsString = asthlp.ExpressionTypeConvert(keyAsString, asthlp.String)
+	}
+	var iterBlock = []ast.Stmt{
+		//	if filled {
+		//		result.WriteRune(',')
+		//	}
+		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(writeRuneFn, asthlp.RuneConstant(',').Expr()))),
+		// filled = true
+		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
+		// result.WriteRune('"')
+		asthlp.CallStmt(asthlp.Call(writeRuneFn, asthlp.RuneConstant('"').Expr())),
+		// result.WriteString(key)
+		asthlp.CallStmt(asthlp.Call(writeStringFn, keyAsString)),
+		// result.WriteString(`":`)
+		asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(`":`).Expr())),
+	}
+	iterBlock = append(
+		iterBlock,
+		ve(asthlp.NewIdent(val))...,
+	)
+	iterBlock = append(
+		iterBlock,
+		// result.Write(b)
+		asthlp.CallStmt(asthlp.Call(writeBytesFn, bufVar)),
+	)
+	var w = WriteBlock{
+		NotZero: asthlp.NotNil(src),
+		Block: []ast.Stmt{
+			// buf = buf[:0]
+			asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, bufExpr),
+			// result.WriteString(`"jsonName":{`)
+			asthlp.CallStmt(asthlp.Call(writeStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":{`, jsonName)).Expr())),
+			// var filled bool
+			asthlp.Var(asthlp.VariableType(filled, asthlp.Bool)),
+			// for key, val := range {src} {
+			asthlp.Range(true, key, val, src, iterBlock...),
+			// result.WriteRune('}')
+			asthlp.CallStmt(asthlp.Call(writeRuneFn, asthlp.RuneConstant('}').Expr())),
+		},
+	}
+	if !omitempty {
+		w.IfZero = []ast.Stmt{
+			asthlp.CallStmt(asthlp.Call(
+				writeStringFn,
+				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
+			)),
+		}
+	}
+	return w
 }

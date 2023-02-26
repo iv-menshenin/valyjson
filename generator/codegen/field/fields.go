@@ -140,21 +140,166 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 			block := timeMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
 			return block.Render(putCommaFirstIf)
 		}
-		panic("d")
+		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar).Render(putCommaFirstIf)
 
 	case *ast.StructType:
-		var block WriteBlock
-		if f.isStar {
-			block = refStructMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
-		} else {
-			block = structMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
+		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar).Render(putCommaFirstIf)
+
+	case *ast.MapType:
+		var isString bool
+		if i, ok := tt.Key.(*ast.Ident); ok {
+			isString = i.Name == "string"
 		}
+		ve := getValueExtractor(tt.Value, f.tags.JsonName())
+		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, ve)
 		return block.Render(putCommaFirstIf)
 
 	default:
 		// todo @menshenin panic
 		panic("not implemented")
 	}
+}
+
+type valueExtractor func(src ast.Expr) []ast.Stmt
+
+func getValueExtractor(t ast.Expr, name string) valueExtractor {
+	transitMarshaller := func(src ast.Expr) []ast.Stmt {
+		return []ast.Stmt{
+			// buf, err = v.MarshalAppend(buf[:0])
+			asthlp.Assign(
+				asthlp.VarNames{bufVar, asthlp.NewIdent("err")},
+				asthlp.Assignment,
+				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "MarshalAppend")), bufExpr),
+			),
+			//	if err != nil {
+			//		return nil, fmt.Errorf(`can't marshal "name" attrbute %q: %w`, k, err)
+			//	}
+			asthlp.If(asthlp.NotNil(asthlp.NewIdent("err")), asthlp.Return(
+				asthlp.Nil,
+				asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+name+`" attrbute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err")),
+			)),
+		}
+	}
+	switch tt := t.(type) {
+
+	case *ast.Ident:
+		switch tt.Name {
+		case "int", "int8", "int16", "int32", "int64":
+			return func(src ast.Expr) []ast.Stmt {
+				int64Expression := asthlp.ExpressionTypeConvert(src, asthlp.Int64)
+				return []ast.Stmt{
+					// b = strconv.AppendInt(buf[:0], int64({src}), 10)
+					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendInt")),
+						bufExpr,                           // buf[:0]
+						int64Expression,                   // int64({src})
+						asthlp.IntegerConstant(10).Expr(), // 10
+					)),
+				}
+			}
+
+		case "uint", "uint8", "uint16", "uint32", "uint64":
+			return func(src ast.Expr) []ast.Stmt {
+				uint64Expression := asthlp.ExpressionTypeConvert(src, asthlp.UInt64)
+				return []ast.Stmt{
+					// buf = strconv.AppendUint(buf[:0], uint64({src}), 10)
+					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendUint")),
+						bufExpr,                           // buf[:0]
+						uint64Expression,                  // uint64({src})
+						asthlp.IntegerConstant(10).Expr(), // 10
+					)),
+				}
+			}
+
+		case "float32", "float64":
+			return func(src ast.Expr) []ast.Stmt {
+				float64Expression := asthlp.ExpressionTypeConvert(src, asthlp.Float64)
+				return []ast.Stmt{
+					// buf = strconv.AppendFloat(buf[:0], float64({src}), 'f', -1, 64)
+					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendFloat")),
+						bufExpr,                           // buf[:0]
+						float64Expression,                 // float64({src})
+						asthlp.RuneConstant('f').Expr(),   // 'f'
+						asthlp.IntegerConstant(-1).Expr(), // -1
+						asthlp.IntegerConstant(64).Expr(), // 64
+					)),
+				}
+			}
+
+		case "bool":
+			return func(src ast.Expr) []ast.Stmt {
+				return []ast.Stmt{
+					asthlp.IfElse(
+						src,
+						// buf = append(buf[:0], []byte(`"name":true`)...)
+						asthlp.Block(asthlp.CallStmt(asthlp.CallEllipsis(
+							asthlp.AppendFn,
+							bufExpr,
+							asthlp.ExpressionTypeConvert(
+								asthlp.StringConstant(fmt.Sprintf(`"%s":true`, name)).Expr(),
+								asthlp.ArrayType(asthlp.Byte),
+							),
+						))),
+						// buf = append(buf[:0], []byte(`"name":false`)...)
+						asthlp.Block(asthlp.CallStmt(asthlp.CallEllipsis(
+							asthlp.AppendFn,
+							bufExpr,
+							asthlp.ExpressionTypeConvert(
+								asthlp.StringConstant(fmt.Sprintf(`"%s":false`, name)).Expr(),
+								asthlp.ArrayType(asthlp.Byte),
+							),
+						))),
+					),
+				}
+			}
+
+		case "string":
+			return func(src ast.Expr) []ast.Stmt {
+				// buf = marshalString(buf[:0], _v)
+				return []ast.Stmt{
+					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+						asthlp.InlineFunc(asthlp.NewIdent("marshalString")),
+						bufExpr, src,
+					)),
+				}
+			}
+
+		default:
+			return transitMarshaller
+		}
+
+	case *ast.SelectorExpr:
+		if tt.Sel.Name == "Time" {
+			// fixme @menshenin need quotation
+			panic("fixme")
+			return func(src ast.Expr) []ast.Stmt {
+				return []ast.Stmt{
+					// b = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
+					asthlp.Assign(
+						asthlp.VarNames{bufVar},
+						asthlp.Assignment,
+						asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), bufExpr, asthlp.SimpleSelector("time", "RFC3339")),
+					),
+				}
+			}
+		}
+		return transitMarshaller
+
+	default:
+		panic("not implemented")
+	}
+}
+
+func marshalTransit(src ast.Expr, name string, omitempty, isStar bool) WriteBlock {
+	var block WriteBlock
+	if isStar {
+		block = refStructMarshal(src, name, omitempty)
+	} else {
+		block = structMarshal(src, name, omitempty)
+	}
+	return block
 }
 
 func (f *Field) notEmptyCondition(src ast.Expr) ast.Expr {
