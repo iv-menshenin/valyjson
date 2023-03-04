@@ -58,7 +58,8 @@ func (m *Map) FillerFunc() ast.Decl {
 		v = "v"
 		o = "o"
 	)
-	value := asthlp.NewIdent("value")
+	var value = asthlp.NewIdent("value")
+	var ifNullValue = asthlp.EmptyStmt()
 	var valueAsValue = asthlp.ExpressionTypeConvert(value, m.spec.Value)
 	if _, isStar := m.spec.Value.(*ast.StarExpr); isStar {
 		valueAsValue = asthlp.Call(
@@ -67,6 +68,23 @@ func (m *Map) FillerFunc() ast.Decl {
 				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
 				asthlp.Ref(value),
 			),
+		)
+		ifNullValue = asthlp.If(
+			asthlp.Equal(
+				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("v", "Type"))),
+				asthlp.SimpleSelector("fastjson", "TypeNull"),
+			),
+			asthlp.Assign(
+				asthlp.VarNames{
+					asthlp.Index(
+						asthlp.ParenExpr(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
+						asthlp.FreeExpression(asthlp.VariableTypeConvert("key", m.spec.Key)),
+					),
+				},
+				asthlp.Assignment,
+				asthlp.Nil,
+			),
+			asthlp.ReturnEmpty(),
 		)
 	}
 
@@ -116,6 +134,7 @@ func (m *Map) FillerFunc() ast.Decl {
 					//   return
 					// }
 					asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.ReturnEmpty()),
+					ifNullValue,
 				).
 				AppendStmt(
 					// fills one value
@@ -195,11 +214,14 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 		)
 
 	fn.AppendStmt(
-		// 	if s == nil {
+		// 	if s == nil || *s == nil {
 		//		return []byte("null"), nil
 		//	}
 		asthlp.If(
-			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+			asthlp.Or(
+				asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+				asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
+			),
 			asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
 		),
 		// var (

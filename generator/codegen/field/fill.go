@@ -199,7 +199,8 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //	}
 //	s.KeyTypedProperties = valKeyTypedProperties
 func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []ast.Stmt {
-	value := asthlp.NewIdent("value")
+	var value = asthlp.NewIdent("value")
+	var ifNullValue = asthlp.EmptyStmt()
 	var valueAsValue = asthlp.ExpressionTypeConvert(value, t.Value)
 	if _, isStar := t.Value.(*ast.StarExpr); isStar {
 		valueAsValue = asthlp.Call(
@@ -208,6 +209,24 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
 				asthlp.Ref(value),
 			),
+		)
+		// if v.Type() == fastjson.TypeNull {
+		//			{dst}[string(key)] = prop
+		//			return
+		//		}
+		ifNullValue = asthlp.If(
+			asthlp.Equal(
+				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("v", "Type"))),
+				asthlp.SimpleSelector("fastjson", "TypeNull"),
+			),
+			asthlp.Assign(
+				[]ast.Expr{
+					asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
+				},
+				asthlp.Assignment,
+				asthlp.Nil,
+			),
+			asthlp.ReturnEmpty(),
 		)
 	}
 	valFactory := New(asthlp.Field("", asthlp.MakeTagsForField(map[string][]string{
@@ -234,6 +253,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				).
 				AppendStmt(
 					asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.ReturnEmpty()),
+					ifNullValue,
 				).
 				AppendStmt(
 					// fills one value
