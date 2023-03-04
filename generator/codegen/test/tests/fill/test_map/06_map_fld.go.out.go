@@ -157,6 +157,27 @@ func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		}
 		s.UintVal = valUintVal
 	}
+	if _typedVal := v.Get("typed-val"); valueIsNotNull(_typedVal) {
+		o, err := _typedVal.Object()
+		if err != nil {
+			return fmt.Errorf("error parsing '%styped-val' value: %w", objPath, err)
+		}
+		var valTypedVal = make(map[Key]Val, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value uint64
+			value, err = v.Uint64()
+			if err == nil {
+				valTypedVal[Key(key)] = Val(value)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("error parsing '%styped-val' value: %w", objPath, err)
+		}
+		s.TypedVal = valTypedVal
+	}
 	return nil
 }
 
@@ -166,7 +187,7 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [6]int
+	var checkFields [7]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
@@ -209,6 +230,13 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'u', 'i', 'n', 't', 'V', 'a', 'l'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'t', 'y', 'p', 'e', 'd', '-', 'v', 'a', 'l'}) {
+			checkFields[6]++
+			if checkFields[6] > 1 {
 				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
@@ -418,6 +446,26 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteString(`"uintVal":{`)
 		var _filled bool
 		for _k, _v := range s.UintVal {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			buf = strconv.AppendUint(buf[:0], uint64(_v), 10)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	if s.TypedVal != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"typed-val":{`)
+		var _filled bool
+		for _k, _v := range s.TypedVal {
 			if _filled {
 				result.WriteRune(',')
 			}

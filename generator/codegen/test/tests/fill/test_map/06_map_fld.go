@@ -9,6 +9,7 @@ type TestMap01 struct {
 	IntegerVal         map[Key]int32       `json:"integerVal,omitempty"`
 	FloatVal           map[Key]float64     `json:"floatVal,omitempty"`
 	UintVal            map[Key]uint16      `json:"uintVal,omitempty"`
+	TypedVal           map[Key]Val         `json:"typed-val,omitempty"`
 }
 
 // Property tests properties
@@ -19,3 +20,5 @@ type Property struct {
 }
 
 type Key string
+
+type Val uint64

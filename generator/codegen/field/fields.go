@@ -150,8 +150,11 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 		if i, ok := tt.Key.(*ast.Ident); ok {
 			isString = i.Name == "string"
 		}
-		ve := getValueExtractor(tt.Value, f.tags.JsonName())
-		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, ve)
+		var valType = tt.Value
+		if i, ok := valType.(*ast.Ident); ok {
+			valType = denotedType(i)
+		}
+		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, getValueExtractor(valType, f.tags.JsonName()))
 		return block.Render(putCommaFirstIf)
 
 	default:
@@ -285,6 +288,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				}
 			}
 		}
+		return transitMarshaller
+
+	case *ast.StructType:
 		return transitMarshaller
 
 	default:

@@ -109,6 +109,25 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.EqualValues(t, test1.FloatVal["0"], 0)
 		require.EqualValues(t, test1.FloatVal["-1"], -1)
 	})
+	t.Run("test-typed-error", func(t *testing.T) {
+		var test1 TestMap01
+		err := test1.UnmarshalJSON([]byte(`{"typed-val":{"123": 123, "0": 0, "minus": -2}}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "typed-val")
+		require.ErrorContains(t, err, "-2")
+	})
+	t.Run("test-typed-values", func(t *testing.T) {
+		var test1 TestMap01
+		err := test1.UnmarshalJSON([]byte(`{"typed-val":{"123": 123, "0": 0, "-1": 1}}`))
+		require.NoError(t, err)
+		require.Nil(t, test1.Tags)
+		require.Nil(t, test1.Properties)
+		require.Nil(t, test1.KeyTypedProperties)
+		require.NotEmpty(t, test1.TypedVal)
+		require.EqualValues(t, test1.TypedVal["123"], 123)
+		require.EqualValues(t, test1.TypedVal["0"], 0)
+		require.EqualValues(t, test1.TypedVal["-1"], 1)
+	})
 }
 
 func Test_TestMap01_Marshal(t *testing.T) {
@@ -201,6 +220,17 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		const expected = `{"tags":null,"key_typed_properties":null,"uintVal":{"344": 344, "345": 345, "0": 0}}`
 		var test = TestMap01{
 			UintVal: map[Key]uint16{
+				"344": 344, "345": 345, "0": 0,
+			},
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("typed-values", func(t *testing.T) {
+		const expected = `{"tags":null,"key_typed_properties":null,"typed-val":{"344": 344, "345": 345, "0": 0}}`
+		var test = TestMap01{
+			TypedVal: map[Key]Val{
 				"344": 344, "345": 345, "0": 0,
 			},
 		}
