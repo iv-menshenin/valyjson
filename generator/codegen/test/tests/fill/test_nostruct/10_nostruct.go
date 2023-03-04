@@ -27,6 +27,6 @@ type (
 	TestSlice13 []test_extr.External
 
 	// TestSlice14 tests maps
-	//json:strict
+	//json:strict,decode
 	TestSlice14 [14]time.Time
 )

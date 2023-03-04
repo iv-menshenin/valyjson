@@ -4,6 +4,7 @@ import (
 	"fill/test_any"
 	"fill/test_extr"
 	"fill/test_string"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -187,6 +188,33 @@ func Test_Map_MarshalJSON(t *testing.T) {
 				},
 			},
 			"empty": nil,
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+}
+
+func Test_Array_MarshalJSON(t *testing.T) {
+	t.Run("[]int64", func(t *testing.T) {
+		const expected = `[-100, 0, 1, 2, 10, 9223372036854775807]`
+		var test = TestSlice12{-100, 0, 1, 2, 10, math.MaxInt64}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("[]int64-null", func(t *testing.T) {
+		const expected = `null`
+		var test TestSlice12
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("[]external", func(t *testing.T) {
+		const expected = `[{"test1":{"comment": "foo", "level": 12}, "test2":{"defRef": null,"field":"","fieldRef":null}}, {"test1":{"comment": "bar", "level": 13}, "test2":{"defRef": null,"field":"","fieldRef":null}}]`
+		var test = TestSlice13{
+			{Test01: test_any.TestAllOfSecond{Comment: "foo", Level: 12}},
+			{Test01: test_any.TestAllOfSecond{Comment: "bar", Level: 13}},
 		}
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)

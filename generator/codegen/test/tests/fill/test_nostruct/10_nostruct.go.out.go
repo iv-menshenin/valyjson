@@ -336,3 +336,68 @@ func (s *TestMap11Ref) MarshalAppend(dst []byte) ([]byte, error) {
 	result.WriteRune('}')
 	return result.Bytes(), err
 }
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice12) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestSlice12) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil || *s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('[')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		_k = _k
+		buf = strconv.AppendInt(buf[:0], int64(_v), 10)
+		result.Write(buf)
+	}
+	result.WriteRune(']')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice13) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestSlice13) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil || *s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('[')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		_k = _k
+		buf, err = _v.MarshalAppend(buf[:0])
+		if err != nil {
+			return nil, fmt.Errorf(`can't marshal "TestSlice13" value at position %d: %w`, _k, err)
+		}
+		result.Write(buf)
+	}
+	result.WriteRune(']')
+	return result.Bytes(), err
+}
