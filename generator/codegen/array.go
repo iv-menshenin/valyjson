@@ -176,17 +176,32 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 			asthlp.Field("", nil, asthlp.ErrorType),
 		)
 
-	fn.AppendStmt(
-		// 	if s == nil || *s == nil {
-		//		return []byte("null"), nil
-		//	}
-		asthlp.If(
-			asthlp.Or(
-				asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-				asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
+	if m.spec.Len == nil {
+		fn.AppendStmt(
+			// 	if s == nil || *s == nil {
+			//		return []byte("null"), nil
+			//	}
+			asthlp.If(
+				asthlp.Or(
+					asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+					asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
+				),
+				asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
 			),
-			asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
-		),
+		)
+	} else {
+		fn.AppendStmt(
+			// 	if s == nil {
+			//		return []byte("null"), nil
+			//	}
+			asthlp.If(
+				asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+				asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
+			),
+		)
+	}
+
+	fn.AppendStmt(
 		// var (
 		// 	err      error
 		//  filled bool

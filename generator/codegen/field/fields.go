@@ -305,16 +305,31 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 
 	case *ast.SelectorExpr:
 		if tt.Sel.Name == "Time" {
-			// fixme @menshenin need quotation
-			panic("fixme")
 			return func(src ast.Expr) []ast.Stmt {
 				return decorStmt(src, []ast.Stmt{
-					// b = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
+					// buf = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
 					asthlp.Assign(
 						asthlp.VarNames{BufVar},
 						asthlp.Assignment,
 						asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), BufExpr, asthlp.SimpleSelector("time", "RFC3339")),
 					),
+					// just an innocent hack
+					//	buf = append(buf, '"', '"')
+					//	copy(buf[1:len(buf)-1], buf[:len(buf)-2])
+					//	buf[0] = '"'
+					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(asthlp.AppendFn, BufVar, asthlp.RuneConstant('"').Expr(), asthlp.RuneConstant('"').Expr())),
+					asthlp.CallStmt(asthlp.Call(
+						asthlp.InlineFunc(asthlp.NewIdent("copy")),
+						asthlp.SliceExpr(BufVar, asthlp.IntegerConstant(1), asthlp.FreeExpression(asthlp.Sub(
+							asthlp.Call(asthlp.LengthFn, BufVar),
+							asthlp.IntegerConstant(1).Expr(),
+						))),
+						asthlp.SliceExpr(BufVar, nil, asthlp.FreeExpression(asthlp.Sub(
+							asthlp.Call(asthlp.LengthFn, BufVar),
+							asthlp.IntegerConstant(2).Expr(),
+						))),
+					)),
+					asthlp.Assign(asthlp.VarNames{asthlp.Index(BufVar, asthlp.IntegerConstant(0))}, asthlp.Assignment, asthlp.RuneConstant('"').Expr()),
 				})
 			}
 		}

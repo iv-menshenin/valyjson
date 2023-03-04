@@ -6,6 +6,7 @@ import (
 	"fill/test_string"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -215,6 +216,16 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		var test = TestSlice13{
 			{Test01: test_any.TestAllOfSecond{Comment: "foo", Level: 12}},
 			{Test01: test_any.TestAllOfSecond{Comment: "bar", Level: 13}},
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("[]time.Time", func(t *testing.T) {
+		const expected = `["2023-03-04T15:35:59Z", "0001-01-01T00:00:00Z"]`
+		var test = TestSlice14{
+			time.Date(2023, time.March, 4, 15, 35, 59, 0, time.UTC),
+			time.Time{},
 		}
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)

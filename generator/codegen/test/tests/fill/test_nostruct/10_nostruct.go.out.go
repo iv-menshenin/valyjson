@@ -401,3 +401,37 @@ func (s *TestSlice13) MarshalAppend(dst []byte) ([]byte, error) {
 	result.WriteRune(']')
 	return result.Bytes(), err
 }
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice14) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestSlice14) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('[')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		_k = _k
+		buf = _v.AppendFormat(buf[:0], time.RFC3339)
+		buf = append(buf, '"', '"')
+		copy(buf[1:len(buf)-1], buf[:len(buf)-2])
+		buf[0] = '"'
+		result.Write(buf)
+	}
+	result.WriteRune(']')
+	return result.Bytes(), err
+}
