@@ -25,7 +25,7 @@ func (s *TestMap10) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap10.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
@@ -62,7 +62,7 @@ func (s *TestMap11) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap11.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
@@ -99,7 +99,7 @@ func (s *TestMap11Ref) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap11Ref.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
@@ -111,6 +111,10 @@ func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 	*s = make(map[string]*test_extr.External, o.Len())
 	o.Visit(func(key []byte, v *fastjson.Value) {
 		if err != nil {
+			return
+		}
+		if v.Type() == fastjson.TypeNull {
+			(*s)[string(key)] = nil
 			return
 		}
 		var value test_extr.External
@@ -136,7 +140,7 @@ func (s *TestSlice12) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice12.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
@@ -150,7 +154,7 @@ func (s *TestSlice12) FillFromJSON(v *fastjson.Value, objPath string) (err error
 		var value int64
 		value, err = v.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
+			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
 		}
 		(*s)[i] = int64(value)
 	}
@@ -169,7 +173,7 @@ func (s *TestSlice13) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice13.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
@@ -183,7 +187,7 @@ func (s *TestSlice13) FillFromJSON(v *fastjson.Value, objPath string) (err error
 		var value test_extr.External
 		err = value.FillFromJSON(v, objPath+".")
 		if err != nil {
-			return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
+			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
 		}
 		(*s)[i] = test_extr.External(value)
 	}
@@ -202,7 +206,7 @@ func (s *TestSlice14) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice14.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
@@ -217,11 +221,11 @@ func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error
 	for i, v := range a {
 		b, err := v.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
 		}
 		value, err := parseDateTime(string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
+			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
 		}
 		(*s)[i] = time.Time(value)
 	}
@@ -236,7 +240,7 @@ func (s *TestMap10) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestMap10) MarshalAppend(dst []byte) ([]byte, error) {
-	if s == nil {
+	if s == nil || *s == nil {
 		return []byte("null"), nil
 	}
 	var (
@@ -269,7 +273,7 @@ func (s *TestMap11) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestMap11) MarshalAppend(dst []byte) ([]byte, error) {
-	if s == nil {
+	if s == nil || *s == nil {
 		return []byte("null"), nil
 	}
 	var (
@@ -305,7 +309,7 @@ func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestMap11Ref) MarshalAppend(dst []byte) ([]byte, error) {
-	if s == nil {
+	if s == nil || *s == nil {
 		return []byte("null"), nil
 	}
 	var (

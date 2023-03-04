@@ -85,7 +85,7 @@ func (f *Field) DontCheckErr() {
 //      var vOffset int
 //      vOffset, err = offset.Int()
 //      if err != nil {
-//          return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//          return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
 //      }
 //      s.Offset = vOffset
 //	} else {

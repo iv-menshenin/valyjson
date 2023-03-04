@@ -32,7 +32,7 @@ func (f *Field) getValue() ast.Expr {
 // fillFrom makes statements to fill some field according to its type
 //	s.Offset, err = offset.Int()
 //	if err != nil {
-//	    return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//	    return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
 //	}
 func (f *Field) fillFrom(name, v string) []ast.Stmt {
 	f.field = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
@@ -179,7 +179,7 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 
 //	o, err := keytypedproperties.Object()
 //	if err != nil {
-//		return fmt.Errorf("error parsing '%skey_typed_properties' value: %w", objPath, err)
+//		return fmt.Errorf("error parsing '%s.key_typed_properties' value: %w", objPath, err)
 //	}
 //	var valKeyTypedProperties = make(map[Key]Property, o.Len())
 //	o.Visit(func(key []byte, v *fastjson.Value) {
@@ -189,7 +189,7 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //		var prop Property
 //		err = prop.FillFromJson(v, objPath+"properties.")
 //		if err != nil {
-//			err = fmt.Errorf("error parsing '%skey_typed_properties.%s' value: %w", objPath, string(key), err)
+//			err = fmt.Errorf("error parsing '%s.key_typed_properties.%s' value: %w", objPath, string(key), err)
 //			return
 //		}
 //		valKeyTypedProperties[Key(key)] = prop
@@ -278,10 +278,10 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 }
 
 //	if err != nil {
-//		return fmt.Errorf("error parsing '%slimit' value: %w", objPath, err)
+//		return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
 //	}
 //	if valIntFld8 > math.MaxInt8 {
-//		return fmt.Errorf("error parsing '%sint_fld8' value %d exceeds maximum for data type uint8", objPath, valIntFld8)
+//		return fmt.Errorf("error parsing '%s.int_fld8' value %d exceeds maximum for data type uint8", objPath, valIntFld8)
 //	}
 func (f *Field) checkErr(val *ast.Ident) []ast.Stmt {
 	var checkOverflow = asthlp.EmptyStmt()
@@ -294,14 +294,14 @@ func (f *Field) checkErr(val *ast.Ident) []ast.Stmt {
 		if ident.Name == "float32" {
 			phldr = "%f"
 		}
-		maxExceeded := "error parsing '%s" + f.tags.JsonName() + "' value " + phldr + " exceeds maximum for data type " + ident.Name
+		maxExceeded := "error parsing '%s." + f.tags.JsonName() + "' value " + phldr + " exceeds maximum for data type " + ident.Name
 		checkOverflow = asthlp.If(
 			asthlp.Great(val, maxExp),
 			asthlp.Return(helpers.FmtError(maxExceeded, ast.NewIdent(names.VarNameObjPath), val)),
 		)
 	}
 
-	format := "error parsing '%s" + f.tags.JsonName() + "' value: %w"
+	format := "error parsing '%s." + f.tags.JsonName() + "' value: %w"
 	return []ast.Stmt{
 		asthlp.If(
 			asthlp.NotNil(ast.NewIdent(names.VarNameError)),

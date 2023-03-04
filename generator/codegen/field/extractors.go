@@ -64,14 +64,14 @@ func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, b
 
 // checkErrAndReturnParsingError generates a decoding error check
 // 	if err != nil {
-// 	    return fmt.Errorf("error parsing '%sname' value: %w", objPath, err)
+// 	    return fmt.Errorf("error parsing '%s.name' value: %w", objPath, err)
 // 	}
 func checkErrAndReturnParsingError(jsonFieldName string) ast.Stmt {
 	return asthlp.If(
 		asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
 		asthlp.Return(asthlp.Call(
 			asthlp.FmtErrorfFn,
-			asthlp.StringConstant("error parsing '%s"+jsonFieldName+"' value: %w").Expr(),
+			asthlp.StringConstant("error parsing '%s."+jsonFieldName+"' value: %w").Expr(),
 			asthlp.NewIdent(names.VarNameObjPath),
 			asthlp.NewIdent(names.VarNameError),
 		)),
@@ -81,7 +81,7 @@ func checkErrAndReturnParsingError(jsonFieldName string) ast.Stmt {
 // stringExtraction makes a block of code that extracts an string from json element into []byte variable
 //   var valField []byte
 //   if valField, err = field.StringBytes(); err != nil {
-//     return fmt.Errorf("error parsing '%s{json}' value: %w", objPath, err)
+//     return fmt.Errorf("error parsing '%s.{json}' value: %w", objPath, err)
 //   }
 func stringExtraction(dst *ast.Ident, v, jsonFieldName string) []ast.Stmt {
 	return asthlp.Block(
@@ -98,7 +98,7 @@ func stringExtraction(dst *ast.Ident, v, jsonFieldName string) []ast.Stmt {
 			// return fmt.Errorf("error parsing ...
 			asthlp.Return(asthlp.Call(
 				asthlp.FmtErrorfFn,
-				asthlp.StringConstant("error parsing '%s"+jsonFieldName+"' value: %w").Expr(),
+				asthlp.StringConstant("error parsing '%s."+jsonFieldName+"' value: %w").Expr(),
 				asthlp.NewIdent(names.VarNameObjPath),
 				asthlp.NewIdent(names.VarNameError),
 			)),
@@ -175,7 +175,7 @@ func particularTypeExtraction(dst, v string, varType ast.Expr, method string) []
 	).List
 }
 
-// err = {dst}.fill({v}, objPath+"{json}.")
+// err = {dst}.fill({v}, objPath+".{json}")
 func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 	return []ast.Stmt{
 		&ast.DeclStmt{
@@ -205,7 +205,7 @@ func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 							Op: token.ADD,
 							Y: &ast.BasicLit{
 								Kind:  token.STRING,
-								Value: "\"" + strings.Replace(json, "\"", "\\\"", -1) + ".\"",
+								Value: "\"." + strings.Replace(json, "\"", "\\\"", -1) + "\"",
 							},
 						},
 					},
@@ -219,7 +219,7 @@ func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
 //  var valfield uuid.UUID
 //  b, err := field.StringBytes()
 //  if err != nil {
-//      return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+//      return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 //  }
 //  valfield, err = uuid.ParseBytes(b)
 func uuidExtraction(dst *ast.Ident, t ast.Expr, v, name string) []ast.Stmt {
@@ -261,7 +261,7 @@ func uuidExtraction(dst *ast.Ident, t ast.Expr, v, name string) []ast.Stmt {
 
 //   b, err := {v}.StringBytes()
 //   if err != nil {
-//     return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+//     return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 //   }
 //   {dst}, err := parseDateTime(string(b))
 func timeExtraction(dst *ast.Ident, v, jsonName, layout string) []ast.Stmt {
@@ -301,7 +301,7 @@ func timeExtraction(dst *ast.Ident, v, jsonName, layout string) []ast.Stmt {
 	return append(
 		//   b, err := {v}.StringBytes()
 		//   if err != nil {
-		//     return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+		//     return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		//   }
 		[]ast.Stmt{
 			asthlp.Assign(asthlp.MakeVarNames("b", names.VarNameError), asthlp.Definition, asthlp.Call(
@@ -311,8 +311,8 @@ func timeExtraction(dst *ast.Ident, v, jsonName, layout string) []ast.Stmt {
 				asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
 				asthlp.Return(asthlp.Call(
 					asthlp.FmtErrorfFn,
-					asthlp.StringConstant("error parsing '%s"+jsonName+"' value: %w").Expr(),
-					asthlp.NewIdent("objPath"),
+					asthlp.StringConstant("error parsing '%s."+jsonName+"' value: %w").Expr(),
+					asthlp.NewIdent(names.VarNameObjPath),
 					asthlp.NewIdent(names.VarNameError),
 				)),
 			),

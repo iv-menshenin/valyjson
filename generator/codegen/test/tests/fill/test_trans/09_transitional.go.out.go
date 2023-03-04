@@ -20,7 +20,7 @@ func (s *TestTransitional) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitional.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -40,7 +40,7 @@ func (s *TestTransitionalElem) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitionalElem.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -52,7 +52,7 @@ func (s *TestTransitionalElem) FillFromJSON(v *fastjson.Value, objPath string) (
 		var valTestField int64
 		valTestField, err = _testField.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%stest-field' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.test-field' value: %w", objPath, err)
 		}
 		s.TestField = valTestField
 	}
@@ -73,7 +73,7 @@ func (s *TestTransitionalElem) validate(v *fastjson.Value, objPath string) error
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '-', 'f', 'i', 'e', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}

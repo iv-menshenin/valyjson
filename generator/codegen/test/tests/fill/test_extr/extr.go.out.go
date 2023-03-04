@@ -23,7 +23,7 @@ func (s *External) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserExternal.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -33,17 +33,17 @@ func (s *External) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _test01 := v.Get("test1"); _test01 != nil {
 		var valTest01 test_any.TestAllOfSecond
-		err = valTest01.FillFromJSON(_test01, objPath+"test1.")
+		err = valTest01.FillFromJSON(_test01, objPath+".test1")
 		if err != nil {
-			return fmt.Errorf("error parsing '%stest1' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.test1' value: %w", objPath, err)
 		}
 		s.Test01 = valTest01
 	}
 	if _test02 := v.Get("test2"); _test02 != nil {
 		var valTest02 test_string.TestStr01
-		err = valTest02.FillFromJSON(_test02, objPath+"test2.")
+		err = valTest02.FillFromJSON(_test02, objPath+".test2")
 		if err != nil {
-			return fmt.Errorf("error parsing '%stest2' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.test2' value: %w", objPath, err)
 		}
 		s.Test02 = valTest02
 	}
@@ -64,14 +64,14 @@ func (s *External) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '1'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '2'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}

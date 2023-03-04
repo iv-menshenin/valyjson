@@ -161,7 +161,7 @@ func Test_NumStruct01_Unmarshal(t *testing.T) {
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld": 1200}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "the 'int_fld' field appears in the object twice")
+		require.ErrorContains(t, err, "the '(root).int_fld' field appears in the object twice")
 	})
 }
 
@@ -379,12 +379,12 @@ func Test_NumStruct02_Unmarshal(t *testing.T) {
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld": 1200}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "the 'int_fld' field appears in the object twice")
+		require.ErrorContains(t, err, "the '(root).int_fld' field appears in the object twice")
 	})
 	t.Run("extra-field", func(t *testing.T) {
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld_extr": 1200}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "unexpected field 'int_fld_extr'")
+		require.ErrorContains(t, err, "unexpected field '(root).int_fld_extr'")
 	})
 }

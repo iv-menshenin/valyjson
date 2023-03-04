@@ -97,7 +97,7 @@ func (m *Array) FillerFunc() ast.Decl {
 				//}
 				asthlp.If(
 					asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
-					asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s[%d]' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(i), asthlp.NewIdent(names.VarNameError))),
+					asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s.[%d]' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(i), asthlp.NewIdent(names.VarNameError))),
 				),
 				// (*s)[i] = test_extr.External(value)
 				asthlp.Assign(

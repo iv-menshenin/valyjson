@@ -23,7 +23,7 @@ func (s *TestUserDefined) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestUserDefined.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -35,10 +35,10 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value, objPath string) (err e
 		var valInt32 int
 		valInt32, err = _int32.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sf_int32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_int32' value: %w", objPath, err)
 		}
 		if valInt32 > math.MaxInt32 {
-			return fmt.Errorf("error parsing '%sf_int32' value %d exceeds maximum for data type int32", objPath, valInt32)
+			return fmt.Errorf("error parsing '%s.f_int32' value %d exceeds maximum for data type int32", objPath, valInt32)
 		}
 		s.Int32 = DefinedInt32(valInt32)
 	} else {
@@ -48,7 +48,7 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value, objPath string) (err e
 		var valInt64 int64
 		valInt64, err = _int64.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sf_int64' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_int64' value: %w", objPath, err)
 		}
 		s.Int64 = DefinedInt64(valInt64)
 	}
@@ -56,10 +56,10 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value, objPath string) (err e
 		var valFloat32 float64
 		valFloat32, err = _float32.Float64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sf_float32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_float32' value: %w", objPath, err)
 		}
 		if valFloat32 > math.MaxFloat32 {
-			return fmt.Errorf("error parsing '%sf_float32' value %f exceeds maximum for data type float32", objPath, valFloat32)
+			return fmt.Errorf("error parsing '%s.f_float32' value %f exceeds maximum for data type float32", objPath, valFloat32)
 		}
 		s.Float32 = DefinedFloat32(valFloat32)
 	} else {
@@ -69,14 +69,14 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value, objPath string) (err e
 		var valFloat64 float64
 		valFloat64, err = _float64.Float64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sf_float64' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_float64' value: %w", objPath, err)
 		}
 		s.Float64 = DefinedFloat64(valFloat64)
 	}
 	if _string := v.Get("f_string"); _string != nil {
 		var valString []byte
 		if valString, err = _string.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%sf_string' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_string' value: %w", objPath, err)
 		}
 		s.String = *(*DefinedString)(unsafe.Pointer(&valString))
 	} else {
@@ -86,7 +86,7 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value, objPath string) (err e
 		var valBool bool
 		valBool, err = _bool.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sf_bool' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.f_bool' value: %w", objPath, err)
 		}
 		s.Bool = DefinedBool(valBool)
 	}
@@ -107,42 +107,42 @@ func (s *TestUserDefined) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', '_', 'i', 'n', 't', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', '_', 'i', 'n', 't', '6', '4'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', '_', 'f', 'l', 'o', 'a', 't', '3', '2'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', '_', 'f', 'l', 'o', 'a', 't', '6', '4'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', '_', 's', 't', 'r', 'i', 'n', 'g'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', '_', 'b', 'o', 'o', 'l'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}

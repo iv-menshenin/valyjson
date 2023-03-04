@@ -135,10 +135,10 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 						asthlp.Index(ast.NewIdent(checkFieldsVarName), asthlp.IntegerConstant(i)),
 						asthlp.IntegerConstant(1).Expr(),
 					),
-					// err = fmt.Errorf("the '%s' field appears in the object twice [%s]", string(key), objPath)
+					// err = fmt.Errorf("the '%s.%s' field appears in the object twice [%s]", string(key), objPath)
 					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 						asthlp.FmtErrorfFn,
-						asthlp.StringConstant("the '%s%s' field appears in the object twice").Expr(),
+						asthlp.StringConstant("the '%s.%s' field appears in the object twice").Expr(),
 						ast.NewIdent(names.VarNameObjPath),
 						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
 					)),
@@ -147,14 +147,14 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 			),
 		)
 	}
-	//	err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+	//	err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	if s.tags.StrictRules() {
 		// If there were unregistered data fields in the JSON object, execution will surely get to that point.
 		// With strict rules it is necessary to register an error
 		visitFunc.AppendStmt(
 			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 				asthlp.FmtErrorfFn,
-				asthlp.StringConstant("unexpected field '%s%s'").Expr(),
+				asthlp.StringConstant("unexpected field '%s.%s'").Expr(),
 				asthlp.NewIdent(names.VarNameObjPath),
 				asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
 			)),

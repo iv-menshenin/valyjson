@@ -35,7 +35,7 @@ func (m *Map) UnmarshalFunc() []ast.Decl {
 //func (m *MapTable) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 //	o, err := v.Object()
 //	if err != nil {
-//		return fmt.Errorf("error parsing '%stables' value: %w", objPath, err)
+//		return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
 //	}
 //	*m = make(map[string]TableOf, o.Len())
 //	o.Visit(func(key []byte, v *fastjson.Value) {
@@ -49,7 +49,7 @@ func (m *Map) UnmarshalFunc() []ast.Decl {
 //		}
 //	})
 //	if err != nil {
-//		return fmt.Errorf("error parsing '%stables' value: %w", objPath, err)
+//		return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
 //	}
 //	return nil
 //}
@@ -112,7 +112,7 @@ func (m *Map) FillerFunc() ast.Decl {
 		),
 		asthlp.If(
 			asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
-			// return fmt.Errorf("error parsing '%stables' value: %w", objPath, err)
+			// return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
 			asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(names.VarNameError))),
 		),
 		//	*m = make(map[string]TableOf, o.Len())

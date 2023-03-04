@@ -23,7 +23,7 @@ func (s *TestInh01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh01.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -34,9 +34,9 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 	}
 	if _testInh02 := v.Get("injected"); _testInh02 != nil {
 		var valTestInh02 TestInh02
-		err = valTestInh02.FillFromJSON(_testInh02, objPath+"injected.")
+		err = valTestInh02.FillFromJSON(_testInh02, objPath+".injected")
 		if err != nil {
-			return fmt.Errorf("error parsing '%sinjected' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.injected' value: %w", objPath, err)
 		}
 		s.TestInh02 = TestInh02(valTestInh02)
 	}
@@ -44,10 +44,10 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var valInt16 int
 		valInt16, err = _int16.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sint_16' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.int_16' value: %w", objPath, err)
 		}
 		if valInt16 > math.MaxInt16 {
-			return fmt.Errorf("error parsing '%sint_16' value %d exceeds maximum for data type int16", objPath, valInt16)
+			return fmt.Errorf("error parsing '%s.int_16' value %d exceeds maximum for data type int16", objPath, valInt16)
 		}
 		s.Int16 = int16(valInt16)
 	}
@@ -55,34 +55,34 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var valRandom int
 		valRandom, err = _random.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%srandom' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.random' value: %w", objPath, err)
 		}
 		s.Random = valRandom
 	}
 	if _dateBegin := v.Get("date_begin"); _dateBegin != nil {
 		b, err := _dateBegin.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sdate_begin' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.date_begin' value: %w", objPath, err)
 		}
 		valDateBegin, err := parseDateTime(string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%sdate_begin' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.date_begin' value: %w", objPath, err)
 		}
 		s.DateBegin = valDateBegin
 	}
 	if _nested1 := v.Get("nested1"); _nested1 != nil {
 		var valNested1 TestInh03
-		err = valNested1.FillFromJSON(_nested1, objPath+"nested1.")
+		err = valNested1.FillFromJSON(_nested1, objPath+".nested1")
 		if err != nil {
-			return fmt.Errorf("error parsing '%snested1' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.nested1' value: %w", objPath, err)
 		}
 		s.Nested1 = TestInh03(valNested1)
 	}
 	if _nested2 := v.Get("nested2"); valueIsNotNull(_nested2) {
 		var valNested2 TestInh03
-		err = valNested2.FillFromJSON(_nested2, objPath+"nested2.")
+		err = valNested2.FillFromJSON(_nested2, objPath+".nested2")
 		if err != nil {
-			return fmt.Errorf("error parsing '%snested2' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.nested2' value: %w", objPath, err)
 		}
 		s.Nested2 = new(TestInh03)
 		*s.Nested2 = TestInh03(valNested2)
@@ -104,46 +104,46 @@ func (s *TestInh01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }
@@ -160,7 +160,7 @@ func (s *TestInh02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh02.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -173,10 +173,10 @@ func (s *TestInh02) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var valInt32 int
 		valInt32, err = _int32.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sint_32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.int_32' value: %w", objPath, err)
 		}
 		if valInt32 > math.MaxInt32 {
-			return fmt.Errorf("error parsing '%sint_32' value %d exceeds maximum for data type int32", objPath, valInt32)
+			return fmt.Errorf("error parsing '%s.int_32' value %d exceeds maximum for data type int32", objPath, valInt32)
 		}
 		s.Int32 = int32(valInt32)
 	}
@@ -197,11 +197,11 @@ func (s *TestInh02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }
@@ -218,7 +218,7 @@ func (s *TestInh03) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh03.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -231,10 +231,10 @@ func (s *TestInh03) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var valInt16 int
 		valInt16, err = _int16.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sint_16' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.int_16' value: %w", objPath, err)
 		}
 		if valInt16 > math.MaxInt16 {
-			return fmt.Errorf("error parsing '%sint_16' value %d exceeds maximum for data type int16", objPath, valInt16)
+			return fmt.Errorf("error parsing '%s.int_16' value %d exceeds maximum for data type int16", objPath, valInt16)
 		}
 		s.Int16 = int16(valInt16)
 	}
@@ -242,7 +242,7 @@ func (s *TestInh03) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var valRandom int
 		valRandom, err = _random.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%srandom' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.random' value: %w", objPath, err)
 		}
 		s.Random = valRandom
 	}
@@ -263,18 +263,18 @@ func (s *TestInh03) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }
@@ -291,7 +291,7 @@ func (s *TestNested01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested01.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -304,10 +304,10 @@ func (s *TestNested01) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 		var valField32 int
 		valField32, err = _field32.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field_32' value: %w", objPath, err)
 		}
 		if valField32 > math.MaxInt32 {
-			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+			return fmt.Errorf("error parsing '%s.field_32' value %d exceeds maximum for data type int32", objPath, valField32)
 		}
 		s.Field32 = int32(valField32)
 	}
@@ -328,11 +328,11 @@ func (s *TestNested01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }
@@ -349,7 +349,7 @@ func (s *TestNested02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested02.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -362,10 +362,10 @@ func (s *TestNested02) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 		var valField32 int
 		valField32, err = _field32.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field_32' value: %w", objPath, err)
 		}
 		if valField32 > math.MaxInt32 {
-			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+			return fmt.Errorf("error parsing '%s.field_32' value %d exceeds maximum for data type int32", objPath, valField32)
 		}
 		s.Field32 = int32(valField32)
 	}
@@ -386,11 +386,11 @@ func (s *TestNested02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }
@@ -407,7 +407,7 @@ func (s *TestNested03) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested03.Put(parser)
-	return s.FillFromJSON(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
@@ -420,10 +420,10 @@ func (s *TestNested03) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 		var valField32 int
 		valField32, err = _field32.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield_32' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field_32' value: %w", objPath, err)
 		}
 		if valField32 > math.MaxInt32 {
-			return fmt.Errorf("error parsing '%sfield_32' value %d exceeds maximum for data type int32", objPath, valField32)
+			return fmt.Errorf("error parsing '%s.field_32' value %d exceeds maximum for data type int32", objPath, valField32)
 		}
 		s.Field32 = int32(valField32)
 	}
@@ -444,11 +444,11 @@ func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', '_', '3', '2'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }

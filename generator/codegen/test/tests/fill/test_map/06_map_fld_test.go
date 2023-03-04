@@ -25,7 +25,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 	t.Run("test-incorrect-type", func(t *testing.T) {
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"tags":324, "properties":null, "key_typed_properties":null}`))
-		require.ErrorContains(t, err, "error parsing 'tags' value")
+		require.ErrorContains(t, err, "error parsing '(root).tags' value")
 		require.ErrorContains(t, err, "doesn't contain object")
 		require.Nil(t, test1.Tags)
 		require.Nil(t, test1.Properties)
