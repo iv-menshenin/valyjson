@@ -28,12 +28,12 @@ var putCommaFirstIf = asthlp.If(
 )
 
 var (
-	writeStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))
-	writeBytesFn  = asthlp.InlineFunc(asthlp.SimpleSelector("result", "Write"))
-	writeRuneFn   = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune"))
+	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))
+	WriteBytesFn  = asthlp.InlineFunc(asthlp.SimpleSelector("result", "Write"))
+	WriteRuneFn   = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune"))
 
-	bufVar  = asthlp.NewIdent("buf")
-	bufExpr = asthlp.SliceExpr(bufVar, nil, asthlp.IntegerConstant(0))
+	BufVar  = asthlp.NewIdent("buf")
+	BufExpr = asthlp.SliceExpr(BufVar, nil, asthlp.IntegerConstant(0))
 )
 
 // result.WriteString("\"{json}\":")
@@ -78,7 +78,7 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		if f.tags.JsonAppendix() != "omitempty" {
 			wb.IfZero = []ast.Stmt{
 				asthlp.CallStmt(asthlp.Call(
-					writeStringFn,
+					WriteStringFn,
 					asthlp.StringConstant(fmt.Sprintf(`"%s":null`, f.tags.JsonName())).Expr(),
 				)),
 			}

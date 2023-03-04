@@ -69,13 +69,13 @@ func (t *TestAllOfFirstIsOne) MarshalJSON() ([]byte, error) {
 
 type (
 	// TestAllOfSecond tests allOf option
-	//json:optional,decode
+	//json:optional
 	TestAllOfSecond struct {
 		Comment string `json:"comment"`
 		Level   int64  `json:"level,omitempty"`
 	}
 	// TestAllOfThird tests allOf option
-	//json:optional,decode
+	//json:optional
 	TestAllOfThird struct {
 		Command string `json:"command,omitempty"`
 		Range   int64  `json:"range,omitempty"`

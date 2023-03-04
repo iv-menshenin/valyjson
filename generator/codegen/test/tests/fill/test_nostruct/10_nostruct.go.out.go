@@ -2,7 +2,9 @@
 package test_nostruct
 
 import (
+	"bytes"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/valyala/fastjson"
@@ -22,11 +24,11 @@ func (s *TestMap10) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap10.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the keys with fastjson.Value
-func (s *TestMap10) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the keys with fastjson.Value
+func (s *TestMap10) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -59,11 +61,11 @@ func (s *TestMap11) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap11.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the keys with fastjson.Value
-func (s *TestMap11) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the keys with fastjson.Value
+func (s *TestMap11) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -74,7 +76,7 @@ func (s *TestMap11) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 			return
 		}
 		var value test_extr.External
-		err = value.FillFromJson(v, objPath+".")
+		err = value.FillFromJSON(v, objPath+".")
 		if err != nil {
 			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
 			return
@@ -96,11 +98,11 @@ func (s *TestSlice12) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice12.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson fills the array with the values recognized from fastjson.Value
-func (s *TestSlice12) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *TestSlice12) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -129,11 +131,11 @@ func (s *TestSlice13) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice13.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson fills the array with the values recognized from fastjson.Value
-func (s *TestSlice13) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *TestSlice13) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -141,7 +143,7 @@ func (s *TestSlice13) FillFromJson(v *fastjson.Value, objPath string) (err error
 	*s = make([]test_extr.External, len(a))
 	for i, v := range a {
 		var value test_extr.External
-		err = value.FillFromJson(v, objPath+".")
+		err = value.FillFromJSON(v, objPath+".")
 		if err != nil {
 			return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
 		}
@@ -162,11 +164,11 @@ func (s *TestSlice14) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice14.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson fills the array with the values recognized from fastjson.Value
-func (s *TestSlice14) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -186,4 +188,73 @@ func (s *TestSlice14) FillFromJson(v *fastjson.Value, objPath string) (err error
 		(*s)[i] = time.Time(value)
 	}
 	return nil
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestMap10) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestMap10) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('{')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		result.WriteRune('"')
+		result.WriteString(string(_k))
+		result.WriteString(`":`)
+		buf = strconv.AppendInt(buf[:0], int64(_v), 10)
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestMap11) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestMap11) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('{')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		result.WriteRune('"')
+		result.WriteString(string(_k))
+		result.WriteString(`":`)
+		buf, err = _v.MarshalAppend(buf[:0])
+		if err != nil {
+			return nil, fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
+		}
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

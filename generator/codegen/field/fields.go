@@ -154,7 +154,8 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 		if i, ok := valType.(*ast.Ident); ok {
 			valType = denotedType(i)
 		}
-		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, getValueExtractor(valType, f.tags.JsonName()))
+		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
+		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr))
 		return block.Render(putCommaFirstIf)
 
 	default:
@@ -163,24 +164,24 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 	}
 }
 
-type valueExtractor func(src ast.Expr) []ast.Stmt
+type ValueExtractor func(src ast.Expr) []ast.Stmt
 
-func getValueExtractor(t ast.Expr, name string) valueExtractor {
+func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
+	if errExpr == nil {
+		errExpr = asthlp.NewIdent("err")
+	}
 	transitMarshaller := func(src ast.Expr) []ast.Stmt {
 		return []ast.Stmt{
 			// buf, err = v.MarshalAppend(buf[:0])
 			asthlp.Assign(
-				asthlp.VarNames{bufVar, asthlp.NewIdent("err")},
+				asthlp.VarNames{BufVar, asthlp.NewIdent("err")},
 				asthlp.Assignment,
-				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "MarshalAppend")), bufExpr),
+				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "MarshalAppend")), BufExpr),
 			),
 			//	if err != nil {
-			//		return nil, fmt.Errorf(`can't marshal "name" attrbute %q: %w`, k, err)
+			//		return nil, fmt.Errorf(`can't marshal "name" attribute %q: %w`, k, err)
 			//	}
-			asthlp.If(asthlp.NotNil(asthlp.NewIdent("err")), asthlp.Return(
-				asthlp.Nil,
-				asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+name+`" attrbute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err")),
-			)),
+			asthlp.If(asthlp.NotNil(asthlp.NewIdent("err")), asthlp.Return(asthlp.Nil, errExpr)),
 		}
 	}
 	switch tt := t.(type) {
@@ -192,9 +193,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				int64Expression := asthlp.ExpressionTypeConvert(src, asthlp.Int64)
 				return []ast.Stmt{
 					// b = strconv.AppendInt(buf[:0], int64({src}), 10)
-					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
 						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendInt")),
-						bufExpr,                           // buf[:0]
+						BufExpr,                           // buf[:0]
 						int64Expression,                   // int64({src})
 						asthlp.IntegerConstant(10).Expr(), // 10
 					)),
@@ -206,9 +207,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				uint64Expression := asthlp.ExpressionTypeConvert(src, asthlp.UInt64)
 				return []ast.Stmt{
 					// buf = strconv.AppendUint(buf[:0], uint64({src}), 10)
-					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
 						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendUint")),
-						bufExpr,                           // buf[:0]
+						BufExpr,                           // buf[:0]
 						uint64Expression,                  // uint64({src})
 						asthlp.IntegerConstant(10).Expr(), // 10
 					)),
@@ -220,9 +221,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				float64Expression := asthlp.ExpressionTypeConvert(src, asthlp.Float64)
 				return []ast.Stmt{
 					// buf = strconv.AppendFloat(buf[:0], float64({src}), 'f', -1, 64)
-					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
 						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendFloat")),
-						bufExpr,                           // buf[:0]
+						BufExpr,                           // buf[:0]
 						float64Expression,                 // float64({src})
 						asthlp.RuneConstant('f').Expr(),   // 'f'
 						asthlp.IntegerConstant(-1).Expr(), // -1
@@ -236,23 +237,15 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				return []ast.Stmt{
 					asthlp.IfElse(
 						src,
-						// buf = append(buf[:0], []byte(`"name":true`)...)
-						asthlp.Block(asthlp.CallStmt(asthlp.CallEllipsis(
-							asthlp.AppendFn,
-							bufExpr,
-							asthlp.ExpressionTypeConvert(
-								asthlp.StringConstant(fmt.Sprintf(`"%s":true`, name)).Expr(),
-								asthlp.ArrayType(asthlp.Byte),
-							),
+						// result.WriteString(`true`)
+						asthlp.Block(asthlp.CallStmt(asthlp.Call(
+							WriteStringFn,
+							asthlp.StringConstant(`true`).Expr(),
 						))),
-						// buf = append(buf[:0], []byte(`"name":false`)...)
-						asthlp.Block(asthlp.CallStmt(asthlp.CallEllipsis(
-							asthlp.AppendFn,
-							bufExpr,
-							asthlp.ExpressionTypeConvert(
-								asthlp.StringConstant(fmt.Sprintf(`"%s":false`, name)).Expr(),
-								asthlp.ArrayType(asthlp.Byte),
-							),
+						// result.WriteString(`false`)
+						asthlp.Block(asthlp.CallStmt(asthlp.Call(
+							WriteStringFn,
+							asthlp.StringConstant(`false`).Expr(),
 						))),
 					),
 				}
@@ -262,9 +255,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 			return func(src ast.Expr) []ast.Stmt {
 				// buf = marshalString(buf[:0], _v)
 				return []ast.Stmt{
-					asthlp.Assign(asthlp.VarNames{bufVar}, asthlp.Assignment, asthlp.Call(
+					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
 						asthlp.InlineFunc(asthlp.NewIdent("marshalString")),
-						bufExpr, src,
+						BufExpr, src,
 					)),
 				}
 			}
@@ -281,9 +274,9 @@ func getValueExtractor(t ast.Expr, name string) valueExtractor {
 				return []ast.Stmt{
 					// b = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
 					asthlp.Assign(
-						asthlp.VarNames{bufVar},
+						asthlp.VarNames{BufVar},
 						asthlp.Assignment,
-						asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), bufExpr, asthlp.SimpleSelector("time", "RFC3339")),
+						asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), BufExpr, asthlp.SimpleSelector("time", "RFC3339")),
 					),
 				}
 			}

@@ -20,12 +20,12 @@ func (s *TestTransitional) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitional.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestTransitional) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-	return (*TestTransitionalElem)(s).FillFromJson(v, objPath)
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestTransitional) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	return (*TestTransitionalElem)(s).FillFromJSON(v, objPath)
 }
 
 // jsonParserTestTransitionalElem used for pooling Parsers for TestTransitionalElem JSONs.
@@ -40,11 +40,11 @@ func (s *TestTransitionalElem) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitionalElem.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestTransitionalElem) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestTransitionalElem) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}

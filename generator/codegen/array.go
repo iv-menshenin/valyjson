@@ -118,6 +118,8 @@ func (m *Array) FillerFunc() ast.Decl {
 	return fn.Decl()
 }
 
+// TODO @menshenin
+
 func (m *Array) ValidatorFunc() ast.Decl {
 	return nil
 }

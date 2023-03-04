@@ -22,11 +22,11 @@ func (s *NumStruct01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserNumStruct01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *NumStruct01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *NumStruct01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
@@ -478,11 +478,11 @@ func (s *NumStruct02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserNumStruct02.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *NumStruct02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *NumStruct02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err

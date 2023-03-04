@@ -118,10 +118,10 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 			asthlp.ReturnEmpty(),
 		),
 	)
-	for i, field := range s.spec.Fields.List {
+	for i, fieldSpec := range s.spec.Fields.List {
 		var fieldTags tags.Tags
-		if field.Tag != nil {
-			fieldTags = tags.Parse(field.Tag.Value)
+		if fieldSpec.Tag != nil {
+			fieldTags = tags.Parse(fieldSpec.Tag.Value)
 		}
 		visitFunc.AppendStmt(
 			//		if bytes.Equal(key, []byte{'f', 'i', 'l', 't', 'e', 'r'}) {
@@ -235,9 +235,8 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 			ast.NewIdent("dst"),
 		)))),
 		// var (
-		// 	b   []byte
-		// 	buf [128]byte
 		// 	err error
+		// 	buf = make([]byte, 0, 128)
 		// )
 		asthlp.Var(
 			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),

@@ -23,17 +23,17 @@ func (s *External) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserExternal.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *External) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *External) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if _test01 := v.Get("test1"); _test01 != nil {
 		var valTest01 test_any.TestAllOfSecond
-		err = valTest01.FillFromJson(_test01, objPath+"test1.")
+		err = valTest01.FillFromJSON(_test01, objPath+"test1.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%stest1' value: %w", objPath, err)
 		}
@@ -41,7 +41,7 @@ func (s *External) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _test02 := v.Get("test2"); _test02 != nil {
 		var valTest02 test_string.TestStr01
-		err = valTest02.FillFromJson(_test02, objPath+"test2.")
+		err = valTest02.FillFromJSON(_test02, objPath+"test2.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%stest2' value: %w", objPath, err)
 		}
@@ -77,4 +77,40 @@ func (s *External) validate(v *fastjson.Value, objPath string) error {
 		}
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *External) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *External) MarshalAppend(dst []byte) ([]byte, error) {
+	var result = bytes.NewBuffer(dst)
+	var (
+		err error
+		buf = make([]byte, 0, 128)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if buf, err = s.Test01.MarshalAppend(buf[:0]); err != nil {
+		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+	} else {
+		result.WriteString(`"test1":`)
+		result.Write(buf)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if buf, err = s.Test02.MarshalAppend(buf[:0]); err != nil {
+		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+	} else {
+		result.WriteString(`"test2":`)
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
 }

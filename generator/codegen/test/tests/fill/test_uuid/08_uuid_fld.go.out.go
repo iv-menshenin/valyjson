@@ -21,11 +21,11 @@ func (s *TestUUID) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestUUID.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestUUID) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}

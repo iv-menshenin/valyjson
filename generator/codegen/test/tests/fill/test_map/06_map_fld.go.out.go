@@ -22,11 +22,11 @@ func (s *TestMap01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestMap01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -63,7 +63,7 @@ func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 				return
 			}
 			var value Property
-			err = value.FillFromJson(v, objPath+"properties.")
+			err = value.FillFromJSON(v, objPath+"properties.")
 			if err == nil {
 				valProperties[string(key)] = Property(value)
 			}
@@ -84,7 +84,7 @@ func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 				return
 			}
 			var value Property
-			err = value.FillFromJson(v, objPath+"key_typed_properties.")
+			err = value.FillFromJSON(v, objPath+"key_typed_properties.")
 			if err == nil {
 				valKeyTypedProperties[Key(key)] = Property(value)
 			}
@@ -157,6 +157,27 @@ func (s *TestMap01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 		}
 		s.UintVal = valUintVal
 	}
+	if _boolVal := v.Get("bool"); valueIsNotNull(_boolVal) {
+		o, err := _boolVal.Object()
+		if err != nil {
+			return fmt.Errorf("error parsing '%sbool' value: %w", objPath, err)
+		}
+		var valBoolVal = make(map[Key]bool, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value bool
+			value, err = v.Bool()
+			if err == nil {
+				valBoolVal[Key(key)] = bool(value)
+			}
+		})
+		if err != nil {
+			return fmt.Errorf("error parsing '%sbool' value: %w", objPath, err)
+		}
+		s.BoolVal = valBoolVal
+	}
 	if _typedVal := v.Get("typed-val"); valueIsNotNull(_typedVal) {
 		o, err := _typedVal.Object()
 		if err != nil {
@@ -187,7 +208,7 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [7]int
+	var checkFields [8]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
@@ -234,9 +255,16 @@ func (s *TestMap01) validate(v *fastjson.Value, objPath string) error {
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'t', 'y', 'p', 'e', 'd', '-', 'v', 'a', 'l'}) {
+		if bytes.Equal(key, []byte{'b', 'o', 'o', 'l'}) {
 			checkFields[6]++
 			if checkFields[6] > 1 {
+				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'t', 'y', 'p', 'e', 'd', '-', 'v', 'a', 'l'}) {
+			checkFields[7]++
+			if checkFields[7] > 1 {
 				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
 			}
 			return
@@ -258,11 +286,11 @@ func (s *Property) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserProperty.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *Property) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *Property) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -367,7 +395,7 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteString(`":`)
 			buf, err = _v.MarshalAppend(buf[:0])
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "properties" attrbute %q: %w`, _k, err)
+				return nil, fmt.Errorf(`can't marshal "properties" attribute %q: %w`, _k, err)
 			}
 			result.Write(buf)
 		}
@@ -390,7 +418,7 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteString(`":`)
 			buf, err = _v.MarshalAppend(buf[:0])
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "key_typed_properties" attrbute %q: %w`, _k, err)
+				return nil, fmt.Errorf(`can't marshal "key_typed_properties" attribute %q: %w`, _k, err)
 			}
 			result.Write(buf)
 		}
@@ -454,6 +482,30 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			buf = strconv.AppendUint(buf[:0], uint64(_v), 10)
+			result.Write(buf)
+		}
+		result.WriteRune('}')
+	}
+	if s.BoolVal != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		buf = buf[:0]
+		result.WriteString(`"bool":{`)
+		var _filled bool
+		for _k, _v := range s.BoolVal {
+			if _filled {
+				result.WriteRune(',')
+			}
+			_filled = true
+			result.WriteRune('"')
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			if _v {
+				result.WriteString("true")
+			} else {
+				result.WriteString("false")
+			}
 			result.Write(buf)
 		}
 		result.WriteRune('}')

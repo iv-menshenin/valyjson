@@ -23,18 +23,18 @@ func (s *TestInh01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestInh01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
 	if _testInh02 := v.Get("injected"); _testInh02 != nil {
 		var valTestInh02 TestInh02
-		err = valTestInh02.FillFromJson(_testInh02, objPath+"injected.")
+		err = valTestInh02.FillFromJSON(_testInh02, objPath+"injected.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%sinjected' value: %w", objPath, err)
 		}
@@ -72,7 +72,7 @@ func (s *TestInh01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 	}
 	if _nested1 := v.Get("nested1"); _nested1 != nil {
 		var valNested1 TestInh03
-		err = valNested1.FillFromJson(_nested1, objPath+"nested1.")
+		err = valNested1.FillFromJSON(_nested1, objPath+"nested1.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%snested1' value: %w", objPath, err)
 		}
@@ -80,7 +80,7 @@ func (s *TestInh01) FillFromJson(v *fastjson.Value, objPath string) (err error) 
 	}
 	if _nested2 := v.Get("nested2"); valueIsNotNull(_nested2) {
 		var valNested2 TestInh03
-		err = valNested2.FillFromJson(_nested2, objPath+"nested2.")
+		err = valNested2.FillFromJSON(_nested2, objPath+"nested2.")
 		if err != nil {
 			return fmt.Errorf("error parsing '%snested2' value: %w", objPath, err)
 		}
@@ -160,11 +160,11 @@ func (s *TestInh02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh02.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestInh02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestInh02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -218,11 +218,11 @@ func (s *TestInh03) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInh03.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestInh03) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestInh03) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -291,11 +291,11 @@ func (s *TestNested01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestNested01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestNested01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -349,11 +349,11 @@ func (s *TestNested02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested02.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestNested02) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestNested02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -407,11 +407,11 @@ func (s *TestNested03) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestNested03.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestNested03) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestNested03) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err

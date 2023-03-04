@@ -20,11 +20,11 @@ func (s *TestBool01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestBool01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestBool01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err

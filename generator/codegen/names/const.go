@@ -14,7 +14,7 @@ const (
 	VarPrefixPool            = "jsonParser"
 	VarNameData              = "data"
 
-	MethodNameFill      = "FillFromJson"
+	MethodNameFill      = "FillFromJSON"
 	MethodNameUnmarshal = "UnmarshalJSON"
 	MethodNameMarshal   = "MarshalJSON"
 	MethodNameValidate  = "validate"
