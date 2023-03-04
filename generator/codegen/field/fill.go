@@ -199,6 +199,17 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //	}
 //	s.KeyTypedProperties = valKeyTypedProperties
 func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []ast.Stmt {
+	value := asthlp.NewIdent("value")
+	var valueAsValue = asthlp.ExpressionTypeConvert(value, t.Value)
+	if _, isStar := t.Value.(*ast.StarExpr); isStar {
+		valueAsValue = asthlp.Call(
+			asthlp.InlineFunc(asthlp.ParenExpr(t.Value)),
+			asthlp.Call(
+				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+				asthlp.Ref(value),
+			),
+		)
+	}
 	valFactory := New(asthlp.Field("", asthlp.MakeTagsForField(map[string][]string{
 		"json": {f.tags.JsonName()},
 	}), t.Value))
@@ -226,7 +237,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				).
 				AppendStmt(
 					// fills one value
-					valFactory.TypedValue(asthlp.NewIdent("value"), "v")...,
+					valFactory.TypedValue(value, "v")...,
 				).
 				AppendStmt(
 					asthlp.If(
@@ -237,7 +248,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 								asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
 							},
 							asthlp.Assignment,
-							asthlp.VariableTypeConvert("value", t.Value),
+							valueAsValue,
 						),
 					),
 				).

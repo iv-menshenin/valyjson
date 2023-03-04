@@ -8,7 +8,7 @@ type TestMap01 struct {
 	KeyTypedProperties map[Key]Property    `json:"key_typed_properties"`
 	IntegerVal         map[Key]int32       `json:"integerVal,omitempty"`
 	FloatVal           map[Key]float64     `json:"floatVal,omitempty"`
-	UintVal            map[Key]uint16      `json:"uintVal,omitempty"`
+	UintVal            map[Key]*uint16     `json:"uintVal,omitempty"`
 	BoolVal            map[Key]bool        `json:"bool,omitempty"`
 	TypedVal           map[Key]Val         `json:"typed-val,omitempty"`
 }

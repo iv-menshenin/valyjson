@@ -87,10 +87,13 @@ func (s *External) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *External) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {

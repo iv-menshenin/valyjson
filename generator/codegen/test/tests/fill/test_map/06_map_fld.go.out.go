@@ -141,7 +141,7 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		if err != nil {
 			return fmt.Errorf("error parsing '%suintVal' value: %w", objPath, err)
 		}
-		var valUintVal = make(map[Key]uint16, o.Len())
+		var valUintVal = make(map[Key]*uint16, o.Len())
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -149,7 +149,7 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 			var value uint
 			value, err = v.Uint()
 			if err == nil {
-				valUintVal[Key(key)] = uint16(value)
+				valUintVal[Key(key)] = (*uint16)(unsafe.Pointer(&value))
 			}
 		})
 		if err != nil {
@@ -350,10 +350,13 @@ func (s *TestMap01) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {
@@ -481,7 +484,11 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteRune('"')
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
-			buf = strconv.AppendUint(buf[:0], uint64(_v), 10)
+			if _v == nil {
+				buf = append(buf[:0], 'n', 'u', 'l', 'l')
+			} else {
+				buf = strconv.AppendUint(buf[:0], uint64(*_v), 10)
+			}
 			result.Write(buf)
 		}
 		result.WriteRune('}')
@@ -542,10 +549,13 @@ func (s *Property) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *Property) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {

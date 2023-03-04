@@ -94,8 +94,10 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.Properties)
 		require.Nil(t, test1.KeyTypedProperties)
 		require.NotEmpty(t, test1.UintVal)
-		require.EqualValues(t, test1.UintVal["123"], 123)
-		require.EqualValues(t, test1.UintVal["0"], 0)
+		require.NotNil(t, *test1.UintVal["123"])
+		require.EqualValues(t, *test1.UintVal["123"], 123)
+		require.NotNil(t, *test1.UintVal["0"])
+		require.EqualValues(t, *test1.UintVal["0"], 0)
 	})
 	t.Run("test-float-values", func(t *testing.T) {
 		var test1 TestMap01
@@ -218,11 +220,16 @@ func Test_TestMap01_Marshal(t *testing.T) {
 	})
 	t.Run("uint-values", func(t *testing.T) {
 		const expected = `{"tags":null,"key_typed_properties":null,"uintVal":{"344": 344, "345": 345, "0": 0}}`
-		var test = TestMap01{
-			UintVal: map[Key]uint16{
-				"344": 344, "345": 345, "0": 0,
-			},
-		}
+		var (
+			v344 uint16 = 344
+			v345 uint16 = 345
+			v000 uint16 = 0
+			test        = TestMap01{
+				UintVal: map[Key]*uint16{
+					"344": &v344, "345": &v345, "0": &v000,
+				},
+			}
+		)
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(b))

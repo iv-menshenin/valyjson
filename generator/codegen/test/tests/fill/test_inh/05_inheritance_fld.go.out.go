@@ -461,10 +461,13 @@ func (s *TestInh01) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {
@@ -543,10 +546,13 @@ func (s *TestInh02) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if s.Int32 != 0 {
@@ -569,10 +575,13 @@ func (s *TestInh03) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {
@@ -607,10 +616,13 @@ func (s *TestNested01) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {
@@ -635,10 +647,13 @@ func (s *TestNested02) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {
@@ -663,10 +678,13 @@ func (s *TestNested03) MarshalJSON() ([]byte, error) {
 
 // MarshalAppend serializes all fields of the structure using a buffer.
 func (s *TestNested03) MarshalAppend(dst []byte) ([]byte, error) {
-	var result = bytes.NewBuffer(dst)
+	if s == nil {
+		return []byte("null"), nil
+	}
 	var (
-		err error
-		buf = make([]byte, 0, 128)
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
 	)
 	result.WriteRune('{')
 	if result.Len() > 1 {

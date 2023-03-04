@@ -229,14 +229,17 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		)
 
 	fn.AppendStmt(
-		// var result = bytes.NewBuffer(dst)
-		asthlp.Var(asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
-			asthlp.BytesNewBufferFn,
-			ast.NewIdent("dst"),
-		)))),
+		// 	if s == nil {
+		//		return []byte("null"), nil
+		//	}
+		asthlp.If(
+			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+			asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
+		),
 		// var (
-		// 	err error
-		// 	buf = make([]byte, 0, 128)
+		// 	err    error
+		// 	buf    = make([]byte, 0, 128)
+		//  result = bytes.NewBuffer(dst)
 		// )
 		asthlp.Var(
 			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
@@ -245,6 +248,10 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 				asthlp.ArrayType(asthlp.Byte),
 				asthlp.IntegerConstant(0).Expr(),
 				asthlp.IntegerConstant(128).Expr(),
+			))),
+			asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
+				asthlp.BytesNewBufferFn,
+				ast.NewIdent("dst"),
 			))),
 		),
 		// result.WriteRune('{')

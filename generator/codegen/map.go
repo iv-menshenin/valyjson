@@ -58,6 +58,17 @@ func (m *Map) FillerFunc() ast.Decl {
 		v = "v"
 		o = "o"
 	)
+	value := asthlp.NewIdent("value")
+	var valueAsValue = asthlp.ExpressionTypeConvert(value, m.spec.Value)
+	if _, isStar := m.spec.Value.(*ast.StarExpr); isStar {
+		valueAsValue = asthlp.Call(
+			asthlp.InlineFunc(asthlp.ParenExpr(m.spec.Value)),
+			asthlp.Call(
+				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
+				asthlp.Ref(value),
+			),
+		)
+	}
 
 	valFactory := field.New(asthlp.Field("", asthlp.MakeTagsForField(map[string][]string{}), m.spec.Value))
 	valFactory.DontCheckErr()
@@ -108,7 +119,7 @@ func (m *Map) FillerFunc() ast.Decl {
 				).
 				AppendStmt(
 					// fills one value
-					valFactory.TypedValue(asthlp.NewIdent("value"), "v")...,
+					valFactory.TypedValue(value, "v")...,
 				).
 				AppendStmt(
 					// if err == nil {
@@ -134,7 +145,7 @@ func (m *Map) FillerFunc() ast.Decl {
 							),
 						},
 						asthlp.Assignment,
-						asthlp.VariableTypeConvert("value", m.spec.Value),
+						valueAsValue,
 					),
 				).
 				Lit(),

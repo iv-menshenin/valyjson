@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"unsafe"
 
 	"github.com/valyala/fastjson"
 
@@ -82,6 +83,43 @@ func (s *TestMap11) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 			return
 		}
 		(*s)[string(key)] = test_extr.External(value)
+	})
+	return err
+}
+
+// jsonParserTestMap11Ref used for pooling Parsers for TestMap11Ref JSONs.
+var jsonParserTestMap11Ref fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestMap11Ref) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestMap11Ref.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestMap11Ref.Put(parser)
+	return s.FillFromJSON(v, "")
+}
+
+// FillFromJSON recursively fills the keys with fastjson.Value
+func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	o, err := v.Object()
+	if err != nil {
+		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+	}
+	*s = make(map[string]*test_extr.External, o.Len())
+	o.Visit(func(key []byte, v *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		var value test_extr.External
+		err = value.FillFromJSON(v, objPath+".")
+		if err != nil {
+			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			return
+		}
+		(*s)[string(key)] = (*test_extr.External)(unsafe.Pointer(&value))
 	})
 	return err
 }
@@ -252,6 +290,42 @@ func (s *TestMap11) MarshalAppend(dst []byte) ([]byte, error) {
 		buf, err = _v.MarshalAppend(buf[:0])
 		if err != nil {
 			return nil, fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
+		}
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestMap11Ref) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err     error
+		_filled bool
+		buf     = make([]byte, 0, 128)
+		result  = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('{')
+	for _k, _v := range *s {
+		if _filled {
+			result.WriteRune(',')
+		}
+		_filled = true
+		result.WriteRune('"')
+		result.WriteString(string(_k))
+		result.WriteString(`":`)
+		buf, err = _v.MarshalAppend(buf[:0])
+		if err != nil {
+			return nil, fmt.Errorf(`can't marshal "TestMap11Ref" attribute %q: %w`, _k, err)
 		}
 		result.Write(buf)
 	}

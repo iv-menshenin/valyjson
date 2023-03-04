@@ -14,6 +14,10 @@ type (
 	//json:strict
 	TestMap11 map[string]test_extr.External
 
+	// TestMap11Ref tests maps
+	//json:strict
+	TestMap11Ref map[string]*test_extr.External
+
 	// TestSlice12 tests maps
 	//json:strict
 	TestSlice12 []int64
