@@ -56,7 +56,7 @@ func (t *Transitive) FillerFunc() ast.Decl {
 	)
 	fn.AppendStmt(asthlp.Return(
 		asthlp.Call(
-			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), "FillFromJson")),
+			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameFill)),
 			asthlp.NewIdent(names.VarNameJsonValue),
 			asthlp.NewIdent(names.VarNameObjPath),
 		),

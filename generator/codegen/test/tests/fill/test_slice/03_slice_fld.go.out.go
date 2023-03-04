@@ -20,11 +20,11 @@ func (s *TestSlice01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice01.Put(parser)
-	return s.FillFromJson(v, "")
+	return s.FillFromJSON(v, "(root)")
 }
 
-// FillFromJson recursively fills the fields with fastjson.Value
-func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
@@ -33,7 +33,7 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		var listA []*fastjson.Value
 		listA, err = _field.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sstrs' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.strs' value: %w", objPath, err)
 		}
 		valField := s.Field[:0]
 		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
@@ -42,12 +42,12 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		for _, listElem := range listA {
 			var elem []byte
 			if elem, err = listElem.StringBytes(); err != nil {
-				return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+				return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
 			}
 			valField = append(valField, string(elem))
 		}
 		if err != nil {
-			return fmt.Errorf("error parsing '%sstrs' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.strs' value: %w", objPath, err)
 		}
 		s.Field = valField
 	}
@@ -55,7 +55,7 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 		var listA []*fastjson.Value
 		listA, err = _fieldRef.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sints' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.ints' value: %w", objPath, err)
 		}
 		valFieldRef := s.FieldRef[:0]
 		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
@@ -75,7 +75,7 @@ func (s *TestSlice01) FillFromJson(v *fastjson.Value, objPath string) (err error
 			valFieldRef = append(valFieldRef, &newElem)
 		}
 		if err != nil {
-			return fmt.Errorf("error parsing '%sints' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.ints' value: %w", objPath, err)
 		}
 		s.FieldRef = valFieldRef
 	}
@@ -96,18 +96,18 @@ func (s *TestSlice01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'s', 't', 'r', 's'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', 's'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s%s' field appears in the object twice", objPath, string(key))
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
 }

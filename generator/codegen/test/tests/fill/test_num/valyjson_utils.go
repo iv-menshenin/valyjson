@@ -9,8 +9,8 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-func marshalString(s string, b []byte) []byte {
-	var out = bytes.NewBuffer(b)
+func marshalString(buf []byte, s string) []byte {
+	var out = bytes.NewBuffer(buf)
 	out.WriteRune('"')
 	for _, r := range s {
 		switch r {

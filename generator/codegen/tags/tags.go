@@ -12,6 +12,9 @@ const (
 	CustomHandlers = "custom"
 	// TransitHandlers tag says that structure will pass the processing to the parent class
 	TransitHandlers = "transit"
+
+	DecodeTag = "decode"
+	EncodeTag = "encode"
 )
 
 type Tags map[string][]string
@@ -101,4 +104,12 @@ func (t StructTags) StrictRules() bool {
 
 func (t StructTags) Custom() bool {
 	return t.Has(CustomHandlers)
+}
+
+func (t StructTags) EncodersOnly() bool {
+	return t.Has(EncodeTag)
+}
+
+func (t StructTags) DecodersOnly() bool {
+	return t.Has(DecodeTag)
 }

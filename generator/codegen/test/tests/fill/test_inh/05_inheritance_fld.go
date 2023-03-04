@@ -5,7 +5,7 @@ import "time"
 // TestInh01 tests inheritance
 //json:strict
 type TestInh01 struct {
-	TestInh02 `json:"injected"`
+	TestInh02 `json:"injected,omitempty"`
 	TestInh03 `json:",inline"`
 	DateBegin time.Time  `json:"date_begin"`
 	Nested1   TestInh03  `json:"nested1"`
@@ -15,7 +15,7 @@ type TestInh01 struct {
 // TestInh02 tests inheritance
 //json:strict
 type TestInh02 struct {
-	Int32 int32 `json:"int_32"`
+	Int32 int32 `json:"int_32,omitempty"`
 }
 
 // TestInh03 tests inheritance
@@ -23,12 +23,6 @@ type TestInh02 struct {
 type TestInh03 struct {
 	Int16  int16 `json:"int_16"`
 	Random int   `json:"random"`
-}
-
-// TestInh04 tests inheritance
-//json:strict
-type TestInh04 struct {
-	FooBar int16 `json:"foo-bar"`
 }
 
 // TestNested01 tests inheritance

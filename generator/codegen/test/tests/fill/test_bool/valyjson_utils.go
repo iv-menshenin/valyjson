@@ -1,5 +1,5 @@
 // Code generated [github.com/iv-menshenin/valyjson]; DO NOT EDIT.
-package test_inh
+package test_bool
 
 import (
 	"bytes"

@@ -6,7 +6,7 @@ import (
 )
 
 // TestAllOf01 tests allOf
-//json:custom
+//json:custom,decode
 type TestAllOf01 struct {
 	TestAllOfFirstIsOne
 	TestAllOfSecond
@@ -14,7 +14,7 @@ type TestAllOf01 struct {
 }
 
 // TestAllOfFirstIsOne tests oneOf
-//json:custom
+//json:custom,decode
 type TestAllOfFirstIsOne struct {
 	OneOf `json:"value"`
 }
