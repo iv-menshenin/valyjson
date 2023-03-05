@@ -31,7 +31,8 @@ func (s *Struct) UnmarshalFunc() []ast.Decl {
 }
 
 // FillerFunc generates function code that will fill in all fields of the structure with the fastjson.Value attribute
-//   func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) { ... }
+//
+//	func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) { ... }
 func (s *Struct) FillerFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameFill))
 	fn.Comments("// " + names.MethodNameFill + " recursively fills the fields with fastjson.Value")
@@ -86,7 +87,8 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 }
 
 // ValidatorFunc generates a function declaration for validating a JSON object, taking into account the presence of fields.
-//  func validate(v *fastjson.Value, objPath string) error {
+//
+//	func validate(v *fastjson.Value, objPath string) error {
 func (s *Struct) ValidatorFunc() ast.Decl {
 	fastJsonValue := asthlp.Star(names.FastJsonValue)
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameValidate))
@@ -193,28 +195,13 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 }
 
 // MarshalFunc marshal
-//   func (s *S) MarshalJSON() ([]byte, error) {
-// 	  var buf [128]byte
-// 	  return s.marshalAppend(buf[:0])
-//   }
+//
+//	  func (s *S) MarshalJSON() ([]byte, error) {
+//		  var buf [128]byte
+//		  return s.marshalAppend(buf[:0])
+//	  }
 func (s *Struct) MarshalFunc() ast.Decl {
-	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
-		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
-		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(s.name)))).
-		Results(
-			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
-			asthlp.Field("", nil, asthlp.ErrorType),
-		).
-		AppendStmt(
-			// todo @menshenin calculate buffer lengthv
-			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(128).Expr()))),
-			asthlp.Return(
-				asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
-					asthlp.Slice(names.VarNameBuf, nil, asthlp.IntegerConstant(0)),
-				),
-			),
-		).Decl()
+	return NewMarshalFunc(s.name)
 }
 
 // AppendJsonFunc produces MarshalAppend(dst []byte) ([]byte, error)
@@ -227,6 +214,28 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
 			asthlp.Field("", nil, asthlp.ErrorType),
 		)
+
+	var vars = []ast.Spec{
+		asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
+	}
+	if len(s.spec.Fields.List) > 0 {
+		vars = append(
+			vars,
+			asthlp.VariableValue("buf", asthlp.FreeExpression(asthlp.Call(
+				asthlp.MakeFn,
+				asthlp.ArrayType(asthlp.Byte),
+				asthlp.IntegerConstant(0).Expr(),
+				asthlp.IntegerConstant(128).Expr(),
+			))),
+		)
+	}
+	vars = append(
+		vars,
+		asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
+			asthlp.BytesNewBufferFn,
+			ast.NewIdent("dst"),
+		))),
+	)
 
 	fn.AppendStmt(
 		// 	if s == nil {
@@ -241,19 +250,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		// 	buf    = make([]byte, 0, 128)
 		//  result = bytes.NewBuffer(dst)
 		// )
-		asthlp.Var(
-			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
-			asthlp.VariableValue("buf", asthlp.FreeExpression(asthlp.Call(
-				asthlp.MakeFn,
-				asthlp.ArrayType(asthlp.Byte),
-				asthlp.IntegerConstant(0).Expr(),
-				asthlp.IntegerConstant(128).Expr(),
-			))),
-			asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
-				asthlp.BytesNewBufferFn,
-				ast.NewIdent("dst"),
-			))),
-		),
+		asthlp.Var(vars...),
 		// result.WriteRune('{')
 		asthlp.CallStmt(asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune")),

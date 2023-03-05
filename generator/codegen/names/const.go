@@ -19,9 +19,23 @@ const (
 	MethodNameMarshal   = "MarshalJSON"
 	MethodNameValidate  = "validate"
 	MethodNameAppend    = "MarshalAppend"
+
+	MarshalTime   = "marshalTime"
+	MarshalString = "marshalString"
 )
 
 var (
 	FastJsonValue      = ast.SimpleSelector("fastjson", "Value")
 	FastJsonParserPool = ast.SimpleSelector("fastjson", "ParserPool")
+
+	MarshalTimeFunc = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(MarshalTime),
+		MinimumNumberOfArguments: 3,
+	}
+	MarshalStringFunc = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(MarshalString),
+		MinimumNumberOfArguments: 2,
+	}
+
+	TimeDefaultLayout = ast.SimpleSelector("time", "RFC3339Nano")
 )

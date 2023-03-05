@@ -24,7 +24,8 @@ func (t *TaggedRenderer) Tags() tags.StructTags {
 }
 
 // NewUnmarshalFunc generates code for unmarshalling, function that parses the JSON object and fills all the structure properties.
-//  func (s *Struct) UnmarshalJSON(data []byte) error {
+//
+//	func (s *Struct) UnmarshalJSON(data []byte) error {
 func NewUnmarshalFunc(structName string) []ast.Decl {
 	const parser = "parser"
 	poolName := fmt.Sprintf("%s%s", names.VarPrefixPool, structName)
@@ -59,4 +60,24 @@ func NewUnmarshalFunc(structName string) []ast.Decl {
 			Decl(),
 		fn.Decl(),
 	}
+}
+
+func NewMarshalFunc(structName string) ast.Decl {
+	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
+		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(structName)))).
+		Results(
+			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
+			asthlp.Field("", nil, asthlp.ErrorType),
+		).
+		AppendStmt(
+			// todo @menshenin calculate buffer lengthv
+			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(128).Expr()))),
+			asthlp.Return(
+				asthlp.Call(
+					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
+					asthlp.Slice(names.VarNameBuf, nil, asthlp.IntegerConstant(0)),
+				),
+			),
+		).Decl()
 }

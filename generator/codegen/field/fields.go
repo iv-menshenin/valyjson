@@ -81,16 +81,17 @@ func (f *Field) DontCheckErr() {
 }
 
 // FillStatements makes statements processed data-filling for struct field
-// 	if offset := v.Get("offset"); offset != nil {
-//      var vOffset int
-//      vOffset, err = offset.Int()
-//      if err != nil {
-//          return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
-//      }
-//      s.Offset = vOffset
-//	} else {
-//      s.Offset = 100
-//	}
+//
+//		if offset := v.Get("offset"); offset != nil {
+//	     var vOffset int
+//	     vOffset, err = offset.Int()
+//	     if err != nil {
+//	         return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
+//	     }
+//	     s.Offset = vOffset
+//		} else {
+//	     s.Offset = 100
+//		}
 func (f *Field) FillStatements(name string) []ast.Stmt {
 	if f.tags.JsonName() == "-" {
 		return nil
@@ -123,9 +124,11 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 
 // result.WriteString("\"field\":")
 // b, err = marshalString(s.Field, buf[:0])
-// if err != nil {
-// 	return nil, err
-// }
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
 // result.Write(b)
 func (f *Field) MarshalStatements(name string) []ast.Stmt {
 	var v = intermediateVarName(name, f.tags)
@@ -138,6 +141,10 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 	case *ast.SelectorExpr:
 		if tt.Sel.Name == "Time" {
 			block := timeMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
+			return block.Render(putCommaFirstIf)
+		}
+		if tt.Sel.Name == "UUID" {
+			block := uuidMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
 			return block.Render(putCommaFirstIf)
 		}
 		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar).Render(putCommaFirstIf)
@@ -156,6 +163,15 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr))
+		return block.Render(putCommaFirstIf)
+
+	case *ast.ArrayType:
+		var valType = tt.Elt
+		if i, ok := valType.(*ast.Ident); ok {
+			valType = denotedType(i)
+		}
+		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
+		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr))
 		return block.Render(putCommaFirstIf)
 
 	default:
@@ -293,7 +309,7 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 				// buf = marshalString(buf[:0], _v)
 				return decorStmt(src, []ast.Stmt{
 					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
-						asthlp.InlineFunc(asthlp.NewIdent("marshalString")),
+						names.MarshalStringFunc,
 						BufExpr, decorSrc(src),
 					)),
 				})
@@ -307,29 +323,12 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 		if tt.Sel.Name == "Time" {
 			return func(src ast.Expr) []ast.Stmt {
 				return decorStmt(src, []ast.Stmt{
-					// buf = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
+					// buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
 					asthlp.Assign(
 						asthlp.VarNames{BufVar},
 						asthlp.Assignment,
-						asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "AppendFormat")), BufExpr, asthlp.SimpleSelector("time", "RFC3339")),
+						asthlp.Call(names.MarshalTimeFunc, BufExpr, src, names.TimeDefaultLayout),
 					),
-					// just an innocent hack
-					//	buf = append(buf, '"', '"')
-					//	copy(buf[1:len(buf)-1], buf[:len(buf)-2])
-					//	buf[0] = '"'
-					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(asthlp.AppendFn, BufVar, asthlp.RuneConstant('"').Expr(), asthlp.RuneConstant('"').Expr())),
-					asthlp.CallStmt(asthlp.Call(
-						asthlp.InlineFunc(asthlp.NewIdent("copy")),
-						asthlp.SliceExpr(BufVar, asthlp.IntegerConstant(1), asthlp.FreeExpression(asthlp.Sub(
-							asthlp.Call(asthlp.LengthFn, BufVar),
-							asthlp.IntegerConstant(1).Expr(),
-						))),
-						asthlp.SliceExpr(BufVar, nil, asthlp.FreeExpression(asthlp.Sub(
-							asthlp.Call(asthlp.LengthFn, BufVar),
-							asthlp.IntegerConstant(2).Expr(),
-						))),
-					)),
-					asthlp.Assign(asthlp.VarNames{asthlp.Index(BufVar, asthlp.IntegerConstant(0))}, asthlp.Assignment, asthlp.RuneConstant('"').Expr()),
 				})
 			}
 		}

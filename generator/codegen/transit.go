@@ -32,17 +32,32 @@ func (t *Transitive) ValidatorFunc() ast.Decl {
 }
 
 func (t *Transitive) MarshalFunc() ast.Decl {
-	return nil
+	return NewMarshalFunc(t.name)
 }
 
 func (t *Transitive) AppendJsonFunc() ast.Decl {
-	return nil
+	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend))
+	fn.Comments("// " + names.MethodNameAppend + " serializes all fields of the structure using a buffer.")
+	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
+	fn.Params(asthlp.Field(names.VarNameData, nil, asthlp.ArrayType(asthlp.Byte)))
+	fn.Results(
+		asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
+		asthlp.Field("", nil, asthlp.ErrorType),
+	)
+	fn.AppendStmt(asthlp.Return(
+		asthlp.Call(
+			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameAppend)),
+			asthlp.NewIdent(names.VarNameData),
+		),
+	))
+	return fn.Decl()
 }
 
 // FillerFunc generates function code that will fill in all fields of the structure with the fastjson.Value attribute
-//   func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-//       return (*StructElem)(s).FillFromJson(v, objPath)
-//   }
+//
+//	func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+//	    return (*StructElem)(s).FillFromJson(v, objPath)
+//	}
 func (t *Transitive) FillerFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameFill))
 	fn.Comments("// " + names.MethodNameFill + " recursively fills the fields with fastjson.Value")
