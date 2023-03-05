@@ -505,10 +505,9 @@ func (s *TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
 		result.WriteRune(',')
 	}
 	if !s.DateBegin.IsZero() {
-		result.WriteString(`"date_begin":"`)
-		buf = s.DateBegin.AppendFormat(buf[:0], time.RFC3339)
+		result.WriteString(`"date_begin":`)
+		buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
 		result.Write(buf)
-		result.WriteRune('"')
 	} else {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
 	}

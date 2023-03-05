@@ -9,8 +9,8 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-func marshalString(s string, b []byte) []byte {
-	var out = bytes.NewBuffer(b)
+func marshalString(buf []byte, s string) []byte {
+	var out = bytes.NewBuffer(buf)
 	out.WriteRune('"')
 	for _, r := range s {
 		switch r {
@@ -38,8 +38,10 @@ func marshalString(s string, b []byte) []byte {
 	return out.Bytes()
 }
 
-func marshalTime(t time.Time, layout string, b []byte) []byte {
-	return t.AppendFormat(b, layout)
+func marshalTime(buf []byte, t time.Time, layout string) []byte {
+	buf = append(buf, '"')
+	buf = t.AppendFormat(buf, layout)
+	return append(buf, '"')
 }
 
 func valueIsNotNull(v *fastjson.Value) bool {
@@ -48,8 +50,8 @@ func valueIsNotNull(v *fastjson.Value) bool {
 
 func parseDateTime(s string) (time.Time, error) {
 	knownFormats := []string{
-		time.RFC3339,
 		time.RFC3339Nano,
+		time.RFC3339,
 		"2006-01-02 15:04:05Z07:00",
 		"02.01.2006 15:04:05Z07:00",
 	}
@@ -63,8 +65,8 @@ func parseDateTime(s string) (time.Time, error) {
 
 func parseDate(s string) (time.Time, error) {
 	knownFormats := []string{
-		time.RFC3339,
 		time.RFC3339Nano,
+		time.RFC3339,
 		"2006-01-02",
 		"02.01.2006",
 	}

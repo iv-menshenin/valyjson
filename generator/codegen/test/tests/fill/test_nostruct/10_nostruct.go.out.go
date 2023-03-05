@@ -426,10 +426,7 @@ func (s *TestSlice14) MarshalAppend(dst []byte) ([]byte, error) {
 		}
 		_filled = true
 		_k = _k
-		buf = _v.AppendFormat(buf[:0], time.RFC3339)
-		buf = append(buf, '"', '"')
-		copy(buf[1:len(buf)-1], buf[:len(buf)-2])
-		buf[0] = '"'
+		buf = marshalTime(buf[:0], _v, time.RFC3339Nano)
 		result.Write(buf)
 	}
 	result.WriteRune(']')
