@@ -225,7 +225,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 				asthlp.MakeFn,
 				asthlp.ArrayType(asthlp.Byte),
 				asthlp.IntegerConstant(0).Expr(),
-				asthlp.IntegerConstant(128).Expr(),
+				asthlp.IntegerConstant(marshalFieldBufLen).Expr(),
 			))),
 		)
 	}

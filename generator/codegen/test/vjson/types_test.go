@@ -54,7 +54,7 @@ func TestPerson_UnmarshalJSON(t *testing.T) {
 }
 
 // BenchmarkMarshal-8     	  425655	      2666 ns/op	     872 B/op	       9 allocs/op
-// BenchmarkMarshal-8   	  641370	      2680 ns/op	    2016 B/op	       4 allocs/op
+// BenchmarkMarshal-8   	  676693	      1866 ns/op	     768 B/op	       2 allocs/op
 // EASY JSON Benchmark     	  685834	      1847 ns/op	    1192 B/op	       8 allocs/op
 func BenchmarkMarshal(b *testing.B) {
 	b.ReportAllocs()

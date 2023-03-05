@@ -146,7 +146,7 @@ func (s *TestAllOfThird) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -185,7 +185,7 @@ func (s *TestAllOfSecond) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 

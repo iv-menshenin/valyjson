@@ -127,7 +127,7 @@ func (s *TestBool01) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 

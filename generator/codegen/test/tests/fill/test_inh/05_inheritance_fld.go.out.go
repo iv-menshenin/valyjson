@@ -455,7 +455,7 @@ func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh01) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -539,7 +539,7 @@ func (s *TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh02) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -568,7 +568,7 @@ func (s *TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh03) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -609,7 +609,7 @@ func (s *TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested01) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -640,7 +640,7 @@ func (s *TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested02) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -671,7 +671,7 @@ func (s *TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested03) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 

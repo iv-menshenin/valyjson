@@ -135,7 +135,7 @@ func (m *Array) MarshalFunc() ast.Decl {
 		).
 		AppendStmt(
 			// todo @menshenin calculate buffer lengthv
-			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(128).Expr()))),
+			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(marshalObjectBufLen).Expr()))),
 			asthlp.Return(
 				asthlp.Call(
 					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
@@ -215,7 +215,7 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 				asthlp.MakeFn,
 				asthlp.ArrayType(asthlp.Byte),
 				asthlp.IntegerConstant(0).Expr(),
-				asthlp.IntegerConstant(128).Expr(),
+				asthlp.IntegerConstant(marshalFieldBufLen).Expr(),
 			))),
 			asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
 				asthlp.BytesNewBufferFn,

@@ -609,7 +609,7 @@ func (s *MapInt64) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Person) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -704,7 +704,7 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Passport) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -745,7 +745,7 @@ func (s *Passport) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TableOf) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -797,7 +797,7 @@ func (s *TableOf) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Table) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -889,7 +889,7 @@ func (s *Table) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Tag) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -930,7 +930,7 @@ func (s *Tag) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapTable) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -966,7 +966,7 @@ func (s *MapTable) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapInt64) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 

@@ -234,7 +234,7 @@ func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap10) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -267,7 +267,7 @@ func (s *TestMap10) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -303,7 +303,7 @@ func (s *TestMap11) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -339,7 +339,7 @@ func (s *TestMap11Ref) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -370,7 +370,7 @@ func (s *TestSlice12) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice13) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 
@@ -404,7 +404,7 @@ func (s *TestSlice13) MarshalAppend(dst []byte) ([]byte, error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
-	var buf [128]byte
+	var buf [512]byte
 	return s.MarshalAppend(buf[:0])
 }
 

@@ -10,6 +10,11 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
+const (
+	marshalObjectBufLen = 512
+	marshalFieldBufLen  = 128
+)
+
 type TaggedRenderer struct {
 	name string
 	tags tags.StructTags
@@ -72,7 +77,7 @@ func NewMarshalFunc(structName string) ast.Decl {
 		).
 		AppendStmt(
 			// todo @menshenin calculate buffer lengthv
-			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(128).Expr()))),
+			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(marshalObjectBufLen).Expr()))),
 			asthlp.Return(
 				asthlp.Call(
 					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
