@@ -652,12 +652,12 @@ func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
 		buf = marshalString(buf[:0], *s.Middle)
 		result.Write(buf)
 	}
-	if !s.DOB.IsZero() {
+	if s.DOB != nil {
 		if result.Len() > 1 {
 			result.WriteRune(',')
 		}
 		result.WriteString(`"dob":`)
-		buf = marshalTime(buf[:0], s.DOB, time.RFC3339Nano)
+		buf = marshalTime(buf[:0], *s.DOB, time.RFC3339Nano)
 		result.Write(buf)
 	}
 	if result.Len() > 1 {
@@ -782,6 +782,7 @@ func (s *TableOf) MarshalAppend(dst []byte) ([]byte, error) {
 				result.WriteRune(',')
 			}
 			_filled = true
+			_k = _k
 			buf, err = _v.MarshalAppend(buf[:0])
 			if err != nil {
 				return nil, fmt.Errorf(`can't marshal "tables" item at position %d: %w`, _k, err)
@@ -833,6 +834,7 @@ func (s *Table) MarshalAppend(dst []byte) ([]byte, error) {
 				result.WriteRune(',')
 			}
 			_filled = true
+			_k = _k
 			buf = strconv.AppendInt(buf[:0], int64(_v), 10)
 			result.Write(buf)
 		}
@@ -870,6 +872,7 @@ func (s *Table) MarshalAppend(dst []byte) ([]byte, error) {
 				result.WriteRune(',')
 			}
 			_filled = true
+			_k = _k
 			buf, err = _v.MarshalAppend(buf[:0])
 			if err != nil {
 				return nil, fmt.Errorf(`can't marshal "tags" item at position %d: %w`, _k, err)

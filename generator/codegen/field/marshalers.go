@@ -46,9 +46,14 @@ func (w WriteBlock) Render(putComma ast.Stmt) []ast.Stmt {
 //	} else {
 //		result.WriteString("\"date_begin\":\"0000-00-00T00:00:00Z\"")
 //	}
-func timeMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
+func timeMarshal(src ast.Expr, jsonName string, omitempty, isStar bool) WriteBlock {
+	var notZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "IsZero"))))
+	if isStar {
+		notZero = asthlp.NotNil(src)
+		src = asthlp.Star(src)
+	}
 	var w = WriteBlock{
-		NotZero: asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "IsZero")))),
+		NotZero: notZero,
 		Block: []ast.Stmt{
 			// result.WriteString(`"date_begin":`)
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
@@ -473,6 +478,8 @@ func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtract
 		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(WriteRuneFn, asthlp.RuneConstant(',').Expr()))),
 		// filled = true
 		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
+		// key = key
+		asthlp.Assign(asthlp.MakeVarNames(key), asthlp.Assignment, asthlp.NewIdent(key)),
 	}
 	iterBlock = append(
 		iterBlock,

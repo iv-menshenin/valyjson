@@ -103,3 +103,52 @@ func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
 	})
 	return err
 }
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestTime01) MarshalJSON() ([]byte, error) {
+	var buf [128]byte
+	return s.MarshalAppend(buf[:0])
+}
+
+// MarshalAppend serializes all fields of the structure using a buffer.
+func (s *TestTime01) MarshalAppend(dst []byte) ([]byte, error) {
+	if s == nil {
+		return []byte("null"), nil
+	}
+	var (
+		err    error
+		buf    = make([]byte, 0, 128)
+		result = bytes.NewBuffer(dst)
+	)
+	result.WriteRune('{')
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if !s.DateBegin.IsZero() {
+		result.WriteString(`"date_begin":`)
+		buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+	}
+	if result.Len() > 1 {
+		result.WriteRune(',')
+	}
+	if !s.DateCustom.IsZero() {
+		result.WriteString(`"date_custom":`)
+		buf = marshalTime(buf[:0], s.DateCustom, time.RFC3339Nano)
+		result.Write(buf)
+	} else {
+		result.WriteString(`"date_custom":"0000-00-00T00:00:00Z"`)
+	}
+	if s.DateEnd != nil {
+		if result.Len() > 1 {
+			result.WriteRune(',')
+		}
+		result.WriteString(`"date_end":`)
+		buf = marshalTime(buf[:0], *s.DateEnd, time.RFC3339Nano)
+		result.Write(buf)
+	}
+	result.WriteRune('}')
+	return result.Bytes(), err
+}

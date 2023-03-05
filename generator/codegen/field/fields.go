@@ -140,7 +140,7 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 
 	case *ast.SelectorExpr:
 		if tt.Sel.Name == "Time" {
-			block := timeMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
+			block := timeMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar)
 			return block.Render(putCommaFirstIf)
 		}
 		if tt.Sel.Name == "UUID" {
