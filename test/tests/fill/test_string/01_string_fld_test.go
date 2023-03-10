@@ -68,7 +68,7 @@ func Test_TestStr01(t *testing.T) {
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "field": "bar"}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "the 'field' field appears in the object twice")
+		require.ErrorContains(t, err, "the '(root).field' field appears in the object twice")
 	})
 }
 
@@ -148,13 +148,13 @@ func Test_TestStr02(t *testing.T) {
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"badName": "test"}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "unexpected field 'badName'")
+		require.ErrorContains(t, err, "unexpected field '(root).badName'")
 	})
 	t.Run("test-double", func(t *testing.T) {
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "field": "bar"}`))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "the 'field' field appears in the object twice")
+		require.ErrorContains(t, err, "the '(root).field' field appears in the object twice")
 	})
 }
 
