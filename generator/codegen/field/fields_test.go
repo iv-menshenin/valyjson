@@ -133,13 +133,12 @@ var stringFld = Field{
 }
 
 const stringFiller = `{
-	if field := v.Get("field"); field != nil {
-		if field.Type() != fastjson.TypeString {
-			err = fmt.Errorf("value doesn't contain string; it contains %s", field.Type())
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+	if _field := v.Get("field"); _field != nil {
+		var valfield []byte
+		if valfield, err = _field.StringBytes(); err != nil {
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
-		valfield := field.String()
-		s.field = valfield
+		s.field = *(*string)(unsafe.Pointer(&valfield))
 	}
 }`
 
@@ -153,14 +152,12 @@ var refStringFld = Field{
 }
 
 const refStringFiller = `{
-	if field := v.Get("field"); field != nil {
-		if field.Type() != fastjson.TypeString {
-			err = fmt.Errorf("value doesn't contain string; it contains %s", field.Type())
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+	if _field := v.Get("field"); _field != nil {
+		var valfield []byte
+		if valfield, err = _field.StringBytes(); err != nil {
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
-		valfield := field.String()
-		s.field = new(string)
-		*s.field = string(valfield)
+		s.field = (*string)(unsafe.Pointer(&valfield))
 	}
 }`
 
@@ -173,13 +170,12 @@ var subStringFld = Field{
 }
 
 const subStringFiller = `{
-	if field := v.Get("field"); field != nil {
-		if field.Type() != fastjson.TypeString {
-			err = fmt.Errorf("value doesn't contain string; it contains %s", field.Type())
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+	if _field := v.Get("field"); _field != nil {
+		var valfield []byte
+		if valfield, err = _field.StringBytes(); err != nil {
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
-		valfield := field.String()
-		s.field = SubGroup(valfield)
+		s.field = *(*SubGroup)(unsafe.Pointer(&valfield))
 	}
 }`
 
@@ -192,11 +188,11 @@ var intFld = Field{
 }
 
 const intFiller = `{
-	if field := v.Get("field"); field != nil {
+	if _field := v.Get("field"); _field != nil {
 		var valfield int
-		valfield, err = field.Int()
+		valfield, err = _field.Int()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.field = valfield
 	}
@@ -211,11 +207,11 @@ var subIntFld = Field{
 }
 
 const subIntFiller = `{
-	if field := v.Get("field"); field != nil {
+	if _field := v.Get("field"); _field != nil {
 		var valfield int64
-		valfield, err = field.Int64()
+		valfield, err = _field.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.field = SubInt(valfield)
 	}
@@ -236,15 +232,15 @@ var uuidFld = Field{
 }
 
 const uuidFiller = `{
-	if field := v.Get("field"); field != nil {
+	if _field := v.Get("field"); _field != nil {
 		var valfield uuid.UUID
-		b, err := field.StringBytes()
+		b, err := _field.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
-		err = valfield.UnmarshalText(b)
+		valfield, err = uuid.ParseBytes(b)
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.field = valfield
 	}
@@ -265,10 +261,14 @@ var timeFld = Field{
 }
 
 const timeFiller = `{
-	if field := v.Get("field"); field != nil {
-		valfield, err := time.Parse(time.RFC3339, field.String())
+	if _field := v.Get("field"); _field != nil {
+		b, err := _field.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
+		}
+		valfield, err := parseDateTime(string(b))
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.field = valfield
 	}
@@ -290,10 +290,14 @@ var refTimeFld = Field{
 }
 
 const refTimeFiller = `{
-	if field := v.Get("field"); field != nil {
-		valfield, err := time.Parse(time.RFC3339, field.String())
+	if _field := v.Get("field"); _field != nil {
+		b, err := _field.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
+		}
+		valfield, err := parseDateTime(string(b))
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.field = new(time.Time)
 		*s.field = time.Time(valfield)
@@ -313,23 +317,26 @@ var arrayFld = Field{
 }
 
 const arrayFiller = `{
-	if items := v.Get("field"); items != nil {
+	if _items := v.Get("field"); _items != nil {
 		var listA []*fastjson.Value
-		listA, err = items.Array()
+		listA, err = _items.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
-		valitems := make([]DatarentPixelItemsValue, 0, len(listA))
+		valitems := s.items[:0]
+		if l := len(listA); cap(valitems) < l || (l == 0 && s.items == nil) {
+			valitems = make([]DatarentPixelItemsValue, 0, len(listA))
+		}
 		for _, listElem := range listA {
 			var elem DatarentPixelItemsValue
-			err = elem.FillFromJson(listElem, objPath+".")
+			err = elem.FillFromJSON(listElem, objPath+".")
 			if err != nil {
 				break
 			}
 			valitems = append(valitems, DatarentPixelItemsValue(elem))
 		}
 		if err != nil {
-			return fmt.Errorf("error parsing '%sfield' value: %w", objPath, err)
+			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
 		s.items = valitems
 	}
@@ -343,18 +350,7 @@ var stringFldMrsh = Field{
 	},
 }
 
-const stringFillerMrsh = `{
-	if s.Field != "" {
-		if result.Len() > 1 {
-			result.WriteRune(',')
-		}
-		result.WriteString("\"field\":")
-		b := marshalString(s.Field, buf[:0])
-		result.Write(b)
-	} else {
-		result.WriteString("\"field\":\"\"")
-	}
-}`
+const stringFillerMrsh = "{\n\tif result.Len() > 1 {\n\t\tresult.WriteRune(',')\n\t}\n\tif s.Field != \"\" {\n\t\tresult.WriteString(`\"field\":`)\n\t\tbuf = marshalString(buf[:0], string(s.Field))\n\t\tresult.Write(buf)\n\t} else {\n\t\tresult.WriteString(`\"field\":\"\"`)\n\t}\n}"
 
 var omitStringFldMrsh = Field{
 	expr: ast.NewIdent("string"),
@@ -364,13 +360,4 @@ var omitStringFldMrsh = Field{
 	},
 }
 
-const omitStringFillerMrsh = `{
-	if s.Field != "" {
-		if result.Len() > 1 {
-			result.WriteRune(',')
-		}
-		result.WriteString("\"field\":")
-		b := marshalString(s.Field, buf[:0])
-		result.Write(b)
-	}
-}`
+const omitStringFillerMrsh = "{\n\tif s.Field != \"\" {\n\t\tif result.Len() > 1 {\n\t\t\tresult.WriteRune(',')\n\t\t}\n\t\tresult.WriteString(`\"field\":`)\n\t\tbuf = marshalString(buf[:0], string(s.Field))\n\t\tresult.Write(buf)\n\t}\n}"
