@@ -342,8 +342,6 @@ const arrayFiller = `{
 	}
 }`
 
-// test
-
 var stringFldMrsh = Field{
 	expr: ast.NewIdent("string"),
 	refx: ast.NewIdent("string"),
