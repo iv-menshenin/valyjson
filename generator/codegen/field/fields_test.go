@@ -338,6 +338,7 @@ const arrayFiller = `{
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
 		}
+		// tried to break test
 		s.items = valitems
 	}
 }`
