@@ -4,8 +4,11 @@ package test_nostruct
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"strconv"
 	"time"
 
+	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fastjson"
 )
 
@@ -36,12 +39,6 @@ func marshalString(buf []byte, s string) []byte {
 	}
 	out.WriteRune('"')
 	return out.Bytes()
-}
-
-func marshalTime(buf []byte, t time.Time, layout string) []byte {
-	buf = append(buf, '"')
-	buf = t.AppendFormat(buf, layout)
-	return append(buf, '"')
 }
 
 func valueIsNotNull(v *fastjson.Value) bool {
@@ -76,4 +73,40 @@ func parseDate(s string) (time.Time, error) {
 		}
 	}
 	return time.Time{}, fmt.Errorf("can't parse date from string '%s'", s)
+}
+
+var intBuf = bytebufferpool.Pool{}
+
+func writeInt64(w io.Writer, i int64) {
+	buf := intBuf.Get()
+	buf.B = strconv.AppendInt(buf.B[:0], i, 10)
+	w.Write(buf.B)
+	intBuf.Put(buf)
+}
+
+func writeUint64(w io.Writer, i uint64) {
+	buf := intBuf.Get()
+	buf.B = strconv.AppendUint(buf.B[:0], i, 10)
+	w.Write(buf.B)
+	intBuf.Put(buf)
+}
+
+var fltBuf = bytebufferpool.Pool{}
+
+func writeFloat64(w io.Writer, f float64) {
+	buf := fltBuf.Get()
+	buf.B = strconv.AppendFloat(buf.B[:0], f, 'f', -1, 64)
+	w.Write(buf.B)
+	fltBuf.Put(buf)
+}
+
+var timeBuf = bytebufferpool.Pool{}
+
+func writeTime(w io.Writer, t time.Time, layout string) {
+	buf := timeBuf.Get()
+	buf.B = append(buf.B[:0], '"')
+	buf.B = t.AppendFormat(buf.B, layout)
+	buf.B = append(buf.B, '"')
+	w.Write(buf.B)
+	timeBuf.Put(buf)
 }

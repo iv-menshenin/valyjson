@@ -4,7 +4,6 @@ package test_any
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -146,76 +145,68 @@ func (s *TestAllOfThird) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestAllOfSecond) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Comment != "" {
 		result.WriteString(`"comment":`)
-		buf = marshalString(buf[:0], s.Comment)
-		result.Write(buf)
+		writeString(result, s.Comment)
 	} else {
 		result.WriteString(`"comment":""`)
 	}
 	if s.Level != 0 {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"level":`)
-		buf = strconv.AppendInt(buf[:0], s.Level, 10)
-		result.Write(buf)
+		writeInt64(result, s.Level)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestAllOfThird) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestAllOfThird) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if s.Command != "" {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"command":`)
-		buf = marshalString(buf[:0], s.Command)
-		result.Write(buf)
+		writeString(result, s.Command)
 	}
 	if s.Range != 0 {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"range":`)
-		buf = strconv.AppendInt(buf[:0], s.Range, 10)
-		result.Write(buf)
+		writeInt64(result, s.Range)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }

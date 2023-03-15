@@ -6,13 +6,9 @@ import (
 
 	"github.com/iv-menshenin/go-ast"
 
+	"github.com/iv-menshenin/valyjson/generator/codegen/field"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
-)
-
-const (
-	marshalObjectBufLen = 512
-	marshalFieldBufLen  = 128
 )
 
 type TaggedRenderer struct {
@@ -67,6 +63,11 @@ func NewUnmarshalFunc(structName string) []ast.Decl {
 	}
 }
 
+//	func (s *S) MarshalJSON() ([]byte, error) {
+//		var result = commonBuffer.Get()
+//		err := s.MarshalTo(result)
+//		return result.Bytes(), err
+//	}
 func NewMarshalFunc(structName string) ast.Decl {
 	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
 		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
@@ -76,13 +77,35 @@ func NewMarshalFunc(structName string) ast.Decl {
 			asthlp.Field("", nil, asthlp.ErrorType),
 		).
 		AppendStmt(
-			// todo @menshenin calculate buffer lengthv
-			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(marshalObjectBufLen).Expr()))),
-			asthlp.Return(
+			asthlp.Var(
+				asthlp.VariableValue(names.VarNameWriter, asthlp.FreeExpression(asthlp.Call(
+					asthlp.InlineFunc(asthlp.SimpleSelector("commonBuffer", "Get")),
+				))),
+			),
+			asthlp.Assign(
+				asthlp.MakeVarNames("err"),
+				asthlp.Definition,
 				asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
-					asthlp.Slice(names.VarNameBuf, nil, asthlp.IntegerConstant(0)),
+					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
+					asthlp.NewIdent("result"),
 				),
 			),
+			asthlp.Return(
+				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("result", "Bytes"))),
+				asthlp.NewIdent("err"),
+			),
 		).Decl()
+}
+
+func makeWriteBytesAndReturn(b ...byte) []ast.Stmt {
+	return []ast.Stmt{
+		// result.Write([]byte{...})
+		asthlp.CallStmt(asthlp.Call(
+			field.WriteBytesFn, asthlp.SliceByteLiteral(b).Expr(),
+		)),
+		// return err
+		asthlp.Return(
+			asthlp.NewIdent(names.VarNameError),
+		),
+	}
 }

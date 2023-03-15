@@ -5,7 +5,6 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/field"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"go/ast"
-	"go/token"
 )
 
 type (
@@ -134,12 +133,10 @@ func (m *Array) MarshalFunc() ast.Decl {
 			asthlp.Field("", nil, asthlp.ErrorType),
 		).
 		AppendStmt(
-			// todo @menshenin calculate buffer lengthv
-			asthlp.Var(asthlp.VariableType(names.VarNameBuf, asthlp.ArrayType(asthlp.Byte, asthlp.IntegerConstant(marshalObjectBufLen).Expr()))),
 			asthlp.Return(
 				asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameAppend)),
-					asthlp.Slice(names.VarNameBuf, nil, asthlp.IntegerConstant(0)),
+					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
+					asthlp.NewIdent(names.VarNameWriter),
 				),
 			),
 		).Decl()
@@ -167,12 +164,11 @@ func (m *Array) MarshalFunc() ast.Decl {
 //	return result.Bytes(), err
 func (m *Array) AppendJsonFunc() ast.Decl {
 	const filled = "_filled"
-	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend)).
-		Comments("// "+names.MethodNameAppend+" serializes all fields of the structure using a buffer.").
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
+		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(m.name)))).
 		Params(asthlp.Field("dst", nil, asthlp.ArrayType(asthlp.Byte))).
 		Results(
-			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
 			asthlp.Field("", nil, asthlp.ErrorType),
 		)
 
@@ -205,27 +201,15 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 		// var (
 		// 	err      error
 		//  filled bool
-		// 	buf    = make([]byte, 0, 128)
-		// 	result = bytes.NewBuffer(dst)
 		// )
 		asthlp.Var(
 			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
 			asthlp.VariableType(filled, asthlp.Bool),
-			asthlp.VariableValue("buf", asthlp.FreeExpression(asthlp.Call(
-				asthlp.MakeFn,
-				asthlp.ArrayType(asthlp.Byte),
-				asthlp.IntegerConstant(0).Expr(),
-				asthlp.IntegerConstant(marshalFieldBufLen).Expr(),
-			))),
-			asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
-				asthlp.BytesNewBufferFn,
-				ast.NewIdent("dst"),
-			))),
 		),
 		// result.WriteRune('{')
 		asthlp.CallStmt(asthlp.Call(
-			asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune")),
-			asthlp.RuneConstant('[').Expr(),
+			field.WriteBytesFn,
+			asthlp.SliceByteLiteral{'['}.Expr(),
 		)),
 	)
 
@@ -236,7 +220,7 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 		//	if filled {
 		//		result.WriteRune(',')
 		//	}
-		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(field.WriteRuneFn, asthlp.RuneConstant(',').Expr()))),
+		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
 		// filled = true
 		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
 		// _k = _k
@@ -245,11 +229,6 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 	iterBlock = append(
 		iterBlock,
 		ve(asthlp.NewIdent("_v"))...,
-	)
-	iterBlock = append(
-		iterBlock,
-		// result.Write(buf)
-		asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, field.BufVar)),
 	)
 
 	fn.AppendStmt(asthlp.Range(
@@ -260,18 +239,7 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 	))
 
 	fn.AppendStmt(
-		// result.WriteRune(']')
-		// return result.Bytes(), err
-		&ast.ExprStmt{X: &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
-			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "']'"}},
-		}},
-		&ast.ReturnStmt{Results: []ast.Expr{
-			&ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Bytes")},
-			},
-			ast.NewIdent("err"),
-		}},
+		makeWriteBytesAndReturn(']')...,
 	)
 	return fn.Decl()
 }

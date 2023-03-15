@@ -2,22 +2,23 @@ package field
 
 import (
 	"fmt"
-	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
+
+	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 )
 
 // putCommaFirst puts comma
-//  result.WriteRune(',')
+//  result.Write([]byte{','})
 var putCommaFirst = asthlp.CallStmt(asthlp.Call(
-	asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune")),
-	asthlp.RuneConstant(',').Expr(),
+	WriteBytesFn,
+	asthlp.SliceByteLiteral{','}.Expr(), // []byte{','}
 ))
 
 //  if result.Len() > 1 {
-//    result.WriteRune(',')
+//    result.Write([]byte{','})
 //  }
 var putCommaFirstIf = asthlp.If(
 	asthlp.Great(
@@ -30,10 +31,6 @@ var putCommaFirstIf = asthlp.If(
 var (
 	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))
 	WriteBytesFn  = asthlp.InlineFunc(asthlp.SimpleSelector("result", "Write"))
-	WriteRuneFn   = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune"))
-
-	BufVar  = asthlp.NewIdent("buf")
-	BufExpr = asthlp.SliceExpr(BufVar, nil, asthlp.IntegerConstant(0))
 )
 
 // result.WriteString("\"{json}\":")

@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"go/ast"
-	"go/token"
 
 	asthlp "github.com/iv-menshenin/go-ast"
 
@@ -196,65 +195,45 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 
 // MarshalFunc marshal
 //
-//	  func (s *S) MarshalJSON() ([]byte, error) {
-//		  var buf [128]byte
-//		  return s.marshalAppend(buf[:0])
-//	  }
+//	func (s *S) MarshalJSON() ([]byte, error) {
+//		var result = commonBuffer.Get()
+//		err := s.MarshalTo(result)
+//		return result.Bytes(), err
+//	}
 func (s *Struct) MarshalFunc() ast.Decl {
 	return NewMarshalFunc(s.name)
 }
 
 // AppendJsonFunc produces MarshalAppend(dst []byte) ([]byte, error)
 func (s *Struct) AppendJsonFunc() ast.Decl {
-	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend)).
-		Comments("// "+names.MethodNameAppend+" serializes all fields of the structure using a buffer.").
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
+		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name)))).
-		Params(asthlp.Field("dst", nil, asthlp.ArrayType(asthlp.Byte))).
+		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
 		Results(
-			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
 			asthlp.Field("", nil, asthlp.ErrorType),
 		)
 
-	var vars = []ast.Spec{
-		asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
-	}
-	if len(s.spec.Fields.List) > 0 {
-		vars = append(
-			vars,
-			asthlp.VariableValue("buf", asthlp.FreeExpression(asthlp.Call(
-				asthlp.MakeFn,
-				asthlp.ArrayType(asthlp.Byte),
-				asthlp.IntegerConstant(0).Expr(),
-				asthlp.IntegerConstant(marshalFieldBufLen).Expr(),
-			))),
-		)
-	}
-	vars = append(
-		vars,
-		asthlp.VariableValue("result", asthlp.FreeExpression(asthlp.Call(
-			asthlp.BytesNewBufferFn,
-			ast.NewIdent("dst"),
-		))),
-	)
-
 	fn.AppendStmt(
 		// 	if s == nil {
-		//		return []byte("null"), nil
+		//		writeString(result, "null")
+		//		return nil
 		//	}
 		asthlp.If(
 			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-			asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
+			asthlp.CallStmt(asthlp.Call(names.WriteStringFunc, asthlp.NewIdent(names.VarNameWriter), asthlp.StringConstant("null").Expr())),
+			asthlp.Return(asthlp.Nil),
 		),
 		// var (
 		// 	err    error
-		// 	buf    = make([]byte, 0, 128)
-		//  result = bytes.NewBuffer(dst)
 		// )
-		asthlp.Var(vars...),
+		asthlp.Var(
+			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
+		),
 		// result.WriteRune('{')
 		asthlp.CallStmt(asthlp.Call(
-			asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteRune")),
-			asthlp.RuneConstant('{').Expr(),
+			field.WriteBytesFn,
+			asthlp.SliceByteLiteral{'{'}.Expr(),
 		)),
 	)
 
@@ -263,18 +242,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 	}
 
 	fn.AppendStmt(
-		// result.WriteRune('}')
-		// return result.Bytes(), err
-		&ast.ExprStmt{X: &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteRune")},
-			Args: []ast.Expr{&ast.BasicLit{Kind: token.CHAR, Value: "'}'"}},
-		}},
-		&ast.ReturnStmt{Results: []ast.Expr{
-			&ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("Bytes")},
-			},
-			ast.NewIdent("err"),
-		}},
+		makeWriteBytesAndReturn('}')...,
 	)
 	return fn.Decl()
 }

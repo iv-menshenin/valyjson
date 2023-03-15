@@ -172,8 +172,7 @@ func (s *TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.Int32 != 0 {
 		result.WriteString(`"f_int32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int32), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.Int32))
 	} else {
 		result.WriteString(`"f_int32":0`)
 	}
@@ -182,8 +181,7 @@ func (s *TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteRune(',')
 		}
 		result.WriteString(`"f_int64":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int64), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.Int64))
 	}
 	if result.Len() > 1 {
 		result.WriteRune(',')

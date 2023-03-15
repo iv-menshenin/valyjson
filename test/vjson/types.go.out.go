@@ -4,7 +4,6 @@ package vjson
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"time"
 	"unsafe"
 
@@ -609,390 +608,355 @@ func (s *MapInt64) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Person) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *Person) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Person) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
-		buf = marshalString(buf[:0], s.Name)
-		result.Write(buf)
+		writeString(result, s.Name)
 	} else {
 		result.WriteString(`"name":""`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
-		buf = marshalString(buf[:0], s.Surname)
-		result.Write(buf)
+		writeString(result, s.Surname)
 	} else {
 		result.WriteString(`"surname":""`)
 	}
 	if s.Middle != nil {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"middle":`)
-		buf = marshalString(buf[:0], *s.Middle)
-		result.Write(buf)
+		writeString(result, *s.Middle)
 	}
 	if s.DOB != nil {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"dob":`)
-		buf = marshalTime(buf[:0], *s.DOB, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, *s.DOB, time.RFC3339Nano)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Passport != nil {
-		if buf, err = s.Passport.MarshalAppend(buf[:0]); err != nil {
-			return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-		} else {
-			result.WriteString(`"passport":`)
-			result.Write(buf)
+		if err = s.Passport.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
 	} else {
 		result.WriteString(`"passport":null`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Tables != nil {
-		buf = buf[:0]
 		result.WriteString(`"tables":{`)
 		var _filled bool
 		for _k, _v := range s.Tables {
 			if _filled {
-				result.WriteRune(',')
+				result.Write([]byte{','})
 			}
 			_filled = true
-			result.WriteRune('"')
+			result.Write([]byte{'"'})
 			result.WriteString(_k)
 			result.WriteString(`":`)
-			buf, err = _v.MarshalAppend(buf[:0])
+			err = _v.MarshalTo(result)
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "tables" attribute %q: %w`, _k, err)
+				return fmt.Errorf(`can't marshal "tables" attribute %q: %w`, _k, err)
 			}
-			result.Write(buf)
 		}
-		result.WriteRune('}')
+		result.Write([]byte{'}'})
 	} else {
 		result.WriteString(`"tables":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Passport) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *Passport) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Passport) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Number != "" {
 		result.WriteString(`"number":`)
-		buf = marshalString(buf[:0], s.Number)
-		result.Write(buf)
+		writeString(result, s.Number)
 	} else {
 		result.WriteString(`"number":""`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if !s.DateDoc.IsZero() {
 		result.WriteString(`"dateDoc":`)
-		buf = marshalTime(buf[:0], s.DateDoc, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, s.DateDoc, time.RFC3339Nano)
 	} else {
 		result.WriteString(`"dateDoc":"0000-00-00T00:00:00Z"`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TableOf) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TableOf) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TableOf) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.TableName != "" {
 		result.WriteString(`"tableName":`)
-		buf = marshalString(buf[:0], s.TableName)
-		result.Write(buf)
+		writeString(result, s.TableName)
 	} else {
 		result.WriteString(`"tableName":""`)
 	}
 	if s.Tables != nil {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
-		buf = buf[:0]
 		result.WriteString(`"tables":[`)
 		var _filled bool
 		for _k, _v := range s.Tables {
 			if _filled {
-				result.WriteRune(',')
+				result.Write([]byte{','})
 			}
 			_filled = true
 			_k = _k
-			buf, err = _v.MarshalAppend(buf[:0])
+			err = _v.MarshalTo(result)
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "tables" item at position %d: %w`, _k, err)
+				return fmt.Errorf(`can't marshal "tables" item at position %d: %w`, _k, err)
 			}
-			result.Write(buf)
 		}
-		result.WriteRune(']')
+		result.Write([]byte{']'})
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Table) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *Table) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Table) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Counter != 0 {
 		result.WriteString(`"counter":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Counter), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Counter))
 	} else {
 		result.WriteString(`"counter":0`)
 	}
 	if s.Assessments != nil {
 		if result.Len() > 1 {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
-		buf = buf[:0]
 		result.WriteString(`"assessments":[`)
 		var _filled bool
 		for _k, _v := range s.Assessments {
 			if _filled {
-				result.WriteRune(',')
+				result.Write([]byte{','})
 			}
 			_filled = true
 			_k = _k
-			buf = strconv.AppendInt(buf[:0], int64(_v), 10)
-			result.Write(buf)
+			writeInt64(result, int64(_v))
 		}
-		result.WriteRune(']')
+		result.Write([]byte{']'})
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if !s.Time.IsZero() {
 		result.WriteString(`"time":`)
-		buf = marshalTime(buf[:0], s.Time, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, s.Time, time.RFC3339Nano)
 	} else {
 		result.WriteString(`"time":"0000-00-00T00:00:00Z"`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Avg != 0 {
 		result.WriteString(`"avg":`)
-		buf = strconv.AppendFloat(buf[:0], s.Avg, 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, s.Avg)
 	} else {
 		result.WriteString(`"avg":0`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.Tags != nil {
-		buf = buf[:0]
 		result.WriteString(`"tags":[`)
 		var _filled bool
 		for _k, _v := range s.Tags {
 			if _filled {
-				result.WriteRune(',')
+				result.Write([]byte{','})
 			}
 			_filled = true
 			_k = _k
-			buf, err = _v.MarshalAppend(buf[:0])
+			err = _v.MarshalTo(result)
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "tags" item at position %d: %w`, _k, err)
+				return fmt.Errorf(`can't marshal "tags" item at position %d: %w`, _k, err)
 			}
-			result.Write(buf)
 		}
-		result.WriteRune(']')
+		result.Write([]byte{']'})
 	} else {
 		result.WriteString(`"tags":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Tag) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *Tag) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Tag) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
-	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
-	)
-	result.WriteRune('{')
+	var err error
+	result.Write([]byte{'{'})
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.TagName != "" {
 		result.WriteString(`"tagName":`)
-		buf = marshalString(buf[:0], s.TagName)
-		result.Write(buf)
+		writeString(result, s.TagName)
 	} else {
 		result.WriteString(`"tagName":""`)
 	}
 	if result.Len() > 1 {
-		result.WriteRune(',')
+		result.Write([]byte{','})
 	}
 	if s.TagValue != "" {
 		result.WriteString(`"tagValue":`)
-		buf = marshalString(buf[:0], s.TagValue)
-		result.Write(buf)
+		writeString(result, s.TagValue)
 	} else {
 		result.WriteString(`"tagValue":""`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapTable) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *MapTable) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *MapTable) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
 		err     error
 		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
 	)
-	result.WriteRune('{')
+	result.Write([]byte{'{'})
 	for _k, _v := range *s {
 		if _filled {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		_filled = true
-		result.WriteRune('"')
+		result.Write([]byte{'"'})
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
-		buf, err = _v.MarshalAppend(buf[:0])
+		err = _v.MarshalTo(result)
 		if err != nil {
-			return nil, fmt.Errorf(`can't marshal "MapTable" attribute %q: %w`, _k, err)
+			return fmt.Errorf(`can't marshal "MapTable" attribute %q: %w`, _k, err)
 		}
-		result.Write(buf)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapInt64) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *MapInt64) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *MapInt64) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
 		err     error
 		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
 	)
-	result.WriteRune('{')
+	result.Write([]byte{'{'})
 	for _k, _v := range *s {
 		if _filled {
-			result.WriteRune(',')
+			result.Write([]byte{','})
 		}
 		_filled = true
-		result.WriteRune('"')
+		result.Write([]byte{'"'})
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
-		buf = strconv.AppendInt(buf[:0], int64(_v), 10)
-		result.Write(buf)
+		writeInt64(result, int64(_v))
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }

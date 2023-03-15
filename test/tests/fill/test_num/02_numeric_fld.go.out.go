@@ -946,8 +946,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld))
 	} else {
 		result.WriteString(`"int_fld":0`)
 	}
@@ -956,16 +955,14 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteRune(',')
 		}
 		result.WriteString(`"int_fld8":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld8), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld8))
 	}
 	if result.Len() > 1 {
 		result.WriteRune(',')
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld16), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld16))
 	} else {
 		result.WriteString(`"int_fld16":0`)
 	}
@@ -974,8 +971,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld32), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld32))
 	} else {
 		result.WriteString(`"int_fld32":0`)
 	}
@@ -984,8 +980,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
-		buf = strconv.AppendInt(buf[:0], s.IntFld64, 10)
-		result.Write(buf)
+		marshalString(result, s.IntFld64)
 	} else {
 		result.WriteString(`"int_fld64":0`)
 	}
@@ -1062,8 +1057,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld))
 	} else {
 		result.WriteString(`"ref_int_fld":null`)
 	}
@@ -1072,16 +1066,14 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 			result.WriteRune(',')
 		}
 		result.WriteString(`"ref_int_fld8":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld8), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld8))
 	}
 	if result.Len() > 1 {
 		result.WriteRune(',')
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld16), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld16))
 	} else {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
@@ -1090,8 +1082,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld32), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld32))
 	} else {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
@@ -1100,8 +1091,7 @@ func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
-		buf = strconv.AppendInt(buf[:0], *s.RefIntFld64, 10)
-		result.Write(buf)
+		marshalString(result, *s.RefIntFld64)
 	} else {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
@@ -1199,8 +1189,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld))
 	} else {
 		result.WriteString(`"int_fld":0`)
 	}
@@ -1209,8 +1198,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld8 != 0 {
 		result.WriteString(`"int_fld8":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld8), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld8))
 	} else {
 		result.WriteString(`"int_fld8":0`)
 	}
@@ -1219,8 +1207,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld16), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld16))
 	} else {
 		result.WriteString(`"int_fld16":0`)
 	}
@@ -1229,8 +1216,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.IntFld32), 10)
-		result.Write(buf)
+		marshalString(result, int64(s.IntFld32))
 	} else {
 		result.WriteString(`"int_fld32":0`)
 	}
@@ -1239,8 +1225,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
-		buf = strconv.AppendInt(buf[:0], s.IntFld64, 10)
-		result.Write(buf)
+		marshalString(result, s.IntFld64)
 	} else {
 		result.WriteString(`"int_fld64":0`)
 	}
@@ -1319,8 +1304,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld))
 	} else {
 		result.WriteString(`"ref_int_fld":null`)
 	}
@@ -1329,8 +1313,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld8 != nil {
 		result.WriteString(`"ref_int_fld8":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld8), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld8))
 	} else {
 		result.WriteString(`"ref_int_fld8":null`)
 	}
@@ -1339,8 +1322,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld16), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld16))
 	} else {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
@@ -1349,8 +1331,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
-		buf = strconv.AppendInt(buf[:0], int64(*s.RefIntFld32), 10)
-		result.Write(buf)
+		marshalString(result, int64(*s.RefIntFld32))
 	} else {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
@@ -1359,8 +1340,7 @@ func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
-		buf = strconv.AppendInt(buf[:0], *s.RefIntFld64, 10)
-		result.Write(buf)
+		marshalString(result, *s.RefIntFld64)
 	} else {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
