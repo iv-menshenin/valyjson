@@ -156,23 +156,29 @@ func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Comment != "" {
 		result.WriteString(`"comment":`)
 		writeString(result, s.Comment)
+		wantComma = true
 	} else {
 		result.WriteString(`"comment":""`)
+		wantComma = true
 	}
 	if s.Level != 0 {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"level":`)
 		writeInt64(result, s.Level)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -191,21 +197,26 @@ func (s *TestAllOfThird) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
 	if s.Command != "" {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"command":`)
 		writeString(result, s.Command)
+		wantComma = true
 	}
 	if s.Range != 0 {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"range":`)
 		writeInt64(result, s.Range)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err

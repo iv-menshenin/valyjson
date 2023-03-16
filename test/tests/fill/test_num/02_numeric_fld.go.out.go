@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/valyala/fastjson"
 )
@@ -926,494 +925,538 @@ func (s *NumStruct02) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *NumStruct01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *NumStruct01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.Write([]byte{'{'})
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
-		marshalString(result, int64(s.IntFld))
+		writeInt64(result, int64(s.IntFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld":0`)
+		wantComma = true
 	}
 	if s.IntFld8 != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"int_fld8":`)
-		marshalString(result, int64(s.IntFld8))
+		writeInt64(result, int64(s.IntFld8))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
-		marshalString(result, int64(s.IntFld16))
+		writeInt64(result, int64(s.IntFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
-		marshalString(result, int64(s.IntFld32))
+		writeInt64(result, int64(s.IntFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld32":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
-		marshalString(result, s.IntFld64)
+		writeInt64(result, s.IntFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld != 0 {
 		result.WriteString(`"Uint_fld":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld":0`)
+		wantComma = true
 	}
 	if s.UintFld8 != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"Uint_fld8":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld8), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld8))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld16 != 0 {
 		result.WriteString(`"Uint_fld16":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld16), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld32 != 0 {
 		result.WriteString(`"Uint_fld32":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld32), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld32":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld64 != 0 {
 		result.WriteString(`"Uint_fld64":`)
-		buf = strconv.AppendUint(buf[:0], s.UintFld64, 10)
-		result.Write(buf)
+		writeUint64(result, s.UintFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FloatFld32 != 0 {
 		result.WriteString(`"fl23":`)
-		buf = strconv.AppendFloat(buf[:0], float64(s.FloatFld32), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(s.FloatFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"fl23":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FloatFld64 != 0 {
 		result.WriteString(`"fl64":`)
-		buf = strconv.AppendFloat(buf[:0], s.FloatFld64, 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, s.FloatFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"fl64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
-		marshalString(result, int64(*s.RefIntFld))
+		writeInt64(result, int64(*s.RefIntFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld":null`)
 	}
 	if s.RefIntFld8 != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"ref_int_fld8":`)
-		marshalString(result, int64(*s.RefIntFld8))
+		writeInt64(result, int64(*s.RefIntFld8))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
-		marshalString(result, int64(*s.RefIntFld16))
+		writeInt64(result, int64(*s.RefIntFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
-		marshalString(result, int64(*s.RefIntFld32))
+		writeInt64(result, int64(*s.RefIntFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
-		marshalString(result, *s.RefIntFld64)
+		writeInt64(result, *s.RefIntFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld != nil {
 		result.WriteString(`"ref_Uint_fld":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld":null`)
 	}
 	if s.RefUintFld8 != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"ref_Uint_fld8":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld8), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld8))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld16 != nil {
 		result.WriteString(`"ref_Uint_fld16":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld16), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld16":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld32 != nil {
 		result.WriteString(`"ref_Uint_fld32":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld32), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld32":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld64 != nil {
 		result.WriteString(`"ref_Uint_fld64":`)
-		buf = strconv.AppendUint(buf[:0], *s.RefUintFld64, 10)
-		result.Write(buf)
+		writeUint64(result, *s.RefUintFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld64":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefFloatFld32 != nil {
 		result.WriteString(`"ref_fl23":`)
-		buf = strconv.AppendFloat(buf[:0], float64(*s.RefFloatFld32), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(*s.RefFloatFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_fl23":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefFloatFld64 != nil {
 		result.WriteString(`"ref_fl64":`)
-		buf = strconv.AppendFloat(buf[:0], *s.RefFloatFld64, 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, *s.RefFloatFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_fl64":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct02) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *NumStruct02) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *NumStruct02) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.Write([]byte{'{'})
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
-		marshalString(result, int64(s.IntFld))
+		writeInt64(result, int64(s.IntFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld8 != 0 {
 		result.WriteString(`"int_fld8":`)
-		marshalString(result, int64(s.IntFld8))
+		writeInt64(result, int64(s.IntFld8))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld8":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
-		marshalString(result, int64(s.IntFld16))
+		writeInt64(result, int64(s.IntFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
-		marshalString(result, int64(s.IntFld32))
+		writeInt64(result, int64(s.IntFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld32":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
-		marshalString(result, s.IntFld64)
+		writeInt64(result, s.IntFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"int_fld64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld != 0 {
 		result.WriteString(`"Uint_fld":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld8 != 0 {
 		result.WriteString(`"Uint_fld8":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld8), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld8))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld8":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld16 != 0 {
 		result.WriteString(`"Uint_fld16":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld16), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld32 != 0 {
 		result.WriteString(`"Uint_fld32":`)
-		buf = strconv.AppendUint(buf[:0], uint64(s.UintFld32), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(s.UintFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld32":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.UintFld64 != 0 {
 		result.WriteString(`"Uint_fld64":`)
-		buf = strconv.AppendUint(buf[:0], s.UintFld64, 10)
-		result.Write(buf)
+		writeUint64(result, s.UintFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"Uint_fld64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FloatFld32 != 0 {
 		result.WriteString(`"fl23":`)
-		buf = strconv.AppendFloat(buf[:0], float64(s.FloatFld32), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(s.FloatFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"fl23":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FloatFld64 != 0 {
 		result.WriteString(`"fl64":`)
-		buf = strconv.AppendFloat(buf[:0], s.FloatFld64, 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, s.FloatFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"fl64":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
-		marshalString(result, int64(*s.RefIntFld))
+		writeInt64(result, int64(*s.RefIntFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld8 != nil {
 		result.WriteString(`"ref_int_fld8":`)
-		marshalString(result, int64(*s.RefIntFld8))
+		writeInt64(result, int64(*s.RefIntFld8))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld8":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
-		marshalString(result, int64(*s.RefIntFld16))
+		writeInt64(result, int64(*s.RefIntFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
-		marshalString(result, int64(*s.RefIntFld32))
+		writeInt64(result, int64(*s.RefIntFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
-		marshalString(result, *s.RefIntFld64)
+		writeInt64(result, *s.RefIntFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld != nil {
 		result.WriteString(`"ref_Uint_fld":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld8 != nil {
 		result.WriteString(`"ref_Uint_fld8":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld8), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld8))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld8":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld16 != nil {
 		result.WriteString(`"ref_Uint_fld16":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld16), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld16))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld16":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld32 != nil {
 		result.WriteString(`"ref_Uint_fld32":`)
-		buf = strconv.AppendUint(buf[:0], uint64(*s.RefUintFld32), 10)
-		result.Write(buf)
+		writeUint64(result, uint64(*s.RefUintFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld32":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefUintFld64 != nil {
 		result.WriteString(`"ref_Uint_fld64":`)
-		buf = strconv.AppendUint(buf[:0], *s.RefUintFld64, 10)
-		result.Write(buf)
+		writeUint64(result, *s.RefUintFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_Uint_fld64":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefFloatFld32 != nil {
 		result.WriteString(`"ref_fl23":`)
-		buf = strconv.AppendFloat(buf[:0], float64(*s.RefFloatFld32), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(*s.RefFloatFld32))
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_fl23":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.RefFloatFld64 != nil {
 		result.WriteString(`"ref_fl64":`)
-		buf = strconv.AppendFloat(buf[:0], *s.RefFloatFld64, 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, *s.RefFloatFld64)
+		wantComma = true
 	} else {
 		result.WriteString(`"ref_fl64":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }

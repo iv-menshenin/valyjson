@@ -106,49 +106,52 @@ func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestTime01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestTime01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.Write([]byte{'{'})
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
-		buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, s.DateBegin, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if !s.DateCustom.IsZero() {
 		result.WriteString(`"date_custom":`)
-		buf = marshalTime(buf[:0], s.DateCustom, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, s.DateCustom, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"date_custom":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
 	if s.DateEnd != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.Write([]byte{','})
 		}
 		result.WriteString(`"date_end":`)
-		buf = marshalTime(buf[:0], *s.DateEnd, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, *s.DateEnd, time.RFC3339Nano)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }

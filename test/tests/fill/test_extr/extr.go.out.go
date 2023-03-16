@@ -92,20 +92,27 @@ func (s *External) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
+	result.WriteString(`"test1":`)
 	if err = s.Test01.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if result.Len() > 1 {
+	wantComma = true
+	if wantComma {
 		result.Write([]byte{','})
 	}
+	result.WriteString(`"test2":`)
 	if err = s.Test02.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	result.Write([]byte{'}'})
 	return err
 }

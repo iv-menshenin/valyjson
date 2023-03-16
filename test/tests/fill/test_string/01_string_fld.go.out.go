@@ -180,102 +180,107 @@ func (s *TestStr02) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestStr01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestStr01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.Write([]byte{'{'})
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
-		buf = marshalString(buf[:0], s.Field)
-		result.Write(buf)
+		writeString(result, s.Field)
+		wantComma = true
 	} else {
 		result.WriteString(`"field":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
-		buf = marshalString(buf[:0], *s.FieldRef)
-		result.Write(buf)
+		writeString(result, *s.FieldRef)
+		wantComma = true
 	} else {
 		result.WriteString(`"fieldRef":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.DefRef != nil {
 		result.WriteString(`"defRef":`)
-		buf = marshalString(buf[:0], *s.DefRef)
-		result.Write(buf)
+		writeString(result, *s.DefRef)
+		wantComma = true
 	} else {
 		result.WriteString(`"defRef":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr02) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestStr02) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestStr02) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		writeString(result, "null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.Write([]byte{'{'})
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
-		buf = marshalString(buf[:0], s.Field)
-		result.Write(buf)
+		writeString(result, s.Field)
+		wantComma = true
 	} else {
 		result.WriteString(`"field":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
-		buf = marshalString(buf[:0], *s.FieldRef)
-		result.Write(buf)
+		writeString(result, *s.FieldRef)
+		wantComma = true
 	} else {
 		result.WriteString(`"fieldRef":null`)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.Write([]byte{','})
 	}
 	if s.String != "" {
 		result.WriteString(`"string":`)
-		buf = marshalString(buf[:0], string(s.String))
-		result.Write(buf)
+		writeString(result, string(s.String))
+		wantComma = true
 	} else {
 		result.WriteString(`"string":""`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.Write([]byte{'}'})
+	return err
 }

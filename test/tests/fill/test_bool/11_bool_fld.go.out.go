@@ -138,23 +138,29 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Bool {
 		result.WriteString(`"bl":true`)
+		wantComma = true
 	} else {
 		result.WriteString(`"bl":false`)
+		wantComma = true
 	}
 	if s.BlMaybe {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"mb":true`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.RefBool != nil {
@@ -163,11 +169,12 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		} else {
 			result.WriteString(`"refBool":false`)
 		}
+		wantComma = true
 	} else {
 		result.WriteString(`"refBool":null`)
 	}
 	if s.RefMaybe != nil {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		if *s.RefMaybe {
@@ -175,14 +182,17 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		} else {
 			result.WriteString(`"refMaybe":false`)
 		}
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.DefBool {
 		result.WriteString(`"defBool":true`)
+		wantComma = true
 	} else {
 		result.WriteString(`"defBool":false`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err

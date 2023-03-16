@@ -248,7 +248,7 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 				uint64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.UInt64)
 				return decorStmt(src, []ast.Stmt{
 					// writeUint64(result, uint64({src}))
-					asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, uint64Expression)),
+					asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, asthlp.NewIdent(names.VarNameWriter), uint64Expression)),
 				})
 			}
 
@@ -257,7 +257,7 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 				float64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.Float64)
 				return decorStmt(src, []ast.Stmt{
 					// writeFloat64(result, float64({src}))
-					asthlp.CallStmt(asthlp.Call(names.WriteFloat64Func, float64Expression)),
+					asthlp.CallStmt(asthlp.Call(names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), float64Expression)),
 				})
 			}
 

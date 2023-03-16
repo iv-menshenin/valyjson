@@ -2,7 +2,6 @@
 package test_num
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -12,33 +11,10 @@ import (
 	"github.com/valyala/fastjson"
 )
 
-func marshalString(buf []byte, s string) []byte {
-	var out = bytes.NewBuffer(buf)
-	out.WriteRune('"')
-	for _, r := range s {
-		switch r {
-
-		case '\t':
-			out.WriteString(`\t`)
-
-		case '\r':
-			out.WriteString(`\r`)
-
-		case '\n':
-			out.WriteString(`\n`)
-
-		case '\\':
-			out.WriteString(`\\`)
-
-		case '"':
-			out.WriteString(`\"`)
-
-		default:
-			out.WriteRune(r)
-		}
-	}
-	out.WriteRune('"')
-	return out.Bytes()
+type Writer interface {
+	io.Writer
+	io.StringWriter
+	Len() int
 }
 
 func valueIsNotNull(v *fastjson.Value) bool {
@@ -109,4 +85,42 @@ func writeTime(w io.Writer, t time.Time, layout string) {
 	buf.B = append(buf.B, '"')
 	w.Write(buf.B)
 	timeBuf.Put(buf)
+}
+
+var stringBuf = bytebufferpool.Pool{}
+
+func writeString(w io.Writer, s string) {
+	var buf = stringBuf.Get()
+	buf.Write([]byte{'"'})
+	for _, r := range s {
+		switch r {
+
+		case '\t':
+			buf.WriteString(`\t`)
+
+		case '\r':
+			buf.WriteString(`\r`)
+
+		case '\n':
+			buf.WriteString(`\n`)
+
+		case '\\':
+			buf.WriteString(`\\`)
+
+		case '"':
+			buf.WriteString(`\"`)
+
+		default:
+			buf.WriteString(string(r))
+		}
+	}
+	buf.Write([]byte{'"'})
+	w.Write(buf.Bytes())
+	stringBuf.Put(buf)
+}
+
+var commonBuffer = bytebufferpool.Pool{}
+
+func Release(b []byte) {
+	commonBuffer.Put(&bytebufferpool.ByteBuffer{B: b})
 }

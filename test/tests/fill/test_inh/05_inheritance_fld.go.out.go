@@ -465,54 +465,76 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
-		result.Write([]byte{','})
-	}
-	if err = s.TestInh02.MarshalTo(result); err != nil {
+
+	_injected := commonBuffer.Get()
+	if err = s.TestInh02.MarshalTo(_injected); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if result.Len() > 1 {
+	if _injected.Len() > 2 {
+		if wantComma {
+			result.Write([]byte{','})
+		}
+		result.WriteString(`"injected":`)
+		result.Write(_injected.Bytes())
+		wantComma = true
+	}
+	commonBuffer.Put(_injected)
+
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
 		writeInt64(result, int64(s.Random))
+		wantComma = true
 	} else {
 		result.WriteString(`"random":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
+	result.WriteString(`"nested1":`)
 	if err = s.Nested1.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if result.Len() > 1 {
+	wantComma = true
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Nested2 != nil {
+		result.WriteString(`"nested2":`)
 		if err = s.Nested2.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
+		wantComma = true
 	} else {
 		result.WriteString(`"nested2":null`)
 	}
@@ -533,14 +555,18 @@ func (s *TestInh02) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
 	if s.Int32 != 0 {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"int_32":`)
 		writeInt64(result, int64(s.Int32))
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -559,25 +585,32 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
 		writeInt64(result, int64(s.Random))
+		wantComma = true
 	} else {
 		result.WriteString(`"random":0`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -596,16 +629,21 @@ func (s *TestNested01) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -624,16 +662,21 @@ func (s *TestNested02) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -652,16 +695,21 @@ func (s *TestNested03) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
