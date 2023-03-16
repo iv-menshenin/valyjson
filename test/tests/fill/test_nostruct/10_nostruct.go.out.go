@@ -240,7 +240,7 @@ func (s *TestMap10) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestMap10) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -272,7 +272,7 @@ func (s *TestMap11) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestMap11) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -307,7 +307,7 @@ func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestMap11Ref) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -334,13 +334,16 @@ func (s *TestMap11Ref) MarshalTo(result Writer) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
-	return s.MarshalTo(result)
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice12) MarshalTo(dst []byte) error {
+func (s *TestSlice12) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
 		err       error
@@ -361,13 +364,16 @@ func (s *TestSlice12) MarshalTo(dst []byte) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice13) MarshalJSON() ([]byte, error) {
-	return s.MarshalTo(result)
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice13) MarshalTo(dst []byte) error {
+func (s *TestSlice13) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
 		err       error
@@ -391,13 +397,16 @@ func (s *TestSlice13) MarshalTo(dst []byte) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
-	return s.MarshalTo(result)
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice14) MarshalTo(dst []byte) error {
+func (s *TestSlice14) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
 		err       error

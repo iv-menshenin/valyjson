@@ -159,7 +159,7 @@ func (s *TestUserDefined) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestUserDefined) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (

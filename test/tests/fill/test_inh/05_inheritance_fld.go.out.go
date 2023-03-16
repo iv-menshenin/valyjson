@@ -477,7 +477,7 @@ func (s *TestInh01) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestInh01) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -586,7 +586,7 @@ func (s *TestInh02) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestInh02) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -616,7 +616,7 @@ func (s *TestInh03) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestInh03) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -660,7 +660,7 @@ func (s *TestNested01) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestNested01) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -693,7 +693,7 @@ func (s *TestNested02) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestNested02) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -726,7 +726,7 @@ func (s *TestNested03) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestNested03) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (

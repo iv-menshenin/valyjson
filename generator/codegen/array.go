@@ -125,21 +125,7 @@ func (m *Array) ValidatorFunc() ast.Decl {
 }
 
 func (m *Array) MarshalFunc() ast.Decl {
-	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
-		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
-		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(m.name)))).
-		Results(
-			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
-			asthlp.Field("", nil, asthlp.ErrorType),
-		).
-		AppendStmt(
-			asthlp.Return(
-				asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
-					asthlp.NewIdent(names.VarNameWriter),
-				),
-			),
-		).Decl()
+	return NewMarshalFunc(m.name)
 }
 
 // 	if s == nil || *s == nil {
@@ -166,35 +152,28 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(m.name)))).
-		Params(asthlp.Field("dst", nil, asthlp.ArrayType(asthlp.Byte))).
-		Results(
-			asthlp.Field("", nil, asthlp.ErrorType),
-		)
+		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
+		Results(asthlp.Field("", nil, asthlp.ErrorType))
 
+	var nilCondition = asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver))
 	if m.spec.Len == nil {
-		fn.AppendStmt(
-			// 	if s == nil || *s == nil {
-			//		return []byte("null"), nil
-			//	}
-			asthlp.If(
-				asthlp.Or(
-					asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-					asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
-				),
-				asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
-			),
-		)
-	} else {
-		fn.AppendStmt(
-			// 	if s == nil {
-			//		return []byte("null"), nil
-			//	}
-			asthlp.If(
-				asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-				asthlp.Return(asthlp.ExpressionTypeConvert(asthlp.StringConstant("null").Expr(), asthlp.ArrayType(asthlp.Byte)), asthlp.Nil),
-			),
+		nilCondition = asthlp.Or(
+			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
+			asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
 		)
 	}
+	fn.AppendStmt(
+		// 	if s == nil || *s == nil {
+		//		result.WriteString("null")
+		//		return nil
+		//	}
+		asthlp.If(
+			nilCondition,
+			// result.WriteString("null")
+			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
+			asthlp.Return(asthlp.Nil),
+		),
+	)
 
 	fn.AppendStmt(
 		// var (

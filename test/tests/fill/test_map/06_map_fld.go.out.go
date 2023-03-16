@@ -355,7 +355,7 @@ func (s *TestMap01) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestMap01) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -539,7 +539,7 @@ func (s *Property) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *Property) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (

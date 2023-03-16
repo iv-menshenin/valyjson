@@ -933,7 +933,7 @@ func (s *NumStruct01) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *NumStruct01) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
@@ -1197,7 +1197,7 @@ func (s *NumStruct02) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *NumStruct02) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (

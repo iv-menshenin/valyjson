@@ -196,7 +196,7 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 
 	fn.AppendStmt(
 		// 	if s == nil || *s == nil {
-		//		writeString(result, "null")
+		//		result.WriteString("null")
 		//		return nil
 		//	}
 		asthlp.If(
@@ -204,7 +204,8 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 				asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
 				asthlp.IsNil(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
 			),
-			asthlp.CallStmt(asthlp.Call(names.WriteStringFunc, asthlp.NewIdent(names.VarNameWriter), asthlp.StringConstant("null").Expr())),
+			// result.WriteString("null")
+			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
 			asthlp.Return(asthlp.Nil),
 		),
 		// var (

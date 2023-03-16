@@ -210,18 +210,17 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name)))).
 		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
-		Results(
-			asthlp.Field("", nil, asthlp.ErrorType),
-		)
+		Results(asthlp.Field("", nil, asthlp.ErrorType))
 
 	fn.AppendStmt(
 		// 	if s == nil {
-		//		writeString(result, "null")
+		//		result.WriteString("null")
 		//		return nil
 		//	}
 		asthlp.If(
 			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-			asthlp.CallStmt(asthlp.Call(names.WriteStringFunc, asthlp.NewIdent(names.VarNameWriter), asthlp.StringConstant("null").Expr())),
+			// result.WriteString("null")
+			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
 			asthlp.Return(asthlp.Nil),
 		),
 		// var (
