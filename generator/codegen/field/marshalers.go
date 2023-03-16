@@ -438,6 +438,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 	var w = WriteBlock{
 		NotZero: asthlp.NotNil(src),
 		Block: []ast.Stmt{
+			SetCommaVar,
 			// result.WriteString(`"jsonName":{`)
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":{`, jsonName)).Expr())),
 			// var filled bool
@@ -450,6 +451,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 	}
 	if !omitempty {
 		w.IfZero = []ast.Stmt{
+			SetCommaVar,
 			asthlp.CallStmt(asthlp.Call(
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),

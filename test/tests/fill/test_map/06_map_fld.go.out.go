@@ -367,6 +367,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.Write([]byte{','})
 	}
 	if s.Tags != nil {
+		wantComma = true
 		result.WriteString(`"tags":{`)
 		var wantComma bool
 		for _k, _v := range s.Tags {
@@ -381,12 +382,14 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		}
 		result.Write([]byte{'}'})
 	} else {
+		wantComma = true
 		result.WriteString(`"tags":null`)
 	}
 	if s.Properties != nil {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"properties":{`)
 		var wantComma bool
 		for _k, _v := range s.Properties {
@@ -408,6 +411,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.Write([]byte{','})
 	}
 	if s.KeyTypedProperties != nil {
+		wantComma = true
 		result.WriteString(`"key_typed_properties":{`)
 		var wantComma bool
 		for _k, _v := range s.KeyTypedProperties {
@@ -425,12 +429,14 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		}
 		result.Write([]byte{'}'})
 	} else {
+		wantComma = true
 		result.WriteString(`"key_typed_properties":null`)
 	}
 	if s.IntegerVal != nil {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"integerVal":{`)
 		var wantComma bool
 		for _k, _v := range s.IntegerVal {
@@ -449,6 +455,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"floatVal":{`)
 		var wantComma bool
 		for _k, _v := range s.FloatVal {
@@ -467,6 +474,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"uintVal":{`)
 		var wantComma bool
 		for _k, _v := range s.UintVal {
@@ -489,6 +497,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"bool":{`)
 		var wantComma bool
 		for _k, _v := range s.BoolVal {
@@ -511,6 +520,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		if wantComma {
 			result.Write([]byte{','})
 		}
+		wantComma = true
 		result.WriteString(`"typed-val":{`)
 		var wantComma bool
 		for _k, _v := range s.TypedVal {
