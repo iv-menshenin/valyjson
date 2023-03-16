@@ -2,6 +2,7 @@ package field
 
 import (
 	"fmt"
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"go/ast"
 	"go/token"
 
@@ -10,6 +11,18 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 )
 
+// WantCommaVar wantComma
+var WantCommaVar = asthlp.NewIdent("wantComma")
+
+func NeedVars() ast.Stmt {
+	return asthlp.Var(
+		asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
+		asthlp.VariableType(WantCommaVar.Name, asthlp.Bool),
+	)
+}
+
+var SetCommaVar = asthlp.Assign(asthlp.VarNames{WantCommaVar}, asthlp.Assignment, asthlp.True)
+
 // putCommaFirst puts comma
 //  result.Write([]byte{','})
 var putCommaFirst = asthlp.CallStmt(asthlp.Call(
@@ -17,16 +30,10 @@ var putCommaFirst = asthlp.CallStmt(asthlp.Call(
 	asthlp.SliceByteLiteral{','}.Expr(), // []byte{','}
 ))
 
-//  if result.Len() > 1 {
+//  if wantComma {
 //    result.Write([]byte{','})
 //  }
-var putCommaFirstIf = asthlp.If(
-	asthlp.Great(
-		asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("result", "Len"))),
-		asthlp.IntegerConstant(1).Expr(),
-	),
-	putCommaFirst,
-)
+var putCommaFirstIf = asthlp.If(WantCommaVar, putCommaFirst)
 
 var (
 	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))

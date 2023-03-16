@@ -147,23 +147,22 @@ func (m *Array) MarshalFunc() ast.Decl {
 //	}
 //	var (
 //		err     error
-//		_filled bool
+//		wantComma bool
 //		buf     = make([]byte, 0, 128)
 //		result  = bytes.NewBuffer(dst)
 //	)
 //	result.WriteRune('[')
 //	for _, _v := range *s {
-//		if _filled {
+//		if wantComma {
 //			result.WriteRune(',')
 //		}
-//		_filled = true
+//		wantComma = true
 //		buf = strconv.AppendInt(buf[:0], _v, 10)
 //		result.Write(buf)
 //	}
 //	result.WriteRune(']')
 //	return result.Bytes(), err
 func (m *Array) AppendJsonFunc() ast.Decl {
-	const filled = "_filled"
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(m.name)))).
@@ -202,10 +201,7 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 		// 	err      error
 		//  filled bool
 		// )
-		asthlp.Var(
-			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
-			asthlp.VariableType(filled, asthlp.Bool),
-		),
+		field.NeedVars(),
 		// result.WriteRune('{')
 		asthlp.CallStmt(asthlp.Call(
 			field.WriteBytesFn,
@@ -220,9 +216,9 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 		//	if filled {
 		//		result.WriteRune(',')
 		//	}
-		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
+		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
 		// filled = true
-		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
+		field.SetCommaVar,
 		// _k = _k
 		asthlp.Assign(asthlp.MakeVarNames("_k"), asthlp.Assignment, asthlp.NewIdent("_k")),
 	}

@@ -227,9 +227,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		// var (
 		// 	err    error
 		// )
-		asthlp.Var(
-			asthlp.VariableType(names.VarNameError, asthlp.ErrorType),
-		),
+		field.NeedVars(),
 		// result.WriteRune('{')
 		asthlp.CallStmt(asthlp.Call(
 			field.WriteBytesFn,

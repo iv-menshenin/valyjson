@@ -60,6 +60,7 @@ func timeMarshal(src ast.Expr, jsonName string, omitempty, isStar bool) WriteBlo
 			asthlp.CallStmt(
 				asthlp.Call(names.WriteTimeFunc, asthlp.NewIdent(names.VarNameWriter), src, names.TimeDefaultLayout),
 			),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -68,6 +69,7 @@ func timeMarshal(src ast.Expr, jsonName string, omitempty, isStar bool) WriteBlo
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":"0000-00-00T00:00:00Z"`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -90,7 +92,7 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.Definition, // must shadow the buf variable
 					asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "MarshalText"))),
 				),
-				asthlp.NotNil(asthlp.NewIdent("err")),
+				asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
 				// return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 				asthlp.Block(
 					asthlp.Return(
@@ -108,6 +110,7 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.CallStmt(asthlp.Call(WriteBytesFn, bufVar)),
 					// result.Write([]byte{'"'})
 					asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{'"'}.Expr())),
+					SetCommaVar,
 				),
 			),
 		},
@@ -118,6 +121,7 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -139,6 +143,7 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 				asthlp.NewIdent(names.VarNameWriter), // result
 				srcInt64,                             // int64({src})
 			)),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -147,6 +152,7 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -169,6 +175,7 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 				asthlp.NewIdent(names.VarNameWriter),
 				srcUint64,
 			)),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -177,6 +184,7 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -197,6 +205,7 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 			asthlp.CallStmt(asthlp.Call(
 				names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), srcFloat64,
 			)),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -205,6 +214,7 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -218,6 +228,7 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":true`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -226,6 +237,7 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":false`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -237,6 +249,7 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 			WriteStringFn,
 			asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
 		)),
+		SetCommaVar,
 	}
 	if omitempty {
 		def = nil
@@ -254,6 +267,7 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.StringConstant(fmt.Sprintf(`"%s":false`, jsonName)).Expr(),
 				))),
 			),
+			SetCommaVar,
 		},
 		IfZero: def,
 	}
@@ -275,6 +289,7 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 			asthlp.CallStmt(asthlp.Call(
 				names.WriteStringFunc, asthlp.NewIdent(names.VarNameWriter), srcString,
 			)),
+			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -283,6 +298,7 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":""`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w
@@ -297,6 +313,10 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 	}
 	return WriteBlock{
 		Block: []ast.Stmt{
+			asthlp.CallStmt(asthlp.Call(
+				WriteStringFn,
+				asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr(),
+			)),
 			asthlp.IfInit(
 				asthlp.Assign(asthlp.VarNames{asthlp.NewIdent(names.VarNameError)}, asthlp.Assignment, asthlp.Call(
 					asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameMarshalTo)),
@@ -312,6 +332,7 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					),
 				),
 			),
+			SetCommaVar,
 		},
 	}
 }
@@ -350,9 +371,8 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 //	}
 func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve ValueExtractor) WriteBlock {
 	const (
-		filled = "_filled"
-		key    = "_k"
-		val    = "_v"
+		key = "_k"
+		val = "_v"
 	)
 	var keyAsString ast.Expr = asthlp.NewIdent(key)
 	if !isStringKey {
@@ -362,9 +382,9 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 		//	if filled {
 		//		result.Write([]byte{',')
 		//	}
-		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
+		asthlp.If(WantCommaVar, asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
 		// filled = true
-		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
+		SetCommaVar,
 		// result.Write([]byte{'"')
 		asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{'"'}.Expr())),
 		// result.WriteString(key)
@@ -382,7 +402,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 			// result.WriteString(`"jsonName":{`)
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":{`, jsonName)).Expr())),
 			// var filled bool
-			asthlp.Var(asthlp.VariableType(filled, asthlp.Bool)),
+			asthlp.Var(asthlp.VariableType(WantCommaVar.Name, asthlp.Bool)),
 			// for key, val := range {src} {
 			asthlp.Range(true, key, val, src, iterBlock...),
 			// result.Write([]byte{'}'})
@@ -402,17 +422,16 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 
 func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor) WriteBlock {
 	const (
-		filled = "_filled"
-		key    = "_k"
-		val    = "_v"
+		key = "_k"
+		val = "_v"
 	)
 	var iterBlock = []ast.Stmt{
 		//	if filled {
 		//		result.Write([]byte{','})
 		//	}
-		asthlp.If(asthlp.NewIdent(filled), asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
+		asthlp.If(WantCommaVar, asthlp.CallStmt(asthlp.Call(WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
 		// filled = true
-		asthlp.Assign(asthlp.MakeVarNames(filled), asthlp.Assignment, asthlp.True),
+		SetCommaVar,
 		// key = key
 		asthlp.Assign(asthlp.MakeVarNames(key), asthlp.Assignment, asthlp.NewIdent(key)),
 	}
@@ -426,7 +445,7 @@ func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtract
 			// result.WriteString(`"jsonName":[`)
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":[`, jsonName)).Expr())),
 			// var filled bool
-			asthlp.Var(asthlp.VariableType(filled, asthlp.Bool)),
+			asthlp.Var(asthlp.VariableType(WantCommaVar.Name, asthlp.Bool)),
 			// for key, val := range {src} {
 			asthlp.Range(true, key, val, src, iterBlock...),
 			// result.Write([]byte{']'})

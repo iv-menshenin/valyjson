@@ -619,61 +619,72 @@ func (s *Person) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, s.Name)
+		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
 		writeString(result, s.Surname)
+		wantComma = true
 	} else {
 		result.WriteString(`"surname":""`)
+		wantComma = true
 	}
 	if s.Middle != nil {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"middle":`)
 		writeString(result, *s.Middle)
+		wantComma = true
 	}
 	if s.DOB != nil {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"dob":`)
 		writeTime(result, *s.DOB, time.RFC3339Nano)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Passport != nil {
+		result.WriteString(`"passport":`)
 		if err = s.Passport.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
+		wantComma = true
 	} else {
 		result.WriteString(`"passport":null`)
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Tables != nil {
 		result.WriteString(`"tables":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Tables {
-			if _filled {
+			if wantComma {
 				result.Write([]byte{','})
 			}
-			_filled = true
+			wantComma = true
 			result.Write([]byte{'"'})
 			result.WriteString(_k)
 			result.WriteString(`":`)
@@ -703,25 +714,32 @@ func (s *Passport) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Number != "" {
 		result.WriteString(`"number":`)
 		writeString(result, s.Number)
+		wantComma = true
 	} else {
 		result.WriteString(`"number":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if !s.DateDoc.IsZero() {
 		result.WriteString(`"dateDoc":`)
 		writeTime(result, s.DateDoc, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"dateDoc":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -740,28 +758,33 @@ func (s *TableOf) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.TableName != "" {
 		result.WriteString(`"tableName":`)
 		writeString(result, s.TableName)
+		wantComma = true
 	} else {
 		result.WriteString(`"tableName":""`)
+		wantComma = true
 	}
 	if s.Tables != nil {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"tables":[`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Tables {
-			if _filled {
+			if wantComma {
 				result.Write([]byte{','})
 			}
-			_filled = true
+			wantComma = true
 			_k = _k
 			err = _v.MarshalTo(result)
 			if err != nil {
@@ -787,62 +810,71 @@ func (s *Table) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Counter != 0 {
 		result.WriteString(`"counter":`)
 		writeInt64(result, int64(s.Counter))
+		wantComma = true
 	} else {
 		result.WriteString(`"counter":0`)
+		wantComma = true
 	}
 	if s.Assessments != nil {
-		if result.Len() > 1 {
+		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"assessments":[`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Assessments {
-			if _filled {
+			if wantComma {
 				result.Write([]byte{','})
 			}
-			_filled = true
+			wantComma = true
 			_k = _k
 			writeInt64(result, int64(_v))
 		}
 		result.Write([]byte{']'})
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if !s.Time.IsZero() {
 		result.WriteString(`"time":`)
 		writeTime(result, s.Time, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"time":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Avg != 0 {
 		result.WriteString(`"avg":`)
 		writeFloat64(result, s.Avg)
+		wantComma = true
 	} else {
 		result.WriteString(`"avg":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.Tags != nil {
 		result.WriteString(`"tags":[`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Tags {
-			if _filled {
+			if wantComma {
 				result.Write([]byte{','})
 			}
-			_filled = true
+			wantComma = true
 			_k = _k
 			err = _v.MarshalTo(result)
 			if err != nil {
@@ -870,25 +902,32 @@ func (s *Tag) MarshalTo(result Writer) error {
 		writeString(result, "null")
 		return nil
 	}
-	var err error
+	var (
+		err       error
+		wantComma bool
+	)
 	result.Write([]byte{'{'})
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.TagName != "" {
 		result.WriteString(`"tagName":`)
 		writeString(result, s.TagName)
+		wantComma = true
 	} else {
 		result.WriteString(`"tagName":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
+	if wantComma {
 		result.Write([]byte{','})
 	}
 	if s.TagValue != "" {
 		result.WriteString(`"tagValue":`)
 		writeString(result, s.TagValue)
+		wantComma = true
 	} else {
 		result.WriteString(`"tagValue":""`)
+		wantComma = true
 	}
 	result.Write([]byte{'}'})
 	return err
@@ -908,15 +947,15 @@ func (s *MapTable) MarshalTo(result Writer) error {
 		return nil
 	}
 	var (
-		err     error
-		_filled bool
+		err       error
+		wantComma bool
 	)
 	result.Write([]byte{'{'})
 	for _k, _v := range *s {
-		if _filled {
+		if wantComma {
 			result.Write([]byte{','})
 		}
-		_filled = true
+		wantComma = true
 		result.Write([]byte{'"'})
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
@@ -943,15 +982,15 @@ func (s *MapInt64) MarshalTo(result Writer) error {
 		return nil
 	}
 	var (
-		err     error
-		_filled bool
+		err       error
+		wantComma bool
 	)
 	result.Write([]byte{'{'})
 	for _k, _v := range *s {
-		if _filled {
+		if wantComma {
 			result.Write([]byte{','})
 		}
-		_filled = true
+		wantComma = true
 		result.Write([]byte{'"'})
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
