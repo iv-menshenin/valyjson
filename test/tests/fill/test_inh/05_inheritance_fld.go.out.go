@@ -31,6 +31,14 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
+	if _breakFirst := v.Get("breakFirst"); _breakFirst != nil {
+		var valBreakFirst int
+		valBreakFirst, err = _breakFirst.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.breakFirst' value: %w", objPath, err)
+		}
+		s.BreakFirst = valBreakFirst
+	}
 	if _testInh02 := v.Get("injected"); _testInh02 != nil {
 		var valTestInh02 TestInh02
 		err = valTestInh02.FillFromJSON(_testInh02, objPath+".injected")
@@ -95,49 +103,56 @@ func (s *TestInh01) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [6]int
+	var checkFields [7]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
 		}
-		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
+		if bytes.Equal(key, []byte{'b', 'r', 'e', 'a', 'k', 'F', 'i', 'r', 's', 't'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
+		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
+		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
+		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
+		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
+		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
+			checkFields[6]++
+			if checkFields[6] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
@@ -470,21 +485,27 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.Write([]byte{'{'})
-
-	_injected := commonBuffer.Get()
-	if err = s.TestInh02.MarshalTo(_injected); err != nil {
+	if s.BreakFirst != 0 {
+		if wantComma {
+			result.Write([]byte{','})
+		}
+		result.WriteString(`"breakFirst":`)
+		writeInt64(result, int64(s.BreakFirst))
+		wantComma = true
+	}
+	tmpinjected := commonBuffer.Get()
+	if err = s.TestInh02.MarshalTo(tmpinjected); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if _injected.Len() > 2 {
+	if tmpinjected.Len() > 2 || bytes.Equal(tmpinjected.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
 		if wantComma {
 			result.Write([]byte{','})
 		}
 		result.WriteString(`"injected":`)
-		result.Write(_injected.Bytes())
+		result.Write(tmpinjected.Bytes())
 		wantComma = true
 	}
-	commonBuffer.Put(_injected)
-
+	commonBuffer.Put(tmpinjected)
 	if wantComma {
 		result.Write([]byte{','})
 	}
@@ -518,24 +539,37 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
 		wantComma = true
 	}
-	if wantComma {
-		result.Write([]byte{','})
-	}
-	result.WriteString(`"nested1":`)
-	if err = s.Nested1.MarshalTo(result); err != nil {
+	tmpnested1 := commonBuffer.Get()
+	if err = s.Nested1.MarshalTo(tmpnested1); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	wantComma = true
-	if wantComma {
-		result.Write([]byte{','})
+	if tmpnested1.Len() > 2 || bytes.Equal(tmpnested1.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+		if wantComma {
+			result.Write([]byte{','})
+		}
+		result.WriteString(`"nested1":`)
+		result.Write(tmpnested1.Bytes())
+		wantComma = true
 	}
+	commonBuffer.Put(tmpnested1)
 	if s.Nested2 != nil {
-		result.WriteString(`"nested2":`)
-		if err = s.Nested2.MarshalTo(result); err != nil {
+		tmpnested2 := commonBuffer.Get()
+		if err = s.Nested2.MarshalTo(tmpnested2); err != nil {
 			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
-		wantComma = true
+		if tmpnested2.Len() > 2 || bytes.Equal(tmpnested2.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+			if wantComma {
+				result.Write([]byte{','})
+			}
+			result.WriteString(`"nested2":`)
+			result.Write(tmpnested2.Bytes())
+			wantComma = true
+		}
+		commonBuffer.Put(tmpnested2)
 	} else {
+		if wantComma {
+			result.Write([]byte{','})
+		}
 		result.WriteString(`"nested2":null`)
 	}
 	result.Write([]byte{'}'})

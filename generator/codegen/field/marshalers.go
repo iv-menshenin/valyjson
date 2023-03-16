@@ -12,9 +12,14 @@ type WriteBlock struct {
 	NotZero ast.Expr
 	Block   []ast.Stmt
 	IfZero  []ast.Stmt
+
+	putCommaCustom bool
 }
 
 func (w WriteBlock) Render(putComma ast.Stmt) []ast.Stmt {
+	if w.putCommaCustom {
+		putComma = asthlp.EmptyStmt()
+	}
 	if w.NotZero == nil {
 		return append([]ast.Stmt{putComma}, w.Block...)
 	}
@@ -304,25 +309,39 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 	return w
 }
 
-//	if err = s.Nested1.MarshalTo(result); err != nil {
+//	_injected := commonBuffer.Get()
+//	if err = s.TestInh02.MarshalTo(_injected); err != nil {
 //		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 //	}
+//	if _injected.Len() > 2 {
+//		if wantComma {
+//			result.Write([]byte{','})
+//		}
+//		result.WriteString(`"injected":`)
+//		result.Write(_injected.Bytes())
+//		wantComma = true
+//	}
+//	commonBuffer.Put(_injected)
 func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
+	var tmpVar = makeTmpVariable(jsonName)
+	var getBytes = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(tmpVar, "Bytes")))
 	if omitempty {
 		// FIXME implement me
 	}
 	return WriteBlock{
 		Block: []ast.Stmt{
-			asthlp.CallStmt(asthlp.Call(
-				WriteStringFn,
-				asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr(),
-			)),
+			// _injected := commonBuffer.Get()
+			asthlp.Assign(
+				asthlp.VarNames{tmpVar},
+				asthlp.Definition,
+				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("commonBuffer", "Get"))),
+			),
+			// if err = s.TestInh02.MarshalTo(_injected); err != nil {
 			asthlp.IfInit(
 				asthlp.Assign(asthlp.VarNames{asthlp.NewIdent(names.VarNameError)}, asthlp.Assignment, asthlp.Call(
-					asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameMarshalTo)),
-					asthlp.NewIdent(names.VarNameWriter),
+					asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameMarshalTo)), tmpVar,
 				)),
-				asthlp.NotNil(asthlp.NewIdent("err")),
+				asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
 				// return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 				asthlp.Return(
 					asthlp.Call(
@@ -332,8 +351,27 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					),
 				),
 			),
-			SetCommaVar,
+			// if _injected.Len() > 2 || bytes.Equal(_injected.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+			asthlp.If(
+				asthlp.Or(
+					asthlp.Great(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(tmpVar, "Len"))), asthlp.IntegerConstant(2).Expr()),
+					asthlp.Call(asthlp.BytesEqualFn, getBytes, asthlp.SliceByteLiteral{'n', 'u', 'l', 'l'}.Expr()),
+				),
+				putCommaFirstIf,
+				// result.WriteString(`"injected":`)
+				asthlp.CallStmt(asthlp.Call(
+					WriteStringFn,
+					asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr(),
+				)),
+				// result.Write(_injected.Bytes())
+				asthlp.CallStmt(asthlp.Call(WriteBytesFn, getBytes)),
+				// wantComma = true
+				SetCommaVar,
+			),
+			// commonBuffer.Put(_injected)
+			asthlp.CallStmt(asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("commonBuffer", "Put")), tmpVar)),
 		},
+		putCommaCustom: true,
 	}
 }
 
@@ -342,6 +380,7 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 	blockWriter.NotZero = asthlp.NotNil(src)
 	if !omitempty {
 		blockWriter.IfZero = []ast.Stmt{
+			putCommaFirstIf,
 			asthlp.CallStmt(asthlp.Call(
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),

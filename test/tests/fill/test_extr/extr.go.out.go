@@ -97,22 +97,32 @@ func (s *External) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.Write([]byte{'{'})
-	if wantComma {
-		result.Write([]byte{','})
-	}
-	result.WriteString(`"test1":`)
-	if err = s.Test01.MarshalTo(result); err != nil {
+	tmptest1 := commonBuffer.Get()
+	if err = s.Test01.MarshalTo(tmptest1); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	wantComma = true
-	if wantComma {
-		result.Write([]byte{','})
+	if tmptest1.Len() > 2 || bytes.Equal(tmptest1.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+		if wantComma {
+			result.Write([]byte{','})
+		}
+		result.WriteString(`"test1":`)
+		result.Write(tmptest1.Bytes())
+		wantComma = true
 	}
-	result.WriteString(`"test2":`)
-	if err = s.Test02.MarshalTo(result); err != nil {
+	commonBuffer.Put(tmptest1)
+	tmptest2 := commonBuffer.Get()
+	if err = s.Test02.MarshalTo(tmptest2); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	wantComma = true
+	if tmptest2.Len() > 2 || bytes.Equal(tmptest2.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+		if wantComma {
+			result.Write([]byte{','})
+		}
+		result.WriteString(`"test2":`)
+		result.Write(tmptest2.Bytes())
+		wantComma = true
+	}
+	commonBuffer.Put(tmptest2)
 	result.Write([]byte{'}'})
 	return err
 }
