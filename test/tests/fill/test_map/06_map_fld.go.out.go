@@ -4,7 +4,6 @@ package test_map
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -348,168 +347,165 @@ func (s *Property) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestMap01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Tags != nil {
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"tags":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Tags {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
-			buf = marshalString(buf[:0], _v)
-			result.Write(buf)
+			writeString(result, _v)
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	} else {
+		wantComma = true
 		result.WriteString(`"tags":null`)
 	}
 	if s.Properties != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"properties":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.Properties {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
-			buf, err = _v.MarshalAppend(buf[:0])
+			err = _v.MarshalTo(result)
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "properties" attribute %q: %w`, _k, err)
+				return fmt.Errorf(`can't marshal "properties" attribute %q: %w`, _k, err)
 			}
-			result.Write(buf)
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.KeyTypedProperties != nil {
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"key_typed_properties":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.KeyTypedProperties {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
-			buf, err = _v.MarshalAppend(buf[:0])
+			err = _v.MarshalTo(result)
 			if err != nil {
-				return nil, fmt.Errorf(`can't marshal "key_typed_properties" attribute %q: %w`, _k, err)
+				return fmt.Errorf(`can't marshal "key_typed_properties" attribute %q: %w`, _k, err)
 			}
-			result.Write(buf)
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	} else {
+		wantComma = true
 		result.WriteString(`"key_typed_properties":null`)
 	}
 	if s.IntegerVal != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"integerVal":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.IntegerVal {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
-			buf = strconv.AppendInt(buf[:0], int64(_v), 10)
-			result.Write(buf)
+			writeInt64(result, int64(_v))
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
 	if s.FloatVal != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"floatVal":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.FloatVal {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
-			buf = strconv.AppendFloat(buf[:0], float64(_v), 'f', -1, 64)
-			result.Write(buf)
+			writeFloat64(result, float64(_v))
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
 	if s.UintVal != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"uintVal":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.UintVal {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			if _v == nil {
-				buf = append(buf[:0], 'n', 'u', 'l', 'l')
+				result.WriteString("null")
 			} else {
-				buf = strconv.AppendUint(buf[:0], uint64(*_v), 10)
+				writeUint64(result, uint64(*_v))
 			}
-			result.Write(buf)
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
 	if s.BoolVal != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"bool":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.BoolVal {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			if _v {
@@ -517,71 +513,112 @@ func (s *TestMap01) MarshalAppend(dst []byte) ([]byte, error) {
 			} else {
 				result.WriteString("false")
 			}
-			result.Write(buf)
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
 	if s.TypedVal != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
+		wantComma = true
 		result.WriteString(`"typed-val":{`)
-		var _filled bool
+		var wantComma bool
 		for _k, _v := range s.TypedVal {
-			if _filled {
-				result.WriteRune(',')
+			if wantComma {
+				result.WriteString(",")
 			}
-			_filled = true
-			result.WriteRune('"')
+			wantComma = true
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
-			buf = strconv.AppendUint(buf[:0], uint64(_v), 10)
-			result.Write(buf)
+			writeUint64(result, uint64(_v))
 		}
-		result.WriteRune('}')
+		result.WriteString("}")
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap01) IsZero() bool {
+	if s.Tags != nil {
+		return false
+	}
+	if s.Properties != nil {
+		return false
+	}
+	if s.KeyTypedProperties != nil {
+		return false
+	}
+	if s.IntegerVal != nil {
+		return false
+	}
+	if s.FloatVal != nil {
+		return false
+	}
+	if s.UintVal != nil {
+		return false
+	}
+	if s.BoolVal != nil {
+		return false
+	}
+	if s.TypedVal != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Property) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *Property) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Property) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
-		buf = marshalString(buf[:0], s.Name)
-		result.Write(buf)
+		writeString(result, s.Name)
+		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Value != "" {
 		result.WriteString(`"value":`)
-		buf = marshalString(buf[:0], s.Value)
-		result.Write(buf)
+		writeString(result, s.Value)
+		wantComma = true
 	} else {
 		result.WriteString(`"value":""`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Property) IsZero() bool {
+	if s.Name != "" {
+		return false
+	}
+	if s.Value != "" {
+		return false
+	}
+	return true
 }

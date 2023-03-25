@@ -9,7 +9,7 @@ import (
 
 func main() {
 	started := time.Now()
-	g := generator.New("./test/struct.go")
+	g := generator.New("./benchmark/data.go")
 	if err := g.Parse(); err != nil {
 		panic(err)
 	}
@@ -18,7 +18,8 @@ func main() {
 	started = time.Now()
 	g.BuildFillers()
 	g.BuildJsoners()
-	g.Print("./test/struct_json.go")
+	g.FixImports()
+	g.Print("./benchmark/data_json.go")
 
 	fmt.Printf("DONE [%v]\n", time.Since(started))
 }

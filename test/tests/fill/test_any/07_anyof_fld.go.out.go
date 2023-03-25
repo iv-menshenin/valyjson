@@ -4,7 +4,6 @@ package test_any
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -146,76 +145,101 @@ func (s *TestAllOfThird) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestAllOfSecond) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Comment != "" {
 		result.WriteString(`"comment":`)
-		buf = marshalString(buf[:0], s.Comment)
-		result.Write(buf)
+		writeString(result, s.Comment)
+		wantComma = true
 	} else {
 		result.WriteString(`"comment":""`)
+		wantComma = true
 	}
 	if s.Level != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"level":`)
-		buf = strconv.AppendInt(buf[:0], s.Level, 10)
-		result.Write(buf)
+		writeInt64(result, s.Level)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestAllOfSecond) IsZero() bool {
+	if s.Comment != "" {
+		return false
+	}
+	if s.Level != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestAllOfThird) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestAllOfThird) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
+	result.WriteString("{")
 	if s.Command != "" {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"command":`)
-		buf = marshalString(buf[:0], s.Command)
-		result.Write(buf)
+		writeString(result, s.Command)
+		wantComma = true
 	}
 	if s.Range != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"range":`)
-		buf = strconv.AppendInt(buf[:0], s.Range, 10)
-		result.Write(buf)
+		writeInt64(result, s.Range)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestAllOfThird) IsZero() bool {
+	if s.Command != "" {
+		return false
+	}
+	if s.Range != 0 {
+		return false
+	}
+	return true
 }

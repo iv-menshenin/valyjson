@@ -184,20 +184,20 @@ type ValueExtractor func(src ast.Expr) []ast.Stmt
 
 func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 	if errExpr == nil {
-		errExpr = asthlp.NewIdent("err")
+		errExpr = asthlp.NewIdent(names.VarNameError)
 	}
 	transitMarshaller := func(src ast.Expr) []ast.Stmt {
 		return []ast.Stmt{
-			// buf, err = v.MarshalAppend(buf[:0])
+			// err = v.MarshalTo(result)
 			asthlp.Assign(
-				asthlp.VarNames{BufVar, asthlp.NewIdent("err")},
+				asthlp.VarNames{asthlp.NewIdent(names.VarNameError)},
 				asthlp.Assignment,
-				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "MarshalAppend")), BufExpr),
+				asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameMarshalTo)), asthlp.NewIdent(names.VarNameWriter)),
 			),
 			//	if err != nil {
-			//		return nil, fmt.Errorf(`can't marshal "name" attribute %q: %w`, k, err)
+			//		return fmt.Errorf(`can't marshal "name" attribute %q: %w`, k, err)
 			//	}
-			asthlp.If(asthlp.NotNil(asthlp.NewIdent("err")), asthlp.Return(asthlp.Nil, errExpr)),
+			asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.Return(errExpr)),
 		}
 	}
 
@@ -219,18 +219,11 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 			return []ast.Stmt{
 				asthlp.IfElse(
 					asthlp.IsNil(src),
-					// buf = append(buf[:0], 'n', 'u', 'l', 'l')
-					asthlp.Block(asthlp.Assign(
-						asthlp.VarNames{BufVar},
-						asthlp.Assignment,
-						asthlp.Call(
-							asthlp.AppendFn, BufExpr,
-							asthlp.RuneConstant('n').Expr(),
-							asthlp.RuneConstant('u').Expr(),
-							asthlp.RuneConstant('l').Expr(),
-							asthlp.RuneConstant('l').Expr(),
-						),
-					)),
+					// result.WriteString("null")
+					asthlp.Block(asthlp.CallStmt(asthlp.Call(
+						WriteStringFn,
+						asthlp.StringConstant("null").Expr(),
+					))),
 					asthlp.Block(stmt...),
 				),
 			}
@@ -245,13 +238,8 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 			return func(src ast.Expr) []ast.Stmt {
 				int64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.Int64)
 				return decorStmt(src, []ast.Stmt{
-					// buf = strconv.AppendInt(buf[:0], int64({src}), 10)
-					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendInt")),
-						BufExpr,                           // buf[:0]
-						int64Expression,                   // int64({src})
-						asthlp.IntegerConstant(10).Expr(), // 10
-					)),
+					// writeInt64(result, int64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteInt64Func, asthlp.NewIdent(names.VarNameWriter), int64Expression)),
 				})
 			}
 
@@ -259,13 +247,8 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 			return func(src ast.Expr) []ast.Stmt {
 				uint64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.UInt64)
 				return decorStmt(src, []ast.Stmt{
-					// buf = strconv.AppendUint(buf[:0], uint64({src}), 10)
-					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendUint")),
-						BufExpr,                           // buf[:0]
-						uint64Expression,                  // uint64({src})
-						asthlp.IntegerConstant(10).Expr(), // 10
-					)),
+					// writeUint64(result, uint64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, asthlp.NewIdent(names.VarNameWriter), uint64Expression)),
 				})
 			}
 
@@ -273,15 +256,8 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 			return func(src ast.Expr) []ast.Stmt {
 				float64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.Float64)
 				return decorStmt(src, []ast.Stmt{
-					// buf = strconv.AppendFloat(buf[:0], float64({src}), 'f', -1, 64)
-					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector("strconv", "AppendFloat")),
-						BufExpr,                           // buf[:0]
-						float64Expression,                 // float64({src})
-						asthlp.RuneConstant('f').Expr(),   // 'f'
-						asthlp.IntegerConstant(-1).Expr(), // -1
-						asthlp.IntegerConstant(64).Expr(), // 64
-					)),
+					// writeFloat64(result, float64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), float64Expression)),
 				})
 			}
 
@@ -306,11 +282,11 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 
 		case "string":
 			return func(src ast.Expr) []ast.Stmt {
-				// buf = marshalString(buf[:0], _v)
+				// writeString(result, _v)
 				return decorStmt(src, []ast.Stmt{
-					asthlp.Assign(asthlp.VarNames{BufVar}, asthlp.Assignment, asthlp.Call(
-						names.MarshalStringFunc,
-						BufExpr, decorSrc(src),
+					asthlp.CallStmt(asthlp.Call(
+						names.WriteStringFunc,
+						asthlp.NewIdent(names.VarNameWriter), decorSrc(src),
 					)),
 				})
 			}
@@ -323,11 +299,9 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 		if tt.Sel.Name == "Time" {
 			return func(src ast.Expr) []ast.Stmt {
 				return decorStmt(src, []ast.Stmt{
-					// buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
-					asthlp.Assign(
-						asthlp.VarNames{BufVar},
-						asthlp.Assignment,
-						asthlp.Call(names.MarshalTimeFunc, BufExpr, src, names.TimeDefaultLayout),
+					// writeTime(result, s.DateBegin, time.RFC3339Nano)
+					asthlp.CallStmt(
+						asthlp.Call(names.WriteTimeFunc, asthlp.NewIdent(names.VarNameWriter), src, names.TimeDefaultLayout),
 					),
 				})
 			}

@@ -28,6 +28,7 @@ type (
 		ValidatorFunc() ast.Decl
 		MarshalFunc() ast.Decl
 		AppendJsonFunc() ast.Decl
+		ZeroFunc() ast.Decl
 	}
 )
 
@@ -67,6 +68,9 @@ func (g *Gen) BuildJsoners() {
 			g.result.Decls = append(g.result.Decls, marshalFn)
 		}
 		if appendFn := structDecl.AppendJsonFunc(); appendFn != nil {
+			g.result.Decls = append(g.result.Decls, appendFn)
+		}
+		if appendFn := structDecl.ZeroFunc(); appendFn != nil {
 			g.result.Decls = append(g.result.Decls, appendFn)
 		}
 	}
@@ -120,7 +124,15 @@ func extractTags(comment *ast.CommentGroup) []string {
 
 func (v *visitor) getNormalized() []renderer {
 	var result []renderer
+	var declProcessed taggedDecl
+	defer func() {
+		r := recover()
+		if r != nil {
+			panic(fmt.Errorf("processing error in file %q, processed structure %q raised error: %+v", v.g.fileName, declProcessed.spec.Name.Name, r))
+		}
+	}()
 	for _, decl := range v.decls {
+		declProcessed = decl
 		if len(decl.tags) == 0 {
 			// only tagged structures
 			continue
@@ -170,7 +182,7 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 			tag = tags.Parse(fld.Tag.Value)
 		} else {
 			if len(fld.Names) > 0 {
-				panic("all fields should have tags")
+				panic(fmt.Errorf("all fields should have tags, but %q haven't", fld.Names[0].Name))
 			}
 		}
 		if v.over != nil {

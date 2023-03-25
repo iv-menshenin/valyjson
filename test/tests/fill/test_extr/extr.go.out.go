@@ -81,39 +81,51 @@ func (s *External) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *External) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *External) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *External) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
-	if buf, err = s.Test01.MarshalAppend(buf[:0]); err != nil {
-		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	} else {
-		result.WriteString(`"test1":`)
-		result.Write(buf)
+	result.WriteString(`"test1":`)
+	if err = s.Test01.MarshalTo(result); err != nil {
+		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
-	}
-	if buf, err = s.Test02.MarshalAppend(buf[:0]); err != nil {
-		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	} else {
+	wantComma = true
+	if !s.Test02.IsZero() {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"test2":`)
-		result.Write(buf)
+		if err = s.Test02.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		}
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s External) IsZero() bool {
+	if s.Test01.IsZero() {
+		return false
+	}
+	if s.Test02.IsZero() {
+		return false
+	}
+	return true
 }

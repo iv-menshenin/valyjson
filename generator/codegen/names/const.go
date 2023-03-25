@@ -10,30 +10,47 @@ const (
 	VarNameReceiver          = "s"
 	VarNameListOfArrayValues = "listA"
 	VarNameListElem          = "listElem"
-	VarNameBuf               = "buf"
 	VarPrefixPool            = "jsonParser"
 	VarNameData              = "data"
+
+	VarNameWriter = "result"
 
 	MethodNameFill      = "FillFromJSON"
 	MethodNameUnmarshal = "UnmarshalJSON"
 	MethodNameMarshal   = "MarshalJSON"
 	MethodNameValidate  = "validate"
-	MethodNameAppend    = "MarshalAppend"
+	MethodNameMarshalTo = "MarshalTo"
+	MethodNameZero      = "IsZero"
 
-	MarshalTime   = "marshalTime"
-	MarshalString = "marshalString"
+	WriteString  = "writeString"
+	WriteTime    = "writeTime"
+	WriteInt64   = "writeInt64"
+	WriteUint64  = "writeUint64"
+	WriteFloat64 = "writeFloat64"
 )
 
 var (
 	FastJsonValue      = ast.SimpleSelector("fastjson", "Value")
 	FastJsonParserPool = ast.SimpleSelector("fastjson", "ParserPool")
 
-	MarshalTimeFunc = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(MarshalTime),
+	WriteTimeFunc = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(WriteTime),
 		MinimumNumberOfArguments: 3,
 	}
-	MarshalStringFunc = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(MarshalString),
+	WriteInt64Func = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(WriteInt64),
+		MinimumNumberOfArguments: 2,
+	}
+	WriteUint64Func = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(WriteUint64),
+		MinimumNumberOfArguments: 2,
+	}
+	WriteFloat64Func = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(WriteFloat64),
+		MinimumNumberOfArguments: 2,
+	}
+	WriteStringFunc = ast.CallFunctionDescriber{
+		FunctionName:             ast.NewIdent(WriteString),
 		MinimumNumberOfArguments: 2,
 	}
 

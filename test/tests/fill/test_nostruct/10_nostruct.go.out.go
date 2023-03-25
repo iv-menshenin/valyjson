@@ -2,9 +2,7 @@
 package test_nostruct
 
 import (
-	"bytes"
 	"fmt"
-	"strconv"
 	"time"
 	"unsafe"
 
@@ -234,201 +232,230 @@ func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap10) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestMap10) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestMap10) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
+	result.WriteString("{")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
-		result.WriteRune('"')
+		wantComma = true
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
-		buf = strconv.AppendInt(buf[:0], int64(_v), 10)
-		result.Write(buf)
+		writeInt64(result, int64(_v))
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap10) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestMap11) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestMap11) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
+	result.WriteString("{")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
-		result.WriteRune('"')
+		wantComma = true
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
-		buf, err = _v.MarshalAppend(buf[:0])
+		err = _v.MarshalTo(result)
 		if err != nil {
-			return nil, fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
+			return fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
 		}
-		result.Write(buf)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap11) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestMap11Ref) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestMap11Ref) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
+	result.WriteString("{")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
-		result.WriteRune('"')
+		wantComma = true
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
-		buf, err = _v.MarshalAppend(buf[:0])
+		err = _v.MarshalTo(result)
 		if err != nil {
-			return nil, fmt.Errorf(`can't marshal "TestMap11Ref" attribute %q: %w`, _k, err)
+			return fmt.Errorf(`can't marshal "TestMap11Ref" attribute %q: %w`, _k, err)
 		}
-		result.Write(buf)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap11Ref) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestSlice12) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice12) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('[')
+	result.WriteString("[")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
+		wantComma = true
 		_k = _k
-		buf = strconv.AppendInt(buf[:0], int64(_v), 10)
-		result.Write(buf)
+		writeInt64(result, int64(_v))
 	}
-	result.WriteRune(']')
-	return result.Bytes(), err
+	result.WriteString("]")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice12) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice13) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestSlice13) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice13) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('[')
+	result.WriteString("[")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
+		wantComma = true
 		_k = _k
-		buf, err = _v.MarshalAppend(buf[:0])
+		err = _v.MarshalTo(result)
 		if err != nil {
-			return nil, fmt.Errorf(`can't marshal "TestSlice13" value at position %d: %w`, _k, err)
+			return fmt.Errorf(`can't marshal "TestSlice13" value at position %d: %w`, _k, err)
 		}
-		result.Write(buf)
 	}
-	result.WriteRune(']')
-	return result.Bytes(), err
+	result.WriteString("]")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice13) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestSlice14) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice14) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err     error
-		_filled bool
-		buf     = make([]byte, 0, 128)
-		result  = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('[')
+	result.WriteString("[")
 	for _k, _v := range *s {
-		if _filled {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		_filled = true
+		wantComma = true
 		_k = _k
-		buf = marshalTime(buf[:0], _v, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, _v, time.RFC3339Nano)
 	}
-	result.WriteRune(']')
-	return result.Bytes(), err
+	result.WriteString("]")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice14) IsZero() bool {
+	for _, _v := range s {
+		if _v.IsZero() {
+			return false
+		}
+	}
+	return true
 }

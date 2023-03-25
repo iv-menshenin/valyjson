@@ -36,17 +36,16 @@ func (t *Transitive) MarshalFunc() ast.Decl {
 }
 
 func (t *Transitive) AppendJsonFunc() ast.Decl {
-	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameAppend))
-	fn.Comments("// " + names.MethodNameAppend + " serializes all fields of the structure using a buffer.")
+	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo))
+	fn.Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
 	fn.Params(asthlp.Field(names.VarNameData, nil, asthlp.ArrayType(asthlp.Byte)))
 	fn.Results(
-		asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
 		asthlp.Field("", nil, asthlp.ErrorType),
 	)
 	fn.AppendStmt(asthlp.Return(
 		asthlp.Call(
-			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameAppend)),
+			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameMarshalTo)),
 			asthlp.NewIdent(names.VarNameData),
 		),
 	))
@@ -76,5 +75,18 @@ func (t *Transitive) FillerFunc() ast.Decl {
 			asthlp.NewIdent(names.VarNameObjPath),
 		),
 	))
+	return fn.Decl()
+}
+
+func (t *Transitive) ZeroFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameZero)).
+		Comments("// " + names.MethodNameZero + " shows whether the object is an empty value.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(t.name))).
+		Results(asthlp.Field("", nil, asthlp.Bool))
+
+	// return s.Zero()
+	fn.AppendStmt(
+		asthlp.Return(asthlp.Equal(asthlp.Call(asthlp.LengthFn, asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran)), asthlp.Zero)),
+	)
 	return fn.Decl()
 }

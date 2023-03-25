@@ -2,10 +2,9 @@ package field
 
 import (
 	"fmt"
+	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
-
-	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"

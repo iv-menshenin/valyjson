@@ -5,11 +5,12 @@ import "time"
 // TestInh01 tests inheritance
 //json:strict
 type TestInh01 struct {
-	TestInh02 `json:"injected,omitempty"`
-	TestInh03 `json:",inline"`
-	DateBegin time.Time  `json:"date_begin"`
-	Nested1   TestInh03  `json:"nested1"`
-	Nested2   *TestInh03 `json:"nested2"`
+	BreakFirst int `json:"breakFirst,omitempty"`
+	TestInh02  `json:"injected,omitempty"`
+	TestInh03  `json:",inline"`
+	DateBegin  time.Time  `json:"date_begin"`
+	Nested1    TestInh03  `json:"nested1"`
+	Nested2    *TestInh03 `json:"nested2"`
 }
 
 // TestInh02 tests inheritance

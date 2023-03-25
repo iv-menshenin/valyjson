@@ -127,70 +127,93 @@ func (s *TestBool01) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestBool01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestBool01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Bool {
-		buf = buf[:0]
 		result.WriteString(`"bl":true`)
+		wantComma = true
 	} else {
 		result.WriteString(`"bl":false`)
+		wantComma = true
 	}
 	if s.BlMaybe {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
 		result.WriteString(`"mb":true`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.RefBool != nil {
-		buf = buf[:0]
 		if *s.RefBool {
 			result.WriteString(`"refBool":true`)
 		} else {
 			result.WriteString(`"refBool":false`)
 		}
+		wantComma = true
 	} else {
 		result.WriteString(`"refBool":null`)
 	}
 	if s.RefMaybe != nil {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
 		if *s.RefMaybe {
 			result.WriteString(`"refMaybe":true`)
 		} else {
 			result.WriteString(`"refMaybe":false`)
 		}
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.DefBool {
-		buf = buf[:0]
 		result.WriteString(`"defBool":true`)
+		wantComma = true
 	} else {
 		result.WriteString(`"defBool":false`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestBool01) IsZero() bool {
+	if s.Bool != false {
+		return false
+	}
+	if s.BlMaybe != false {
+		return false
+	}
+	if s.RefBool != nil {
+		return false
+	}
+	if s.RefMaybe != nil {
+		return false
+	}
+	if s.DefBool != false {
+		return false
+	}
+	return true
 }

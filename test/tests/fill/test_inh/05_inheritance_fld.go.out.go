@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strconv"
 	"time"
 
 	"github.com/valyala/fastjson"
@@ -31,6 +30,14 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
+	}
+	if _breakFirst := v.Get("breakFirst"); _breakFirst != nil {
+		var valBreakFirst int
+		valBreakFirst, err = _breakFirst.Int()
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.breakFirst' value: %w", objPath, err)
+		}
+		s.BreakFirst = valBreakFirst
 	}
 	if _testInh02 := v.Get("injected"); _testInh02 != nil {
 		var valTestInh02 TestInh02
@@ -96,49 +103,56 @@ func (s *TestInh01) validate(v *fastjson.Value, objPath string) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [6]int
+	var checkFields [7]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
 		}
-		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
+		if bytes.Equal(key, []byte{'b', 'r', 'e', 'a', 'k', 'F', 'i', 'r', 's', 't'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
+		if bytes.Equal(key, []byte{'i', 'n', 'j', 'e', 'c', 't', 'e', 'd'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
+		if bytes.Equal(key, []byte{'i', 'n', 't', '_', '1', '6'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
+		if bytes.Equal(key, []byte{'r', 'a', 'n', 'd', 'o', 'm'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
+		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
 		}
-		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
+		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '1'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'n', 'e', 's', 't', 'e', 'd', '2'}) {
+			checkFields[6]++
+			if checkFields[6] > 1 {
 				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
 			}
 			return
@@ -455,247 +469,335 @@ func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestInh01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestInh01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
-	}
-	if buf, err = s.TestInh02.MarshalAppend(buf[:0]); err != nil {
-		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	} else {
-		if len(buf) > 2 {
-			result.WriteString(`"injected":`)
-			result.Write(buf)
+	result.WriteString("{")
+	if s.BreakFirst != 0 {
+		if wantComma {
+			result.WriteString(",")
 		}
+		result.WriteString(`"breakFirst":`)
+		writeInt64(result, int64(s.BreakFirst))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if !s.TestInh02.IsZero() {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"injected":`)
+		if err = s.TestInh02.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		}
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int16), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Int16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Random), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Random))
+		wantComma = true
 	} else {
 		result.WriteString(`"random":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
-		buf = marshalTime(buf[:0], s.DateBegin, time.RFC3339Nano)
-		result.Write(buf)
+		writeTime(result, s.DateBegin, time.RFC3339Nano)
+		wantComma = true
 	} else {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
-	if buf, err = s.Nested1.MarshalAppend(buf[:0]); err != nil {
-		return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	} else {
-		result.WriteString(`"nested1":`)
-		result.Write(buf)
+	result.WriteString(`"nested1":`)
+	if err = s.Nested1.MarshalTo(result); err != nil {
+		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	wantComma = true
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Nested2 != nil {
-		if buf, err = s.Nested2.MarshalAppend(buf[:0]); err != nil {
-			return nil, fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-		} else {
-			result.WriteString(`"nested2":`)
-			result.Write(buf)
+		result.WriteString(`"nested2":`)
+		if err = s.Nested2.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
+		wantComma = true
 	} else {
 		result.WriteString(`"nested2":null`)
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh01) IsZero() bool {
+	if s.BreakFirst != 0 {
+		return false
+	}
+	if s.TestInh02.IsZero() {
+		return false
+	}
+	if s.Int16 != 0 {
+		return false
+	}
+	if s.Random != 0 {
+		return false
+	}
+	if s.DateBegin.IsZero() {
+		return false
+	}
+	if s.Nested1.IsZero() {
+		return false
+	}
+	if s.Nested2 != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh02) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestInh02) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestInh02) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
+	result.WriteString("{")
 	if s.Int32 != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"int_32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int32), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Int32))
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh02) IsZero() bool {
+	if s.Int32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh03) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestInh03) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestInh03) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int16), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Int16))
+		wantComma = true
 	} else {
 		result.WriteString(`"int_16":0`)
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Random), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Random))
+		wantComma = true
 	} else {
 		result.WriteString(`"random":0`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh03) IsZero() bool {
+	if s.Int16 != 0 {
+		return false
+	}
+	if s.Random != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested01) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestNested01) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestNested01) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested01) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested02) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestNested02) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestNested02) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested02) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested03) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestNested03) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestNested03) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Field32), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Field32))
+		wantComma = true
 	} else {
 		result.WriteString(`"field_32":0`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested03) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }

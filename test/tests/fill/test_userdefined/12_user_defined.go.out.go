@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"strconv"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -152,74 +151,101 @@ func (s *TestUserDefined) validate(v *fastjson.Value, objPath string) error {
 
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestUserDefined) MarshalJSON() ([]byte, error) {
-	var buf [512]byte
-	return s.MarshalAppend(buf[:0])
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
 }
 
-// MarshalAppend serializes all fields of the structure using a buffer.
-func (s *TestUserDefined) MarshalAppend(dst []byte) ([]byte, error) {
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestUserDefined) MarshalTo(result Writer) error {
 	if s == nil {
-		return []byte("null"), nil
+		result.WriteString("null")
+		return nil
 	}
 	var (
-		err    error
-		buf    = make([]byte, 0, 128)
-		result = bytes.NewBuffer(dst)
+		err       error
+		wantComma bool
 	)
-	result.WriteRune('{')
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Int32 != 0 {
 		result.WriteString(`"f_int32":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int32), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Int32))
+		wantComma = true
 	} else {
 		result.WriteString(`"f_int32":0`)
+		wantComma = true
 	}
 	if s.Int64 != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"f_int64":`)
-		buf = strconv.AppendInt(buf[:0], int64(s.Int64), 10)
-		result.Write(buf)
+		writeInt64(result, int64(s.Int64))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.Float32 != 0 {
 		result.WriteString(`"f_float32":`)
-		buf = strconv.AppendFloat(buf[:0], float64(s.Float32), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(s.Float32))
+		wantComma = true
 	} else {
 		result.WriteString(`"f_float32":0`)
+		wantComma = true
 	}
 	if s.Float64 != 0 {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
 		result.WriteString(`"f_float64":`)
-		buf = strconv.AppendFloat(buf[:0], float64(s.Float64), 'f', -1, 64)
-		result.Write(buf)
+		writeFloat64(result, float64(s.Float64))
+		wantComma = true
 	}
-	if result.Len() > 1 {
-		result.WriteRune(',')
+	if wantComma {
+		result.WriteString(",")
 	}
 	if s.String != "" {
 		result.WriteString(`"f_string":`)
-		buf = marshalString(buf[:0], string(s.String))
-		result.Write(buf)
+		writeString(result, string(s.String))
+		wantComma = true
 	} else {
 		result.WriteString(`"f_string":""`)
+		wantComma = true
 	}
 	if s.Bool {
-		if result.Len() > 1 {
-			result.WriteRune(',')
+		if wantComma {
+			result.WriteString(",")
 		}
-		buf = buf[:0]
 		result.WriteString(`"f_bool":true`)
+		wantComma = true
 	}
-	result.WriteRune('}')
-	return result.Bytes(), err
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestUserDefined) IsZero() bool {
+	if s.Int32 != 0 {
+		return false
+	}
+	if s.Int64 != 0 {
+		return false
+	}
+	if s.Float32 != 0 {
+		return false
+	}
+	if s.Float64 != 0 {
+		return false
+	}
+	if s.String != "" {
+		return false
+	}
+	if s.Bool != false {
+		return false
+	}
+	return true
 }

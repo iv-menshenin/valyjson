@@ -124,6 +124,28 @@ func Test_JsonTestInh01(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, `{"int_32":1112}`, string(b))
 	})
+	t.Run("omit-injected-check-comma", func(t *testing.T) {
+		var nested = TestInh03{
+			Int16:  2222,
+			Random: 44443,
+		}
+		var test = TestInh01{
+			BreakFirst: 1230000,
+			TestInh03: TestInh03{
+				Int16:  16003,
+				Random: 45222,
+			},
+			DateBegin: time.Date(2001, time.December, 31, 12, 11, 10, 0, time.UTC),
+			Nested1: TestInh03{
+				Int16:  4120,
+				Random: 9889,
+			},
+			Nested2: &nested,
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"breakFirst":1230000,"int_16":16003,"random":45222,"date_begin":"2001-12-31T12:11:10Z","nested1":{"int_16":4120,"random":9889},"nested2":{"int_16":2222,"random":44443}}`, string(b))
+	})
 	t.Run("omit-injected", func(t *testing.T) {
 		var nested = TestInh03{
 			Int16:  2222,
