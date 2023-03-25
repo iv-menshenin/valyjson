@@ -212,7 +212,7 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("[]external", func(t *testing.T) {
-		const expected = `[{"test1":{"comment": "foo", "level": 12}, "test2":{"defRef": null,"field":"","fieldRef":null}}, {"test1":{"comment": "bar", "level": 13}, "test2":{"defRef": null,"field":"","fieldRef":null}}]`
+		const expected = `[{"test1":{"comment": "foo", "level": 12}}, {"test1":{"comment": "bar", "level": 13}}]`
 		var test = TestSlice13{
 			{Test01: test_any.TestAllOfSecond{Comment: "foo", Level: 12}},
 			{Test01: test_any.TestAllOfSecond{Comment: "bar", Level: 13}},

@@ -18,6 +18,7 @@ func main() {
 	started = time.Now()
 	g.BuildFillers()
 	g.BuildJsoners()
+	g.FixImports()
 	g.Print("./benchmark/data_json.go")
 
 	fmt.Printf("DONE [%v]\n", time.Since(started))

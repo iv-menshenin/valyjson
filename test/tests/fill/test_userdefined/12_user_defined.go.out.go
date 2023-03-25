@@ -166,9 +166,9 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Int32 != 0 {
 		result.WriteString(`"f_int32":`)
@@ -180,14 +180,14 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 	}
 	if s.Int64 != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"f_int64":`)
 		writeInt64(result, int64(s.Int64))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Float32 != 0 {
 		result.WriteString(`"f_float32":`)
@@ -199,14 +199,14 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 	}
 	if s.Float64 != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"f_float64":`)
 		writeFloat64(result, float64(s.Float64))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.String != "" {
 		result.WriteString(`"f_string":`)
@@ -218,11 +218,34 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 	}
 	if s.Bool {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"f_bool":true`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestUserDefined) IsZero() bool {
+	if s.Int32 != 0 {
+		return false
+	}
+	if s.Int64 != 0 {
+		return false
+	}
+	if s.Float32 != 0 {
+		return false
+	}
+	if s.Float64 != 0 {
+		return false
+	}
+	if s.String != "" {
+		return false
+	}
+	if s.Bool != false {
+		return false
+	}
+	return true
 }

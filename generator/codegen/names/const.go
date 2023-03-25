@@ -20,6 +20,7 @@ const (
 	MethodNameMarshal   = "MarshalJSON"
 	MethodNameValidate  = "validate"
 	MethodNameMarshalTo = "MarshalTo"
+	MethodNameZero      = "IsZero"
 
 	WriteString  = "writeString"
 	WriteTime    = "writeTime"

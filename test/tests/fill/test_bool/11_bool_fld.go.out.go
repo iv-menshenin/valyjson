@@ -142,9 +142,9 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Bool {
 		result.WriteString(`"bl":true`)
@@ -155,13 +155,13 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 	}
 	if s.BlMaybe {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"mb":true`)
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefBool != nil {
 		if *s.RefBool {
@@ -175,7 +175,7 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 	}
 	if s.RefMaybe != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		if *s.RefMaybe {
 			result.WriteString(`"refMaybe":true`)
@@ -185,7 +185,7 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.DefBool {
 		result.WriteString(`"defBool":true`)
@@ -194,6 +194,26 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		result.WriteString(`"defBool":false`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestBool01) IsZero() bool {
+	if s.Bool != false {
+		return false
+	}
+	if s.BlMaybe != false {
+		return false
+	}
+	if s.RefBool != nil {
+		return false
+	}
+	if s.RefMaybe != nil {
+		return false
+	}
+	if s.DefBool != false {
+		return false
+	}
+	return true
 }

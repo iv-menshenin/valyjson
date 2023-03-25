@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"go/ast"
 
 	asthlp "github.com/iv-menshenin/go-ast"
@@ -264,4 +265,55 @@ func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 		result = append(result, factory.MarshalStatements(name.Name)...)
 	}
 	return result
+}
+
+func (s *Struct) ZeroFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameZero)).
+		Comments("// " + names.MethodNameZero + " shows whether the object is an empty value.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(s.name))).
+		Results(asthlp.Field("", nil, asthlp.Bool))
+
+	var isArrayContains bool
+	for _, fld := range s.spec.Fields.List {
+		if a, ok := fld.Type.(*ast.ArrayType); ok {
+			if isArrayContains = isArrayContains || a.Len != nil; isArrayContains {
+				break
+			}
+		}
+	}
+	if isArrayContains {
+		fn.AppendStmt(asthlp.Return(asthlp.False))
+		return fn.Decl()
+	}
+
+	for _, fld := range s.spec.Fields.List {
+		zero := helpers.ZeroValueOfT(fld.Type)
+		for _, name := range fld.Names {
+			var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), names.MethodNameZero)))
+			if zero != nil {
+				isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), zero)
+			}
+			fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+		}
+		if len(fld.Names) == 0 {
+			switch t := fld.Type.(type) {
+
+			case *ast.Ident:
+				var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), names.MethodNameZero)))
+				if zero != nil {
+					isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), zero)
+				}
+				fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+
+			case *ast.SelectorExpr:
+				var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), names.MethodNameZero)))
+				if zero != nil {
+					isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), helpers.ZeroValueOfT(fld.Type))
+				}
+				fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+			}
+		}
+	}
+	fn.AppendStmt(asthlp.Return(asthlp.True))
+	return fn.Decl()
 }

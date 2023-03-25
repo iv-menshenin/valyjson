@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -97,7 +98,8 @@ func StringFromType(t ast.Expr, val string) string {
 	}
 }
 
-// fmt.Errorf("{format}", {attrs[0]}, {attrs[1]}, ..., {attrs[n]})
+// FmtError produces an error constructor
+//	fmt.Errorf("{format}", {attrs[0]}, {attrs[1]}, ..., {attrs[n]})
 func FmtError(format string, attrs ...ast.Expr) ast.Expr {
 	var fmtAttrs []ast.Expr
 	fmtAttrs = append(fmtAttrs, &ast.BasicLit{
@@ -112,4 +114,42 @@ func FmtError(format string, attrs ...ast.Expr) ast.Expr {
 		},
 		Args: fmtAttrs,
 	}
+}
+
+func ZeroValueOfT(x ast.Expr) ast.Expr {
+	switch t := x.(type) {
+
+	case *ast.Ident:
+		switch t.Name {
+
+		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
+			return asthlp.Zero
+
+		case "string":
+			return asthlp.EmptyString
+
+		case "rune":
+			return asthlp.RuneConstant(0).Expr()
+
+		case "bool":
+			return asthlp.False
+
+		default:
+			if t.Obj != nil {
+				if e, ok := t.Obj.Decl.(*ast.TypeSpec); ok {
+					return ZeroValueOfT(e.Type)
+				}
+			}
+		}
+
+	case *ast.StarExpr, *ast.MapType:
+		return asthlp.Nil
+
+	case *ast.ArrayType:
+		if t.Len == nil {
+			return asthlp.Nil
+		}
+		return nil // FIXME can't check, always nonzero
+	}
+	return nil
 }

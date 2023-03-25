@@ -77,3 +77,16 @@ func (t *Transitive) FillerFunc() ast.Decl {
 	))
 	return fn.Decl()
 }
+
+func (t *Transitive) ZeroFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameZero)).
+		Comments("// " + names.MethodNameZero + " shows whether the object is an empty value.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(t.name))).
+		Results(asthlp.Field("", nil, asthlp.Bool))
+
+	// return s.Zero()
+	fn.AppendStmt(
+		asthlp.Return(asthlp.Equal(asthlp.Call(asthlp.LengthFn, asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran)), asthlp.Zero)),
+	)
+	return fn.Decl()
+}

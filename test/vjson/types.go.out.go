@@ -616,16 +616,16 @@ func (s *Person) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *Person) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
@@ -636,7 +636,7 @@ func (s *Person) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
@@ -648,7 +648,7 @@ func (s *Person) MarshalTo(result Writer) error {
 	}
 	if s.Middle != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"middle":`)
 		writeString(result, *s.Middle)
@@ -656,14 +656,14 @@ func (s *Person) MarshalTo(result Writer) error {
 	}
 	if s.DOB != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"dob":`)
 		writeTime(result, *s.DOB, time.RFC3339Nano)
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Passport != nil {
 		result.WriteString(`"passport":`)
@@ -675,17 +675,18 @@ func (s *Person) MarshalTo(result Writer) error {
 		result.WriteString(`"passport":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Tables != nil {
+		wantComma = true
 		result.WriteString(`"tables":{`)
 		var wantComma bool
 		for _k, _v := range s.Tables {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
 			err = _v.MarshalTo(result)
@@ -693,12 +694,36 @@ func (s *Person) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "tables" attribute %q: %w`, _k, err)
 			}
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	} else {
+		wantComma = true
 		result.WriteString(`"tables":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Person) IsZero() bool {
+	if s.Name != "" {
+		return false
+	}
+	if s.Surname != "" {
+		return false
+	}
+	if s.Middle != nil {
+		return false
+	}
+	if s.DOB != nil {
+		return false
+	}
+	if s.Passport != nil {
+		return false
+	}
+	if s.Tables != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -711,16 +736,16 @@ func (s *Passport) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *Passport) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Number != "" {
 		result.WriteString(`"number":`)
@@ -731,7 +756,7 @@ func (s *Passport) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if !s.DateDoc.IsZero() {
 		result.WriteString(`"dateDoc":`)
@@ -741,8 +766,19 @@ func (s *Passport) MarshalTo(result Writer) error {
 		result.WriteString(`"dateDoc":"0000-00-00T00:00:00Z"`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Passport) IsZero() bool {
+	if s.Number != "" {
+		return false
+	}
+	if s.DateDoc.IsZero() {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -755,16 +791,16 @@ func (s *TableOf) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TableOf) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.TableName != "" {
 		result.WriteString(`"tableName":`)
@@ -776,13 +812,13 @@ func (s *TableOf) MarshalTo(result Writer) error {
 	}
 	if s.Tables != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"tables":[`)
 		var wantComma bool
 		for _k, _v := range s.Tables {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
 			_k = _k
@@ -791,10 +827,21 @@ func (s *TableOf) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "tables" item at position %d: %w`, _k, err)
 			}
 		}
-		result.Write([]byte{']'})
+		result.WriteString("]")
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TableOf) IsZero() bool {
+	if s.TableName != "" {
+		return false
+	}
+	if s.Tables != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -807,16 +854,16 @@ func (s *Table) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *Table) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Counter != 0 {
 		result.WriteString(`"counter":`)
@@ -828,22 +875,22 @@ func (s *Table) MarshalTo(result Writer) error {
 	}
 	if s.Assessments != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"assessments":[`)
 		var wantComma bool
 		for _k, _v := range s.Assessments {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
 			_k = _k
 			writeInt64(result, int64(_v))
 		}
-		result.Write([]byte{']'})
+		result.WriteString("]")
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if !s.Time.IsZero() {
 		result.WriteString(`"time":`)
@@ -854,7 +901,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Avg != 0 {
 		result.WriteString(`"avg":`)
@@ -865,14 +912,14 @@ func (s *Table) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Tags != nil {
 		result.WriteString(`"tags":[`)
 		var wantComma bool
 		for _k, _v := range s.Tags {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
 			_k = _k
@@ -881,12 +928,32 @@ func (s *Table) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "tags" item at position %d: %w`, _k, err)
 			}
 		}
-		result.Write([]byte{']'})
+		result.WriteString("]")
 	} else {
 		result.WriteString(`"tags":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Table) IsZero() bool {
+	if s.Counter != 0 {
+		return false
+	}
+	if s.Assessments != nil {
+		return false
+	}
+	if s.Time.IsZero() {
+		return false
+	}
+	if s.Avg != 0 {
+		return false
+	}
+	if s.Tags != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -899,16 +966,16 @@ func (s *Tag) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *Tag) MarshalTo(result Writer) error {
 	if s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.TagName != "" {
 		result.WriteString(`"tagName":`)
@@ -919,7 +986,7 @@ func (s *Tag) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.TagValue != "" {
 		result.WriteString(`"tagValue":`)
@@ -929,8 +996,19 @@ func (s *Tag) MarshalTo(result Writer) error {
 		result.WriteString(`"tagValue":""`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Tag) IsZero() bool {
+	if s.TagName != "" {
+		return false
+	}
+	if s.TagValue != "" {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -943,20 +1021,20 @@ func (s *MapTable) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *MapTable) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
-		result.Write([]byte{'"'})
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
 		err = _v.MarshalTo(result)
@@ -964,8 +1042,13 @@ func (s *MapTable) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "MapTable" attribute %q: %w`, _k, err)
 		}
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s MapTable) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -978,24 +1061,29 @@ func (s *MapInt64) MarshalJSON() ([]byte, error) {
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *MapInt64) MarshalTo(result Writer) error {
 	if s == nil || *s == nil {
-		writeString(result, "null")
+		result.WriteString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
-		result.Write([]byte{'"'})
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
 		writeInt64(result, int64(_v))
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s MapInt64) IsZero() bool {
+	return len(s) == 0
 }

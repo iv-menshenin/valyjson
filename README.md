@@ -56,12 +56,12 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 
 
 
-| lib      | json size | ns/op  |     MB/s |     B/op | allocs/op |
-|:---------|:----------|--------|---------:|---------:|----------:|
-| valyjson | large     | 320148 |  1382.67 |  2621070 |      1009 |
-| valyjson | regular   | 8370   |   1556.1 |    60832 |        23 |
-| valyjson | small     | 21.86  |   3705.3 |        0 |         0 |
-|          |           |        |          |          |           |
-| easyjson | large     | 91492  |   4890.1 |   464261 |        30 |
-| easyjson | regular   | 1792   |   7266.8 |    10283 |         9 |
-| easyjson | small     | 33.44  |   2421.9 |      128 |         1 |
+| lib      | json size | ns/op  |   MB/s |   B/op | allocs/op |
+|:---------|:----------|--------|-------:|-------:|----------:|
+| valyjson | large     | 274990 | 1604.6 | 927003 |        22 |
+| valyjson | regular   | 8419   | 1547.0 |  58723 |         4 |
+| valyjson | small     | 3539   |   22.4 |  33015 |         4 |
+|          |           |        |        |        |           |
+| easyjson | large     | 108981 | 4105.4 | 464261 |        28 |
+| easyjson | regular   | 1792   | 7266.8 |  10283 |         9 |
+| easyjson | small     | 33.44  | 2421.9 |    128 |         1 |

@@ -1,12 +1,15 @@
 // Code generated [github.com/iv-menshenin/valyjson]; DO NOT EDIT.
-package benchmark // jsonParserSearchMetadata used for pooling Parsers for SearchMetadata JSONs.
+package benchmark
+
 import (
 	"bytes"
 	"fmt"
-	"github.com/valyala/fastjson"
 	"unsafe"
+
+	"github.com/valyala/fastjson"
 )
 
+// jsonParserSearchMetadata used for pooling Parsers for SearchMetadata JSONs.
 var jsonParserSearchMetadata fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
@@ -1976,6 +1979,38 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	return err
 }
 
+// IsZero shows whether the object is an empty value.
+func (s SearchMetadata) IsZero() bool {
+	if s.CompletedIn != 0 {
+		return false
+	}
+	if s.Count != 0 {
+		return false
+	}
+	if s.MaxID != 0 {
+		return false
+	}
+	if s.MaxIDStr != "" {
+		return false
+	}
+	if s.NextResults != "" {
+		return false
+	}
+	if s.Query != "" {
+		return false
+	}
+	if s.RefreshURL != "" {
+		return false
+	}
+	if s.SinceID != 0 {
+		return false
+	}
+	if s.SinceIDStr != "" {
+		return false
+	}
+	return true
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Hashtag) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -2025,6 +2060,17 @@ func (s *Hashtag) MarshalTo(result Writer) error {
 	}
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Hashtag) IsZero() bool {
+	if s.Indices != nil {
+		return false
+	}
+	if s.Text != "" {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2114,6 +2160,20 @@ func (s *Entities) MarshalTo(result Writer) error {
 	return err
 }
 
+// IsZero shows whether the object is an empty value.
+func (s Entities) IsZero() bool {
+	if s.Hashtags != nil {
+		return false
+	}
+	if s.Urls != nil {
+		return false
+	}
+	if s.UserMentions != nil {
+		return false
+	}
+	return true
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityDescription) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -2156,6 +2216,14 @@ func (s *UserEntityDescription) MarshalTo(result Writer) error {
 	}
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s UserEntityDescription) IsZero() bool {
+	if s.Urls != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2219,6 +2287,20 @@ func (s *URL) MarshalTo(result Writer) error {
 	return err
 }
 
+// IsZero shows whether the object is an empty value.
+func (s URL) IsZero() bool {
+	if s.ExpandedURL != nil {
+		return false
+	}
+	if s.Indices != nil {
+		return false
+	}
+	if s.URL != "" {
+		return false
+	}
+	return true
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityURL) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -2262,6 +2344,14 @@ func (s *UserEntityURL) MarshalTo(result Writer) error {
 	return err
 }
 
+// IsZero shows whether the object is an empty value.
+func (s UserEntityURL) IsZero() bool {
+	if s.Urls != nil {
+		return false
+	}
+	return true
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntities) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -2287,6 +2377,7 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 	if err = s.Description.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -2294,8 +2385,20 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 	if err = s.URL.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s UserEntities) IsZero() bool {
+	if s.Description.IsZero() {
+		return false
+	}
+	if s.URL.IsZero() {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2375,6 +2478,7 @@ func (s *User) MarshalTo(result Writer) error {
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -2731,6 +2835,128 @@ func (s *User) MarshalTo(result Writer) error {
 	return err
 }
 
+// IsZero shows whether the object is an empty value.
+func (s User) IsZero() bool {
+	if s.ContributorsEnabled != false {
+		return false
+	}
+	if s.CreatedAt != "" {
+		return false
+	}
+	if s.DefaultProfile != false {
+		return false
+	}
+	if s.DefaultProfileImage != false {
+		return false
+	}
+	if s.Description != "" {
+		return false
+	}
+	if s.Entities.IsZero() {
+		return false
+	}
+	if s.FavouritesCount != 0 {
+		return false
+	}
+	if s.FollowRequestSent != nil {
+		return false
+	}
+	if s.FollowersCount != 0 {
+		return false
+	}
+	if s.Following != nil {
+		return false
+	}
+	if s.FriendsCount != 0 {
+		return false
+	}
+	if s.GeoEnabled != false {
+		return false
+	}
+	if s.ID != 0 {
+		return false
+	}
+	if s.IDStr != "" {
+		return false
+	}
+	if s.IsTranslator != false {
+		return false
+	}
+	if s.Lang != "" {
+		return false
+	}
+	if s.ListedCount != 0 {
+		return false
+	}
+	if s.Location != "" {
+		return false
+	}
+	if s.Name != "" {
+		return false
+	}
+	if s.Notifications != nil {
+		return false
+	}
+	if s.ProfileBackgroundColor != "" {
+		return false
+	}
+	if s.ProfileBackgroundImageURL != "" {
+		return false
+	}
+	if s.ProfileBackgroundImageURLHTTPS != "" {
+		return false
+	}
+	if s.ProfileBackgroundTile != false {
+		return false
+	}
+	if s.ProfileImageURL != "" {
+		return false
+	}
+	if s.ProfileImageURLHTTPS != "" {
+		return false
+	}
+	if s.ProfileLinkColor != "" {
+		return false
+	}
+	if s.ProfileSidebarBorderColor != "" {
+		return false
+	}
+	if s.ProfileSidebarFillColor != "" {
+		return false
+	}
+	if s.ProfileTextColor != "" {
+		return false
+	}
+	if s.ProfileUseBackgroundImage != false {
+		return false
+	}
+	if s.Protected != false {
+		return false
+	}
+	if s.ScreenName != "" {
+		return false
+	}
+	if s.ShowAllInlineMedia != false {
+		return false
+	}
+	if s.StatusesCount != 0 {
+		return false
+	}
+	if s.TimeZone != "" {
+		return false
+	}
+	if s.URL != nil {
+		return false
+	}
+	if s.UtcOffset != 0 {
+		return false
+	}
+	if s.Verified != false {
+		return false
+	}
+	return true
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *StatusMetadata) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -2773,6 +2999,17 @@ func (s *StatusMetadata) MarshalTo(result Writer) error {
 	}
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s StatusMetadata) IsZero() bool {
+	if s.IsoLanguageCode != "" {
+		return false
+	}
+	if s.ResultType != "" {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2831,6 +3068,7 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -2930,6 +3168,7 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.Metadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -3000,8 +3239,77 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.User.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Status) IsZero() bool {
+	if s.Contributors != nil {
+		return false
+	}
+	if s.Coordinates != nil {
+		return false
+	}
+	if s.CreatedAt != "" {
+		return false
+	}
+	if s.Entities.IsZero() {
+		return false
+	}
+	if s.Favorited != false {
+		return false
+	}
+	if s.Geo != nil {
+		return false
+	}
+	if s.ID != 0 {
+		return false
+	}
+	if s.IDStr != "" {
+		return false
+	}
+	if s.InReplyToScreenName != nil {
+		return false
+	}
+	if s.InReplyToStatusID != nil {
+		return false
+	}
+	if s.InReplyToStatusIDStr != nil {
+		return false
+	}
+	if s.InReplyToUserID != nil {
+		return false
+	}
+	if s.InReplyToUserIDStr != nil {
+		return false
+	}
+	if s.Metadata.IsZero() {
+		return false
+	}
+	if s.Place != nil {
+		return false
+	}
+	if s.RetweetCount != 0 {
+		return false
+	}
+	if s.Retweeted != false {
+		return false
+	}
+	if s.Source != "" {
+		return false
+	}
+	if s.Text != "" {
+		return false
+	}
+	if s.Truncated != false {
+		return false
+	}
+	if s.User.IsZero() {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -3029,6 +3337,7 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 	if err = s.SearchMetadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
+	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -3052,6 +3361,17 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 	}
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s LargeStruct) IsZero() bool {
+	if s.SearchMetadata.IsZero() {
+		return false
+	}
+	if s.Statuses != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -3095,4 +3415,12 @@ func (s *XLStruct) MarshalTo(result Writer) error {
 	}
 	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s XLStruct) IsZero() bool {
+	if s.Data != nil {
+		return false
+	}
+	return true
 }

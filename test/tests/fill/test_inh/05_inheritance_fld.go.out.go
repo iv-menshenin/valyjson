@@ -484,30 +484,27 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if s.BreakFirst != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"breakFirst":`)
 		writeInt64(result, int64(s.BreakFirst))
 		wantComma = true
 	}
-	tmpinjected := commonBuffer.Get()
-	if err = s.TestInh02.MarshalTo(tmpinjected); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	}
-	if tmpinjected.Len() > 2 || bytes.Equal(tmpinjected.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+	if !s.TestInh02.IsZero() {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"injected":`)
-		result.Write(tmpinjected.Bytes())
+		if err = s.TestInh02.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		}
 		wantComma = true
 	}
-	commonBuffer.Put(tmpinjected)
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
@@ -518,7 +515,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
@@ -529,7 +526,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
@@ -539,41 +536,54 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
 		wantComma = true
 	}
-	tmpnested1 := commonBuffer.Get()
-	if err = s.Nested1.MarshalTo(tmpnested1); err != nil {
+	if wantComma {
+		result.WriteString(",")
+	}
+	result.WriteString(`"nested1":`)
+	if err = s.Nested1.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if tmpnested1.Len() > 2 || bytes.Equal(tmpnested1.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
-		if wantComma {
-			result.Write([]byte{','})
-		}
-		result.WriteString(`"nested1":`)
-		result.Write(tmpnested1.Bytes())
-		wantComma = true
+	wantComma = true
+	if wantComma {
+		result.WriteString(",")
 	}
-	commonBuffer.Put(tmpnested1)
 	if s.Nested2 != nil {
-		tmpnested2 := commonBuffer.Get()
-		if err = s.Nested2.MarshalTo(tmpnested2); err != nil {
+		result.WriteString(`"nested2":`)
+		if err = s.Nested2.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 		}
-		if tmpnested2.Len() > 2 || bytes.Equal(tmpnested2.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
-			if wantComma {
-				result.Write([]byte{','})
-			}
-			result.WriteString(`"nested2":`)
-			result.Write(tmpnested2.Bytes())
-			wantComma = true
-		}
-		commonBuffer.Put(tmpnested2)
+		wantComma = true
 	} else {
-		if wantComma {
-			result.Write([]byte{','})
-		}
 		result.WriteString(`"nested2":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh01) IsZero() bool {
+	if s.BreakFirst != 0 {
+		return false
+	}
+	if s.TestInh02.IsZero() {
+		return false
+	}
+	if s.Int16 != 0 {
+		return false
+	}
+	if s.Random != 0 {
+		return false
+	}
+	if s.DateBegin.IsZero() {
+		return false
+	}
+	if s.Nested1.IsZero() {
+		return false
+	}
+	if s.Nested2 != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -593,17 +603,25 @@ func (s *TestInh02) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if s.Int32 != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"int_32":`)
 		writeInt64(result, int64(s.Int32))
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh02) IsZero() bool {
+	if s.Int32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -623,9 +641,9 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
@@ -636,7 +654,7 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
@@ -646,8 +664,19 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		result.WriteString(`"random":0`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInh03) IsZero() bool {
+	if s.Int16 != 0 {
+		return false
+	}
+	if s.Random != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -667,9 +696,9 @@ func (s *TestNested01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
@@ -679,8 +708,16 @@ func (s *TestNested01) MarshalTo(result Writer) error {
 		result.WriteString(`"field_32":0`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested01) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -700,9 +737,9 @@ func (s *TestNested02) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
@@ -712,8 +749,16 @@ func (s *TestNested02) MarshalTo(result Writer) error {
 		result.WriteString(`"field_32":0`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested02) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -733,9 +778,9 @@ func (s *TestNested03) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
@@ -745,6 +790,14 @@ func (s *TestNested03) MarshalTo(result Writer) error {
 		result.WriteString(`"field_32":0`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested03) IsZero() bool {
+	if s.Field32 != 0 {
+		return false
+	}
+	return true
 }

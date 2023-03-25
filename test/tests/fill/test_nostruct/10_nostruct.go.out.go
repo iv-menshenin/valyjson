@@ -247,19 +247,24 @@ func (s *TestMap10) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
-		result.Write([]byte{'"'})
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
 		writeInt64(result, int64(_v))
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap10) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -279,13 +284,13 @@ func (s *TestMap11) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
-		result.Write([]byte{'"'})
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
 		err = _v.MarshalTo(result)
@@ -293,8 +298,13 @@ func (s *TestMap11) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
 		}
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap11) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -314,13 +324,13 @@ func (s *TestMap11Ref) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
-		result.Write([]byte{'"'})
+		result.WriteString(`"`)
 		result.WriteString(string(_k))
 		result.WriteString(`":`)
 		err = _v.MarshalTo(result)
@@ -328,8 +338,13 @@ func (s *TestMap11Ref) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "TestMap11Ref" attribute %q: %w`, _k, err)
 		}
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap11Ref) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -349,17 +364,22 @@ func (s *TestSlice12) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'['})
+	result.WriteString("[")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		_k = _k
 		writeInt64(result, int64(_v))
 	}
-	result.Write([]byte{']'})
+	result.WriteString("]")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice12) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -379,10 +399,10 @@ func (s *TestSlice13) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'['})
+	result.WriteString("[")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		_k = _k
@@ -391,8 +411,13 @@ func (s *TestSlice13) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "TestSlice13" value at position %d: %w`, _k, err)
 		}
 	}
-	result.Write([]byte{']'})
+	result.WriteString("]")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice13) IsZero() bool {
+	return len(s) == 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -412,15 +437,25 @@ func (s *TestSlice14) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'['})
+	result.WriteString("[")
 	for _k, _v := range *s {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		_k = _k
 		writeTime(result, _v, time.RFC3339Nano)
 	}
-	result.Write([]byte{']'})
+	result.WriteString("]")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice14) IsZero() bool {
+	for _, _v := range s {
+		if _v.IsZero() {
+			return false
+		}
+	}
+	return true
 }

@@ -268,3 +268,16 @@ func denotedType(t ast.Expr) ast.Expr {
 	}
 	return i
 }
+
+func (m *Map) ZeroFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameZero)).
+		Comments("// " + names.MethodNameZero + " shows whether the object is an empty value.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(m.name))).
+		Results(asthlp.Field("", nil, asthlp.Bool))
+
+	// return len(s) == 0
+	fn.AppendStmt(
+		asthlp.Return(asthlp.Equal(asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameReceiver)), asthlp.Zero)),
+	)
+	return fn.Decl()
+}

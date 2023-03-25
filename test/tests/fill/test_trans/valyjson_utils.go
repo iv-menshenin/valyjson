@@ -4,8 +4,12 @@ package test_trans
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
+	"unsafe"
 
 	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fastjson"
@@ -16,6 +20,88 @@ type Writer interface {
 	io.StringWriter
 	Len() int
 }
+
+type bufWriter struct {
+	buf []*bytebufferpool.ByteBuffer
+	br  int // current bucket
+}
+
+func (b *bufWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	free := b.ensureSpace(n)
+	if free >= n {
+		b.buf[b.br].B = append(b.buf[b.br].B, p...)
+		return n, nil
+	}
+	b.buf[b.br].B = append(b.buf[b.br].B, p[:free]...)
+	b.br++
+	b.buf[b.br].B = append(b.buf[b.br].B, p[free:]...)
+	return n, nil
+}
+
+func (b *bufWriter) WriteString(s string) (n int, err error) {
+	return b.Write(s2b(s))
+}
+
+func s2b(s string) (b []byte) {
+	strh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	sh.Data = strh.Data
+	sh.Len = strh.Len
+	sh.Cap = strh.Len
+	return b
+}
+
+func (b *bufWriter) Len() (l int) {
+	for _, seg := range b.buf {
+		l += len(seg.B)
+	}
+	return
+}
+
+func (b *bufWriter) Bytes() []byte {
+	out := make([]byte, 0, b.Len())
+	for _, buf := range b.buf {
+		out = append(out, buf.B...)
+	}
+	b.Close()
+	return out
+}
+
+func (b *bufWriter) Close() error {
+	for i := range b.buf {
+		writeBuf.Put(b.buf[i])
+	}
+	commonBuffer.Put(b)
+	return nil
+}
+
+const minBufBlock = 32768
+
+func (b *bufWriter) ensureSpace(minNeededSz int) (free int) {
+	if len(b.buf) > 0 {
+		free = cap(b.buf[b.br].B) - len(b.buf[b.br].B)
+		if free >= minNeededSz {
+			return
+		}
+		minNeededSz -= free
+	}
+	needSz := minNeededSz
+	if needSz < minBufBlock {
+		needSz = minBufBlock
+	}
+	bb := writeBuf.Get()
+	if len(bb.B) < minNeededSz {
+		bb.B = make([]byte, 0, needSz)
+	}
+	b.buf = append(b.buf, bb)
+	if len(b.buf) == 1 {
+		return needSz
+	}
+	return
+}
+
+var writeBuf = bytebufferpool.Pool{}
 
 func valueIsNotNull(v *fastjson.Value) bool {
 	return v != nil && v.Type() != fastjson.TypeNull
@@ -89,38 +175,93 @@ func writeTime(w io.Writer, t time.Time, layout string) {
 
 var stringBuf = bytebufferpool.Pool{}
 
-func writeString(w io.Writer, s string) {
-	var buf = stringBuf.Get()
-	buf.Write([]byte{'"'})
+func writeString(w Writer, s string) {
+	w.WriteString(`"`)
+	if !hasSpecialChars(s) {
+		w.WriteString(s)
+		w.WriteString(`"`)
+		return
+	}
+	var (
+		buf [128]byte
+		idx int
+	)
+	flush := func() {
+		if len(buf) > 0 {
+			w.WriteString(string(buf[:idx]))
+			idx = 0
+		}
+	}
 	for _, r := range s {
 		switch r {
 
 		case '\t':
-			buf.WriteString(`\t`)
+			flush()
+			w.WriteString(`\t`)
 
 		case '\r':
-			buf.WriteString(`\r`)
+			flush()
+			w.WriteString(`\r`)
 
 		case '\n':
-			buf.WriteString(`\n`)
+			flush()
+			w.WriteString(`\n`)
 
 		case '\\':
-			buf.WriteString(`\\`)
+			flush()
+			w.WriteString(`\\`)
 
 		case '"':
-			buf.WriteString(`\"`)
+			flush()
+			w.WriteString(`\"`)
 
 		default:
-			buf.WriteString(string(r))
+			if len(buf) >= cap(buf)-2 {
+				flush()
+			}
+			if r < 256 {
+				buf[idx] = byte(r & 0xff)
+				idx++
+			} else {
+				buf[idx] = byte(r >> 8)
+				idx++
+				buf[idx] = byte(r & 0xff)
+				idx++
+			}
 		}
 	}
-	buf.Write([]byte{'"'})
-	w.Write(buf.Bytes())
-	stringBuf.Put(buf)
+	flush()
+	w.WriteString(`"`)
 }
 
-var commonBuffer = bytebufferpool.Pool{}
-
-func Release(b []byte) {
-	commonBuffer.Put(&bytebufferpool.ByteBuffer{B: b})
+func hasSpecialChars(s string) bool {
+	if strings.IndexByte(s, '"') >= 0 || strings.IndexByte(s, '\\') >= 0 {
+		return true
+	}
+	for i := 0; i < len(s); i++ {
+		if s[i] < 0x20 {
+			return true
+		}
+	}
+	return false
 }
+
+type cb struct {
+	pool sync.Pool
+}
+
+func (c *cb) Get() *bufWriter {
+	p := c.pool.Get()
+	if p == nil {
+		return &bufWriter{}
+	}
+	return p.(*bufWriter)
+}
+
+func (c *cb) Put(w *bufWriter) {
+	w.br = 0
+	w.buf = w.buf[:0]
+	c.pool.Put(w)
+}
+
+var commonBuffer = cb{}

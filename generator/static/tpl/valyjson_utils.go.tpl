@@ -4,7 +4,9 @@ package {{ .Package }}
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
@@ -19,43 +21,47 @@ type Writer interface {
 	Len() int
 }
 
-
 type bufWriter struct {
 	buf []*bytebufferpool.ByteBuffer
-	ln int // len
-	br int // current bucket
+	br  int // current bucket
 }
 
 func (b *bufWriter) Write(p []byte) (n int, err error) {
-	b.ensureSpace(len(p))
-	b.ln += len(p)
-	free := cap(b.buf[b.br].B) - len(b.buf[b.br].B)
-	if free >= len(p) {
+	n = len(p)
+	free := b.ensureSpace(n)
+	if free >= n {
 		b.buf[b.br].B = append(b.buf[b.br].B, p...)
-		return len(p), nil
+		return n, nil
 	}
 	b.buf[b.br].B = append(b.buf[b.br].B, p[:free]...)
 	b.br++
 	b.buf[b.br].B = append(b.buf[b.br].B, p[free:]...)
-	return len(p), nil
+	return n, nil
 }
 
 func (b *bufWriter) WriteString(s string) (n int, err error) {
-	return b.Write((*(*[0x7fff0000]byte)(unsafe.Pointer(&s)))[:len(s)])
+	return b.Write(s2b(s))
 }
 
-func (b *bufWriter) Len() int {
-	return b.ln
+func s2b(s string) (b []byte) {
+	strh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	sh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	sh.Data = strh.Data
+	sh.Len = strh.Len
+	sh.Cap = strh.Len
+	return b
+}
+
+func (b *bufWriter) Len() (l int) {
+	for _, seg := range b.buf {
+		l += len(seg.B)
+	}
+	return
 }
 
 func (b *bufWriter) Bytes() []byte {
-	out := make([]byte, 0, b.ln)
-	var expLn = b.ln
+	out := make([]byte, 0, b.Len())
 	for _, buf := range b.buf {
-		if len(buf.B) > expLn {
-			out = append(out, buf.B[:expLn]...)
-			break
-		}
 		out = append(out, buf.B...)
 	}
 	b.Close()
@@ -70,14 +76,11 @@ func (b *bufWriter) Close() error {
 	return nil
 }
 
-const minBufBlock = 65535
+const minBufBlock = 32768
 
-func (b *bufWriter) ensureSpace(minNeededSz int) {
-	if cap(b.buf) == 0 {
-		b.buf = make([]*bytebufferpool.ByteBuffer, 0, 64)
-	}
+func (b *bufWriter) ensureSpace(minNeededSz int) (free int) {
 	if len(b.buf) > 0 {
-		free := cap(b.buf[b.br].B) - len(b.buf[b.br].B)
+		free = cap(b.buf[b.br].B) - len(b.buf[b.br].B)
 		if free >= minNeededSz {
 			return
 		}
@@ -92,6 +95,10 @@ func (b *bufWriter) ensureSpace(minNeededSz int) {
 		bb.B = make([]byte, 0, needSz)
 	}
 	b.buf = append(b.buf, bb)
+	if len(b.buf) == 1 {
+		return needSz
+	}
+	return
 }
 
 var writeBuf = bytebufferpool.Pool{}
@@ -170,11 +177,16 @@ var stringBuf = bytebufferpool.Pool{}
 
 func writeString(w Writer, s string) {
 	w.WriteString(`"`)
+	if !hasSpecialChars(s) {
+		w.WriteString(s)
+		w.WriteString(`"`)
+		return
+	}
 	var (
 		buf [128]byte
 		idx int
 	)
-	flush := func(){
+	flush := func() {
 		if len(buf) > 0 {
 			w.WriteString(string(buf[:idx]))
 			idx = 0
@@ -211,7 +223,7 @@ func writeString(w Writer, s string) {
 				buf[idx] = byte(r & 0xff)
 				idx++
 			} else {
-				buf[idx] = byte(r>>8)
+				buf[idx] = byte(r >> 8)
 				idx++
 				buf[idx] = byte(r & 0xff)
 				idx++
@@ -222,7 +234,19 @@ func writeString(w Writer, s string) {
 	w.WriteString(`"`)
 }
 
-type cb struct{
+func hasSpecialChars(s string) bool {
+	if strings.IndexByte(s, '"') >= 0 || strings.IndexByte(s, '\\') >= 0 {
+		return true
+	}
+	for i := 0; i < len(s); i++ {
+		if s[i] < 0x20 {
+			return true
+		}
+	}
+	return false
+}
+
+type cb struct {
 	pool sync.Pool
 }
 
@@ -235,7 +259,6 @@ func (c *cb) Get() *bufWriter {
 }
 
 func (c *cb) Put(w *bufWriter) {
-	w.ln = 0
 	w.br = 0
 	w.buf = w.buf[:0]
 	c.pool.Put(w)

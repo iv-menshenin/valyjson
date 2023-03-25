@@ -362,9 +362,9 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Tags != nil {
 		wantComma = true
@@ -372,32 +372,32 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		var wantComma bool
 		for _k, _v := range s.Tags {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
 			writeString(result, _v)
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	} else {
 		wantComma = true
 		result.WriteString(`"tags":null`)
 	}
 	if s.Properties != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"properties":{`)
 		var wantComma bool
 		for _k, _v := range s.Properties {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
 			err = _v.MarshalTo(result)
@@ -405,10 +405,10 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "properties" attribute %q: %w`, _k, err)
 			}
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.KeyTypedProperties != nil {
 		wantComma = true
@@ -416,10 +416,10 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		var wantComma bool
 		for _k, _v := range s.KeyTypedProperties {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			err = _v.MarshalTo(result)
@@ -427,62 +427,62 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "key_typed_properties" attribute %q: %w`, _k, err)
 			}
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	} else {
 		wantComma = true
 		result.WriteString(`"key_typed_properties":null`)
 	}
 	if s.IntegerVal != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"integerVal":{`)
 		var wantComma bool
 		for _k, _v := range s.IntegerVal {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			writeInt64(result, int64(_v))
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
 	if s.FloatVal != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"floatVal":{`)
 		var wantComma bool
 		for _k, _v := range s.FloatVal {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			writeFloat64(result, float64(_v))
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
 	if s.UintVal != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"uintVal":{`)
 		var wantComma bool
 		for _k, _v := range s.UintVal {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			if _v == nil {
@@ -491,21 +491,21 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 				writeUint64(result, uint64(*_v))
 			}
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
 	if s.BoolVal != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"bool":{`)
 		var wantComma bool
 		for _k, _v := range s.BoolVal {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			if _v {
@@ -514,29 +514,58 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 				result.WriteString("false")
 			}
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
 	if s.TypedVal != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		wantComma = true
 		result.WriteString(`"typed-val":{`)
 		var wantComma bool
 		for _k, _v := range s.TypedVal {
 			if wantComma {
-				result.Write([]byte{','})
+				result.WriteString(",")
 			}
 			wantComma = true
-			result.Write([]byte{'"'})
+			result.WriteString(`"`)
 			result.WriteString(string(_k))
 			result.WriteString(`":`)
 			writeUint64(result, uint64(_v))
 		}
-		result.Write([]byte{'}'})
+		result.WriteString("}")
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestMap01) IsZero() bool {
+	if s.Tags != nil {
+		return false
+	}
+	if s.Properties != nil {
+		return false
+	}
+	if s.KeyTypedProperties != nil {
+		return false
+	}
+	if s.IntegerVal != nil {
+		return false
+	}
+	if s.FloatVal != nil {
+		return false
+	}
+	if s.UintVal != nil {
+		return false
+	}
+	if s.BoolVal != nil {
+		return false
+	}
+	if s.TypedVal != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -556,9 +585,9 @@ func (s *Property) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
@@ -569,7 +598,7 @@ func (s *Property) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Value != "" {
 		result.WriteString(`"value":`)
@@ -579,6 +608,17 @@ func (s *Property) MarshalTo(result Writer) error {
 		result.WriteString(`"value":""`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Property) IsZero() bool {
+	if s.Name != "" {
+		return false
+	}
+	if s.Value != "" {
+		return false
+	}
+	return true
 }

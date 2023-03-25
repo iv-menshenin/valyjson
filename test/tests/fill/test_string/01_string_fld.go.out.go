@@ -195,9 +195,9 @@ func (s *TestStr01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
@@ -208,7 +208,7 @@ func (s *TestStr01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
@@ -218,7 +218,7 @@ func (s *TestStr01) MarshalTo(result Writer) error {
 		result.WriteString(`"fieldRef":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.DefRef != nil {
 		result.WriteString(`"defRef":`)
@@ -227,8 +227,22 @@ func (s *TestStr01) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"defRef":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestStr01) IsZero() bool {
+	if s.Field != "" {
+		return false
+	}
+	if s.FieldRef != nil {
+		return false
+	}
+	if s.DefRef != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -248,9 +262,9 @@ func (s *TestStr02) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
@@ -261,7 +275,7 @@ func (s *TestStr02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
@@ -271,7 +285,7 @@ func (s *TestStr02) MarshalTo(result Writer) error {
 		result.WriteString(`"fieldRef":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.String != "" {
 		result.WriteString(`"string":`)
@@ -281,6 +295,20 @@ func (s *TestStr02) MarshalTo(result Writer) error {
 		result.WriteString(`"string":""`)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestStr02) IsZero() bool {
+	if s.Field != "" {
+		return false
+	}
+	if s.FieldRef != nil {
+		return false
+	}
+	if s.String != "" {
+		return false
+	}
+	return true
 }

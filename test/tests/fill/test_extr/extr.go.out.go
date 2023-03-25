@@ -96,33 +96,36 @@ func (s *External) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
-	tmptest1 := commonBuffer.Get()
-	if err = s.Test01.MarshalTo(tmptest1); err != nil {
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	result.WriteString(`"test1":`)
+	if err = s.Test01.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
-	if tmptest1.Len() > 2 || bytes.Equal(tmptest1.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
+	wantComma = true
+	if !s.Test02.IsZero() {
 		if wantComma {
-			result.Write([]byte{','})
-		}
-		result.WriteString(`"test1":`)
-		result.Write(tmptest1.Bytes())
-		wantComma = true
-	}
-	commonBuffer.Put(tmptest1)
-	tmptest2 := commonBuffer.Get()
-	if err = s.Test02.MarshalTo(tmptest2); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
-	}
-	if tmptest2.Len() > 2 || bytes.Equal(tmptest2.Bytes(), []byte{'n', 'u', 'l', 'l'}) {
-		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"test2":`)
-		result.Write(tmptest2.Bytes())
+		if err = s.Test02.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		}
 		wantComma = true
 	}
-	commonBuffer.Put(tmptest2)
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s External) IsZero() bool {
+	if s.Test01.IsZero() {
+		return false
+	}
+	if s.Test02.IsZero() {
+		return false
+	}
+	return true
 }

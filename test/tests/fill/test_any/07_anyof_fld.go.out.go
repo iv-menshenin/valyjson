@@ -160,9 +160,9 @@ func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.Comment != "" {
 		result.WriteString(`"comment":`)
@@ -174,14 +174,25 @@ func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 	}
 	if s.Level != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"level":`)
 		writeInt64(result, s.Level)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestAllOfSecond) IsZero() bool {
+	if s.Comment != "" {
+		return false
+	}
+	if s.Level != 0 {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -201,10 +212,10 @@ func (s *TestAllOfThird) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if s.Command != "" {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"command":`)
 		writeString(result, s.Command)
@@ -212,12 +223,23 @@ func (s *TestAllOfThird) MarshalTo(result Writer) error {
 	}
 	if s.Range != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"range":`)
 		writeInt64(result, s.Range)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestAllOfThird) IsZero() bool {
+	if s.Command != "" {
+		return false
+	}
+	if s.Range != 0 {
+		return false
+	}
+	return true
 }

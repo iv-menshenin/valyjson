@@ -121,9 +121,9 @@ func (s *TestTime01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
@@ -134,7 +134,7 @@ func (s *TestTime01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if !s.DateCustom.IsZero() {
 		result.WriteString(`"date_custom":`)
@@ -146,12 +146,26 @@ func (s *TestTime01) MarshalTo(result Writer) error {
 	}
 	if s.DateEnd != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"date_end":`)
 		writeTime(result, *s.DateEnd, time.RFC3339Nano)
 		wantComma = true
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestTime01) IsZero() bool {
+	if s.DateBegin.IsZero() {
+		return false
+	}
+	if s.DateCustom.IsZero() {
+		return false
+	}
+	if s.DateEnd != nil {
+		return false
+	}
+	return true
 }

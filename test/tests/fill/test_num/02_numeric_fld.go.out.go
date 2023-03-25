@@ -940,9 +940,9 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
@@ -954,14 +954,14 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 	}
 	if s.IntFld8 != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"int_fld8":`)
 		writeInt64(result, int64(s.IntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
@@ -972,7 +972,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
@@ -983,7 +983,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
@@ -994,7 +994,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld != 0 {
 		result.WriteString(`"Uint_fld":`)
@@ -1006,14 +1006,14 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 	}
 	if s.UintFld8 != 0 {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"Uint_fld8":`)
 		writeUint64(result, uint64(s.UintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld16 != 0 {
 		result.WriteString(`"Uint_fld16":`)
@@ -1024,7 +1024,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld32 != 0 {
 		result.WriteString(`"Uint_fld32":`)
@@ -1035,7 +1035,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld64 != 0 {
 		result.WriteString(`"Uint_fld64":`)
@@ -1046,7 +1046,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FloatFld32 != 0 {
 		result.WriteString(`"fl23":`)
@@ -1057,7 +1057,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FloatFld64 != 0 {
 		result.WriteString(`"fl64":`)
@@ -1068,7 +1068,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
@@ -1079,14 +1079,14 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 	}
 	if s.RefIntFld8 != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"ref_int_fld8":`)
 		writeInt64(result, int64(*s.RefIntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
@@ -1096,7 +1096,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
@@ -1106,7 +1106,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
@@ -1116,7 +1116,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld != nil {
 		result.WriteString(`"ref_Uint_fld":`)
@@ -1127,14 +1127,14 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 	}
 	if s.RefUintFld8 != nil {
 		if wantComma {
-			result.Write([]byte{','})
+			result.WriteString(",")
 		}
 		result.WriteString(`"ref_Uint_fld8":`)
 		writeUint64(result, uint64(*s.RefUintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld16 != nil {
 		result.WriteString(`"ref_Uint_fld16":`)
@@ -1144,7 +1144,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld16":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld32 != nil {
 		result.WriteString(`"ref_Uint_fld32":`)
@@ -1154,7 +1154,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld32":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld64 != nil {
 		result.WriteString(`"ref_Uint_fld64":`)
@@ -1164,7 +1164,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld64":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefFloatFld32 != nil {
 		result.WriteString(`"ref_fl23":`)
@@ -1174,7 +1174,7 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_fl23":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefFloatFld64 != nil {
 		result.WriteString(`"ref_fl64":`)
@@ -1183,8 +1183,85 @@ func (s *NumStruct01) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"ref_fl64":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s NumStruct01) IsZero() bool {
+	if s.IntFld != 0 {
+		return false
+	}
+	if s.IntFld8 != 0 {
+		return false
+	}
+	if s.IntFld16 != 0 {
+		return false
+	}
+	if s.IntFld32 != 0 {
+		return false
+	}
+	if s.IntFld64 != 0 {
+		return false
+	}
+	if s.UintFld != 0 {
+		return false
+	}
+	if s.UintFld8 != 0 {
+		return false
+	}
+	if s.UintFld16 != 0 {
+		return false
+	}
+	if s.UintFld32 != 0 {
+		return false
+	}
+	if s.UintFld64 != 0 {
+		return false
+	}
+	if s.FloatFld32 != 0 {
+		return false
+	}
+	if s.FloatFld64 != 0 {
+		return false
+	}
+	if s.RefIntFld != nil {
+		return false
+	}
+	if s.RefIntFld8 != nil {
+		return false
+	}
+	if s.RefIntFld16 != nil {
+		return false
+	}
+	if s.RefIntFld32 != nil {
+		return false
+	}
+	if s.RefIntFld64 != nil {
+		return false
+	}
+	if s.RefUintFld != nil {
+		return false
+	}
+	if s.RefUintFld8 != nil {
+		return false
+	}
+	if s.RefUintFld16 != nil {
+		return false
+	}
+	if s.RefUintFld32 != nil {
+		return false
+	}
+	if s.RefUintFld64 != nil {
+		return false
+	}
+	if s.RefFloatFld32 != nil {
+		return false
+	}
+	if s.RefFloatFld64 != nil {
+		return false
+	}
+	return true
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -1204,9 +1281,9 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		err       error
 		wantComma bool
 	)
-	result.Write([]byte{'{'})
+	result.WriteString("{")
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld != 0 {
 		result.WriteString(`"int_fld":`)
@@ -1217,7 +1294,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld8 != 0 {
 		result.WriteString(`"int_fld8":`)
@@ -1228,7 +1305,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld16 != 0 {
 		result.WriteString(`"int_fld16":`)
@@ -1239,7 +1316,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld32 != 0 {
 		result.WriteString(`"int_fld32":`)
@@ -1250,7 +1327,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.IntFld64 != 0 {
 		result.WriteString(`"int_fld64":`)
@@ -1261,7 +1338,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld != 0 {
 		result.WriteString(`"Uint_fld":`)
@@ -1272,7 +1349,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld8 != 0 {
 		result.WriteString(`"Uint_fld8":`)
@@ -1283,7 +1360,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld16 != 0 {
 		result.WriteString(`"Uint_fld16":`)
@@ -1294,7 +1371,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld32 != 0 {
 		result.WriteString(`"Uint_fld32":`)
@@ -1305,7 +1382,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.UintFld64 != 0 {
 		result.WriteString(`"Uint_fld64":`)
@@ -1316,7 +1393,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FloatFld32 != 0 {
 		result.WriteString(`"fl23":`)
@@ -1327,7 +1404,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.FloatFld64 != 0 {
 		result.WriteString(`"fl64":`)
@@ -1338,7 +1415,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld != nil {
 		result.WriteString(`"ref_int_fld":`)
@@ -1348,7 +1425,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld8 != nil {
 		result.WriteString(`"ref_int_fld8":`)
@@ -1358,7 +1435,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld8":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld16 != nil {
 		result.WriteString(`"ref_int_fld16":`)
@@ -1368,7 +1445,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld16":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld32 != nil {
 		result.WriteString(`"ref_int_fld32":`)
@@ -1378,7 +1455,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld32":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefIntFld64 != nil {
 		result.WriteString(`"ref_int_fld64":`)
@@ -1388,7 +1465,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_int_fld64":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld != nil {
 		result.WriteString(`"ref_Uint_fld":`)
@@ -1398,7 +1475,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld8 != nil {
 		result.WriteString(`"ref_Uint_fld8":`)
@@ -1408,7 +1485,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld8":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld16 != nil {
 		result.WriteString(`"ref_Uint_fld16":`)
@@ -1418,7 +1495,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld16":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld32 != nil {
 		result.WriteString(`"ref_Uint_fld32":`)
@@ -1428,7 +1505,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld32":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefUintFld64 != nil {
 		result.WriteString(`"ref_Uint_fld64":`)
@@ -1438,7 +1515,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_Uint_fld64":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefFloatFld32 != nil {
 		result.WriteString(`"ref_fl23":`)
@@ -1448,7 +1525,7 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"ref_fl23":null`)
 	}
 	if wantComma {
-		result.Write([]byte{','})
+		result.WriteString(",")
 	}
 	if s.RefFloatFld64 != nil {
 		result.WriteString(`"ref_fl64":`)
@@ -1457,6 +1534,83 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"ref_fl64":null`)
 	}
-	result.Write([]byte{'}'})
+	result.WriteString("}")
 	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s NumStruct02) IsZero() bool {
+	if s.IntFld != 0 {
+		return false
+	}
+	if s.IntFld8 != 0 {
+		return false
+	}
+	if s.IntFld16 != 0 {
+		return false
+	}
+	if s.IntFld32 != 0 {
+		return false
+	}
+	if s.IntFld64 != 0 {
+		return false
+	}
+	if s.UintFld != 0 {
+		return false
+	}
+	if s.UintFld8 != 0 {
+		return false
+	}
+	if s.UintFld16 != 0 {
+		return false
+	}
+	if s.UintFld32 != 0 {
+		return false
+	}
+	if s.UintFld64 != 0 {
+		return false
+	}
+	if s.FloatFld32 != 0 {
+		return false
+	}
+	if s.FloatFld64 != 0 {
+		return false
+	}
+	if s.RefIntFld != nil {
+		return false
+	}
+	if s.RefIntFld8 != nil {
+		return false
+	}
+	if s.RefIntFld16 != nil {
+		return false
+	}
+	if s.RefIntFld32 != nil {
+		return false
+	}
+	if s.RefIntFld64 != nil {
+		return false
+	}
+	if s.RefUintFld != nil {
+		return false
+	}
+	if s.RefUintFld8 != nil {
+		return false
+	}
+	if s.RefUintFld16 != nil {
+		return false
+	}
+	if s.RefUintFld32 != nil {
+		return false
+	}
+	if s.RefUintFld64 != nil {
+		return false
+	}
+	if s.RefFloatFld32 != nil {
+		return false
+	}
+	if s.RefFloatFld64 != nil {
+		return false
+	}
+	return true
 }

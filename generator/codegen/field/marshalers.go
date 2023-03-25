@@ -314,10 +314,12 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 //		return fmt.Errorf(`can't marshal "injected" attribute: %w`, err)
 //	}
 func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
+	var notZero ast.Expr
 	if omitempty {
-		// FIXME implement me
+		notZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameZero))))
 	}
 	return WriteBlock{
+		NotZero: notZero,
 		Block: []ast.Stmt{
 			// result.WriteString(`"injected":`)
 			asthlp.CallStmt(asthlp.Call(
@@ -339,8 +341,8 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					),
 				),
 			),
+			SetCommaVar,
 		},
-		putCommaCustom: false,
 	}
 }
 
@@ -349,7 +351,6 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 	blockWriter.NotZero = asthlp.NotNil(src)
 	if !omitempty {
 		blockWriter.IfZero = []ast.Stmt{
-			putCommaFirstIf,
 			asthlp.CallStmt(asthlp.Call(
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
