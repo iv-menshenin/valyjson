@@ -181,10 +181,10 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 		//  filled bool
 		// )
 		field.NeedVars(),
-		// result.WriteRune('{')
+		// result.WriteString("{")
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteBytesFn,
-			asthlp.SliceByteLiteral{'['}.Expr(),
+			field.WriteStringFn,
+			asthlp.StringConstant("[").Expr(),
 		)),
 	)
 
@@ -193,9 +193,9 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {
-		//		result.WriteRune(',')
+		//		result.WriteString(",")
 		//	}
-		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
+		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant(",").Expr()))),
 		// filled = true
 		field.SetCommaVar,
 		// _k = _k
@@ -214,7 +214,7 @@ func (m *Array) AppendJsonFunc() ast.Decl {
 	))
 
 	fn.AppendStmt(
-		makeWriteBytesAndReturn(']')...,
+		makeWriteAndReturn("]")...,
 	)
 	return fn.Decl()
 }

@@ -97,11 +97,11 @@ func NewMarshalFunc(structName string) ast.Decl {
 		).Decl()
 }
 
-func makeWriteBytesAndReturn(b ...byte) []ast.Stmt {
+func makeWriteAndReturn(s string) []ast.Stmt {
 	return []ast.Stmt{
-		// result.Write([]byte{...})
+		// result.WriteString(s)
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteBytesFn, asthlp.SliceByteLiteral(b).Expr(),
+			field.WriteStringFn, asthlp.StringConstant(s).Expr(),
 		)),
 		// return err
 		asthlp.Return(

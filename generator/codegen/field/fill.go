@@ -2,11 +2,9 @@ package field
 
 import (
 	"fmt"
+	asthlp "github.com/iv-menshenin/go-ast"
 	"go/ast"
 	"go/token"
-	"strings"
-
-	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
@@ -53,10 +51,6 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 
 func makeBufVariable(name string) *ast.Ident {
 	return asthlp.NewIdent("val" + name)
-}
-
-func makeTmpVariable(name string) *ast.Ident {
-	return asthlp.NewIdent("tmp" + strings.NewReplacer("-", "_").Replace(name))
 }
 
 // var elem int

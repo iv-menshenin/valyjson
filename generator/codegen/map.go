@@ -213,10 +213,10 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 		//  filled bool
 		// )
 		field.NeedVars(),
-		// result.Write([]byte{'{'})
+		// result.WriteString("{")
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteBytesFn,
-			asthlp.SliceByteLiteral{'{'}.Expr(),
+			field.WriteStringFn,
+			asthlp.StringConstant("{").Expr(),
 		)),
 	)
 
@@ -225,15 +225,15 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {
-		//		result.WriteRune(',')
+		//		result.WriteString(",")
 		//	}
-		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{','}.Expr()))),
+		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant(",").Expr()))),
 		// filled = true
 		field.SetCommaVar,
-		// result.WriteRune('"')
+		// result.WriteString(`"`)
 		// result.WriteString(string(_k))
 		// result.WriteString(`":`)
-		asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, asthlp.SliceByteLiteral{'"'}.Expr())),
+		asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant(`"`).Expr())),
 		asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.VariableTypeConvert("_k", asthlp.String))),
 		asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant(`":`).Expr())),
 	}
@@ -250,7 +250,7 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 	))
 
 	fn.AppendStmt(
-		makeWriteBytesAndReturn('}')...,
+		makeWriteAndReturn("}")...,
 	)
 	return fn.Decl()
 }

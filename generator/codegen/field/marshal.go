@@ -21,19 +21,26 @@ func NeedVars() ast.Stmt {
 	)
 }
 
+// putQuoteStmt puts quote
+//  result.WriteString(`"`)
+var putQuoteStmt = asthlp.CallStmt(asthlp.Call(
+	WriteStringFn,
+	asthlp.StringConstant(`"`).Expr(),
+))
+
 var SetCommaVar = asthlp.Assign(asthlp.VarNames{WantCommaVar}, asthlp.Assignment, asthlp.True)
 
-// putCommaFirst puts comma
-//  result.Write([]byte{','})
-var putCommaFirst = asthlp.CallStmt(asthlp.Call(
-	WriteBytesFn,
-	asthlp.SliceByteLiteral{','}.Expr(), // []byte{','}
+// putCommaStmt puts comma
+//  result.WriteString(",")
+var putCommaStmt = asthlp.CallStmt(asthlp.Call(
+	WriteStringFn,
+	asthlp.StringConstant(",").Expr(),
 ))
 
 //  if wantComma {
 //    result.Write([]byte{','})
 //  }
-var putCommaFirstIf = asthlp.If(WantCommaVar, putCommaFirst)
+var putCommaFirstIf = asthlp.If(WantCommaVar, putCommaStmt)
 
 var (
 	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))

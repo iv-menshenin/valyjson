@@ -227,10 +227,10 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		// 	err    error
 		// )
 		field.NeedVars(),
-		// result.WriteRune('{')
+		// result.WriteString("{")
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteBytesFn,
-			asthlp.SliceByteLiteral{'{'}.Expr(),
+			field.WriteStringFn,
+			asthlp.StringConstant("{").Expr(),
 		)),
 	)
 
@@ -239,7 +239,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 	}
 
 	fn.AppendStmt(
-		makeWriteBytesAndReturn('}')...,
+		makeWriteAndReturn("}")...,
 	)
 	return fn.Decl()
 }

@@ -1,5 +1,5 @@
 // Code generated [github.com/iv-menshenin/valyjson]; DO NOT EDIT.
-package {{ .Package }}
+package benchmark
 
 import (
 	"fmt"
@@ -19,11 +19,10 @@ type Writer interface {
 	Len() int
 }
 
-
 type bufWriter struct {
 	buf []*bytebufferpool.ByteBuffer
-	ln int // len
-	br int // current bucket
+	ln  int // len
+	br  int // current bucket
 }
 
 func (b *bufWriter) Write(p []byte) (n int, err error) {
@@ -174,7 +173,7 @@ func writeString(w Writer, s string) {
 		buf [128]byte
 		idx int
 	)
-	flush := func(){
+	flush := func() {
 		if len(buf) > 0 {
 			w.WriteString(string(buf[:idx]))
 			idx = 0
@@ -211,7 +210,7 @@ func writeString(w Writer, s string) {
 				buf[idx] = byte(r & 0xff)
 				idx++
 			} else {
-				buf[idx] = byte(r>>8)
+				buf[idx] = byte(r >> 8)
 				idx++
 				buf[idx] = byte(r & 0xff)
 				idx++
@@ -222,7 +221,7 @@ func writeString(w Writer, s string) {
 	w.WriteString(`"`)
 }
 
-type cb struct{
+type cb struct {
 	pool sync.Pool
 }
 
