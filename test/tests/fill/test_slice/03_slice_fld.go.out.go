@@ -110,6 +110,92 @@ func (s *TestSlice01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+// jsonParserTestSlice03 used for pooling Parsers for TestSlice03 JSONs.
+var jsonParserTestSlice03 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestSlice03) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestSlice03.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestSlice03.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestSlice03) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if err = s.validate(v, objPath); err != nil {
+		return err
+	}
+	if _data := v.Get("data"); _data != nil {
+		var valData int64
+		valData, err = _data.Int64()
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.data' value: %w", objPath, err)
+		}
+		s.Data = valData
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestSlice03) validate(v *fastjson.Value, objPath string) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'d', 'a', 't', 'a'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+			}
+			return
+		}
+	})
+	return err
+}
+
+// jsonParserTestSlice02 used for pooling Parsers for TestSlice02 JSONs.
+var jsonParserTestSlice02 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestSlice02) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestSlice02.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestSlice02.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *TestSlice02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	a, err := v.Array()
+	if err != nil {
+		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+	}
+	*s = make([]TestSlice03, len(a))
+	for i, v := range a {
+		var value TestSlice03
+		err = value.FillFromJSON(v, objPath+".")
+		if err != nil {
+			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
+		}
+		(*s)[i] = TestSlice03(value)
+	}
+	return nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice01) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -185,4 +271,83 @@ func (s TestSlice01) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice03) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice03) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Data != 0 {
+		result.WriteString(`"data":`)
+		writeInt64(result, s.Data)
+		wantComma = true
+	} else {
+		result.WriteString(`"data":0`)
+		wantComma = true
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice03) IsZero() bool {
+	if s.Data != 0 {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice02) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice02) MarshalTo(result Writer) error {
+	if s == nil || *s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("[")
+	for _k, _v := range *s {
+		if wantComma {
+			result.WriteString(",")
+		}
+		wantComma = true
+		_k = _k
+		err = _v.MarshalTo(result)
+		if err != nil {
+			return fmt.Errorf(`can't marshal "TestSlice02" value at position %d: %w`, _k, err)
+		}
+	}
+	result.WriteString("]")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice02) IsZero() bool {
+	return len(s) == 0
 }

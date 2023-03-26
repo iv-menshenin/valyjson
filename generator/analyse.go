@@ -2,11 +2,11 @@ package generator
 
 import (
 	"fmt"
+	"github.com/iv-menshenin/valyjson/generator/codegen"
 	"go/ast"
 	"strings"
 	"unicode"
 
-	"github.com/iv-menshenin/valyjson/generator/codegen"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
@@ -137,30 +137,44 @@ func (v *visitor) getNormalized() []renderer {
 			// only tagged structures
 			continue
 		}
-		switch typed := decl.spec.Type.(type) {
+		result = v.processDecl(decl, result)
+	}
+	return result
+}
 
-		case *ast.StructType:
-			if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
-				result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
-				break
-			}
-			stct := &ast.StructType{
-				Fields: &ast.FieldList{List: v.collectFields(typed.Fields.List)}, // uninline
-			}
-			result = append(result, codegen.NewStruct(decl.spec.Name.Name, decl.tags, stct))
+func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
+	switch typed := decl.spec.Type.(type) {
 
-		case *ast.MapType:
-			result = append(result, codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
-
-		case *ast.ArrayType:
-			result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
-
-		case *ast.Ident, *ast.SelectorExpr:
+	case *ast.StructType:
+		if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
 			result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
-
-		default:
-			panic("unsupported")
+			break
 		}
+		stct := &ast.StructType{
+			Fields: &ast.FieldList{List: v.collectFields(typed.Fields.List)}, // uninline
+		}
+		result = append(result, codegen.NewStruct(decl.spec.Name.Name, decl.tags, stct))
+
+	case *ast.MapType:
+		result = append(result, codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
+
+	case *ast.ArrayType:
+		if el, ok := typed.Elt.(*ast.Ident); ok {
+			// elements of the array have no tags, so we will consider the tags of the child structure
+			elDecl := v.getDeclByName(el.Name)
+			if elDecl != nil && len(elDecl.tags) == 0 {
+				var elDeclT = *elDecl
+				elDeclT.tags = decl.tags // inherits tags from an heir
+				result = v.processDecl(elDeclT, result)
+			}
+		}
+		result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
+
+	case *ast.Ident, *ast.SelectorExpr:
+		result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+
+	default:
+		panic("unsupported")
 	}
 	return result
 }
