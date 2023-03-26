@@ -1293,15 +1293,12 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"int_fld":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.IntFld8 != 0 {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"int_fld8":`)
 		writeInt64(result, int64(s.IntFld8))
-		wantComma = true
-	} else {
-		result.WriteString(`"int_fld8":0`)
 		wantComma = true
 	}
 	if wantComma {
@@ -1348,15 +1345,12 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 		result.WriteString(`"Uint_fld":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.UintFld8 != 0 {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"Uint_fld8":`)
 		writeUint64(result, uint64(s.UintFld8))
-		wantComma = true
-	} else {
-		result.WriteString(`"Uint_fld8":0`)
 		wantComma = true
 	}
 	if wantComma {
@@ -1424,15 +1418,13 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"ref_int_fld":null`)
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.RefIntFld8 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"ref_int_fld8":`)
 		writeInt64(result, int64(*s.RefIntFld8))
 		wantComma = true
-	} else {
-		result.WriteString(`"ref_int_fld8":null`)
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1474,15 +1466,13 @@ func (s *NumStruct02) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"ref_Uint_fld":null`)
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.RefUintFld8 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"ref_Uint_fld8":`)
 		writeUint64(result, uint64(*s.RefUintFld8))
 		wantComma = true
-	} else {
-		result.WriteString(`"ref_Uint_fld8":null`)
 	}
 	if wantComma {
 		result.WriteString(",")
