@@ -180,6 +180,9 @@ func (s *TestSlice02) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
 func (s *TestSlice02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)

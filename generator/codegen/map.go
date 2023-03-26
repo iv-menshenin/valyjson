@@ -6,6 +6,7 @@ import (
 	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/field"
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
@@ -69,10 +70,7 @@ func (m *Map) FillerFunc() ast.Decl {
 			),
 		)
 		ifNullValue = asthlp.If(
-			asthlp.Equal(
-				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("v", "Type"))),
-				asthlp.SimpleSelector("fastjson", "TypeNull"),
-			),
+			helpers.MakeIfItsNullTypeCondition(),
 			asthlp.Assign(
 				asthlp.VarNames{
 					asthlp.Index(
@@ -99,6 +97,16 @@ func (m *Map) FillerFunc() ast.Decl {
 	)
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
+	)
+
+	// 	if v.Type() == fastjson.TypeNull {
+	//		return nil
+	//	}
+	fn.AppendStmt(
+		asthlp.If(
+			helpers.MakeIfItsNullTypeCondition(),
+			asthlp.Return(asthlp.Nil),
+		),
 	)
 
 	fn.AppendStmt(

@@ -2,10 +2,12 @@ package helpers
 
 import (
 	"fmt"
-	asthlp "github.com/iv-menshenin/go-ast"
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"go/ast"
 	"go/token"
 	"strings"
+
+	asthlp "github.com/iv-menshenin/go-ast"
 )
 
 func IsIdent(expr ast.Expr, ident string) bool {
@@ -157,4 +159,11 @@ func ZeroValueOfT(x ast.Expr) ast.Expr {
 		return nil // FIXME can't check, always nonzero
 	}
 	return nil
+}
+
+func MakeIfItsNullTypeCondition() ast.Expr {
+	return asthlp.Equal(
+		asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameJsonValue, "Type"))),
+		asthlp.SimpleSelector("fastjson", "TypeNull"),
+	)
 }

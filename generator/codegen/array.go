@@ -49,6 +49,16 @@ func (a *Array) FillerFunc() ast.Decl {
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
 	)
 
+	// 	if v.Type() == fastjson.TypeNull {
+	//		return nil
+	//	}
+	fn.AppendStmt(
+		asthlp.If(
+			helpers.MakeIfItsNullTypeCondition(),
+			asthlp.Return(asthlp.Nil),
+		),
+	)
+
 	makeStmt := asthlp.EmptyStmt()
 	if a.spec.Len == nil {
 		//	*m = make(map[string]TableOf, len(a)

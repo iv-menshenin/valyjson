@@ -549,6 +549,9 @@ func (s *MapTable) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the keys with fastjson.Value
 func (s *MapTable) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -586,6 +589,9 @@ func (s *MapInt64) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the keys with fastjson.Value
 func (s *MapInt64) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)

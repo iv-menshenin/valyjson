@@ -214,10 +214,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 		//			return
 		//		}
 		ifNullValue = asthlp.If(
-			asthlp.Equal(
-				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("v", "Type"))),
-				asthlp.SimpleSelector("fastjson", "TypeNull"),
-			),
+			helpers.MakeIfItsNullTypeCondition(),
 			asthlp.Assign(
 				[]ast.Expr{
 					asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),

@@ -28,6 +28,9 @@ func (s *TestMap10) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the keys with fastjson.Value
 func (s *TestMap10) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -65,6 +68,9 @@ func (s *TestMap11) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the keys with fastjson.Value
 func (s *TestMap11) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -102,6 +108,9 @@ func (s *TestMap11Ref) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the keys with fastjson.Value
 func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	o, err := v.Object()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -143,6 +152,9 @@ func (s *TestSlice12) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
 func (s *TestSlice12) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -176,6 +188,9 @@ func (s *TestSlice13) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
 func (s *TestSlice13) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
@@ -209,6 +224,9 @@ func (s *TestSlice14) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
 func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
 	a, err := v.Array()
 	if err != nil {
 		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
