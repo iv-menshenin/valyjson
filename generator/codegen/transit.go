@@ -39,14 +39,14 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo))
 	fn.Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
-	fn.Params(asthlp.Field(names.VarNameData, nil, asthlp.ArrayType(asthlp.Byte)))
+	fn.Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer")))
 	fn.Results(
 		asthlp.Field("", nil, asthlp.ErrorType),
 	)
 	fn.AppendStmt(asthlp.Return(
 		asthlp.Call(
 			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameMarshalTo)),
-			asthlp.NewIdent(names.VarNameData),
+			asthlp.NewIdent(names.VarNameWriter),
 		),
 	))
 	return fn.Decl()
@@ -86,7 +86,9 @@ func (t *Transitive) ZeroFunc() ast.Decl {
 
 	// return s.Zero()
 	fn.AppendStmt(
-		asthlp.Return(asthlp.Equal(asthlp.Call(asthlp.LengthFn, asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran)), asthlp.Zero)),
+		asthlp.Return(asthlp.Call(asthlp.InlineFunc(
+			asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran), names.MethodNameZero),
+		))),
 	)
 	return fn.Decl()
 }

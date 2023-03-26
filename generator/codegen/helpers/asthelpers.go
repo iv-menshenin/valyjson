@@ -142,6 +142,11 @@ func ZeroValueOfT(x ast.Expr) ast.Expr {
 			}
 		}
 
+	case *ast.SelectorExpr:
+		if t.Sel.Name == "UUID" {
+			return asthlp.SimpleSelector("uuid", "Nil")
+		}
+
 	case *ast.StarExpr, *ast.MapType:
 		return asthlp.Nil
 

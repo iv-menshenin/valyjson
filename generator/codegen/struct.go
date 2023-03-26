@@ -213,6 +213,13 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
 		Results(asthlp.Field("", nil, asthlp.ErrorType))
 
+	if len(s.spec.Fields.List) == 0 {
+		return fn.AppendStmt(
+			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("{}").Expr())),
+			asthlp.Return(asthlp.Nil),
+		).Decl()
+	}
+
 	fn.AppendStmt(
 		// 	if s == nil {
 		//		result.WriteString("null")
