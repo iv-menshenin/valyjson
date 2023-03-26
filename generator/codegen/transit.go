@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"go/ast"
 
 	asthlp "github.com/iv-menshenin/go-ast"
@@ -43,6 +44,68 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 	fn.Results(
 		asthlp.Field("", nil, asthlp.ErrorType),
 	)
+
+	typed, ok := t.tran.(*ast.Ident)
+	if ok {
+		src := asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))
+		switch typed.Name {
+		case "int", "int8", "int16", "int32", "int64":
+			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
+				names.WriteInt64Func,
+				asthlp.NewIdent(names.VarNameWriter),
+				asthlp.ExpressionTypeConvert(src, asthlp.Int64),
+			)))
+			fn.AppendStmt(asthlp.Return(asthlp.Nil))
+			return fn.Decl()
+
+		case "uint", "uint8", "uint16", "uint32", "uint64":
+			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
+				names.WriteUint64Func,
+				asthlp.NewIdent(names.VarNameWriter),
+				asthlp.ExpressionTypeConvert(src, asthlp.UInt64),
+			)))
+			fn.AppendStmt(asthlp.Return(asthlp.Nil))
+			return fn.Decl()
+
+		case "float32", "float64":
+			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
+				names.WriteFloat64Func,
+				asthlp.NewIdent(names.VarNameWriter),
+				asthlp.ExpressionTypeConvert(src, asthlp.Float64),
+			)))
+			fn.AppendStmt(asthlp.Return(asthlp.Nil))
+			return fn.Decl()
+
+		case "string":
+			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
+				names.WriteStringFunc,
+				asthlp.NewIdent(names.VarNameWriter),
+				asthlp.ExpressionTypeConvert(src, asthlp.String),
+			)))
+			fn.AppendStmt(asthlp.Return(asthlp.Nil))
+			return fn.Decl()
+
+		case "rune":
+			panic("unimplemented")
+
+		case "bool":
+			fn.AppendStmt(asthlp.IfElse(
+				src,
+				// result.WriteString
+				asthlp.Block(asthlp.CallStmt(asthlp.Call(
+					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "WriteString")),
+					asthlp.StringConstant("true").Expr(),
+				))),
+				asthlp.Block(asthlp.CallStmt(asthlp.Call(
+					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "WriteString")),
+					asthlp.StringConstant("false").Expr(),
+				))),
+			))
+			fn.AppendStmt(asthlp.Return(asthlp.Nil))
+			return fn.Decl()
+		}
+	}
+
 	fn.AppendStmt(asthlp.Return(
 		asthlp.Call(
 			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameMarshalTo)),
@@ -84,11 +147,19 @@ func (t *Transitive) ZeroFunc() ast.Decl {
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(t.name))).
 		Results(asthlp.Field("", nil, asthlp.Bool))
 
-	// return s.Zero()
-	fn.AppendStmt(
-		asthlp.Return(asthlp.Call(asthlp.InlineFunc(
-			asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran), names.MethodNameZero),
-		))),
-	)
+	zero := helpers.ZeroValueOfT(t.tran)
+	if zero != nil {
+		fn.AppendStmt(
+			asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), zero)),
+		)
+	} else {
+		// return s.Zero()
+		fn.AppendStmt(
+			asthlp.Return(asthlp.Call(asthlp.InlineFunc(
+				asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran), names.MethodNameZero),
+			))),
+		)
+	}
+
 	return fn.Decl()
 }

@@ -144,6 +144,97 @@ func (s *TestAllOfThird) validate(v *fastjson.Value, objPath string) error {
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestOneOfInteger) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestOneOfInteger) MarshalTo(result Writer) error {
+	writeInt64(result, int64(*s))
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestOneOfInteger) IsZero() bool {
+	return s == 0
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestOneOfString) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestOneOfString) MarshalTo(result Writer) error {
+	writeString(result, string(*s))
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestOneOfString) IsZero() bool {
+	return s == ""
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestOneOfStruct) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestOneOfStruct) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Class != "" {
+		result.WriteString(`"class":`)
+		writeString(result, s.Class)
+		wantComma = true
+	} else {
+		result.WriteString(`"class":""`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Value != 0 {
+		result.WriteString(`"width":`)
+		writeFloat64(result, s.Value)
+		wantComma = true
+	} else {
+		result.WriteString(`"width":0`)
+		wantComma = true
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestOneOfStruct) IsZero() bool {
+	if s.Class != "" {
+		return false
+	}
+	if s.Value != 0 {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
 	err := s.MarshalTo(result)

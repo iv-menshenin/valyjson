@@ -23,9 +23,12 @@ type TestAllOfFirstIsOne struct {
 type OneOf interface{}
 
 type (
+	//json:encode
 	TestOneOfInteger int64
-	TestOneOfString  string
-	TestOneOfStruct  struct {
+	//json:encode
+	TestOneOfString string
+	//json:encode
+	TestOneOfStruct struct {
 		Class string  `json:"class"`
 		Value float64 `json:"width"`
 	}
@@ -67,6 +70,23 @@ func (t *TestAllOfFirstIsOne) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.OneOf)
 }
 
+func (t *TestAllOfFirstIsOne) MarshalTo(result *bufWriter) error {
+	if t == nil {
+		_, err := result.WriteString("null")
+		return err
+	}
+	if t1, ok := t.OneOf.(TestOneOfInteger); ok {
+		return t1.MarshalTo(result)
+	}
+	if t1, ok := t.OneOf.(TestOneOfString); ok {
+		return t1.MarshalTo(result)
+	}
+	if t1, ok := t.OneOf.(TestOneOfStruct); ok {
+		return t1.MarshalTo(result)
+	}
+	return fmt.Errorf("unknown data type %T", t.OneOf)
+}
+
 type (
 	// TestAllOfSecond tests allOf option
 	//json:optional
@@ -94,4 +114,19 @@ func (t *TestAllOf01) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 	return nil
+}
+
+func (t *TestAllOf01) MarshalJSON() ([]byte, error) {
+	var err error
+	var result = commonBuffer.Get()
+	if err = t.TestAllOfFirstIsOne.MarshalTo(result); err != nil {
+		return nil, err
+	}
+	if err = t.TestAllOfSecond.MarshalTo(result); err != nil {
+		return nil, err
+	}
+	if err = t.TestAllOfThird.MarshalTo(result); err != nil {
+		return nil, err
+	}
+	return result.Bytes(), err
 }

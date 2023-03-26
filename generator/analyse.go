@@ -170,7 +170,10 @@ func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
 		}
 		result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
 
-	case *ast.Ident, *ast.SelectorExpr:
+	case *ast.Ident:
+		result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+
+	case *ast.SelectorExpr:
 		result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
 
 	default:
