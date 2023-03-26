@@ -1,6 +1,7 @@
 package test_any
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -119,14 +120,39 @@ func (t *TestAllOf01) UnmarshalJSON(data []byte) (err error) {
 func (t *TestAllOf01) MarshalJSON() ([]byte, error) {
 	var err error
 	var result = commonBuffer.Get()
-	if err = t.TestAllOfFirstIsOne.MarshalTo(result); err != nil {
+	result.WriteString("{")
+
+	var result1 = commonBuffer.Get()
+	if err = t.TestAllOfFirstIsOne.MarshalTo(result1); err != nil {
 		return nil, err
 	}
-	if err = t.TestAllOfSecond.MarshalTo(result); err != nil {
+	result.WriteString(`"value":`)
+	_, err = result.Write(result1.Bytes())
+
+	var result2 = commonBuffer.Get()
+	if err = t.TestAllOfSecond.MarshalTo(result2); err != nil {
 		return nil, err
 	}
-	if err = t.TestAllOfThird.MarshalTo(result); err != nil {
+	if b := result2.Bytes(); len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
+		result.WriteString(",")
+		_, err = result.Write(b[1 : len(b)-1])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var result3 = commonBuffer.Get()
+	if err = t.TestAllOfThird.MarshalTo(result3); err != nil {
 		return nil, err
 	}
-	return result.Bytes(), err
+	if b := result3.Bytes(); len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
+		result.WriteString(",")
+		_, err = result.Write(b[1 : len(b)-1])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	result.WriteString("}")
+	return result.Bytes(), nil
 }

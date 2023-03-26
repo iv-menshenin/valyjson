@@ -85,7 +85,7 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 				Range:   6,
 			},
 		}
-		data, err := json.Marshal(value)
+		data, err := value.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, `{"comment":"hello", "command": "world", "level":2, "range":6, "value":{"class":"chair","width":12.5}}`, string(data))
 
@@ -97,6 +97,34 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 			Class: "table",
 			Value: 256.7,
 		}, val)
+		require.Equal(t, "foo", outValue.Comment)
+		require.EqualValues(t, 1, outValue.Level)
+		require.Equal(t, "bar", outValue.Command)
+		require.EqualValues(t, 5, outValue.Range)
+	})
+	t.Run("all_of_with_integer", func(t *testing.T) {
+		var value = TestAllOf01{
+			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
+				OneOf: TestOneOfInteger(999),
+			},
+			TestAllOfSecond: TestAllOfSecond{
+				Comment: "hello",
+				Level:   2,
+			},
+			TestAllOfThird: TestAllOfThird{
+				Command: "world",
+				Range:   6,
+			},
+		}
+		data, err := value.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"comment":"hello", "command": "world", "level":2, "range":6, "value":999}`, string(data))
+
+		var outValue TestAllOf01
+		require.NoError(t, json.Unmarshal([]byte(`{"value":998, "comment":"foo", "command": "bar", "level":1, "range":5}`), &outValue))
+		val, ok := outValue.OneOf.(TestOneOfInteger)
+		require.True(t, ok)
+		require.EqualValues(t, TestOneOfInteger(998), val)
 		require.Equal(t, "foo", outValue.Comment)
 		require.EqualValues(t, 1, outValue.Level)
 		require.Equal(t, "bar", outValue.Command)
