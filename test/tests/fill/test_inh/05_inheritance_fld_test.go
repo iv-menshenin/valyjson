@@ -229,3 +229,8 @@ func Test_JsonTestInh01(t *testing.T) {
 		require.JSONEq(t, `{"injected":{"int_32":1112},"int_16":16003,"random":45222,"date_begin":"2001-12-31T12:11:10Z","nested1":{"int_16":4120,"random":9889},"nested2":{"int_16":2222,"random":44443}}`, string(b))
 	})
 }
+
+func TestTestNested04_IsZero(t *testing.T) {
+	var test TestNested04
+	require.True(t, test.IsZero())
+}

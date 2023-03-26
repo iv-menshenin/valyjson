@@ -814,6 +814,7 @@ func (s *TableOf) MarshalTo(result Writer) error {
 		if wantComma {
 			result.WriteString(",")
 		}
+		wantComma = true
 		result.WriteString(`"tables":[`)
 		var wantComma bool
 		for _k, _v := range s.Tables {
@@ -877,6 +878,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		if wantComma {
 			result.WriteString(",")
 		}
+		wantComma = true
 		result.WriteString(`"assessments":[`)
 		var wantComma bool
 		for _k, _v := range s.Assessments {
@@ -915,6 +917,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Tags != nil {
+		wantComma = true
 		result.WriteString(`"tags":[`)
 		var wantComma bool
 		for _k, _v := range s.Tags {
@@ -931,6 +934,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"tags":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err

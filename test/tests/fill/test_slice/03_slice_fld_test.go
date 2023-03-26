@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_TestSlice01(t *testing.T) {
+func Test_TestSlice_Unmarshal(t *testing.T) {
 	t.Run("test-all-empty", func(t *testing.T) {
 		var test1 TestSlice01
 		err := test1.UnmarshalJSON([]byte(`{"strs":[], "ints":null}`))
@@ -55,5 +55,44 @@ func Test_TestSlice01(t *testing.T) {
 			}
 		}
 		require.ElementsMatch(t, expected, test1.FieldRef)
+	})
+}
+
+func Test_TestSlice_Marshal(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		var s TestSlice01
+		b, err := s.MarshalJSON()
+		require.NoError(t, err)
+		const expected = `{"strs":null,"ints":null}`
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("comma_after_filled", func(t *testing.T) {
+		var s = TestSlice01{Field: []string{"1"}}
+		b, err := s.MarshalJSON()
+		require.NoError(t, err)
+		const expected = `{"strs":["1"],"ints":null}`
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("filled_both", func(t *testing.T) {
+		var a, b, c = 3, 2, 1
+		var s = TestSlice01{
+			Field:    []string{"1"},
+			FieldRef: []*int{&a, &b, &c},
+		}
+		data, err := s.MarshalJSON()
+		require.NoError(t, err)
+		const expected = `{"strs":["1"],"ints":[3,2,1]}`
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("with_null_elem", func(t *testing.T) {
+		var a, b, c = 3, 2, 1
+		var s = TestSlice01{
+			Field:    []string{"1", ""},
+			FieldRef: []*int{&a, nil, &b, &c},
+		}
+		data, err := s.MarshalJSON()
+		require.NoError(t, err)
+		const expected = `{"strs":["1",""],"ints":[3,null,2,1]}`
+		require.JSONEq(t, expected, string(data))
 	})
 }

@@ -467,6 +467,26 @@ func (s *TestNested03) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+// jsonParserTestNested04 used for pooling Parsers for TestNested04 JSONs.
+var jsonParserTestNested04 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestNested04) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestNested04.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestNested04.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestNested04) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	return (*TestNested03)(s).FillFromJSON(v, objPath)
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh01) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -800,4 +820,21 @@ func (s TestNested03) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestNested04) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestNested04) MarshalTo(result Writer) error {
+	return (*TestNested03)(s).MarshalTo(result)
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestNested04) IsZero() bool {
+	return TestNested03(s).IsZero()
 }

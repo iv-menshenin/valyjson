@@ -2033,6 +2033,7 @@ func (s *Hashtag) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Indices != nil {
+		wantComma = true
 		result.WriteString(`"indices":[`)
 		var wantComma bool
 		for _k, _v := range s.Indices {
@@ -2046,6 +2047,7 @@ func (s *Hashtag) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"indices":null`)
+		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2095,6 +2097,7 @@ func (s *Entities) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Hashtags != nil {
+		wantComma = true
 		result.WriteString(`"hashtags":[`)
 		var wantComma bool
 		for _k, _v := range s.Hashtags {
@@ -2111,11 +2114,13 @@ func (s *Entities) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"hashtags":null`)
+		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Urls != nil {
+		wantComma = true
 		result.WriteString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
@@ -2133,11 +2138,13 @@ func (s *Entities) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"urls":null`)
+		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.UserMentions != nil {
+		wantComma = true
 		result.WriteString(`"user_mentions":[`)
 		var wantComma bool
 		for _k, _v := range s.UserMentions {
@@ -2155,6 +2162,7 @@ func (s *Entities) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"user_mentions":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -2196,6 +2204,7 @@ func (s *UserEntityDescription) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Urls != nil {
+		wantComma = true
 		result.WriteString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
@@ -2213,6 +2222,7 @@ func (s *UserEntityDescription) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"urls":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -2258,6 +2268,7 @@ func (s *URL) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Indices != nil {
+		wantComma = true
 		result.WriteString(`"indices":[`)
 		var wantComma bool
 		for _k, _v := range s.Indices {
@@ -2271,6 +2282,7 @@ func (s *URL) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"indices":null`)
+		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2323,6 +2335,7 @@ func (s *UserEntityURL) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Urls != nil {
+		wantComma = true
 		result.WriteString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
@@ -2339,6 +2352,7 @@ func (s *UserEntityURL) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"urls":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -3342,6 +3356,7 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Statuses != nil {
+		wantComma = true
 		result.WriteString(`"statuses":[`)
 		var wantComma bool
 		for _k, _v := range s.Statuses {
@@ -3358,6 +3373,7 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"statuses":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -3396,6 +3412,7 @@ func (s *XLStruct) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if s.Data != nil {
+		wantComma = true
 		result.WriteString(`"data":[`)
 		var wantComma bool
 		for _k, _v := range s.Data {
@@ -3412,6 +3429,7 @@ func (s *XLStruct) MarshalTo(result Writer) error {
 		result.WriteString("]")
 	} else {
 		result.WriteString(`"data":null`)
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err

@@ -25,7 +25,6 @@ func (s *TestSlice01) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the fields with fastjson.Value
 func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	// strict rules
 	if err = s.validate(v, objPath); err != nil {
 		return err
 	}
@@ -107,7 +106,83 @@ func (s *TestSlice01) validate(v *fastjson.Value, objPath string) error {
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
 	})
 	return err
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSlice01) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSlice01) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Field != nil {
+		wantComma = true
+		result.WriteString(`"strs":[`)
+		var wantComma bool
+		for _k, _v := range s.Field {
+			if wantComma {
+				result.WriteString(",")
+			}
+			wantComma = true
+			_k = _k
+			writeString(result, _v)
+		}
+		result.WriteString("]")
+	} else {
+		result.WriteString(`"strs":null`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.FieldRef != nil {
+		wantComma = true
+		result.WriteString(`"ints":[`)
+		var wantComma bool
+		for _k, _v := range s.FieldRef {
+			if wantComma {
+				result.WriteString(",")
+			}
+			wantComma = true
+			_k = _k
+			if _v == nil {
+				result.WriteString("null")
+			} else {
+				writeInt64(result, int64(*_v))
+			}
+		}
+		result.WriteString("]")
+	} else {
+		result.WriteString(`"ints":null`)
+		wantComma = true
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSlice01) IsZero() bool {
+	if s.Field != nil {
+		return false
+	}
+	if s.FieldRef != nil {
+		return false
+	}
+	return true
 }

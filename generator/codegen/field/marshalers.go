@@ -453,6 +453,7 @@ func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtract
 	var w = WriteBlock{
 		NotZero: asthlp.NotNil(src),
 		Block: []ast.Stmt{
+			SetCommaVar,
 			// result.WriteString(`"jsonName":[`)
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":[`, jsonName)).Expr())),
 			// var filled bool
@@ -469,6 +470,7 @@ func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtract
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
 			)),
+			SetCommaVar,
 		}
 	}
 	return w

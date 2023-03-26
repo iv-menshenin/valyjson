@@ -43,3 +43,7 @@ type TestNested02 struct {
 type TestNested03 struct {
 	Field32 int32 `json:"field_32"`
 }
+
+// TestNested04 tests inheritance
+//json:strict
+type TestNested04 TestNested03
