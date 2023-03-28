@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/iv-menshenin/valyjson/generator/codegen/field"
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"go/ast"
 
@@ -131,6 +132,27 @@ func (t *Transitive) FillerFunc() ast.Decl {
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
 	)
+
+	typed, ok := t.tran.(*ast.Ident)
+	if ok {
+		switch typed.Name {
+
+		case "int", "int8", "int16", "int32", "int64",
+			"uint", "uint8", "uint16", "uint32", "uint64",
+			"float32", "float64", "string", "rune", "bool":
+			f := field.NewFromType(typed, true)
+			fn.AppendStmt(
+				f.TypedValue(asthlp.NewIdent("_val"), names.VarNameJsonValue)...,
+			)
+			fn.AppendStmt(
+				asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.Return(asthlp.NewIdent(names.VarNameError))),
+				asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.VariableTypeConvert("_val", asthlp.NewIdent(t.name))),
+			)
+			asthlp.NewIdent(names.VarNameReceiver)
+			return fn.AppendStmt(asthlp.Return(asthlp.Nil)).Decl()
+		}
+	}
+
 	fn.AppendStmt(asthlp.Return(
 		asthlp.Call(
 			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameFill)),

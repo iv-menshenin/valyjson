@@ -125,6 +125,32 @@ func (s *TestBool01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+// jsonParserTestInhBool used for pooling Parsers for TestInhBool JSONs.
+var jsonParserTestInhBool fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestInhBool) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestInhBool.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestInhBool.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestInhBool) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	var _val bool
+	_val, err = v.Bool()
+	if err != nil {
+		return err
+	}
+	*s = TestInhBool(_val)
+	return nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -216,4 +242,26 @@ func (s TestBool01) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestInhBool) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestInhBool) MarshalTo(result Writer) error {
+	if *s {
+		result.WriteString("true")
+	} else {
+		result.WriteString("false")
+	}
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestInhBool) IsZero() bool {
+	return s == false
 }

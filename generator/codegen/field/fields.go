@@ -44,6 +44,15 @@ func New(f *ast.Field) *Field {
 	return &ff
 }
 
+func NewFromType(expr ast.Expr, isStar bool) *Field {
+	var ff = Field{
+		expr:   expr,
+		isStar: isStar,
+	}
+	ff.prepareRef()
+	return &ff
+}
+
 func (f *Field) prepareRef() {
 	var dstType = f.expr
 	star, isStar := dstType.(*ast.StarExpr)

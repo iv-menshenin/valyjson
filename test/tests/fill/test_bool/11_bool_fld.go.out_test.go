@@ -139,6 +139,31 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 	})
 }
 
+func Test_InhBool_UnmarshalJSON(t *testing.T) {
+	t.Run("unmarhal", func(t *testing.T) {
+		var test TestInhBool
+
+		require.NoError(t, test.UnmarshalJSON([]byte("true")))
+		require.True(t, bool(test))
+
+		require.NoError(t, test.UnmarshalJSON([]byte("false")))
+		require.False(t, bool(test))
+
+		require.Error(t, test.UnmarshalJSON([]byte("-")))
+	})
+	t.Run("marshal", func(t *testing.T) {
+		var test1 TestInhBool = true
+		data, err := test1.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, "true", string(data))
+
+		var test2 TestInhBool = false
+		data, err = test2.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, "false", string(data))
+	})
+}
+
 func Benchmark_TestBool01_MarshalJSON(b *testing.B) {
 	var (
 		True  = true

@@ -10,3 +10,7 @@ type TestBool01 struct {
 
 	DefBool bool `json:"defBool" default:"true"`
 }
+
+// TestInhBool tests inherited bool
+//json:json
+type TestInhBool bool
