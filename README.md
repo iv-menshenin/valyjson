@@ -30,12 +30,19 @@ The last point can make your code more understandable.
 You can understand the json behavior of each model even if the generation is not yet complete.
 For the same reason all fields must have json tags.
 
+## Take a look at my benchmarks
+
+The tests, the results of which are presented here, I borrowed from easyjson.
+So if you trust the objectivity of their tests, then trust mine.
+
 ```
 goos: linux
 goarch: amd64
 pkg: github.com/mailru/easyjson/benchmark
 cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 ```
+
+### Unmarshaling
 
 | lib      | json size | ns/op  |  MB/s |  B/op | allocs/op |
 |:---------|:----------|--------|------:|------:|----------:|
@@ -54,7 +61,15 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 | easyjson | regular   | 26220  | 499.7 |  9512 |       126 |
 | easyjson | small     | 414.6  | 197.9 |   128 |         3 |
 
+Tests of unpacking JSON objects show a nice gain in memory allocation.
+This is not surprising, I used [valyala/fastjson](https://github.com/valyala/fastjson) parser,
+and Aliaksandr Valialkin knows how to save memory.
 
+### Marshaling
+
+For convenience, I cut out all results except easyjson and left only the tests working with concurrency.
+In real life, we are unlikely to encounter a situation where we have no parallelism,
+but we still need the generation of marshaller code.
 
 | lib      | json size | ns/op  |   MB/s |   B/op | allocs/op |
 |:---------|:----------|--------|-------:|-------:|----------:|
@@ -65,3 +80,6 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 | easyjson | large     | 108981 | 4105.4 | 464261 |        28 |
 | easyjson | regular   | 1792   | 7266.8 |  10283 |         9 |
 | easyjson | small     | 33.44  | 2421.9 |    128 |         1 |
+
+Here I seriously lose in processing speed, but win a little in the number of requests to the memory allocator.
+Not a great achievement, but I achieved my goals (see above).
