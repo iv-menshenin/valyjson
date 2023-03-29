@@ -152,6 +152,10 @@ func (s *TestOneOfInteger) MarshalJSON() ([]byte, error) {
 
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestOneOfInteger) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
 	writeInt64(result, int64(*s))
 	return nil
 }
@@ -170,6 +174,10 @@ func (s *TestOneOfString) MarshalJSON() ([]byte, error) {
 
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestOneOfString) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
 	writeString(result, string(*s))
 	return nil
 }

@@ -81,6 +81,12 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, `{"bl": false, "mb": true, "refBool": null, "defBool": false}`, string(b))
 	})
+	t.Run("null", func(t *testing.T) {
+		var test *TestBool01
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `null`, string(b))
+	})
 }
 
 func TestTestBool01_UnmarshalJSON(t *testing.T) {
@@ -137,6 +143,48 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, test)
 	})
+	t.Run("invalid-type", func(t *testing.T) {
+		var test TestBool01
+
+		err := test.UnmarshalJSON([]byte(`{"mb": null, "defBool": null}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "value doesn't contain bool")
+
+		err = test.UnmarshalJSON([]byte(`{"bl": null, "defBool": null}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "value doesn't contain bool")
+
+		err = test.UnmarshalJSON([]byte(`{"bl": true, "refBool": "null"}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "value doesn't contain bool")
+
+		err = test.UnmarshalJSON([]byte(`{"bl": true, "refMaybe": "null"}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "value doesn't contain bool")
+
+		err = test.UnmarshalJSON([]byte(`{"bl": true, "defBool": "null"}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "value doesn't contain bool")
+	})
+	t.Run("invalid-format", func(t *testing.T) {
+		var test TestBool01
+		err := test.UnmarshalJSON([]byte(`{"mb": f, "defBool": null}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "unexpected value found")
+	})
+	t.Run("strict-validation", func(t *testing.T) {
+		var test TestBool01
+		err := test.UnmarshalJSON([]byte(`{"mb": true, "unknown": 123, "defBool": null}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "unexpected field")
+		require.ErrorContains(t, err, "(root).unknown")
+	})
+	t.Run("double-fields", func(t *testing.T) {
+		var test TestBool01
+		err := test.UnmarshalJSON([]byte(`{"mb": true, "defBool": null, "defBool": null}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "field appears in the object twice")
+	})
 }
 
 func Test_InhBool_UnmarshalJSON(t *testing.T) {
@@ -161,6 +209,11 @@ func Test_InhBool_UnmarshalJSON(t *testing.T) {
 		data, err = test2.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, "false", string(data))
+
+		var test3 *TestInhBool
+		data, err = test3.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, "null", string(data))
 	})
 }
 

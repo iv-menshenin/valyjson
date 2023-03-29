@@ -46,6 +46,18 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		asthlp.Field("", nil, asthlp.ErrorType),
 	)
 
+	//if s == nil {
+	//	result.WriteString("null")
+	//	return nil
+	//}
+	fn.AppendStmt(
+		asthlp.If(
+			asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.Nil),
+			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
+			asthlp.Return(asthlp.Nil),
+		),
+	)
+
 	typed, ok := t.tran.(*ast.Ident)
 	if ok {
 		src := asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))

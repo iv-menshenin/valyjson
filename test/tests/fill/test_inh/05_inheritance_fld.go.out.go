@@ -831,6 +831,10 @@ func (s *TestNested04) MarshalJSON() ([]byte, error) {
 
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestNested04) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
 	return (*TestNested03)(s).MarshalTo(result)
 }
 

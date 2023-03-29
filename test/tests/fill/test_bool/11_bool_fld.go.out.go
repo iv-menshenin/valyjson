@@ -253,6 +253,10 @@ func (s *TestInhBool) MarshalJSON() ([]byte, error) {
 
 // MarshalTo serializes all fields of the structure using a buffer.
 func (s *TestInhBool) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
 	if *s {
 		result.WriteString("true")
 	} else {
