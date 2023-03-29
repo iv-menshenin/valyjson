@@ -25,7 +25,13 @@ func (s *TestTransitional) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the fields with fastjson.Value
 func (s *TestTransitional) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	return (*TestTransitionalElem)(s).FillFromJSON(v, objPath)
+	var _val TestTransitionalElem
+	err = _val.FillFromJSON(v, objPath+".")
+	if err != nil {
+		return err
+	}
+	*s = TestTransitional(_val)
+	return nil
 }
 
 // jsonParserTestTransitionalElem used for pooling Parsers for TestTransitionalElem JSONs.

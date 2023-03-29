@@ -38,7 +38,7 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = makeBufVariable(name)
 	var result []ast.Stmt
 
-	result = append(result, f.TypedValue(bufVariable, v)...)
+	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v))...)
 	result = append(result, f.checkErr(bufVariable)...)
 
 	if f.isStar {
@@ -72,7 +72,7 @@ func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
 			asthlp.Continue(),
 		))
 	}
-	result = append(result, f.TypedValue(bufVariable, v)...)
+	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v))...)
 	result = append(result, f.breakErr()...)
 
 	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
@@ -138,9 +138,16 @@ func (f *Field) TypedValue(dst *ast.Ident, v string) []ast.Stmt {
 		// TODO
 
 	default:
-		panic("unsupported field type")
+		return nil
 	}
 	return result
+}
+
+func IsNotEmpty(in []ast.Stmt) []ast.Stmt {
+	if len(in) == 0 {
+		panic("unsupported data type")
+	}
+	return in
 }
 
 func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
@@ -253,7 +260,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				).
 				AppendStmt(
 					// fills one value
-					valFactory.TypedValue(value, "v")...,
+					IsNotEmpty(valFactory.TypedValue(value, "v"))...,
 				).
 				AppendStmt(
 					asthlp.If(

@@ -65,3 +65,150 @@ func (s *TestUUID) validate(v *fastjson.Value, objPath string) error {
 	})
 	return err
 }
+
+// jsonParserInheritUUID2 used for pooling Parsers for InheritUUID2 JSONs.
+var jsonParserInheritUUID2 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *InheritUUID2) UnmarshalJSON(data []byte) error {
+	parser := jsonParserInheritUUID2.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserInheritUUID2.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *InheritUUID2) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	var _val uuid.UUID
+	b, err := v.StringBytes()
+	if err != nil {
+		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+	}
+	_val, err = uuid.ParseBytes(b)
+	if err != nil {
+		return err
+	}
+	*s = InheritUUID2(_val)
+	return nil
+}
+
+// jsonParserInheritUUID used for pooling Parsers for InheritUUID JSONs.
+var jsonParserInheritUUID fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *InheritUUID) UnmarshalJSON(data []byte) error {
+	parser := jsonParserInheritUUID.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserInheritUUID.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *InheritUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	var _val uuid.UUID
+	b, err := v.StringBytes()
+	if err != nil {
+		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+	}
+	_val, err = uuid.ParseBytes(b)
+	if err != nil {
+		return err
+	}
+	*s = InheritUUID(_val)
+	return nil
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestUUID) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestUUID) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if buf, err := s.UUID.MarshalText(); err != nil {
+		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+	} else {
+		result.WriteString(`"uuid":"`)
+		result.Write(buf)
+		result.WriteString(`"`)
+		wantComma = true
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestUUID) IsZero() bool {
+	if s.UUID != uuid.Nil {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *InheritUUID2) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *InheritUUID2) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	return (*InheritUUID)(s).MarshalTo(result)
+}
+
+// IsZero shows whether the object is an empty value.
+func (s InheritUUID2) IsZero() bool {
+	return s == InheritUUID2(uuid.Nil)
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *InheritUUID) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *InheritUUID) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	_uuid, err := uuid.UUID(*s).MarshalText()
+	if err == nil {
+		result.Write(_uuid)
+	}
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s InheritUUID) IsZero() bool {
+	return s == InheritUUID(uuid.Nil)
+}

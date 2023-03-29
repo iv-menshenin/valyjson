@@ -267,5 +267,5 @@ func (s *TestInhBool) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s TestInhBool) IsZero() bool {
-	return s == false
+	return s == TestInhBool(false)
 }

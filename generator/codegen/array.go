@@ -102,7 +102,7 @@ func (a *Array) FillerFunc() ast.Decl {
 		makeStmt,
 		asthlp.Range(true, _i, _v, asthlp.NewIdent(_a),
 			append(
-				valFactory.TypedValue(asthlp.NewIdent("value"), _v),
+				field.IsNotEmpty(valFactory.TypedValue(asthlp.NewIdent("value"), _v)),
 				//if err != nil {
 				//	return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
 				//}

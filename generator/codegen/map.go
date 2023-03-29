@@ -145,7 +145,7 @@ func (m *Map) FillerFunc() ast.Decl {
 				).
 				AppendStmt(
 					// fills one value
-					valFactory.TypedValue(value, "v")...,
+					field.IsNotEmpty(valFactory.TypedValue(value, "v"))...,
 				).
 				AppendStmt(
 					// if err == nil {

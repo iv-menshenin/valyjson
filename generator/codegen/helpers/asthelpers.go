@@ -137,10 +137,11 @@ func ZeroValueOfT(x ast.Expr) ast.Expr {
 			return asthlp.False
 
 		default:
-			if t.Obj != nil {
-				if e, ok := t.Obj.Decl.(*ast.TypeSpec); ok {
-					return ZeroValueOfT(e.Type)
-				}
+			if t.Obj == nil {
+				break
+			}
+			if e, ok := t.Obj.Decl.(*ast.TypeSpec); ok {
+				return ZeroValueOfT(e.Type)
 			}
 		}
 

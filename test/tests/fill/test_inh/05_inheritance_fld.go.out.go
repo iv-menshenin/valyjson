@@ -484,7 +484,13 @@ func (s *TestNested04) UnmarshalJSON(data []byte) error {
 
 // FillFromJSON recursively fills the fields with fastjson.Value
 func (s *TestNested04) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	return (*TestNested03)(s).FillFromJSON(v, objPath)
+	var _val TestNested03
+	err = _val.FillFromJSON(v, objPath+".")
+	if err != nil {
+		return err
+	}
+	*s = TestNested04(_val)
+	return nil
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.

@@ -162,7 +162,7 @@ func (s *TestOneOfInteger) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s TestOneOfInteger) IsZero() bool {
-	return s == 0
+	return s == TestOneOfInteger(0)
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -184,7 +184,7 @@ func (s *TestOneOfString) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s TestOneOfString) IsZero() bool {
-	return s == ""
+	return s == TestOneOfString("")
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.

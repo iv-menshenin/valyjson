@@ -58,6 +58,24 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		),
 	)
 
+	sel, ok := t.tran.(*ast.SelectorExpr)
+	if ok {
+		if sel.Sel.Name == "UUID" {
+			bufVar := asthlp.NewIdent("_uuid")
+			return fn.AppendStmt(
+				asthlp.Assign(
+					asthlp.VarNames{bufVar, asthlp.NewIdent(names.VarNameError)},
+					asthlp.Definition,
+					asthlp.Call(asthlp.InlineFunc(
+						asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver)), t.tran), "MarshalText"),
+					)),
+				),
+				asthlp.If(asthlp.IsNil(asthlp.NewIdent(names.VarNameError)), asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, bufVar))),
+				asthlp.Return(asthlp.NewIdent(names.VarNameError)),
+			).Decl()
+		}
+	}
+
 	typed, ok := t.tran.(*ast.Ident)
 	if ok {
 		src := asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))
@@ -145,24 +163,15 @@ func (t *Transitive) FillerFunc() ast.Decl {
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
 	)
 
-	typed, ok := t.tran.(*ast.Ident)
-	if ok {
-		switch typed.Name {
-
-		case "int", "int8", "int16", "int32", "int64",
-			"uint", "uint8", "uint16", "uint32", "uint64",
-			"float32", "float64", "string", "rune", "bool":
-			f := field.NewFromType(typed, true)
-			fn.AppendStmt(
-				f.TypedValue(asthlp.NewIdent("_val"), names.VarNameJsonValue)...,
-			)
-			fn.AppendStmt(
-				asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.Return(asthlp.NewIdent(names.VarNameError))),
-				asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.VariableTypeConvert("_val", asthlp.NewIdent(t.name))),
-			)
-			asthlp.NewIdent(names.VarNameReceiver)
-			return fn.AppendStmt(asthlp.Return(asthlp.Nil)).Decl()
-		}
+	typedFiller := field.NewFromType(t.tran, true).TypedValue(asthlp.NewIdent("_val"), names.VarNameJsonValue)
+	if len(typedFiller) > 0 {
+		fn.AppendStmt(typedFiller...)
+		fn.AppendStmt(
+			asthlp.If(asthlp.NotNil(asthlp.NewIdent(names.VarNameError)), asthlp.Return(asthlp.NewIdent(names.VarNameError))),
+			asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.VariableTypeConvert("_val", asthlp.NewIdent(t.name))),
+		)
+		asthlp.NewIdent(names.VarNameReceiver)
+		return fn.AppendStmt(asthlp.Return(asthlp.Nil)).Decl()
 	}
 
 	fn.AppendStmt(asthlp.Return(
@@ -184,7 +193,7 @@ func (t *Transitive) ZeroFunc() ast.Decl {
 	zero := helpers.ZeroValueOfT(t.tran)
 	if zero != nil {
 		fn.AppendStmt(
-			asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), zero)),
+			asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.ExpressionTypeConvert(zero, asthlp.NewIdent(t.name)))),
 		)
 	} else {
 		// return s.Zero()
