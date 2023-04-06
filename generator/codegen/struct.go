@@ -306,18 +306,18 @@ func (s *Struct) ZeroFunc() ast.Decl {
 			switch t := fld.Type.(type) {
 
 			case *ast.Ident:
-				var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), names.MethodNameZero)))
+				var isNotZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), names.MethodNameZero))))
 				if zero != nil {
-					isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), zero)
+					isNotZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Name), zero)
 				}
-				fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+				fn.AppendStmt(asthlp.If(isNotZero, asthlp.Return(asthlp.False)))
 
 			case *ast.SelectorExpr:
-				var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), names.MethodNameZero)))
+				var isNotZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), names.MethodNameZero))))
 				if zero != nil {
-					isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), helpers.ZeroValueOfT(fld.Type))
+					isNotZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), helpers.ZeroValueOfT(fld.Type))
 				}
-				fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+				fn.AppendStmt(asthlp.If(isNotZero, asthlp.Return(asthlp.False)))
 			}
 		}
 	}

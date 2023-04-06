@@ -2,10 +2,12 @@ package field
 
 import (
 	"fmt"
-	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"go/ast"
+	"time"
 
 	asthlp "github.com/iv-menshenin/go-ast"
+
+	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
 type WriteBlock struct {
@@ -50,7 +52,11 @@ func (w WriteBlock) Render(putComma ast.Stmt) []ast.Stmt {
 //	} else {
 //		result.WriteString("\"date_begin\":\"0000-00-00T00:00:00Z\"")
 //	}
-func timeMarshal(src ast.Expr, jsonName string, omitempty, isStar bool) WriteBlock {
+func timeMarshal(src ast.Expr, jsonName, layout string, omitempty, isStar bool) WriteBlock {
+	var layoutExpr = names.TimeDefaultLayout
+	if layout != "" {
+		layoutExpr = asthlp.StringConstant(layout).Expr()
+	}
 	var notZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "IsZero"))))
 	if isStar {
 		notZero = asthlp.NotNil(src)
@@ -63,16 +69,20 @@ func timeMarshal(src ast.Expr, jsonName string, omitempty, isStar bool) WriteBlo
 			asthlp.CallStmt(asthlp.Call(WriteStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
 			// writeTime(result, s.DateBegin, time.RFC3339Nano)
 			asthlp.CallStmt(
-				asthlp.Call(names.WriteTimeFunc, asthlp.NewIdent(names.VarNameWriter), src, names.TimeDefaultLayout),
+				asthlp.Call(names.WriteTimeFunc, asthlp.NewIdent(names.VarNameWriter), src, layoutExpr),
 			),
 			SetCommaVar,
 		},
 	}
 	if !omitempty {
+		if layout == "" {
+			layout = time.RFC3339
+		}
+		var zeroDate = time.Time{}.Format(layout)
 		w.IfZero = []ast.Stmt{
 			asthlp.CallStmt(asthlp.Call(
 				WriteStringFn,
-				asthlp.StringConstant(fmt.Sprintf(`"%s":"0000-00-00T00:00:00Z"`, jsonName)).Expr(),
+				asthlp.StringConstant(fmt.Sprintf(`"%s":"%s"`, jsonName, zeroDate)).Expr(),
 			)),
 			SetCommaVar,
 		}

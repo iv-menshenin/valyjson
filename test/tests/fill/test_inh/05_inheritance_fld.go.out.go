@@ -559,7 +559,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"date_begin":"0000-00-00T00:00:00Z"`)
+		result.WriteString(`"date_begin":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
 	if wantComma {
@@ -591,7 +591,7 @@ func (s TestInh01) IsZero() bool {
 	if s.BreakFirst != 0 {
 		return false
 	}
-	if s.TestInh02.IsZero() {
+	if !s.TestInh02.IsZero() {
 		return false
 	}
 	if s.Int16 != 0 {
@@ -600,10 +600,10 @@ func (s TestInh01) IsZero() bool {
 	if s.Random != 0 {
 		return false
 	}
-	if s.DateBegin.IsZero() {
+	if !s.DateBegin.IsZero() {
 		return false
 	}
-	if s.Nested1.IsZero() {
+	if !s.Nested1.IsZero() {
 		return false
 	}
 	if s.Nested2 != nil {

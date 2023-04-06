@@ -769,7 +769,7 @@ func (s *Passport) MarshalTo(result Writer) error {
 		writeTime(result, s.DateDoc, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"dateDoc":"0000-00-00T00:00:00Z"`)
+		result.WriteString(`"dateDoc":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
 	result.WriteString("}")
@@ -781,7 +781,7 @@ func (s Passport) IsZero() bool {
 	if s.Number != "" {
 		return false
 	}
-	if s.DateDoc.IsZero() {
+	if !s.DateDoc.IsZero() {
 		return false
 	}
 	return true
@@ -905,7 +905,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		writeTime(result, s.Time, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"time":"0000-00-00T00:00:00Z"`)
+		result.WriteString(`"time":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
 	if wantComma {
@@ -954,7 +954,7 @@ func (s Table) IsZero() bool {
 	if s.Assessments != nil {
 		return false
 	}
-	if s.Time.IsZero() {
+	if !s.Time.IsZero() {
 		return false
 	}
 	if s.Avg != 0 {

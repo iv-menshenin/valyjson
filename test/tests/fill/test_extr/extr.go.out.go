@@ -121,10 +121,10 @@ func (s *External) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s External) IsZero() bool {
-	if s.Test01.IsZero() {
+	if !s.Test01.IsZero() {
 		return false
 	}
-	if s.Test02.IsZero() {
+	if !s.Test02.IsZero() {
 		return false
 	}
 	return true
