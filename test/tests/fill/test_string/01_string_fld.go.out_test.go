@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_TestStr01(t *testing.T) {
+func Test_TestStr01_Unmarshal(t *testing.T) {
 	t.Run("test-all-omitted", func(t *testing.T) {
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{}`))
@@ -72,6 +72,75 @@ func Test_TestStr01(t *testing.T) {
 	})
 }
 
+func Test_TestStr01_Marshal(t *testing.T) {
+	t.Run("null-fields", func(t *testing.T) {
+		const expected = `{"field":"foo-bar","fieldRef":null,"defRef":null}`
+		var test = TestStr01{
+			Field:    "foo-bar",
+			FieldRef: nil,
+			DefRef:   nil,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("fill-fields", func(t *testing.T) {
+		const expected = `{"field":"foo-bar","fieldRef":"nil/null","defRef":"nil/null"}`
+		var str = "nil/null"
+		var test = TestStr01{
+			Field:    "foo-bar",
+			FieldRef: &str,
+			DefRef:   &str,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("multiline", func(t *testing.T) {
+		const expected = `{"field":"test\nmulti\nlined","fieldRef":null,"defRef":null}`
+		var test = TestStr01{
+			Field: "test\nmulti\nlined",
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("special-runes", func(t *testing.T) {
+		const expected = `{"field":"\"quoted\\slashed\ttabbed","fieldRef":null,"defRef":null}`
+		var test = TestStr01{
+			Field: `"quoted\slashed	tabbed`,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+}
+
+func Test_TestStr02_Marshal(t *testing.T) {
+	t.Run("null-fields", func(t *testing.T) {
+		const expected = `{"field":"foo-bar","fieldRef":null,"string":"nil"}`
+		var test = TestStr02{
+			Field:    "foo-bar",
+			FieldRef: nil,
+			String:   "nil",
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("fill-fields", func(t *testing.T) {
+		const expected = `{"field":"foo-bar","fieldRef":"nil/null","string":""}`
+		var str = "nil/null"
+		var test = TestStr02{
+			Field:    "foo-bar",
+			FieldRef: &str,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+}
+
 func Test_Strings_Allocations(t *testing.T) {
 	t.Parallel()
 	t.Run("ref-allocation", func(t *testing.T) {
@@ -109,7 +178,7 @@ func Benchmark_TestStr_Alloc(b *testing.B) {
 	})
 }
 
-func Test_TestStr02(t *testing.T) {
+func Test_TestStr02_Unmarshal(t *testing.T) {
 	t.Run("test-all-omitted", func(t *testing.T) {
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{}`))
@@ -177,5 +246,32 @@ func Test_TestSubTypeString(t *testing.T) {
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "fieldRef": "bar"}`))
 		require.NoError(t, err)
 		require.EqualValues(t, "value-foo-bar", test1.String)
+	})
+}
+
+func Test_Zero(t *testing.T) {
+	t.Run("TestStr01", func(t *testing.T) {
+		var test TestStr01
+		require.True(t, test.IsZero())
+	})
+	t.Run("TestStr01_not_zero", func(t *testing.T) {
+		var test1 TestStr01
+		test1.Field = "."
+		require.False(t, test1.IsZero())
+		var test2 TestStr01
+		test2.FieldRef = &test1.Field
+		require.False(t, test2.IsZero())
+		var test3 TestStr01
+		test3.DefRef = &test1.Field
+		require.False(t, test3.IsZero())
+	})
+	t.Run("TestStr02", func(t *testing.T) {
+		var test TestStr02
+		require.True(t, test.IsZero())
+	})
+	t.Run("TestStr02_not_zero", func(t *testing.T) {
+		var test TestStr02
+		test.String = "value-foo-bar"
+		require.False(t, test.IsZero())
 	})
 }
