@@ -309,6 +309,8 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 	return w
 }
 
+// structMarshal makes WriteBlock for structure marshalling
+//
 //	result.WriteString(`"injected":`)
 //	if err = s.URL.MarshalTo(result); err != nil {
 //		return fmt.Errorf(`can't marshal "injected" attribute: %w`, err)
@@ -376,6 +378,7 @@ func refStructMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock 
 //		}
 //		result.WriteRune('}')
 //	} else {
+//
 //		result.WriteString(`"tags":null`)
 //	}
 func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve ValueExtractor) WriteBlock {

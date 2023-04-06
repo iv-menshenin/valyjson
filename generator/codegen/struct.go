@@ -296,11 +296,11 @@ func (s *Struct) ZeroFunc() ast.Decl {
 	for _, fld := range s.spec.Fields.List {
 		zero := helpers.ZeroValueOfT(fld.Type)
 		for _, name := range fld.Names {
-			var isZero ast.Expr = asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), names.MethodNameZero)))
+			var isNotZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), names.MethodNameZero))))
 			if zero != nil {
-				isZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), zero)
+				isNotZero = asthlp.NotEqual(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), zero)
 			}
-			fn.AppendStmt(asthlp.If(isZero, asthlp.Return(asthlp.False)))
+			fn.AppendStmt(asthlp.If(isNotZero, asthlp.Return(asthlp.False)))
 		}
 		if len(fld.Names) == 0 {
 			switch t := fld.Type.(type) {

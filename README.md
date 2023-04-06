@@ -38,7 +38,6 @@ So if you trust the objectivity of their tests, then trust mine.
 ```
 goos: linux
 goarch: amd64
-pkg: github.com/mailru/easyjson/benchmark
 cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 ```
 

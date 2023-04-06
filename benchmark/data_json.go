@@ -2406,10 +2406,10 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s UserEntities) IsZero() bool {
-	if s.Description.IsZero() {
+	if !s.Description.IsZero() {
 		return false
 	}
-	if s.URL.IsZero() {
+	if !s.URL.IsZero() {
 		return false
 	}
 	return true
@@ -2866,7 +2866,7 @@ func (s User) IsZero() bool {
 	if s.Description != "" {
 		return false
 	}
-	if s.Entities.IsZero() {
+	if !s.Entities.IsZero() {
 		return false
 	}
 	if s.FavouritesCount != 0 {
@@ -3269,7 +3269,7 @@ func (s Status) IsZero() bool {
 	if s.CreatedAt != "" {
 		return false
 	}
-	if s.Entities.IsZero() {
+	if !s.Entities.IsZero() {
 		return false
 	}
 	if s.Favorited != false {
@@ -3299,7 +3299,7 @@ func (s Status) IsZero() bool {
 	if s.InReplyToUserIDStr != nil {
 		return false
 	}
-	if s.Metadata.IsZero() {
+	if !s.Metadata.IsZero() {
 		return false
 	}
 	if s.Place != nil {
@@ -3320,7 +3320,7 @@ func (s Status) IsZero() bool {
 	if s.Truncated != false {
 		return false
 	}
-	if s.User.IsZero() {
+	if !s.User.IsZero() {
 		return false
 	}
 	return true
@@ -3381,7 +3381,7 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 
 // IsZero shows whether the object is an empty value.
 func (s LargeStruct) IsZero() bool {
-	if s.SearchMetadata.IsZero() {
+	if !s.SearchMetadata.IsZero() {
 		return false
 	}
 	if s.Statuses != nil {

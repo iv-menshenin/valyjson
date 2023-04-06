@@ -196,7 +196,7 @@ func (t *Transitive) ZeroFunc() ast.Decl {
 			asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.ExpressionTypeConvert(zero, asthlp.NewIdent(t.name)))),
 		)
 	} else {
-		// return s.Zero()
+		// return s.IsZero()
 		fn.AppendStmt(
 			asthlp.Return(asthlp.Call(asthlp.InlineFunc(
 				asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), t.tran), names.MethodNameZero),
