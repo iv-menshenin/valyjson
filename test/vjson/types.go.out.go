@@ -674,7 +674,7 @@ func (s *Person) MarshalTo(result Writer) error {
 	if s.Passport != nil {
 		result.WriteString(`"passport":`)
 		if err = s.Passport.MarshalTo(result); err != nil {
-			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+			return fmt.Errorf(`can't marshal "passport" attribute: %w`, err)
 		}
 		wantComma = true
 	} else {

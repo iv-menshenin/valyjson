@@ -102,7 +102,7 @@ func (s *External) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"test1":`)
 	if err = s.Test01.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "test1" attribute: %w`, err)
 	}
 	wantComma = true
 	if !s.Test02.IsZero() {
@@ -111,7 +111,7 @@ func (s *External) MarshalTo(result Writer) error {
 		}
 		result.WriteString(`"test2":`)
 		if err = s.Test02.MarshalTo(result); err != nil {
-			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+			return fmt.Errorf(`can't marshal "test2" attribute: %w`, err)
 		}
 		wantComma = true
 	}

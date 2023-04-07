@@ -525,7 +525,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		}
 		result.WriteString(`"injected":`)
 		if err = s.TestInh02.MarshalTo(result); err != nil {
-			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+			return fmt.Errorf(`can't marshal "injected" attribute: %w`, err)
 		}
 		wantComma = true
 	}
@@ -576,7 +576,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 	if s.Nested2 != nil {
 		result.WriteString(`"nested2":`)
 		if err = s.Nested2.MarshalTo(result); err != nil {
-			return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+			return fmt.Errorf(`can't marshal "nested2" attribute: %w`, err)
 		}
 		wantComma = true
 	} else {

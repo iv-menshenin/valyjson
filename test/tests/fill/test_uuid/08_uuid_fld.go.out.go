@@ -148,7 +148,7 @@ func (s *TestUUID) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if buf, err := s.UUID.MarshalText(); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "uuid" attribute: %w`, err)
 	} else {
 		result.WriteString(`"uuid":"`)
 		result.Write(buf)

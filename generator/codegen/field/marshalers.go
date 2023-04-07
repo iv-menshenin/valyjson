@@ -113,7 +113,7 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.Return(
 						asthlp.Call(
 							asthlp.InlineFunc(asthlp.SimpleSelector("fmt", "Errorf")),
-							asthlp.StringConstant(`can't marshal "nested1" attribute: %w`).Expr(),
+							asthlp.StringConstant(`can't marshal "`+jsonName+`" attribute: %w`).Expr(),
 							asthlp.NewIdent("err"),
 						),
 					),
@@ -348,7 +348,7 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				asthlp.Return(
 					asthlp.Call(
 						asthlp.FmtErrorfFn,
-						asthlp.StringConstant(`can't marshal "nested1" attribute: %w`).Expr(),
+						asthlp.StringConstant(`can't marshal "`+jsonName+`" attribute: %w`).Expr(),
 						asthlp.NewIdent(names.VarNameError),
 					),
 				),
