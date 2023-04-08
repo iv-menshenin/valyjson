@@ -134,11 +134,17 @@ func (nullWriter) Write(b []byte) (n int, err error) { return len(b), nil }
 func (nullWriter) WriteString(b string) (n int, err error) { return len(b), nil }
 
 func Test_writeString(t *testing.T) {
-	// TODO more tests
-	t.Run("allocation", func(t *testing.T) {
+	t.Run("allocation-without-special", func(t *testing.T) {
 		var w = nullWriter{}
 		n := testing.AllocsPerRun(100, func() {
-			writeString(w, "\"это не те дроиды,\nкоторых вы ищете\"")
+			writeString(w, "это не те дроиды,которых вы ищете")
+		})
+		require.EqualValues(t, 0, n)
+	})
+	t.Run("allocation-with-special", func(t *testing.T) {
+		var w = nullWriter{}
+		n := testing.AllocsPerRun(100, func() {
+			writeString(w, "эй ты\nиди сюда\n - \"чего?\"")
 		})
 		require.EqualValues(t, 0, n)
 	})
