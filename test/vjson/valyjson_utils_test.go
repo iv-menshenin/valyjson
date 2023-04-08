@@ -131,6 +131,8 @@ type (
 
 func (nullWriter) Write(b []byte) (n int, err error) { return len(b), nil }
 
+func (nullWriter) WriteString(b string) (n int, err error) { return len(b), nil }
+
 func Test_writeString(t *testing.T) {
 	// TODO more tests
 	t.Run("allocation", func(t *testing.T) {

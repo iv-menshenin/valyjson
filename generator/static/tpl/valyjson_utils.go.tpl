@@ -18,7 +18,6 @@ import (
 type Writer interface {
 	io.Writer
 	io.StringWriter
-	Len() int
 }
 
 type bufWriter struct {
