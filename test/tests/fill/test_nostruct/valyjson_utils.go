@@ -18,7 +18,6 @@ import (
 type Writer interface {
 	io.Writer
 	io.StringWriter
-	Len() int
 }
 
 type bufWriter struct {
@@ -50,6 +49,10 @@ func s2b(s string) (b []byte) {
 	sh.Len = strh.Len
 	sh.Cap = strh.Len
 	return b
+}
+
+func b2s(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
 }
 
 func (b *bufWriter) Len() (l int) {
@@ -188,7 +191,7 @@ func writeString(w Writer, s string) {
 	)
 	flush := func() {
 		if len(buf) > 0 {
-			w.WriteString(string(buf[:idx]))
+			w.WriteString(b2s(buf[:idx]))
 			idx = 0
 		}
 	}

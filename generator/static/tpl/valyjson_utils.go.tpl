@@ -191,7 +191,7 @@ func writeString(w Writer, s string) {
 	)
 	flush := func() {
 		if len(buf) > 0 {
-			w.WriteString(string(buf[:idx]))
+			w.WriteString(b2s(buf[:idx]))
 			idx = 0
 		}
 	}
