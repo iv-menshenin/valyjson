@@ -51,6 +51,10 @@ func s2b(s string) (b []byte) {
 	return b
 }
 
+func b2s(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+
 func (b *bufWriter) Len() (l int) {
 	for _, seg := range b.buf {
 		l += len(seg.B)
@@ -187,7 +191,7 @@ func writeString(w Writer, s string) {
 	)
 	flush := func() {
 		if len(buf) > 0 {
-			w.WriteString(string(buf[:idx]))
+			w.WriteString(b2s(buf[:idx]))
 			idx = 0
 		}
 	}
