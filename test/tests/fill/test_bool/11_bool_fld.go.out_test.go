@@ -32,7 +32,7 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 			False = false
 		)
 		var test = &TestBool01{
-			Bool:     false,
+			Bool:     true,
 			BlMaybe:  true,
 			RefBool:  &True,
 			RefMaybe: &False,
@@ -40,7 +40,7 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 		}
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)
-		require.JSONEq(t, `{"bl": false, "mb": true, "refBool": true, "refMaybe": false, "defBool": true}`, string(b))
+		require.JSONEq(t, `{"bl": true, "mb": true, "refBool": true, "refMaybe": false, "defBool": true}`, string(b))
 	})
 	t.Run("omit-false", func(t *testing.T) {
 		var (
@@ -187,7 +187,7 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 	})
 }
 
-func Test_InhBool_UnmarshalJSON(t *testing.T) {
+func Test_InhBool(t *testing.T) {
 	t.Run("unmarhal", func(t *testing.T) {
 		var test TestInhBool
 
@@ -237,4 +237,28 @@ func Benchmark_TestBool01_MarshalJSON(b *testing.B) {
 			b.Error(err)
 		}
 	}
+}
+
+func Test_TestBool02(t *testing.T) {
+	t.Run("Unmarshal", func(t *testing.T) {
+		var got TestBool02
+		var expected = TestBool02{
+			I: true,
+			X: true,
+		}
+		const data = `{"i": true, "x": true}`
+		err := got.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, got)
+	})
+	t.Run("Marshal", func(t *testing.T) {
+		var test = TestBool02{
+			I: true,
+			X: true,
+		}
+		const expected = `{"x":true,"i":true}`
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
 }
