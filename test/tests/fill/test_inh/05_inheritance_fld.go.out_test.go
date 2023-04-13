@@ -173,6 +173,12 @@ func Test_TestNested01(t *testing.T) {
 }
 
 func Test_JsonTestNested01(t *testing.T) {
+	t.Run("nested-3-0", func(t *testing.T) {
+		var test3 = TestNested03{}
+		b, err := test3.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"field_32": 0}`, string(b))
+	})
 	t.Run("nested-3", func(t *testing.T) {
 		var test3 = TestNested03{Field32: 22}
 		b, err := test3.MarshalJSON()

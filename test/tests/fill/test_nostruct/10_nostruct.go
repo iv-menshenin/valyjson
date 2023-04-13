@@ -29,4 +29,6 @@ type (
 	// TestSlice14 tests maps
 	//json:strict
 	TestSlice14 [2]time.Time
+
+	// TODO []map[string][]int64
 )

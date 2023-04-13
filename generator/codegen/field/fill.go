@@ -29,6 +29,7 @@ func (f *Field) getValue() ast.Expr {
 }
 
 // fillFrom makes statements to fill some field according to its type
+//
 //	s.Offset, err = offset.Int()
 //	if err != nil {
 //	    return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
@@ -54,9 +55,11 @@ func makeBufVariable(name string) *ast.Ident {
 }
 
 // var elem int
-// if elem, err = listElem.Int(); err != nil {
-// 	break
-// }
+//
+//	if elem, err = listElem.Int(); err != nil {
+//		break
+//	}
+//
 // valList = append(valList, int32(elem))
 func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
 	var bufVariable = asthlp.NewIdent("elem")
@@ -97,8 +100,8 @@ func appendStmt(dst, el ast.Expr) ast.Stmt {
 	)
 }
 
-//  var val{name} {type}
-//	val{name}, err = {v}.(Int|Int64|String|Bool)()
+//	 var val{name} {type}
+//		val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *Field) TypedValue(dst *ast.Ident, v string) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.refx.(type) {
@@ -183,11 +186,14 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 	}
 }
 
-//	o, err := keytypedproperties.Object()
+// o, err := keytypedproperties.Object()
+//
 //	if err != nil {
 //		return fmt.Errorf("error parsing '%s.key_typed_properties' value: %w", objPath, err)
 //	}
-//	var valKeyTypedProperties = make(map[Key]Property, o.Len())
+//
+// var valKeyTypedProperties = make(map[Key]Property, o.Len())
+//
 //	o.Visit(func(key []byte, v *fastjson.Value) {
 //		if err != nil {
 //			return
@@ -200,10 +206,12 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 //		}
 //		valKeyTypedProperties[Key(key)] = prop
 //	})
+//
 //	if err != nil {
 //		return err
 //	}
-//	s.KeyTypedProperties = valKeyTypedProperties
+//
+// s.KeyTypedProperties = valKeyTypedProperties
 func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []ast.Stmt {
 	var value = asthlp.NewIdent("value")
 	var ifNullValue = asthlp.EmptyStmt()
@@ -283,6 +291,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 //	if err != nil {
 //		return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
 //	}
+//
 //	if valIntFld8 > math.MaxInt8 {
 //		return fmt.Errorf("error parsing '%s.int_fld8' value %d exceeds maximum for data type uint8", objPath, valIntFld8)
 //	}

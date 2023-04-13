@@ -31,6 +31,19 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.Properties)
 		require.Nil(t, test1.KeyTypedProperties)
 	})
+	t.Run("fill-booleans", func(t *testing.T) {
+		var test1 TestMap01
+		err := test1.UnmarshalJSON([]byte(`{"bool":{"foo":true, "bar":false}}`))
+		require.NoError(t, err)
+		require.NotNil(t, test1.BoolVal)
+		require.Equal(t, test1.BoolVal, map[Key]bool{
+			"foo": true,
+			"bar": false,
+		})
+		require.Nil(t, test1.Tags)
+		require.Nil(t, test1.Properties)
+		require.Nil(t, test1.KeyTypedProperties)
+	})
 	t.Run("fill-simple-strings", func(t *testing.T) {
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"tags":{"test":"maps", "foo":"bar"}}`))
@@ -88,7 +101,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 	})
 	t.Run("test-uint-values", func(t *testing.T) {
 		var test1 TestMap01
-		err := test1.UnmarshalJSON([]byte(`{"uintVal":{"123": 123, "0": 0}}`))
+		err := test1.UnmarshalJSON([]byte(`{"uintVal":{"123": 123, "0": 0,"nil": null}}`))
 		require.NoError(t, err)
 		require.Nil(t, test1.Tags)
 		require.Nil(t, test1.Properties)
@@ -98,6 +111,9 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.EqualValues(t, *test1.UintVal["123"], 123)
 		require.NotNil(t, *test1.UintVal["0"])
 		require.EqualValues(t, *test1.UintVal["0"], 0)
+		val, ok := test1.UintVal["nil"]
+		require.True(t, ok)
+		require.Nil(t, val)
 	})
 	t.Run("test-float-values", func(t *testing.T) {
 		var test1 TestMap01
@@ -239,6 +255,17 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		var test = TestMap01{
 			TypedVal: map[Key]Val{
 				"344": 344, "345": 345, "0": 0,
+			},
+		}
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("boolean-values", func(t *testing.T) {
+		const expected = `{"tags":null,"key_typed_properties":null,"bool":{"foo": true, "bar": false}}`
+		var test = TestMap01{
+			BoolVal: map[Key]bool{
+				"foo": true, "bar": false,
 			},
 		}
 		b, err := test.MarshalJSON()

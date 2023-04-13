@@ -126,6 +126,16 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.ErrorContains(t, err, "(root).wrong")
 		require.ErrorContains(t, err, "doesn't contain object")
 	})
+	t.Run("[]int64", func(t *testing.T) {
+		const data = `[1,2,3,4,5]`
+		var (
+			test     TestSlice12
+			expected = TestSlice12{1, 2, 3, 4, 5}
+		)
+		err := test.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.EqualValues(t, expected, test)
+	})
 }
 
 func Test_Map_MarshalJSON(t *testing.T) {
@@ -207,6 +217,13 @@ func Test_Array_MarshalJSON(t *testing.T) {
 	t.Run("[]int64-null", func(t *testing.T) {
 		const expected = `null`
 		var test TestSlice12
+		b, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(b))
+	})
+	t.Run("[]int64", func(t *testing.T) {
+		const expected = `[1,2,3,4,5]`
+		var test = TestSlice12{1, 2, 3, 4, 5}
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(b))
