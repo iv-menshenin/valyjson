@@ -122,3 +122,48 @@ func Test_TestTime01_Zero(t *testing.T) {
 		require.False(t, test.IsZero())
 	})
 }
+
+func Test_UsedDefinedTime(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		const expected = "null"
+		var test *TestTime2
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("equal-time.Time", func(t *testing.T) {
+		var (
+			now  = time.Now()
+			test = TestTime2(now)
+		)
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		expected, err := now.MarshalText()
+		require.NoError(t, err)
+		require.Equal(t, expected, data)
+	})
+	t.Run("unmarshal", func(t *testing.T) {
+		var data = `"2023-04-01T12:00:01.000000000Z"`
+		var test TestTime2
+		require.NoError(t, test.UnmarshalJSON([]byte(data)))
+		require.EqualValues(t, time.Date(2023, 4, 1, 12, 0, 1, 0, time.UTC), test)
+	})
+	t.Run("wrong-json", func(t *testing.T) {
+		var data = `2023-04-01T12:00:01.000000000Z`
+		var test TestTime2
+		err := test.UnmarshalJSON([]byte(data))
+		require.Error(t, err)
+	})
+	t.Run("wrong-format", func(t *testing.T) {
+		var data = `"2023S04S01S12:00:01.000000000Z"`
+		var test TestTime2
+		err := test.UnmarshalJSON([]byte(data))
+		require.ErrorContains(t, err, "can't parse date-time")
+	})
+	t.Run("wrong-data-type", func(t *testing.T) {
+		var data = `["2023-04-01T12:00:01.000000000Z"]`
+		var test TestTime2
+		err := test.UnmarshalJSON([]byte(data))
+		require.ErrorContains(t, err, "it contains array")
+	})
+}

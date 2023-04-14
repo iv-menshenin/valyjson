@@ -104,6 +104,35 @@ func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+// jsonParserTextTime2 used for pooling Parsers for TextTime2 JSONs.
+var jsonParserTextTime2 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestTime2) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTextTime2.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTextTime2.Put(parser)
+	return s.FillFromJSON(v, "(root)")
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestTime2) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+	b, err := v.StringBytes()
+	if err != nil {
+		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+	}
+	_val, err := parseDateTime(b2s(b))
+	if err != nil {
+		return err
+	}
+	*s = TestTime2(_val)
+	return nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime01) MarshalJSON() ([]byte, error) {
 	var result = commonBuffer.Get()
@@ -168,4 +197,30 @@ func (s TestTime01) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestTime2) MarshalJSON() ([]byte, error) {
+	var result = commonBuffer.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestTime2) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	data, err := (*time.Time)(s).MarshalText()
+	if err != nil {
+		return err
+	}
+	result.Write(data)
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestTime2) IsZero() bool {
+	return time.Time(s).IsZero()
 }
