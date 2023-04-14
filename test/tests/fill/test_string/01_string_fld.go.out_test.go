@@ -84,6 +84,13 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(data))
 	})
+	t.Run("null-struct", func(t *testing.T) {
+		const expected = `null`
+		var test1 *TestStr01
+		data, err := test1.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
 	t.Run("fill-fields", func(t *testing.T) {
 		const expected = `{"field":"foo-bar","fieldRef":"nil/null","defRef":"nil/null"}`
 		var str = "nil/null"
@@ -100,6 +107,15 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		const expected = `{"field":"test\nmulti\nlined","fieldRef":null,"defRef":null}`
 		var test = TestStr01{
 			Field: "test\nmulti\nlined",
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("empty-field", func(t *testing.T) {
+		const expected = `{"field":"","fieldRef":null,"defRef":null}`
+		var test = TestStr01{
+			Field: "",
 		}
 		data, err := test.MarshalJSON()
 		require.NoError(t, err)
@@ -128,6 +144,13 @@ func Test_TestStr02_Marshal(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(data))
 	})
+	t.Run("null-struct", func(t *testing.T) {
+		const expected = "null"
+		var test2 *TestStr02
+		data, err := test2.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
 	t.Run("fill-fields", func(t *testing.T) {
 		const expected = `{"field":"foo-bar","fieldRef":"nil/null","string":""}`
 		var str = "nil/null"
@@ -135,6 +158,24 @@ func Test_TestStr02_Marshal(t *testing.T) {
 			Field:    "foo-bar",
 			FieldRef: &str,
 		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("ref-spec-symbols", func(t *testing.T) {
+		const expected = "{\"field\":\"foo-bar\",\"fieldRef\":\"\\twe\\nwrap\\nall the \\\"world\\\"\",\"string\":\"\"}"
+		var str = "\twe\nwrap\nall the \"world\""
+		var test = TestStr02{
+			Field:    "foo-bar",
+			FieldRef: &str,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("empty-field", func(t *testing.T) {
+		const expected = `{"field":"","fieldRef":null,"string":""}`
+		var test = TestStr02{}
 		data, err := test.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(data))
