@@ -60,8 +60,11 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 
 	sel, ok := t.tran.(*ast.SelectorExpr)
 	if ok {
-		if sel.Sel.Name == "UUID" {
+		if sel.Sel.Name == "UUID" || sel.Sel.Name == "Time" {
 			bufVar := asthlp.NewIdent("_uuid")
+			if sel.Sel.Name == "Time" {
+				bufVar = asthlp.NewIdent("_time")
+			}
 			return fn.AppendStmt(
 				asthlp.Assign(
 					asthlp.VarNames{bufVar, asthlp.NewIdent(names.VarNameError)},

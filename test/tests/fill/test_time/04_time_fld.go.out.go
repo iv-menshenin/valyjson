@@ -104,18 +104,18 @@ func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
-// jsonParserTextTime2 used for pooling Parsers for TextTime2 JSONs.
-var jsonParserTextTime2 fastjson.ParserPool
+// jsonParserTestTime2 used for pooling Parsers for TestTime2 JSONs.
+var jsonParserTestTime2 fastjson.ParserPool
 
 // UnmarshalJSON implements json.Unmarshaler
 func (s *TestTime2) UnmarshalJSON(data []byte) error {
-	parser := jsonParserTextTime2.Get()
+	parser := jsonParserTestTime2.Get()
 	// parses data containing JSON
 	v, err := parser.ParseBytes(data)
 	if err != nil {
 		return err
 	}
-	defer jsonParserTextTime2.Put(parser)
+	defer jsonParserTestTime2.Put(parser)
 	return s.FillFromJSON(v, "(root)")
 }
 
@@ -125,7 +125,7 @@ func (s *TestTime2) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 	if err != nil {
 		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
 	}
-	_val, err := parseDateTime(b2s(b))
+	_val, err := parseDateTime(string(b))
 	if err != nil {
 		return err
 	}
@@ -212,12 +212,11 @@ func (s *TestTime2) MarshalTo(result Writer) error {
 		result.WriteString("null")
 		return nil
 	}
-	data, err := (*time.Time)(s).MarshalText()
-	if err != nil {
-		return err
+	_time, err := time.Time(*s).MarshalText()
+	if err == nil {
+		result.Write(_time)
 	}
-	result.Write(data)
-	return nil
+	return err
 }
 
 // IsZero shows whether the object is an empty value.
