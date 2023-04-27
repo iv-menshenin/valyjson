@@ -7,7 +7,6 @@ import (
 
 func TestTestBool01_MarshalJSON(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
-		t.SkipNow()
 		var (
 			True  = true
 			False = false
@@ -18,13 +17,13 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 			RefBool:  &True,
 			RefMaybe: &False,
 		}
-		n := testing.AllocsPerRun(100, func() {
+		n := testing.AllocsPerRun(1000, func() {
 			_, err := test.MarshalJSON()
 			if err != nil {
 				t.Error(err)
 			}
 		})
-		require.LessOrEqual(t, n, float64(0))
+		require.LessOrEqual(t, n, float64(1))
 	})
 	t.Run("filled-all", func(t *testing.T) {
 		var (

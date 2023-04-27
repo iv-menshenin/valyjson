@@ -72,13 +72,13 @@ but we still need the generation of marshaller code.
 
 | lib      | json size | ns/op  |   MB/s |   B/op | allocs/op |
 |:---------|:----------|--------|-------:|-------:|----------:|
-| valyjson | large     | 274990 | 1604.6 | 927003 |        22 |
-| valyjson | regular   | 8419   | 1547.0 |  58723 |         4 |
-| valyjson | small     | 3539   |   22.4 |  33015 |         4 |
+| valyjson | large     | 227322 | 1944.6 | 468187 |       109 |
+| valyjson | regular   | 5164   | 2522.0 |   9745 |         3 |
+| valyjson | small     | 151.2  |  535.6 |     96 |         1 |
 |          |           |        |        |        |           |
-| easyjson | large     | 108981 | 4105.4 | 464261 |        28 |
-| easyjson | regular   | 1792   | 7266.8 |  10283 |         9 |
-| easyjson | small     | 33.44  | 2421.9 |    128 |         1 |
+| easyjson | large     | 101827 | 4393.8 | 466120 |        30 |
+| easyjson | regular   | 2462   | 5290.9 |  10293 |         9 |
+| easyjson | small     | 42.12  | 1923.2 |    128 |         1 |
 
-Here I seriously lose in processing speed, but win a little in the number of requests to the memory allocator.
+Here I seriously lose in processing speed, but win a little in the number of requests to the memory allocator except for the big test case.
 Not a great achievement, but I achieved my goals (see above).

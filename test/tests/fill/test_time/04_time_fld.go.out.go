@@ -133,9 +133,11 @@ func (s *TestTime2) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 	return nil
 }
 
+var bufDataTestTime01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestTime01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -199,9 +201,11 @@ func (s TestTime01) IsZero() bool {
 	return true
 }
 
+var bufDataTestTime2 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime2) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestTime2.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

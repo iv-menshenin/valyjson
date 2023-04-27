@@ -143,9 +143,11 @@ func (s *TestAllOfThird) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataTestOneOfInteger = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfInteger) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestOneOfInteger.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -165,9 +167,11 @@ func (s TestOneOfInteger) IsZero() bool {
 	return s == TestOneOfInteger(0)
 }
 
+var bufDataTestOneOfString = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfString) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestOneOfString.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -187,9 +191,11 @@ func (s TestOneOfString) IsZero() bool {
 	return s == TestOneOfString("")
 }
 
+var bufDataTestOneOfStruct = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfStruct) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestOneOfStruct.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -242,9 +248,11 @@ func (s TestOneOfStruct) IsZero() bool {
 	return true
 }
 
+var bufDataTestAllOfSecond = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestAllOfSecond.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -294,9 +302,11 @@ func (s TestAllOfSecond) IsZero() bool {
 	return true
 }
 
+var bufDataTestAllOfThird = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestAllOfThird.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

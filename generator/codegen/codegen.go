@@ -68,33 +68,39 @@ func NewUnmarshalFunc(structName string) []ast.Decl {
 //		err := s.MarshalTo(result)
 //		return result.Bytes(), err
 //	}
-func NewMarshalFunc(structName string) ast.Decl {
-	return asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
-		Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
-		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(structName)))).
-		Results(
-			asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
-			asthlp.Field("", nil, asthlp.ErrorType),
-		).
-		AppendStmt(
-			asthlp.Var(
-				asthlp.VariableValue(names.VarNameWriter, asthlp.FreeExpression(asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector("commonBuffer", "Get")),
-				))),
-			),
-			asthlp.Assign(
-				asthlp.MakeVarNames("err"),
-				asthlp.Definition,
-				asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
-					asthlp.NewIdent("result"),
+func NewMarshalFunc(structName string) []ast.Decl {
+	var buffName = fmt.Sprintf("bufData%s", structName)
+	return []ast.Decl{
+		asthlp.DeclareVariable().AppendSpec(asthlp.VariableValue(
+			buffName, asthlp.StructLiteral(asthlp.NewIdent("cb")),
+		)).Decl(),
+		asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
+			Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
+			Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(structName)))).
+			Results(
+				asthlp.Field("", nil, asthlp.ArrayType(asthlp.Byte)),
+				asthlp.Field("", nil, asthlp.ErrorType),
+			).
+			AppendStmt(
+				asthlp.Var(
+					asthlp.VariableValue(names.VarNameWriter, asthlp.FreeExpression(asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector(buffName, "Get")),
+					))),
 				),
-			),
-			asthlp.Return(
-				asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("result", "Bytes"))),
-				asthlp.NewIdent("err"),
-			),
-		).Decl()
+				asthlp.Assign(
+					asthlp.MakeVarNames("err"),
+					asthlp.Definition,
+					asthlp.Call(
+						asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
+						asthlp.NewIdent("result"),
+					),
+				),
+				asthlp.Return(
+					asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("result", "Bytes"))),
+					asthlp.NewIdent("err"),
+				),
+			).Decl(),
+	}
 }
 
 func makeWriteAndReturn(s string) []ast.Stmt {

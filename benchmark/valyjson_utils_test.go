@@ -29,7 +29,7 @@ func Test_bufWriter_Write(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
 		var bx [256]byte
 		n := testing.AllocsPerRun(1000, func() {
-			var w = commonBuffer.Get()
+			var w = bufDataXLStruct.Get()
 			var x = 16384
 			for x > 0 {
 				pie := 255

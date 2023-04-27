@@ -23,6 +23,8 @@ type Writer interface {
 type bufWriter struct {
 	buf []*bytebufferpool.ByteBuffer
 	br  int // current bucket
+	sz  int
+	cb  *cb
 }
 
 func (b *bufWriter) Write(p []byte) (n int, err error) {
@@ -32,9 +34,16 @@ func (b *bufWriter) Write(p []byte) (n int, err error) {
 		b.buf[b.br].B = append(b.buf[b.br].B, p...)
 		return n, nil
 	}
-	b.buf[b.br].B = append(b.buf[b.br].B, p[:free]...)
-	b.br++
-	b.buf[b.br].B = append(b.buf[b.br].B, p[free:]...)
+	for len(p) > 0 {
+		sz := cap(b.buf[b.br].B) - len(b.buf[b.br].B)
+		if sz >= len(p) {
+			b.buf[b.br].B = append(b.buf[b.br].B, p...)
+			break
+		}
+		b.buf[b.br].B = append(b.buf[b.br].B, p[:sz]...)
+		p = p[sz:]
+		b.br++
+	}
 	return n, nil
 }
 
@@ -63,45 +72,91 @@ func (b *bufWriter) Len() (l int) {
 }
 
 func (b *bufWriter) Bytes() []byte {
+	var sz int
 	out := make([]byte, 0, b.Len())
 	for _, buf := range b.buf {
+		sz += len(buf.B)
 		out = append(out, buf.B...)
 	}
+	b.sz = tuneBuf(b.sz, sz)
 	b.Close()
 	return out
+}
+
+func tuneBuf(old, cur int) int {
+	var nw = cur
+	if old > 0 {
+		nw = (cur + old) / 2
+	}
+	const kib = 1024
+	switch {
+	case nw > 32*kib:
+		return 64 * kib
+	case nw > 22*kib:
+		return 32 * kib
+	case nw > 16*kib:
+		return 22 * kib
+	case nw > 10*kib:
+		return 16 * kib
+	case nw > 8*kib:
+		return 10 * kib
+	case nw > 4*kib:
+		return 8 * kib
+	case nw > 2*kib:
+		return 4 * kib
+	case nw > kib:
+		return 2 * kib
+	case nw > 512:
+		return kib
+	case nw > 256:
+		return 512
+	case nw > 128:
+		return 256
+	default:
+		return 128
+	}
 }
 
 func (b *bufWriter) Close() error {
 	for i := range b.buf {
 		writeBuf.Put(b.buf[i])
 	}
-	commonBuffer.Put(b)
+	if b.cb != nil {
+		b.cb.Put(b)
+	}
 	return nil
 }
 
-const minBufBlock = 32768
+const defBufBlock = 8192
 
-func (b *bufWriter) ensureSpace(minNeededSz int) (free int) {
+func (b *bufWriter) ensureSpace(minNeededSz int) (currBlockFree int) {
 	if len(b.buf) > 0 {
-		free = cap(b.buf[b.br].B) - len(b.buf[b.br].B)
-		if free >= minNeededSz {
-			return
+		currBlockFree = cap(b.buf[b.br].B) - len(b.buf[b.br].B)
+		if currBlockFree >= minNeededSz {
+			return currBlockFree
 		}
-		minNeededSz -= free
+		minNeededSz -= currBlockFree
 	}
-	needSz := minNeededSz
-	if needSz < minBufBlock {
-		needSz = minBufBlock
+	for {
+		bb := writeBuf.Get()
+		if cap(bb.B) == 0 {
+			if b.sz == 0 {
+				b.sz = defBufBlock
+			}
+			if minNeededSz < b.sz {
+				minNeededSz = b.sz
+			}
+			bb.B = make([]byte, 0, minNeededSz)
+		}
+		if len(b.buf) == 0 {
+			currBlockFree = cap(bb.B)
+		}
+		b.buf = append(b.buf, bb)
+		if cap(bb.B) >= minNeededSz {
+			return currBlockFree
+		}
+		minNeededSz -= cap(bb.B)
 	}
-	bb := writeBuf.Get()
-	if len(bb.B) < minNeededSz {
-		bb.B = make([]byte, 0, needSz)
-	}
-	b.buf = append(b.buf, bb)
-	if len(b.buf) == 1 {
-		return needSz
-	}
-	return
 }
 
 var writeBuf = bytebufferpool.Pool{}
@@ -256,9 +311,13 @@ type cb struct {
 func (c *cb) Get() *bufWriter {
 	p := c.pool.Get()
 	if p == nil {
-		return &bufWriter{}
+		return &bufWriter{
+			cb: c,
+		}
 	}
-	return p.(*bufWriter)
+	b := p.(*bufWriter)
+	b.cb = c
+	return b
 }
 
 func (c *cb) Put(w *bufWriter) {
@@ -266,5 +325,3 @@ func (c *cb) Put(w *bufWriter) {
 	w.buf = w.buf[:0]
 	c.pool.Put(w)
 }
-
-var commonBuffer = cb{}

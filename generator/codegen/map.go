@@ -31,28 +31,27 @@ func (m *Map) UnmarshalFunc() []ast.Decl {
 	return NewUnmarshalFunc(m.Name())
 }
 
-//
-//func (m *MapTable) FillFromJson(v *fastjson.Value, objPath string) (err error) {
-//	o, err := v.Object()
-//	if err != nil {
-//		return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
-//	}
-//	*m = make(map[string]TableOf, o.Len())
-//	o.Visit(func(key []byte, v *fastjson.Value) {
+//	func (m *MapTable) FillFromJson(v *fastjson.Value, objPath string) (err error) {
+//		o, err := v.Object()
 //		if err != nil {
-//			return
+//			return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
 //		}
-//		var value TableOf
-//		err = value.FillFromJson(v, objPath+"tables.")
-//		if err == nil {
-//			(*m)[string(key)] = TableOf(value)
+//		*m = make(map[string]TableOf, o.Len())
+//		o.Visit(func(key []byte, v *fastjson.Value) {
+//			if err != nil {
+//				return
+//			}
+//			var value TableOf
+//			err = value.FillFromJson(v, objPath+"tables.")
+//			if err == nil {
+//				(*m)[string(key)] = TableOf(value)
+//			}
+//		})
+//		if err != nil {
+//			return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
 //		}
-//	})
-//	if err != nil {
-//		return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
+//		return nil
 //	}
-//	return nil
-//}
 func (m *Map) FillerFunc() ast.Decl {
 	const (
 		v = "v"
@@ -189,7 +188,7 @@ func (m *Map) ValidatorFunc() ast.Decl {
 	return nil
 }
 
-func (m *Map) MarshalFunc() ast.Decl {
+func (m *Map) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(m.name)
 }
 

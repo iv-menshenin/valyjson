@@ -201,7 +201,7 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 //		err := s.MarshalTo(result)
 //		return result.Bytes(), err
 //	}
-func (s *Struct) MarshalFunc() ast.Decl {
+func (s *Struct) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(s.name)
 }
 

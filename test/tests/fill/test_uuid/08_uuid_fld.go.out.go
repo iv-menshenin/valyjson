@@ -126,9 +126,11 @@ func (s *InheritUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error
 	return nil
 }
 
+var bufDataTestUUID = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestUUID) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestUUID.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -167,9 +169,11 @@ func (s TestUUID) IsZero() bool {
 	return true
 }
 
+var bufDataInheritUUID2 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *InheritUUID2) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataInheritUUID2.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -188,9 +192,11 @@ func (s InheritUUID2) IsZero() bool {
 	return s == InheritUUID2(uuid.Nil)
 }
 
+var bufDataInheritUUID = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *InheritUUID) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataInheritUUID.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

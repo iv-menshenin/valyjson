@@ -345,9 +345,11 @@ func (s *Property) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataTestMap01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestMap01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -568,9 +570,11 @@ func (s TestMap01) IsZero() bool {
 	return true
 }
 
+var bufDataProperty = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Property) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataProperty.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

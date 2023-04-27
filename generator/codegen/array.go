@@ -135,20 +135,24 @@ func (a *Array) ValidatorFunc() ast.Decl {
 	return nil
 }
 
-func (a *Array) MarshalFunc() ast.Decl {
+func (a *Array) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(a.name)
 }
 
-// 	if s == nil || *s == nil {
+//	if s == nil || *s == nil {
 //		return []byte("null"), nil
 //	}
-//	var (
-//		err     error
-//		wantComma bool
-//		buf     = make([]byte, 0, 128)
-//		result  = bytes.NewBuffer(dst)
-//	)
-//	result.WriteRune('[')
+//
+// var (
+//
+//	err     error
+//	wantComma bool
+//	buf     = make([]byte, 0, 128)
+//	result  = bytes.NewBuffer(dst)
+//
+// )
+// result.WriteRune('[')
+//
 //	for _, _v := range *s {
 //		if wantComma {
 //			result.WriteRune(',')
@@ -157,8 +161,9 @@ func (a *Array) MarshalFunc() ast.Decl {
 //		buf = strconv.AppendInt(buf[:0], _v, 10)
 //		result.Write(buf)
 //	}
-//	result.WriteRune(']')
-//	return result.Bytes(), err
+//
+// result.WriteRune(']')
+// return result.Bytes(), err
 func (a *Array) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
