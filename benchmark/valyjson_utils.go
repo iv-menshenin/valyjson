@@ -90,8 +90,6 @@ func tuneBuf(old, cur int) int {
 	}
 	const kib = 1024
 	switch {
-	case nw > 32*kib:
-		return 64 * kib
 	case nw > 22*kib:
 		return 32 * kib
 	case nw > 16*kib:
@@ -240,14 +238,12 @@ func writeString(w Writer, s string) {
 		w.WriteString(`"`)
 		return
 	}
-	var (
-		buf [128]byte
-		idx int
-	)
+	var buf = stringBuf.Get()
+	defer stringBuf.Put(buf)
 	flush := func() {
-		if len(buf) > 0 {
-			w.WriteString(b2s(buf[:idx]))
-			idx = 0
+		if buf.Len() > 0 {
+			buf.WriteTo(w)
+			buf.B = buf.B[:0]
 		}
 	}
 	for _, r := range s {
@@ -274,18 +270,7 @@ func writeString(w Writer, s string) {
 			w.WriteString(`\"`)
 
 		default:
-			if len(buf) >= cap(buf)-2 {
-				flush()
-			}
-			if r < 256 {
-				buf[idx] = byte(r & 0xff)
-				idx++
-			} else {
-				buf[idx] = byte(r >> 8)
-				idx++
-				buf[idx] = byte(r & 0xff)
-				idx++
-			}
+			buf.WriteString(string(r))
 		}
 	}
 	flush()

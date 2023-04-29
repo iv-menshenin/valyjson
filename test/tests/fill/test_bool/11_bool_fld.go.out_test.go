@@ -5,6 +5,16 @@ import (
 	"testing"
 )
 
+type Null struct{}
+
+func (Null) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+func (Null) WriteString(p string) (n int, err error) {
+	return len(p), nil
+}
+
 func TestTestBool01_MarshalJSON(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
 		var (
@@ -18,12 +28,12 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 			RefMaybe: &False,
 		}
 		n := testing.AllocsPerRun(1000, func() {
-			_, err := test.MarshalJSON()
+			err := test.MarshalTo(Null{})
 			if err != nil {
 				t.Error(err)
 			}
 		})
-		require.LessOrEqual(t, n, float64(1))
+		require.LessOrEqual(t, n, float64(0))
 	})
 	t.Run("filled-all", func(t *testing.T) {
 		var (
