@@ -6,34 +6,34 @@ Yet another generator of the JSON-marshalers and unmarshalers code.
 Powered by [valyala/fastjson](https://github.com/valyala/fastjson) this thing generates quite efficient parsing code.
 And this is the reason of this name "valyjson".
 
-## Why I`m built it
+## Why have I built it
 
 The main reason is the experience.
-But really I wanted any useful generator that I can integrate into my project that used golang for making structures from specifications.
-I've tried [mailru/easyjson](https://github.com/mailru/easyjson) and had failed.
-At first, I had difficulty setting up my generators that they would invoke the mailru generators.
-After several nervous attempts the generation is performed without errors.
-Then I failed with the embedded structures, something seemed to break there in the easyjson.
+But really I wanted to get a useful generator which I can integrate into my golang project that is used for building structures from specifications.
+I've tried [mailru/easyjson](https://github.com/mailru/easyjson) and failed.
+At first, I had difficulty setting up my generators that would invoke the mailru generators.
+After several nervous attempts the generation was performing without errors.
+Then I failed with the embedded structures, something seemed to break inside easyjson.
 
-And I thought, Okay, if you don't want to work with me, I'm going to build my own json-parser-generator with blackjack...
+And I thought: Okay, if you don't want to work with me, I'm going to build my own json-parser-generator with blackjack...
 
 ## Main objectives
 
-The main goals I wanted to achieve were:
+The goals I wanted to achieve were:
 
  - No dependencies: you do not need to import my package into your final product;
- - Efficiency: I used [valyala/fastjson](https://github.com/valyala/fastjson) for parsing, so it's very efficient.
+ - Efficiency: I used [valyala/fastjson](https://github.com/valyala/fastjson) for parsing which is very efficient.
  - Standards: I took care to match the behavior of marshalers/parsers with that of the standard golang parser.
- - Declarative: as few cmd-flags as possible, all generation settings are located in a special comment, which means the code describes itself.
+ - Declarative: as few cmd-flags as possible, all generation settings are located in a special comment, that means the code describes itself.
 
 The last point can make your code more understandable.
 You can understand the json behavior of each model even if the generation is not yet complete.
 For the same reason all fields must have json tags.
 
-## Take a look at my benchmarks
+## Take a look at the benchmarks
 
-The tests, the results of which are presented here, I borrowed from easyjson.
-So if you trust the objectivity of their tests, then trust mine.
+The results of the tests presented here, I borrowed from easyjson.
+So if you trust the objectiveness of their tests, then you can trust my tests too.
 
 ```
 goos: linux
@@ -66,9 +66,9 @@ and Aliaksandr Valialkin knows how to save memory.
 
 ### Marshaling
 
-For convenience, I cut out all results except easyjson and left only the tests working with concurrency.
+For convenience, I cut out all the results except easyjson and left only those tests which work with concurrency.
 In real life, we are unlikely to encounter a situation where we have no parallelism,
-but we still need the generation of marshaller code.
+but still need the generation of marshaller code.
 
 | lib      | json size | ns/op  |   MB/s |   B/op | allocs/op |
 |:---------|:----------|--------|-------:|-------:|----------:|
