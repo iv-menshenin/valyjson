@@ -493,9 +493,11 @@ func (s *TestNested04) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 	return nil
 }
 
+var bufDataTestInh01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestInh01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -612,9 +614,11 @@ func (s TestInh01) IsZero() bool {
 	return true
 }
 
+var bufDataTestInh02 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh02) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestInh02.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -650,9 +654,11 @@ func (s TestInh02) IsZero() bool {
 	return true
 }
 
+var bufDataTestInh03 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh03) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestInh03.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -705,9 +711,11 @@ func (s TestInh03) IsZero() bool {
 	return true
 }
 
+var bufDataTestNested01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestNested01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -746,9 +754,11 @@ func (s TestNested01) IsZero() bool {
 	return true
 }
 
+var bufDataTestNested02 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested02) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestNested02.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -787,9 +797,11 @@ func (s TestNested02) IsZero() bool {
 	return true
 }
 
+var bufDataTestNested03 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested03) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestNested03.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -828,9 +840,11 @@ func (s TestNested03) IsZero() bool {
 	return true
 }
 
+var bufDataTestNested04 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested04) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestNested04.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

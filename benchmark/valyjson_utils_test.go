@@ -29,7 +29,7 @@ func Test_bufWriter_Write(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
 		var bx [256]byte
 		n := testing.AllocsPerRun(1000, func() {
-			var w = commonBuffer.Get()
+			var w = bufDataXLStruct.Get()
 			var x = 16384
 			for x > 0 {
 				pie := 255
@@ -62,4 +62,22 @@ func Benchmark_testWiter(b *testing.B) {
 		}
 		w.Close()
 	}
+}
+
+func Test_writeString(t *testing.T) {
+	t.Run("ascii", func(t *testing.T) {
+		var b = bytes.NewBufferString("")
+		writeString(b, "te\tst\n")
+		require.Equal(t, `"te\tst\n"`, b.String())
+	})
+	t.Run("double", func(t *testing.T) {
+		var b = bytes.NewBufferString("")
+		writeString(b, "съешь еще этих \\горьких апельсинов\n")
+		require.Equal(t, `"съешь еще этих \\горьких апельсинов\n"`, b.String())
+	})
+	t.Run("china", func(t *testing.T) {
+		var b = bytes.NewBufferString("")
+		writeString(b, "去吧，离开这里。\n")
+		require.Equal(t, `"去吧，离开这里。\n"`, b.String())
+	})
 }

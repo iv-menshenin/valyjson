@@ -178,9 +178,11 @@ func (s *TestStr02) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataTestStr01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestStr01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -245,9 +247,11 @@ func (s TestStr01) IsZero() bool {
 	return true
 }
 
+var bufDataTestStr02 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr02) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestStr02.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

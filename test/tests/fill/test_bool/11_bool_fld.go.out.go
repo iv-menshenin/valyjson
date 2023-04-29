@@ -219,9 +219,11 @@ func (s *TestInhBool) FillFromJSON(v *fastjson.Value, objPath string) (err error
 	return nil
 }
 
+var bufDataTestBool01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestBool01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -312,9 +314,11 @@ func (s TestBool01) IsZero() bool {
 	return true
 }
 
+var bufDataTestBool02 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool02) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestBool02.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -362,9 +366,11 @@ func (s TestBool02) IsZero() bool {
 	return true
 }
 
+var bufDataTestInhBool = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInhBool) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestInhBool.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

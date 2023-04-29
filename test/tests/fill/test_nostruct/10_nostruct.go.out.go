@@ -248,9 +248,11 @@ func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error
 	return nil
 }
 
+var bufDataTestMap10 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap10) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestMap10.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -285,9 +287,11 @@ func (s TestMap10) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataTestMap11 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestMap11.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -325,9 +329,11 @@ func (s TestMap11) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataTestMap11Ref = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestMap11Ref.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -365,9 +371,11 @@ func (s TestMap11Ref) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataTestSlice12 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestSlice12.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -400,9 +408,11 @@ func (s TestSlice12) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataTestSlice13 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice13) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestSlice13.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -438,9 +448,11 @@ func (s TestSlice13) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataTestSlice14 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestSlice14.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

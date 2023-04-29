@@ -612,9 +612,11 @@ func (s *MapInt64) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	return err
 }
 
+var bufDataPerson = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Person) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataPerson.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -732,9 +734,11 @@ func (s Person) IsZero() bool {
 	return true
 }
 
+var bufDataPassport = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Passport) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataPassport.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -787,9 +791,11 @@ func (s Passport) IsZero() bool {
 	return true
 }
 
+var bufDataTableOf = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TableOf) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTableOf.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -851,9 +857,11 @@ func (s TableOf) IsZero() bool {
 	return true
 }
 
+var bufDataTable = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Table) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTable.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -966,9 +974,11 @@ func (s Table) IsZero() bool {
 	return true
 }
 
+var bufDataTag = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Tag) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTag.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -1021,9 +1031,11 @@ func (s Tag) IsZero() bool {
 	return true
 }
 
+var bufDataMapTable = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapTable) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataMapTable.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -1061,9 +1073,11 @@ func (s MapTable) IsZero() bool {
 	return len(s) == 0
 }
 
+var bufDataMapInt64 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapInt64) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataMapInt64.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

@@ -33,7 +33,7 @@ func (t *Transitive) ValidatorFunc() ast.Decl {
 	return nil
 }
 
-func (t *Transitive) MarshalFunc() ast.Decl {
+func (t *Transitive) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(t.name)
 }
 

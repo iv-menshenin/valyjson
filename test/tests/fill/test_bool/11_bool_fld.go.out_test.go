@@ -5,9 +5,18 @@ import (
 	"testing"
 )
 
+type Null struct{}
+
+func (Null) Write(p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+func (Null) WriteString(p string) (n int, err error) {
+	return len(p), nil
+}
+
 func TestTestBool01_MarshalJSON(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
-		t.SkipNow()
 		var (
 			True  = true
 			False = false
@@ -18,8 +27,8 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 			RefBool:  &True,
 			RefMaybe: &False,
 		}
-		n := testing.AllocsPerRun(100, func() {
-			_, err := test.MarshalJSON()
+		n := testing.AllocsPerRun(1000, func() {
+			err := test.MarshalTo(Null{})
 			if err != nil {
 				t.Error(err)
 			}

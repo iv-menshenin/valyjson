@@ -26,7 +26,7 @@ type (
 		UnmarshalFunc() []ast.Decl
 		FillerFunc() ast.Decl
 		ValidatorFunc() ast.Decl
-		MarshalFunc() ast.Decl
+		MarshalFunc() []ast.Decl
 		AppendJsonFunc() ast.Decl
 		ZeroFunc() ast.Decl
 	}
@@ -65,7 +65,7 @@ func (g *Gen) BuildJsoners() {
 			continue
 		}
 		if marshalFn := structDecl.MarshalFunc(); marshalFn != nil {
-			g.result.Decls = append(g.result.Decls, marshalFn)
+			g.result.Decls = append(g.result.Decls, marshalFn...)
 		}
 		if appendFn := structDecl.AppendJsonFunc(); appendFn != nil {
 			g.result.Decls = append(g.result.Decls, appendFn)

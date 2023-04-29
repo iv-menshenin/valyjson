@@ -149,9 +149,11 @@ func (s *TestUserDefined) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataTestUserDefined = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestUserDefined) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataTestUserDefined.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

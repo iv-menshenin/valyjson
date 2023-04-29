@@ -1858,9 +1858,11 @@ func (s *XLStruct) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataSearchMetadata = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *SearchMetadata) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataSearchMetadata.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2011,9 +2013,11 @@ func (s SearchMetadata) IsZero() bool {
 	return true
 }
 
+var bufDataHashtag = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Hashtag) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataHashtag.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2075,9 +2079,11 @@ func (s Hashtag) IsZero() bool {
 	return true
 }
 
+var bufDataEntities = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Entities) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataEntities.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2182,9 +2188,11 @@ func (s Entities) IsZero() bool {
 	return true
 }
 
+var bufDataUserEntityDescription = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityDescription) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataUserEntityDescription.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2236,9 +2244,11 @@ func (s UserEntityDescription) IsZero() bool {
 	return true
 }
 
+var bufDataURL = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *URL) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataURL.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2313,9 +2323,11 @@ func (s URL) IsZero() bool {
 	return true
 }
 
+var bufDataUserEntityURL = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityURL) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataUserEntityURL.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2366,9 +2378,11 @@ func (s UserEntityURL) IsZero() bool {
 	return true
 }
 
+var bufDataUserEntities = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntities) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataUserEntities.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2389,7 +2403,7 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"description":`)
 	if err = s.Description.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "description" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
@@ -2397,7 +2411,7 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"url":`)
 	if err = s.URL.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "url" attribute: %w`, err)
 	}
 	wantComma = true
 	result.WriteString("}")
@@ -2415,9 +2429,11 @@ func (s UserEntities) IsZero() bool {
 	return true
 }
 
+var bufDataUser = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *User) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataUser.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -2490,7 +2506,7 @@ func (s *User) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"entities":`)
 	if err = s.Entities.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
@@ -2971,9 +2987,11 @@ func (s User) IsZero() bool {
 	return true
 }
 
+var bufDataStatusMetadata = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *StatusMetadata) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataStatusMetadata.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -3026,9 +3044,11 @@ func (s StatusMetadata) IsZero() bool {
 	return true
 }
 
+var bufDataStatus = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Status) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataStatus.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -3080,7 +3100,7 @@ func (s *Status) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"entities":`)
 	if err = s.Entities.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
@@ -3180,7 +3200,7 @@ func (s *Status) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"metadata":`)
 	if err = s.Metadata.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "metadata" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
@@ -3251,7 +3271,7 @@ func (s *Status) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"user":`)
 	if err = s.User.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "user" attribute: %w`, err)
 	}
 	wantComma = true
 	result.WriteString("}")
@@ -3326,9 +3346,11 @@ func (s Status) IsZero() bool {
 	return true
 }
 
+var bufDataLargeStruct = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *LargeStruct) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataLargeStruct.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -3349,7 +3371,7 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 	}
 	result.WriteString(`"search_metadata":`)
 	if err = s.SearchMetadata.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
+		return fmt.Errorf(`can't marshal "search_metadata" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
@@ -3390,9 +3412,11 @@ func (s LargeStruct) IsZero() bool {
 	return true
 }
 
+var bufDataXLStruct = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *XLStruct) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataXLStruct.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

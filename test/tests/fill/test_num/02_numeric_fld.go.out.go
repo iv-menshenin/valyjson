@@ -923,9 +923,11 @@ func (s *NumStruct02) validate(v *fastjson.Value, objPath string) error {
 	return err
 }
 
+var bufDataNumStruct01 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct01) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataNumStruct01.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }
@@ -1264,9 +1266,11 @@ func (s NumStruct01) IsZero() bool {
 	return true
 }
 
+var bufDataNumStruct02 = cb{}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct02) MarshalJSON() ([]byte, error) {
-	var result = commonBuffer.Get()
+	var result = bufDataNumStruct02.Get()
 	err := s.MarshalTo(result)
 	return result.Bytes(), err
 }

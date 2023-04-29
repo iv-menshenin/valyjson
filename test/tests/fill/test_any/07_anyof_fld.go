@@ -7,6 +7,7 @@ import (
 )
 
 // TestAllOf01 tests allOf
+//
 //json:custom,decode
 type TestAllOf01 struct {
 	TestAllOfFirstIsOne
@@ -15,6 +16,7 @@ type TestAllOf01 struct {
 }
 
 // TestAllOfFirstIsOne tests oneOf
+//
 //json:custom,decode
 type TestAllOfFirstIsOne struct {
 	OneOf `json:"value"`
@@ -116,6 +118,8 @@ func (t *TestAllOf01) UnmarshalJSON(data []byte) (err error) {
 	}
 	return nil
 }
+
+var commonBuffer = cb{}
 
 func (t *TestAllOf01) MarshalJSON() ([]byte, error) {
 	var err error
