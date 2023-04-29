@@ -20,6 +20,7 @@ type Writer interface {
 	io.StringWriter
 }
 
+// some kind of a speck
 type bufWriter struct {
 	buf []*bytebufferpool.ByteBuffer
 	br  int // current bucket
