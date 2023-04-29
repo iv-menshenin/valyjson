@@ -146,6 +146,6 @@ func Test_writeString(t *testing.T) {
 		n := testing.AllocsPerRun(100, func() {
 			writeString(w, "эй ты\nиди сюда\n - \"чего?\"")
 		})
-		require.EqualValues(t, 1, n)
+		require.EqualValues(t, 0, n)
 	})
 }
