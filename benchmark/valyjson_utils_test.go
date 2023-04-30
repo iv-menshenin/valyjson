@@ -2,6 +2,8 @@ package benchmark
 
 import (
 	"bytes"
+	"io"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -45,14 +47,13 @@ func Test_bufWriter_Write(t *testing.T) {
 	})
 }
 
-func Benchmark_testWiter(b *testing.B) {
-	var w = bufWriter{
-		cb: &cb{},
-	}
+// Benchmark_testWriter-8                     47090             25799 ns/op            8303 B/op         11 allocs/op
+func Benchmark_testWriter(b *testing.B) {
 	var bx [256]byte
 	b.ResetTimer()
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
+		var w bufWriter
 		var x = 65535
 		for x > 0 {
 			pie := 255
@@ -103,4 +104,40 @@ func Test_bufWriter_ensureSpace(t *testing.T) {
 		_, err = w.Write(make([]byte, 290))
 		require.NoError(t, err)
 	})
+}
+
+func Test_testWriter_Parallelism(t *testing.T) {
+	t.Parallel()
+	var wg sync.WaitGroup
+	var etalon []byte
+	for r := 0; r < 64; r++ {
+		for x := byte(0); x < 254; x++ {
+			etalon = append(etalon, bytes.Repeat([]byte{x}, 250)...)
+		}
+	}
+	var ch = make(chan struct{}, 64)
+	for n := 0; n < 255; n++ {
+		wg.Add(1)
+		go func() {
+			ch <- struct{}{}
+			defer func() {
+				<-ch
+			}()
+			defer wg.Done()
+			var w bufWriter
+			r := bytes.NewReader(etalon)
+			for {
+				var buf = make([]byte, 215)
+				read, err := r.Read(buf)
+				if err == io.EOF {
+					break
+				}
+				require.NoError(t, err)
+				_, err = w.Write(buf[:read])
+				require.NoError(t, err)
+			}
+			require.Equal(t, etalon, w.Bytes())
+		}()
+	}
+	wg.Wait()
 }
