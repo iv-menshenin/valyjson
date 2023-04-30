@@ -22,7 +22,8 @@ func NeedVars() ast.Stmt {
 }
 
 // putQuoteStmt puts quote
-//  result.WriteString(`"`)
+//
+//	result.WriteString(`"`)
 var putQuoteStmt = asthlp.CallStmt(asthlp.Call(
 	WriteStringFn,
 	asthlp.StringConstant(`"`).Expr(),
@@ -30,17 +31,20 @@ var putQuoteStmt = asthlp.CallStmt(asthlp.Call(
 
 var SetCommaVar = asthlp.Assign(asthlp.VarNames{WantCommaVar}, asthlp.Assignment, asthlp.True)
 
-// putCommaStmt puts comma
-//  result.WriteString(",")
-var putCommaStmt = asthlp.CallStmt(asthlp.Call(
+// PutCommaStmt puts comma
+//
+//	result.WriteString(",")
+var PutCommaStmt = asthlp.CallStmt(asthlp.Call(
 	WriteStringFn,
 	asthlp.StringConstant(",").Expr(),
 ))
 
-//  if wantComma {
-//    result.Write([]byte{','})
-//  }
-var putCommaFirstIf = asthlp.If(WantCommaVar, putCommaStmt)
+// PutCommaFirstIf
+//
+//	if wantComma {
+//		result.Write([]byte{','})
+//	}
+var PutCommaFirstIf = asthlp.If(WantCommaVar, PutCommaStmt)
 
 var (
 	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))
@@ -50,7 +54,7 @@ var (
 // result.WriteString("\"{json}\":")
 // b = strconv.AppendUint(buf[:0], uint64({src}), 10)
 // result.Write(b)
-func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
+func (f *Field) typeMarshal(src ast.Expr, t string) WriteBlock {
 	var (
 		ur = src
 		wb WriteBlock
@@ -60,7 +64,6 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		ur = asthlp.Star(src)
 	}
 	switch t {
-
 	case "int", "int8", "int16", "int32", "int64":
 		wb = intMarshal(ur, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", nc || t != "int64")
 
@@ -96,14 +99,14 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		}
 	}
 
-	return wb.Render(putCommaFirstIf)
+	return wb
 }
 
 // result.WriteString("\"field\":\"\"")
+// TODO deadcode?
 func (f *Field) typeMarshalDefault(t string) []ast.Stmt {
 	var writeArg ast.Expr
 	switch t {
-
 	case "int", "int8", "int16", "int32", "int64":
 		writeArg = asthlp.StringConstant(fmt.Sprintf(`"%s":0`, f.tags.JsonName())).Expr()
 
@@ -130,19 +133,22 @@ func (f *Field) typeMarshalDefault(t string) []ast.Stmt {
 	}
 }
 
-// if s.HeightRef != nil {
-//     {v} := *{src}
-//     result.WriteString("\"{json}\":")
-//     b = strconv.AppendUint(buf[:0], uint64({v}), 10)
-//     result.Write(b)
-// } else {
-//     result.WriteString("\"{json}\":{default}")
-// }
+//	if s.HeightRef != nil {
+//	    {v} := *{src}
+//	    result.WriteString("\"{json}\":")
+//	    b = strconv.AppendUint(buf[:0], uint64({v}), 10)
+//	    result.Write(b)
+//	} else {
+//
+//	    result.WriteString("\"{json}\":{default}")
+//	}
+//
+// TODO deadcode?
 func (f *Field) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var result = []ast.Stmt{
 		define(ast.NewIdent(v), asthlp.Star(src)),
 	}
-	result = append(result, f.typeMarshal(ast.NewIdent(v), v, t)...)
+	result = append(result, f.typeMarshal(ast.NewIdent(v), t).Render(PutCommaFirstIf)...)
 
 	if stmt := f.ifNil(); len(stmt) > 0 {
 		return []ast.Stmt{

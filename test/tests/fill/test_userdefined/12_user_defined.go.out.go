@@ -169,9 +169,6 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Int32 != 0 {
 		result.WriteString(`"f_int32":`)
 		writeInt64(result, int64(s.Int32))
@@ -181,16 +178,12 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Int64 != 0 {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"f_int64":`)
 		writeInt64(result, int64(s.Int64))
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Float32 != 0 {
 		result.WriteString(`"f_float32":`)
 		writeFloat64(result, float64(s.Float32))
@@ -200,16 +193,12 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Float64 != 0 {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"f_float64":`)
 		writeFloat64(result, float64(s.Float64))
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.String != "" {
 		result.WriteString(`"f_string":`)
 		writeString(result, string(s.String))
@@ -219,9 +208,7 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Bool {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"f_bool":true`)
 		wantComma = true
 	}

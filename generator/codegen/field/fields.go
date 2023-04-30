@@ -139,27 +139,25 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 //	}
 //
 // result.Write(b)
-func (f *Field) MarshalStatements(name string) []ast.Stmt {
-	var v = intermediateVarName(name, f.tags)
+func (f *Field) MarshalStatements(name string) WriteBlock {
 	var src = asthlp.SimpleSelector(names.VarNameReceiver, name)
 	switch tt := f.refx.(type) {
-
 	case *ast.Ident:
-		return f.typeMarshal(src, v, tt.Name)
+		return f.typeMarshal(src, tt.Name)
 
 	case *ast.SelectorExpr:
 		if tt.Sel.Name == "Time" {
 			block := timeMarshal(src, f.tags.JsonName(), f.tags.Layout(), f.tags.JsonAppendix() == "omitempty", f.isStar)
-			return block.Render(putCommaFirstIf)
+			return block
 		}
 		if tt.Sel.Name == "UUID" {
 			block := uuidMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty")
-			return block.Render(putCommaFirstIf)
+			return block
 		}
-		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar).Render(putCommaFirstIf)
+		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar)
 
 	case *ast.StructType:
-		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar).Render(putCommaFirstIf)
+		return marshalTransit(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", f.isStar)
 
 	case *ast.MapType:
 		var isString bool
@@ -173,7 +171,7 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr, dec))
-		return block.Render(putCommaFirstIf)
+		return block
 
 	case *ast.ArrayType:
 		var valType = tt.Elt
@@ -182,7 +180,7 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, nil))
-		return block.Render(putCommaFirstIf)
+		return block
 
 	default:
 		// todo @menshenin panic

@@ -638,9 +638,6 @@ func (s *Person) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, s.Name)
@@ -649,9 +646,7 @@ func (s *Person) MarshalTo(result Writer) error {
 		result.WriteString(`"name":""`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
 		writeString(result, s.Surname)
@@ -661,24 +656,18 @@ func (s *Person) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Middle != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"middle":`)
 		writeString(result, *s.Middle)
 		wantComma = true
 	}
 	if s.DOB != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"dob":`)
 		writeTime(result, *s.DOB, time.RFC3339Nano)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Passport != nil {
 		result.WriteString(`"passport":`)
 		if err = s.Passport.MarshalTo(result); err != nil {
@@ -688,9 +677,7 @@ func (s *Person) MarshalTo(result Writer) error {
 	} else {
 		result.WriteString(`"passport":null`)
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Tables != nil {
 		wantComma = true
 		result.WriteString(`"tables":{`)
@@ -760,9 +747,6 @@ func (s *Passport) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Number != "" {
 		result.WriteString(`"number":`)
 		writeString(result, s.Number)
@@ -771,9 +755,7 @@ func (s *Passport) MarshalTo(result Writer) error {
 		result.WriteString(`"number":""`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if !s.DateDoc.IsZero() {
 		result.WriteString(`"dateDoc":`)
 		writeTime(result, s.DateDoc, time.RFC3339Nano)
@@ -817,9 +799,6 @@ func (s *TableOf) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.TableName != "" {
 		result.WriteString(`"tableName":`)
 		writeString(result, s.TableName)
@@ -829,9 +808,7 @@ func (s *TableOf) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Tables != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"tables":[`)
 		var wantComma bool
@@ -883,9 +860,6 @@ func (s *Table) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Counter != 0 {
 		result.WriteString(`"counter":`)
 		writeInt64(result, int64(s.Counter))
@@ -895,9 +869,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		wantComma = true
 	}
 	if s.Assessments != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"assessments":[`)
 		var wantComma bool
@@ -911,9 +883,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		}
 		result.WriteString("]")
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if !s.Time.IsZero() {
 		result.WriteString(`"time":`)
 		writeTime(result, s.Time, time.RFC3339Nano)
@@ -922,9 +892,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		result.WriteString(`"time":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Avg != 0 {
 		result.WriteString(`"avg":`)
 		writeFloat64(result, s.Avg)
@@ -933,9 +901,7 @@ func (s *Table) MarshalTo(result Writer) error {
 		result.WriteString(`"avg":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Tags != nil {
 		wantComma = true
 		result.WriteString(`"tags":[`)
@@ -1000,9 +966,6 @@ func (s *Tag) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.TagName != "" {
 		result.WriteString(`"tagName":`)
 		writeString(result, s.TagName)
@@ -1011,9 +974,7 @@ func (s *Tag) MarshalTo(result Writer) error {
 		result.WriteString(`"tagName":""`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.TagValue != "" {
 		result.WriteString(`"tagValue":`)
 		writeString(result, s.TagValue)

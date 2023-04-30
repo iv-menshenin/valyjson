@@ -18,6 +18,13 @@ type WriteBlock struct {
 	putCommaCustom bool
 }
 
+func (w WriteBlock) AnywayWrites() bool {
+	if w.IfZero != nil && w.NotZero == nil {
+		return false
+	}
+	return true
+}
+
 func (w WriteBlock) Render(putComma ast.Stmt) []ast.Stmt {
 	if w.putCommaCustom {
 		putComma = asthlp.EmptyStmt()
@@ -404,7 +411,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 		//	if filled {
 		//		result.WriteString(",")
 		//	}
-		asthlp.If(WantCommaVar, putCommaStmt),
+		asthlp.If(WantCommaVar, PutCommaStmt),
 		// filled = true
 		SetCommaVar,
 		// result.WriteString(`"`)

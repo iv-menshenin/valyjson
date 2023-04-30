@@ -381,9 +381,6 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Tags != nil {
 		wantComma = true
 		result.WriteString(`"tags":{`)
@@ -404,9 +401,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString(`"tags":null`)
 	}
 	if s.Properties != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"properties":{`)
 		var wantComma bool
@@ -425,9 +420,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		}
 		result.WriteString("}")
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.KeyTypedProperties != nil {
 		wantComma = true
 		result.WriteString(`"key_typed_properties":{`)
@@ -451,9 +444,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString(`"key_typed_properties":null`)
 	}
 	if s.IntegerVal != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"integerVal":{`)
 		var wantComma bool
@@ -470,9 +461,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString("}")
 	}
 	if s.FloatVal != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"floatVal":{`)
 		var wantComma bool
@@ -489,9 +478,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString("}")
 	}
 	if s.UintVal != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"uintVal":{`)
 		var wantComma bool
@@ -512,9 +499,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString("}")
 	}
 	if s.BoolVal != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"bool":{`)
 		var wantComma bool
@@ -535,9 +520,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 		result.WriteString("}")
 	}
 	if s.TypedVal != nil {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		wantComma = true
 		result.WriteString(`"typed-val":{`)
 		var wantComma bool
@@ -606,9 +589,6 @@ func (s *Property) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, s.Name)
@@ -617,9 +597,7 @@ func (s *Property) MarshalTo(result Writer) error {
 		result.WriteString(`"name":""`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Value != "" {
 		result.WriteString(`"value":`)
 		writeString(result, s.Value)

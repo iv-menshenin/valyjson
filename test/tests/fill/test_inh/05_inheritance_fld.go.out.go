@@ -514,26 +514,19 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 	)
 	result.WriteString("{")
 	if s.BreakFirst != 0 {
-		if wantComma {
-			result.WriteString(",")
-		}
 		result.WriteString(`"breakFirst":`)
 		writeInt64(result, int64(s.BreakFirst))
 		wantComma = true
 	}
 	if !s.TestInh02.IsZero() {
-		if wantComma {
-			result.WriteString(",")
-		}
+		result.WriteString(",")
 		result.WriteString(`"injected":`)
 		if err = s.TestInh02.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "injected" attribute: %w`, err)
 		}
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
@@ -542,9 +535,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		result.WriteString(`"int_16":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
 		writeInt64(result, int64(s.Random))
@@ -553,9 +544,7 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		result.WriteString(`"random":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
@@ -564,17 +553,13 @@ func (s *TestInh01) MarshalTo(result Writer) error {
 		result.WriteString(`"date_begin":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	result.WriteString(`"nested1":`)
 	if err = s.Nested1.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
 	wantComma = true
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Nested2 != nil {
 		result.WriteString(`"nested2":`)
 		if err = s.Nested2.MarshalTo(result); err != nil {
@@ -635,9 +620,6 @@ func (s *TestInh02) MarshalTo(result Writer) error {
 	)
 	result.WriteString("{")
 	if s.Int32 != 0 {
-		if wantComma {
-			result.WriteString(",")
-		}
 		result.WriteString(`"int_32":`)
 		writeInt64(result, int64(s.Int32))
 		wantComma = true
@@ -674,9 +656,6 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Int16 != 0 {
 		result.WriteString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
@@ -685,9 +664,7 @@ func (s *TestInh03) MarshalTo(result Writer) error {
 		result.WriteString(`"int_16":0`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.Random != 0 {
 		result.WriteString(`"random":`)
 		writeInt64(result, int64(s.Random))
@@ -731,9 +708,6 @@ func (s *TestNested01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
@@ -774,9 +748,6 @@ func (s *TestNested02) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
@@ -817,9 +788,6 @@ func (s *TestNested03) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Field32 != 0 {
 		result.WriteString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))

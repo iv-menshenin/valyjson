@@ -241,8 +241,9 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		)),
 	)
 
+	var fs fieldsMarshalState
 	for _, fld := range s.spec.Fields.List {
-		fn.AppendStmt(jsonFieldStmts(fld)...)
+		fn.AppendStmt(fs.jsonFieldStmts(fld)...)
 	}
 
 	fn.AppendStmt(
@@ -251,24 +252,41 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 	return fn.Decl()
 }
 
-func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
-	if len(fld.Names) == 0 {
-		factory := field.New(fld)
-		name := ""
-		switch t := fld.Type.(type) {
+type fieldsMarshalState struct {
+	anywayWrites bool
+	someWrote    bool
+}
 
+func (f *fieldsMarshalState) jsonFieldStmts(fld *ast.Field) []ast.Stmt {
+	var (
+		result   []ast.Stmt
+		factory  = field.New(fld)
+		fldNames = make([]string, 0, len(fld.Names))
+	)
+	if len(fld.Names) == 0 {
+		switch t := fld.Type.(type) {
 		case *ast.Ident:
-			name = t.Name
+			fldNames = append(fldNames, t.Name)
 
 		case *ast.SelectorExpr:
-			name = t.Sel.Name
+			fldNames = append(fldNames, t.Sel.Name)
 		}
-		return factory.MarshalStatements(name)
 	}
-	var result []ast.Stmt
-	factory := field.New(fld)
-	for _, name := range fld.Names {
-		result = append(result, factory.MarshalStatements(name.Name)...)
+	for _, nm := range fld.Names {
+		fldNames = append(fldNames, nm.Name)
+	}
+	for _, name := range fldNames {
+		block := factory.MarshalStatements(name)
+		var stmt = field.PutCommaStmt
+		if !f.anywayWrites {
+			stmt = field.PutCommaFirstIf
+		}
+		if !f.someWrote {
+			stmt = asthlp.EmptyStmt()
+		}
+		result = append(result, block.Render(stmt)...)
+		f.anywayWrites = f.anywayWrites || block.AnywayWrites()
+		f.someWrote = true
 	}
 	return result
 }

@@ -221,9 +221,6 @@ func (s *TestSlice01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Field != nil {
 		wantComma = true
 		result.WriteString(`"strs":[`)
@@ -241,9 +238,7 @@ func (s *TestSlice01) MarshalTo(result Writer) error {
 		result.WriteString(`"strs":null`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
+	result.WriteString(",")
 	if s.FieldRef != nil {
 		wantComma = true
 		result.WriteString(`"ints":[`)
@@ -300,9 +295,6 @@ func (s *TestSlice03) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Data != 0 {
 		result.WriteString(`"data":`)
 		writeInt64(result, s.Data)
