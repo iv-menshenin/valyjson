@@ -137,6 +137,7 @@ func (b *bufWriter) ensureSpace(minNeededSz int) (currBlockFree int) {
 	}
 	for {
 		bb := writeBuf.Get()
+		bb.B = bb.B[:0]
 		if cap(bb.B) == 0 {
 			if b.sz == 0 {
 				b.sz = defBufBlock

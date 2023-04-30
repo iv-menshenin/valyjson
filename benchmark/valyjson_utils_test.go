@@ -46,7 +46,9 @@ func Test_bufWriter_Write(t *testing.T) {
 }
 
 func Benchmark_testWiter(b *testing.B) {
-	var w bufWriter
+	var w = bufWriter{
+		cb: &cb{},
+	}
 	var bx [256]byte
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -79,5 +81,26 @@ func Test_writeString(t *testing.T) {
 		var b = bytes.NewBufferString("")
 		writeString(b, "去吧，离开这里。\n")
 		require.Equal(t, `"去吧，离开这里。\n"`, b.String())
+	})
+}
+
+func Test_bufWriter_ensureSpace(t *testing.T) {
+	t.Run("take bigger first", func(t *testing.T) {
+		var w = bufWriter{
+			br: 0,
+			sz: 128,
+		}
+		_, err := w.Write(make([]byte, 129))
+		require.NoError(t, err)
+	})
+	t.Run("take bigger second", func(t *testing.T) {
+		var w = bufWriter{
+			br: 0,
+			sz: 128,
+		}
+		_, err := w.Write(make([]byte, 64))
+		require.NoError(t, err)
+		_, err = w.Write(make([]byte, 290))
+		require.NoError(t, err)
 	})
 }

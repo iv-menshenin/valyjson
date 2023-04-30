@@ -69,7 +69,7 @@ func BenchmarkEJ_Marshal_M_Parallel(b *testing.B) {
 	})
 }
 
-// BenchmarkEJ_Marshal_L_Parallel-8            4054            291508 ns/op        1516.46 MB/s      904606 B/op         16 allocs/op
+// BenchmarkEJ_Marshal_L_Parallel-8            7064	    164843 ns/op	2681.70 MB/s	  447951 B/op	       5 allocs/op
 func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
