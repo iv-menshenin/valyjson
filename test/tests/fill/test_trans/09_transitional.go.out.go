@@ -20,13 +20,13 @@ func (s *TestTransitional) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitional.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestTransitional) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestTransitional) FillFromJSON(v *fastjson.Value) (err error) {
 	var _val TestTransitionalElem
-	err = _val.FillFromJSON(v, objPath+".")
+	err = _val.FillFromJSON(v)
 	if err != nil {
 		return err
 	}
@@ -46,19 +46,19 @@ func (s *TestTransitionalElem) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTransitionalElem.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestTransitionalElem) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestTransitionalElem) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _testField := v.Get("test-field"); _testField != nil {
 		var valTestField int64
 		valTestField, err = _testField.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.test-field' value: %w", objPath, err)
+			return newParsingError("test-field", err)
 		}
 		s.TestField = valTestField
 	}
@@ -66,7 +66,7 @@ func (s *TestTransitionalElem) FillFromJSON(v *fastjson.Value, objPath string) (
 }
 
 // validate checks for correct data structure
-func (s *TestTransitionalElem) validate(v *fastjson.Value, objPath string) error {
+func (s *TestTransitionalElem) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (s *TestTransitionalElem) validate(v *fastjson.Value, objPath string) error
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '-', 'f', 'i', 'e', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}

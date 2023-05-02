@@ -43,7 +43,6 @@ func (a *Array) FillerFunc() ast.Decl {
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(a.name))))
 	fn.Params(
 		asthlp.Field(names.VarNameJsonValue, nil, asthlp.Star(names.FastJsonValue)),
-		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
 	)
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
@@ -78,8 +77,7 @@ func (a *Array) FillerFunc() ast.Decl {
 			),
 			asthlp.Return(asthlp.Call(
 				asthlp.FmtErrorfFn,
-				asthlp.StringConstant("error parsing '%s', expected %d elements, got %d").Expr(),
-				asthlp.NewIdent(names.VarNameObjPath),
+				asthlp.StringConstant("expected %d elements, got %d").Expr(),
 				asthlp.Call(asthlp.LengthFn, asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))),
 				asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(_a)),
 			)),
@@ -96,19 +94,28 @@ func (a *Array) FillerFunc() ast.Decl {
 		),
 		asthlp.If(
 			asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
-			// return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
-			asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(names.VarNameError))),
+			asthlp.Return(asthlp.NewIdent(names.VarNameError)),
 		),
 		makeStmt,
 		asthlp.Range(true, _i, _v, asthlp.NewIdent(_a),
 			append(
-				field.IsNotEmpty(valFactory.TypedValue(asthlp.NewIdent("value"), _v)),
+				field.IsNotEmpty(valFactory.TypedValue(asthlp.NewIdent("value"), _v, asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent(_i)))),
 				//if err != nil {
 				//	return fmt.Errorf("error parsing '%s[%d]' value: %w", objPath, i, err)
 				//}
 				asthlp.If(
 					asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
-					asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s.[%d]' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(_i), asthlp.NewIdent(names.VarNameError))),
+					asthlp.Return(
+						asthlp.Call(
+							asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+							asthlp.Call(
+								asthlp.FmtSprintfFn,
+								asthlp.StringConstant("%d").Expr(),
+								asthlp.NewIdent(_i),
+							),
+							asthlp.NewIdent(names.VarNameError),
+						),
+					),
 				),
 				// (*s)[i] = test_extr.External(value)
 				asthlp.Assign(
@@ -205,7 +212,7 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 	)
 
 	errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+a.name+`" value at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-	ve := field.GetValueExtractor(denotedType(a.spec.Elt), errExpr)
+	ve := field.GetValueExtractor(denotedType(a.spec.Elt), errExpr, nil)
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {

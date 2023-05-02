@@ -6,7 +6,6 @@ import ast "github.com/iv-menshenin/go-ast"
 const (
 	VarNameJsonValue         = "v"
 	VarNameError             = "err"
-	VarNameObjPath           = "objPath"
 	VarNameReceiver          = "s"
 	VarNameListOfArrayValues = "listA"
 	VarNameListElem          = "listElem"
@@ -27,6 +26,8 @@ const (
 	WriteInt64   = "writeInt64"
 	WriteUint64  = "writeUint64"
 	WriteFloat64 = "writeFloat64"
+
+	ParsingError = "newParsingError"
 )
 
 var (

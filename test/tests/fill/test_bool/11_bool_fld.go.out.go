@@ -20,20 +20,20 @@ func (s *TestBool01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestBool01.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestBool01) FillFromJSON(v *fastjson.Value) (err error) {
 	// strict rules
-	if err = s.validate(v, objPath); err != nil {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _bool := v.Get("bl"); _bool != nil {
 		var valBool bool
 		valBool, err = _bool.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.bl' value: %w", objPath, err)
+			return newParsingError("bl", err)
 		}
 		s.Bool = valBool
 	}
@@ -41,7 +41,7 @@ func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 		var valBlMaybe bool
 		valBlMaybe, err = _blMaybe.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.mb' value: %w", objPath, err)
+			return newParsingError("mb", err)
 		}
 		s.BlMaybe = valBlMaybe
 	}
@@ -49,7 +49,7 @@ func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 		var valRefBool bool
 		valRefBool, err = _refBool.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.refBool' value: %w", objPath, err)
+			return newParsingError("refBool", err)
 		}
 		s.RefBool = &valRefBool
 	}
@@ -57,7 +57,7 @@ func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 		var valRefMaybe bool
 		valRefMaybe, err = _refMaybe.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.refMaybe' value: %w", objPath, err)
+			return newParsingError("refMaybe", err)
 		}
 		s.RefMaybe = &valRefMaybe
 	}
@@ -65,7 +65,7 @@ func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 		var valDefBool bool
 		valDefBool, err = _defBool.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.defBool' value: %w", objPath, err)
+			return newParsingError("defBool", err)
 		}
 		s.DefBool = valDefBool
 	} else {
@@ -75,7 +75,7 @@ func (s *TestBool01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 }
 
 // validate checks for correct data structure
-func (s *TestBool01) validate(v *fastjson.Value, objPath string) error {
+func (s *TestBool01) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -88,39 +88,39 @@ func (s *TestBool01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'b', 'l'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'m', 'b'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', 'B', 'o', 'o', 'l'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'r', 'e', 'f', 'M', 'a', 'y', 'b', 'e'}) {
 			checkFields[3]++
 			if checkFields[3] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'e', 'f', 'B', 'o', 'o', 'l'}) {
 			checkFields[4]++
 			if checkFields[4] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s'", string(key))
 	})
 	return err
 }
@@ -137,19 +137,19 @@ func (s *TestBool02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestBool02.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestBool02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestBool02) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _i := v.Get("i"); _i != nil {
 		var valI bool
 		valI, err = _i.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.i' value: %w", objPath, err)
+			return newParsingError("i", err)
 		}
 		s.I = TestInhBool(valI)
 	}
@@ -157,7 +157,7 @@ func (s *TestBool02) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 		var valX bool
 		valX, err = _x.Bool()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.x' value: %w", objPath, err)
+			return newParsingError("x", err)
 		}
 		s.X = TestInhBool(valX)
 	}
@@ -165,7 +165,7 @@ func (s *TestBool02) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 }
 
 // validate checks for correct data structure
-func (s *TestBool02) validate(v *fastjson.Value, objPath string) error {
+func (s *TestBool02) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -178,14 +178,14 @@ func (s *TestBool02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'i'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'x'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
@@ -205,11 +205,11 @@ func (s *TestInhBool) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestInhBool.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestInhBool) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestInhBool) FillFromJSON(v *fastjson.Value) (err error) {
 	var _val bool
 	_val, err = v.Bool()
 	if err != nil {

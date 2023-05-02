@@ -162,7 +162,7 @@ func TestTestSlice01_validate(t *testing.T) {
 		v, err := parser.ParseBytes([]byte(jData))
 		require.NoError(t, err)
 		var test TestSlice01
-		err = test.validate(v, "(root)")
+		err = test.validate(v)
 		require.ErrorContains(t, err, "appears in the object twice")
 		require.ErrorContains(t, err, "ints")
 	})
@@ -172,7 +172,7 @@ func TestTestSlice01_validate(t *testing.T) {
 		v, err := parser.ParseBytes([]byte(jData))
 		require.NoError(t, err)
 		var test TestSlice01
-		err = test.validate(v, "(root)")
+		err = test.validate(v)
 		require.ErrorContains(t, err, "value doesn't contain object")
 		require.ErrorContains(t, err, "it contains number")
 	})
@@ -182,7 +182,7 @@ func TestTestSlice01_validate(t *testing.T) {
 		v, err := parser.ParseBytes([]byte(jData))
 		require.NoError(t, err)
 		var test TestSlice01
-		err = test.validate(v, "(root)")
+		err = test.validate(v)
 		require.ErrorContains(t, err, "appears in the object twice")
 		require.ErrorContains(t, err, "strs")
 	})
@@ -192,7 +192,7 @@ func TestTestSlice01_validate(t *testing.T) {
 		v, err := parser.ParseBytes([]byte(jData))
 		require.NoError(t, err)
 		var test TestSlice03
-		err = test.validate(v, "(root)")
+		err = test.validate(v)
 		require.ErrorContains(t, err, "appears in the object twice")
 		require.ErrorContains(t, err, "data")
 	})
@@ -202,7 +202,7 @@ func TestTestSlice01_validate(t *testing.T) {
 		v, err := parser.ParseBytes([]byte(jData))
 		require.NoError(t, err)
 		var test TestSlice01
-		err = test.validate(v, "(root)")
+		err = test.validate(v)
 		require.ErrorContains(t, err, "appears in the object twice")
 	})
 }

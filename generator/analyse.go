@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func (g *Gen) BuildFillers() {
+func (g *Gen) BuildDecoders() {
 	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
@@ -54,7 +54,7 @@ func (g *Gen) BuildFillers() {
 	}
 }
 
-func (g *Gen) BuildJsoners() {
+func (g *Gen) BuildEncoders() {
 	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
@@ -143,20 +143,28 @@ func (v *visitor) getNormalized() []renderer {
 }
 
 func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
+	put := func(r renderer) {
+		for _, ex := range result {
+			if ex.Name() == r.Name() {
+				return
+			}
+		}
+		result = append(result, r)
+	}
 	switch typed := decl.spec.Type.(type) {
 
 	case *ast.StructType:
 		if tags.StructTags(decl.tags).Has(tags.TransitHandlers) {
-			result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+			put(codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
 			break
 		}
 		stct := &ast.StructType{
 			Fields: &ast.FieldList{List: v.collectFields(typed.Fields.List)}, // uninline
 		}
-		result = append(result, codegen.NewStruct(decl.spec.Name.Name, decl.tags, stct))
+		put(codegen.NewStruct(decl.spec.Name.Name, decl.tags, stct))
 
 	case *ast.MapType:
-		result = append(result, codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
+		put(codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.ArrayType:
 		if el, ok := typed.Elt.(*ast.Ident); ok {
@@ -168,13 +176,13 @@ func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
 				result = v.processDecl(elDeclT, result)
 			}
 		}
-		result = append(result, codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
+		put(codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.Ident:
-		result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+		put(codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.SelectorExpr:
-		result = append(result, codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
+		put(codegen.NewTransitive(decl.spec.Name.Name, decl.tags, typed))
 
 	default:
 		panic("unsupported")

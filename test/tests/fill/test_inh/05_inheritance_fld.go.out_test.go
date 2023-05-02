@@ -52,12 +52,12 @@ func Test_Inheritance(t *testing.T) {
 	t.Run("test-wrong-inline-type", func(t *testing.T) {
 		var test1 TestInh01
 		err := test1.UnmarshalJSON([]byte(`{"int_16":543,"random":"66","nested1":{"int_16":888,"random":999},"nested2":{"int_16":777,"random":666},"date_begin":"2023-01-28 07:10:05Z"}`))
-		require.ErrorContains(t, err, "error parsing '(root).random' value")
+		require.ErrorContains(t, err, "error parsing 'random':")
 	})
 	t.Run("test-wrong-nested-type", func(t *testing.T) {
 		var test1 TestInh01
 		err := test1.UnmarshalJSON([]byte(`{"int_16":543,"random":66,"nested1":{"int_16":888,"random":"999"},"nested2":{"int_16":777,"random":666},"date_begin":"2023-01-28 07:10:05Z"}`))
-		require.ErrorContains(t, err, "error parsing '(root).nested1.random' value")
+		require.ErrorContains(t, err, "error parsing 'nested1.random':")
 	})
 	t.Run("marshal", func(t *testing.T) {
 		const expected = `{"breakFirst":-1,"injected":{"int_32":123},"int_16":16,"random":-9,"date_begin":"2023-04-06T00:00:00Z","nested1":{"int_16":17,"random":-8},"nested2":{"int_16":22,"random":88}}`

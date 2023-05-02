@@ -50,7 +50,6 @@ func NewUnmarshalFunc(structName string) []ast.Decl {
 		asthlp.Return(asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameFill)),
 			ast.NewIdent(names.VarNameJsonValue),
-			asthlp.StringConstant("(root)").Expr(),
 		)),
 	)
 

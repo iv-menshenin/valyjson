@@ -39,7 +39,7 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = makeBufVariable(name)
 	var result []ast.Stmt
 
-	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v))...)
+	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.StringConstant(f.tags.JsonName()).Expr()))...)
 	result = append(result, f.checkErr(bufVariable)...)
 
 	if f.isStar {
@@ -57,6 +57,7 @@ func makeBufVariable(name string) *ast.Ident {
 // var elem int
 //
 //	if elem, err = listElem.Int(); err != nil {
+//		err = newParsingError(strconv.Itoa(listElemNum), err)
 //		break
 //	}
 //
@@ -75,7 +76,7 @@ func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
 			asthlp.Continue(),
 		))
 	}
-	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v))...)
+	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum"))))...)
 	result = append(result, f.breakErr()...)
 
 	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
@@ -102,15 +103,15 @@ func appendStmt(dst, el ast.Expr) ast.Stmt {
 
 //	 var val{name} {type}
 //		val{name}, err = {v}.(Int|Int64|String|Bool)()
-func (f *Field) TypedValue(dst *ast.Ident, v string) []ast.Stmt {
+func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.refx.(type) {
 
 	case *ast.Ident:
-		result = append(result, f.typeExtraction(dst, v, t.Name)...)
+		result = append(result, f.typeExtraction(dst, v, t.Name, elemPathExpr)...)
 
 	case *ast.StructType:
-		result = append(result, f.typeExtraction(dst, v, "struct")...)
+		result = append(result, f.typeExtraction(dst, v, "struct", elemPathExpr)...)
 
 	case *ast.SelectorExpr:
 		switch t.Sel.Name {
@@ -153,7 +154,7 @@ func IsNotEmpty(in []ast.Stmt) []ast.Stmt {
 	return in
 }
 
-func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
+func (f *Field) typeExtraction(dst *ast.Ident, v, t string, elemPathExpr ast.Expr) []ast.Stmt {
 	switch t {
 
 	case "int", "int8", "int16", "int32":
@@ -176,9 +177,9 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string) []ast.Stmt {
 
 	case "string":
 		if f.dontCheckErr {
-			return stringExtractionWithoutErrChecking(dst, v, f.tags.JsonName())
+			return stringExtractionWithoutErrChecking(dst, v)
 		}
-		return stringExtraction(dst, v, f.tags.JsonName())
+		return stringExtraction(dst, v, elemPathExpr)
 
 	default:
 		return nestedExtraction(dst, f.expr, v, f.tags.JsonName())
@@ -249,7 +250,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 		asthlp.Assign(asthlp.MakeVarNames("o", names.VarNameError), asthlp.Definition, asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector(v, "Object")),
 		)),
-		checkErrAndReturnParsingError(json),
+		checkErrAndReturnParsingError(asthlp.StringConstant(json).Expr()),
 		// var {dst} = make(map[Key]Property, o.Len())
 		asthlp.Var(asthlp.VariableValue(dst.Name, asthlp.FreeExpression(asthlp.Call(
 			asthlp.MakeFn, t, asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("o", "Len"))),
@@ -268,18 +269,32 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				).
 				AppendStmt(
 					// fills one value
-					IsNotEmpty(valFactory.TypedValue(value, "v"))...,
+					IsNotEmpty(valFactory.TypedValue(value, "v", asthlp.StringConstant(f.tags.JsonName()).Expr()))...,
 				).
 				AppendStmt(
-					asthlp.If(
-						asthlp.IsNil(asthlp.NewIdent(names.VarNameError)),
+					asthlp.IfElse(
+						asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
+						// err = newParsingError(string(key), err)
+						asthlp.Block(
+							asthlp.Assign(
+								asthlp.MakeVarNames(names.VarNameError),
+								asthlp.Assignment,
+								asthlp.Call(
+									asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+									asthlp.VariableTypeConvert("key", asthlp.String),
+									asthlp.NewIdent(names.VarNameError),
+								),
+							),
+						),
 						// {dst}[string(key)] = prop
-						asthlp.Assign(
-							[]ast.Expr{
-								asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
-							},
-							asthlp.Assignment,
-							valueAsValue,
+						asthlp.Block(
+							asthlp.Assign(
+								asthlp.VarNames{
+									asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
+								},
+								asthlp.Assignment,
+								valueAsValue,
+							),
 						),
 					),
 				).
@@ -306,18 +321,27 @@ func (f *Field) checkErr(val *ast.Ident) []ast.Stmt {
 		if ident.Name == "float32" {
 			phldr = "%f"
 		}
-		maxExceeded := "error parsing '%s." + f.tags.JsonName() + "' value " + phldr + " exceeds maximum for data type " + ident.Name
+		maxExceeded := phldr + " exceeds maximum for data type " + ident.Name
 		checkOverflow = asthlp.If(
 			asthlp.Great(val, maxExp),
-			asthlp.Return(helpers.FmtError(maxExceeded, ast.NewIdent(names.VarNameObjPath), val)),
+			asthlp.Return(asthlp.Call(
+				asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+				asthlp.StringConstant(f.tags.JsonName()).Expr(),
+				helpers.FmtError(maxExceeded, val),
+			)),
 		)
 	}
 
-	format := "error parsing '%s." + f.tags.JsonName() + "' value: %w"
 	return []ast.Stmt{
 		asthlp.If(
 			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
-			asthlp.Return(helpers.FmtError(format, ast.NewIdent(names.VarNameObjPath), ast.NewIdent(names.VarNameError))),
+			asthlp.Return(
+				asthlp.Call(
+					asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+					asthlp.StringConstant(f.tags.JsonName()).Expr(),
+					asthlp.NewIdent(names.VarNameError),
+				),
+			),
 		),
 		checkOverflow,
 	}
@@ -355,6 +379,7 @@ func getMaxByType(t *ast.Ident) ast.Expr {
 }
 
 //	if err != nil {
+//		err = newParsingError(strconv.Itoa(_elemNum), err)
 //		break
 //	}
 func (f *Field) breakErr() []ast.Stmt {
@@ -365,6 +390,11 @@ func (f *Field) breakErr() []ast.Stmt {
 	return []ast.Stmt{
 		asthlp.If(
 			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
+			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
+				asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+				asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum")),
+				ast.NewIdent(names.VarNameError),
+			)),
 			asthlp.Break(),
 		),
 	}
@@ -514,10 +544,14 @@ func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 func (f *Field) ifDefault(varName, name string) []ast.Stmt {
 	if f.tags.DefaultValue() == "" {
 		if f.tags.JsonTags().Has("required") {
-			// return fmt.Errorf("required element '%s{json}' is missing", objPath)
+			// return fmt.Errorf("required element '{json}' is missing", objPath)
 			return []ast.Stmt{
 				asthlp.Return(
-					helpers.FmtError("\"required element '%s"+f.tags.JsonName()+"' is missing\"", ast.NewIdent(names.VarNameObjPath)),
+					asthlp.Call(
+						asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+						asthlp.StringConstant(f.tags.JsonName()).Expr(),
+						helpers.FmtError("\"required element '%s' is missing\"", asthlp.StringConstant(f.tags.JsonName()).Expr()),
+					),
 				),
 			}
 		}

@@ -21,23 +21,23 @@ func (s *TestUUID) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestUUID.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestUUID) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _uUID := v.Get("uuid"); _uUID != nil {
 		var valUUID uuid.UUID
 		b, err := _uUID.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.uuid' value: %w", objPath, err)
+			return newParsingError("uuid", err)
 		}
 		valUUID, err = uuid.ParseBytes(b)
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.uuid' value: %w", objPath, err)
+			return newParsingError("uuid", err)
 		}
 		s.UUID = valUUID
 	}
@@ -45,7 +45,7 @@ func (s *TestUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 }
 
 // validate checks for correct data structure
-func (s *TestUUID) validate(v *fastjson.Value, objPath string) error {
+func (s *TestUUID) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (s *TestUUID) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'u', 'u', 'i', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
@@ -78,15 +78,15 @@ func (s *InheritUUID2) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserInheritUUID2.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *InheritUUID2) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *InheritUUID2) FillFromJSON(v *fastjson.Value) (err error) {
 	var _val uuid.UUID
 	b, err := v.StringBytes()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+		return newParsingError("", err)
 	}
 	_val, err = uuid.ParseBytes(b)
 	if err != nil {
@@ -108,15 +108,15 @@ func (s *InheritUUID) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserInheritUUID.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *InheritUUID) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *InheritUUID) FillFromJSON(v *fastjson.Value) (err error) {
 	var _val uuid.UUID
 	b, err := v.StringBytes()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+		return newParsingError("", err)
 	}
 	_val, err = uuid.ParseBytes(b)
 	if err != nil {
@@ -150,7 +150,7 @@ func (s *TestUUID) MarshalTo(result Writer) error {
 		result.WriteString(",")
 	}
 	if buf, err := s.UUID.MarshalText(); err != nil {
-		return fmt.Errorf(`can't marshal "uuid" attribute: %w`, err)
+		return newParsingError("uuid", err)
 	} else {
 		result.WriteString(`"uuid":"`)
 		result.Write(buf)

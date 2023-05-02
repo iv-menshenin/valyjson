@@ -112,9 +112,9 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				asthlp.Block(
 					asthlp.Return(
 						asthlp.Call(
-							asthlp.InlineFunc(asthlp.SimpleSelector("fmt", "Errorf")),
-							asthlp.StringConstant(`can't marshal "`+jsonName+`" attribute: %w`).Expr(),
-							asthlp.NewIdent("err"),
+							asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+							asthlp.StringConstant(jsonName).Expr(),
+							asthlp.NewIdent(names.VarNameError),
 						),
 					),
 				),

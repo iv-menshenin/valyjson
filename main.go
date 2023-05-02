@@ -16,8 +16,8 @@ func main() {
 	fmt.Printf("PARSED [%v]\n", time.Since(started))
 
 	started = time.Now()
-	g.BuildFillers()
-	g.BuildJsoners()
+	g.BuildDecoders()
+	g.BuildEncoders()
 	g.FixImports()
 	g.Print("./benchmark/data_json.go")
 

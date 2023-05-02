@@ -309,3 +309,35 @@ func (c *cb) Put(w *bufWriter) {
 	w.buf = w.buf[:0]
 	c.pool.Put(w)
 }
+
+type parsingError struct {
+	path string
+	err  error
+}
+
+func newParsingError(objPath string, err error) error {
+	if err == nil {
+		return nil
+	}
+	type wrapper interface {
+		WrapPath(string) error
+	}
+	if w, ok := err.(wrapper); ok {
+		return w.WrapPath(objPath)
+	}
+	return parsingError{
+		path: objPath,
+		err:  err,
+	}
+}
+
+func (p parsingError) WrapPath(objPath string) error {
+	return parsingError{
+		path: objPath + "." + p.path,
+		err:  p.err,
+	}
+}
+
+func (p parsingError) Error() string {
+	return fmt.Sprintf("error parsing '%s': %+v", p.path, p.err)
+}

@@ -39,7 +39,6 @@ func (s *Struct) FillerFunc() ast.Decl {
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(s.name))))
 	fn.Params(
 		asthlp.Field(names.VarNameJsonValue, nil, asthlp.Star(names.FastJsonValue)),
-		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
 	)
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
@@ -54,7 +53,6 @@ func (s *Struct) FillerFunc() ast.Decl {
 		asthlp.MakeCallReturnIfError(nil, asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameValidate)),
 			asthlp.NewIdent(names.VarNameJsonValue),
-			asthlp.NewIdent(names.VarNameObjPath),
 		)),
 	)
 	for _, f := range s.spec.Fields.List {
@@ -96,7 +94,6 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(s.name))))
 	fn.Params(
 		asthlp.Field(names.VarNameJsonValue, nil, fastJsonValue),
-		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
 	)
 	fn.Results(
 		asthlp.Field("", nil, asthlp.ErrorType),
@@ -139,10 +136,13 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 					),
 					// err = fmt.Errorf("the '%s.%s' field appears in the object twice [%s]", string(key), objPath)
 					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
-						asthlp.FmtErrorfFn,
-						asthlp.StringConstant("the '%s.%s' field appears in the object twice").Expr(),
-						ast.NewIdent(names.VarNameObjPath),
+						asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
 						asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
+						asthlp.Call(
+							asthlp.FmtErrorfFn,
+							asthlp.StringConstant("the '%s' field appears in the object twice").Expr(),
+							asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
+						),
 					)),
 				),
 				asthlp.ReturnEmpty(),
@@ -156,8 +156,7 @@ func (s *Struct) ValidatorFunc() ast.Decl {
 		visitFunc.AppendStmt(
 			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 				asthlp.FmtErrorfFn,
-				asthlp.StringConstant("unexpected field '%s.%s'").Expr(),
-				asthlp.NewIdent(names.VarNameObjPath),
+				asthlp.StringConstant("unexpected field '%s'").Expr(),
 				asthlp.ExpressionTypeConvert(asthlp.NewIdent(keyVarName), asthlp.String),
 			)),
 		)

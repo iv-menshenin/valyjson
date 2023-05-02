@@ -36,7 +36,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		var test TestMap10
 		err := test.UnmarshalJSON([]byte(input))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "(root).test")
+		require.ErrorContains(t, err, "test")
 		require.ErrorContains(t, err, "value doesn't contain number")
 	})
 
@@ -64,7 +64,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		var test TestMap11
 		err := test.UnmarshalJSON([]byte(input))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "(root).test")
+		require.ErrorContains(t, err, "test")
 		require.ErrorContains(t, err, "value doesn't contain object")
 	})
 
@@ -123,7 +123,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		var test TestMap11Ref
 		err := test.UnmarshalJSON([]byte(input))
 		require.Error(t, err)
-		require.ErrorContains(t, err, "(root).wrong")
+		require.ErrorContains(t, err, "wrong")
 		require.ErrorContains(t, err, "doesn't contain object")
 	})
 	t.Run("[]int64", func(t *testing.T) {

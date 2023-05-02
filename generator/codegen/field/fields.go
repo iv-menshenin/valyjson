@@ -167,11 +167,12 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 			isString = i.Name == "string"
 		}
 		var valType = tt.Value
+		dec := GetDecorExpr(valType)
 		if i, ok := valType.(*ast.Ident); ok {
 			valType = denotedType(i)
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr))
+		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr, dec))
 		return block.Render(putCommaFirstIf)
 
 	case *ast.ArrayType:
@@ -180,7 +181,7 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 			valType = denotedType(i)
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr))
+		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, nil))
 		return block.Render(putCommaFirstIf)
 
 	default:
@@ -190,8 +191,28 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 }
 
 type ValueExtractor func(src ast.Expr) []ast.Stmt
+type DecorSrc func(e ast.Expr) ast.Expr
 
-func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
+func EmptyDecorSrc(e ast.Expr) ast.Expr {
+	return e
+}
+
+func GetDecorExpr(valType ast.Expr) DecorSrc {
+	if i, ok := valType.(*ast.Ident); ok {
+		valType = denotedType(i)
+		switch t := valType.(type) {
+		case *ast.Ident:
+			if i.Name != "string" && t.Name == "string" {
+				return func(e ast.Expr) ast.Expr {
+					return asthlp.ExpressionTypeConvert(e, asthlp.String)
+				}
+			}
+		}
+	}
+	return EmptyDecorSrc
+}
+
+func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtractor {
 	if errExpr == nil {
 		errExpr = asthlp.NewIdent(names.VarNameError)
 	}
@@ -210,9 +231,10 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 		}
 	}
 
-	decorSrc := func(e ast.Expr) ast.Expr {
-		return e
+	if initDecorSrc == nil {
+		initDecorSrc = EmptyDecorSrc
 	}
+	decorSrc := initDecorSrc
 	decorStmt := func(_ ast.Expr, stmt []ast.Stmt) []ast.Stmt {
 		return stmt
 	}
@@ -222,7 +244,7 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 	}
 	if isStar {
 		decorSrc = func(e ast.Expr) ast.Expr {
-			return asthlp.Star(e)
+			return initDecorSrc(asthlp.Star(e))
 		}
 		decorStmt = func(src ast.Expr, stmt []ast.Stmt) []ast.Stmt {
 			return []ast.Stmt{

@@ -92,7 +92,6 @@ func (m *Map) FillerFunc() ast.Decl {
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(m.name))))
 	fn.Params(
 		asthlp.Field(names.VarNameJsonValue, nil, asthlp.Star(names.FastJsonValue)),
-		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
 	)
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
@@ -118,8 +117,7 @@ func (m *Map) FillerFunc() ast.Decl {
 		),
 		asthlp.If(
 			asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
-			// return fmt.Errorf("error parsing '%s.tables' value: %w", objPath, err)
-			asthlp.Return(asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("error parsing '%s' value: %w").Expr(), asthlp.NewIdent(names.VarNameObjPath), asthlp.NewIdent(names.VarNameError))),
+			asthlp.Return(asthlp.NewIdent(names.VarNameError)),
 		),
 		//	*m = make(map[string]TableOf, o.Len())
 		asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.Call(
@@ -144,7 +142,7 @@ func (m *Map) FillerFunc() ast.Decl {
 				).
 				AppendStmt(
 					// fills one value
-					field.IsNotEmpty(valFactory.TypedValue(value, "v"))...,
+					field.IsNotEmpty(valFactory.TypedValue(value, "v", asthlp.VariableTypeConvert("key", asthlp.String)))...,
 				).
 				AppendStmt(
 					// if err == nil {
@@ -154,10 +152,8 @@ func (m *Map) FillerFunc() ast.Decl {
 					asthlp.If(
 						asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
 						asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
-							asthlp.FmtErrorfFn,
-							asthlp.StringConstant("error parsing '%s.%s' value: %w").Expr(),
-							asthlp.NewIdent(names.VarNameObjPath),
-							asthlp.VariableTypeConvert("key", m.spec.Key),
+							asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+							asthlp.VariableTypeConvert("key", asthlp.String),
 							asthlp.NewIdent(names.VarNameError),
 						)),
 						asthlp.ReturnEmpty(),
@@ -227,8 +223,13 @@ func (m *Map) AppendJsonFunc() ast.Decl {
 		)),
 	)
 
+	var valType = m.spec.Value
+	dec := field.GetDecorExpr(valType)
+	if i, ok := valType.(*ast.Ident); ok {
+		valType = denotedType(i)
+	}
 	errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+m.name+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-	ve := field.GetValueExtractor(denotedType(m.spec.Value), errExpr)
+	ve := field.GetValueExtractor(valType, errExpr, dec)
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {

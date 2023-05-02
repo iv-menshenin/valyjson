@@ -160,13 +160,12 @@ func (t *Transitive) FillerFunc() ast.Decl {
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
 	fn.Params(
 		asthlp.Field(names.VarNameJsonValue, nil, asthlp.Star(names.FastJsonValue)),
-		asthlp.Field(names.VarNameObjPath, nil, asthlp.String),
 	)
 	fn.Results(
 		asthlp.Field(names.VarNameError, nil, asthlp.ErrorType),
 	)
 
-	typedFiller := field.NewFromType(t.tran, true).TypedValue(asthlp.NewIdent("_val"), names.VarNameJsonValue)
+	typedFiller := field.NewFromType(t.tran, true).TypedValue(asthlp.NewIdent("_val"), names.VarNameJsonValue, asthlp.StringConstant("(root)").Expr())
 	if len(typedFiller) > 0 {
 		fn.AppendStmt(typedFiller...)
 		fn.AppendStmt(
@@ -181,7 +180,6 @@ func (t *Transitive) FillerFunc() ast.Decl {
 		asthlp.Call(
 			asthlp.InlineFunc(asthlp.Selector(asthlp.VariableTypeConvert("s", asthlp.Star(t.tran)), names.MethodNameFill)),
 			asthlp.NewIdent(names.VarNameJsonValue),
-			asthlp.NewIdent(names.VarNameObjPath),
 		),
 	))
 	return fn.Decl()
