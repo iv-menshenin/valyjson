@@ -4,6 +4,7 @@ package test_slice
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 
 	"github.com/valyala/fastjson"
 )
@@ -20,33 +21,33 @@ func (s *TestSlice01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice01.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _field := v.Get("strs"); valueIsNotNull(_field) {
 		var listA []*fastjson.Value
 		listA, err = _field.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.strs' value: %w", objPath, err)
+			return newParsingError("strs", err)
 		}
 		valField := s.Field[:0]
 		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
 			valField = make([]string, 0, len(listA))
 		}
-		for _, listElem := range listA {
+		for _elemNum, listElem := range listA {
 			var elem []byte
 			if elem, err = listElem.StringBytes(); err != nil {
-				return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+				return newParsingError(strconv.Itoa(_elemNum), err)
 			}
 			valField = append(valField, string(elem))
 		}
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.strs' value: %w", objPath, err)
+			return newParsingError("strs", err)
 		}
 		s.Field = valField
 	}
@@ -54,13 +55,13 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error
 		var listA []*fastjson.Value
 		listA, err = _fieldRef.Array()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.ints' value: %w", objPath, err)
+			return newParsingError("ints", err)
 		}
 		valFieldRef := s.FieldRef[:0]
 		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
 			valFieldRef = make([]*int, 0, len(listA))
 		}
-		for _, listElem := range listA {
+		for _elemNum, listElem := range listA {
 			if !valueIsNotNull(listElem) {
 				valFieldRef = append(valFieldRef, nil)
 				continue
@@ -68,13 +69,14 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error
 			var elem int
 			elem, err = listElem.Int()
 			if err != nil {
+				err = newParsingError(strconv.Itoa(_elemNum), err)
 				break
 			}
 			newElem := int(elem)
 			valFieldRef = append(valFieldRef, &newElem)
 		}
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.ints' value: %w", objPath, err)
+			return newParsingError("ints", err)
 		}
 		s.FieldRef = valFieldRef
 	}
@@ -82,7 +84,7 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value, objPath string) (err error
 }
 
 // validate checks for correct data structure
-func (s *TestSlice01) validate(v *fastjson.Value, objPath string) error {
+func (s *TestSlice01) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -95,14 +97,14 @@ func (s *TestSlice01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'s', 't', 'r', 's'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 't', 's'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
@@ -122,19 +124,19 @@ func (s *TestSlice03) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice03.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestSlice03) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestSlice03) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _data := v.Get("data"); _data != nil {
 		var valData int64
 		valData, err = _data.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.data' value: %w", objPath, err)
+			return newParsingError("data", err)
 		}
 		s.Data = valData
 	}
@@ -142,7 +144,7 @@ func (s *TestSlice03) FillFromJSON(v *fastjson.Value, objPath string) (err error
 }
 
 // validate checks for correct data structure
-func (s *TestSlice03) validate(v *fastjson.Value, objPath string) error {
+func (s *TestSlice03) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -155,7 +157,7 @@ func (s *TestSlice03) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'a'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
@@ -175,24 +177,24 @@ func (s *TestSlice02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice02.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
-func (s *TestSlice02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestSlice02) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	a, err := v.Array()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make([]TestSlice03, len(a))
 	for i, v := range a {
 		var value TestSlice03
-		err = value.FillFromJSON(v, objPath+".")
+		err = value.FillFromJSON(v)
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
+			return newParsingError(fmt.Sprintf("%d", i), err)
 		}
 		(*s)[i] = TestSlice03(value)
 	}

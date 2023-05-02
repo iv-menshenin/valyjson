@@ -186,7 +186,7 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		err := test.UnmarshalJSON([]byte(`{"mb": true, "unknown": 123, "defBool": null}`))
 		require.Error(t, err)
 		require.ErrorContains(t, err, "unexpected field")
-		require.ErrorContains(t, err, "(root).unknown")
+		require.ErrorContains(t, err, "unknown")
 	})
 	t.Run("double-fields", func(t *testing.T) {
 		var test TestBool01

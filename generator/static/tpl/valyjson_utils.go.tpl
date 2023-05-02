@@ -317,6 +317,9 @@ type parsingError struct {
 }
 
 func newParsingError(objPath string, err error) error {
+	if err == nil {
+		return nil
+	}
 	type wrapper interface {
 		WrapPath(string) error
 	}

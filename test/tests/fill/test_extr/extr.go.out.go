@@ -23,27 +23,27 @@ func (s *External) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserExternal.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *External) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *External) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _test01 := v.Get("test1"); _test01 != nil {
 		var valTest01 test_any.TestAllOfSecond
-		err = valTest01.FillFromJSON(_test01, objPath+".test1")
+		err = valTest01.FillFromJSON(_test01)
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.test1' value: %w", objPath, err)
+			return newParsingError("test1", err)
 		}
 		s.Test01 = valTest01
 	}
 	if _test02 := v.Get("test2"); _test02 != nil {
 		var valTest02 test_string.TestStr01
-		err = valTest02.FillFromJSON(_test02, objPath+".test2")
+		err = valTest02.FillFromJSON(_test02)
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.test2' value: %w", objPath, err)
+			return newParsingError("test2", err)
 		}
 		s.Test02 = valTest02
 	}
@@ -51,7 +51,7 @@ func (s *External) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 }
 
 // validate checks for correct data structure
-func (s *External) validate(v *fastjson.Value, objPath string) error {
+func (s *External) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -64,14 +64,14 @@ func (s *External) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '1'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'t', 'e', 's', 't', '2'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}

@@ -23,17 +23,17 @@ func (s *TestMap10) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap10.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
-func (s *TestMap10) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestMap10) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	o, err := v.Object()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make(map[string]int64, o.Len())
 	o.Visit(func(key []byte, v *fastjson.Value) {
@@ -43,7 +43,7 @@ func (s *TestMap10) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 		var value int64
 		value, err = v.Int64()
 		if err != nil {
-			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			err = newParsingError(string(key), err)
 			return
 		}
 		(*s)[string(key)] = int64(value)
@@ -63,17 +63,17 @@ func (s *TestMap11) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap11.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
-func (s *TestMap11) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestMap11) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	o, err := v.Object()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make(map[string]test_extr.External, o.Len())
 	o.Visit(func(key []byte, v *fastjson.Value) {
@@ -81,9 +81,9 @@ func (s *TestMap11) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 			return
 		}
 		var value test_extr.External
-		err = value.FillFromJSON(v, objPath+".")
+		err = value.FillFromJSON(v)
 		if err != nil {
-			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			err = newParsingError(string(key), err)
 			return
 		}
 		(*s)[string(key)] = test_extr.External(value)
@@ -103,17 +103,17 @@ func (s *TestMap11Ref) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestMap11Ref.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the keys with fastjson.Value
-func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	o, err := v.Object()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make(map[string]*test_extr.External, o.Len())
 	o.Visit(func(key []byte, v *fastjson.Value) {
@@ -125,9 +125,9 @@ func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 			return
 		}
 		var value test_extr.External
-		err = value.FillFromJSON(v, objPath+".")
+		err = value.FillFromJSON(v)
 		if err != nil {
-			err = fmt.Errorf("error parsing '%s.%s' value: %w", objPath, string(key), err)
+			err = newParsingError(string(key), err)
 			return
 		}
 		(*s)[string(key)] = (*test_extr.External)(unsafe.Pointer(&value))
@@ -147,24 +147,24 @@ func (s *TestSlice12) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice12.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
-func (s *TestSlice12) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestSlice12) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	a, err := v.Array()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make([]int64, len(a))
 	for i, v := range a {
 		var value int64
 		value, err = v.Int64()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
+			return newParsingError(fmt.Sprintf("%d", i), err)
 		}
 		(*s)[i] = int64(value)
 	}
@@ -183,24 +183,24 @@ func (s *TestSlice13) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice13.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
-func (s *TestSlice13) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestSlice13) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	a, err := v.Array()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	*s = make([]test_extr.External, len(a))
 	for i, v := range a {
 		var value test_extr.External
-		err = value.FillFromJSON(v, objPath+".")
+		err = value.FillFromJSON(v)
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
+			return newParsingError(fmt.Sprintf("%d", i), err)
 		}
 		(*s)[i] = test_extr.External(value)
 	}
@@ -219,29 +219,29 @@ func (s *TestSlice14) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestSlice14.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON fills the array with the values recognized from fastjson.Value
-func (s *TestSlice14) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestSlice14) FillFromJSON(v *fastjson.Value) (err error) {
 	if v.Type() == fastjson.TypeNull {
 		return nil
 	}
 	a, err := v.Array()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s' value: %w", objPath, err)
+		return err
 	}
 	if len(*s) != len(a) {
-		return fmt.Errorf("error parsing '%s', expected %d elements, got %d", objPath, len(*s), len(a))
+		return fmt.Errorf("expected %d elements, got %d", len(*s), len(a))
 	}
 	for i, v := range a {
 		b, err := v.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+			return newParsingError("", err)
 		}
 		value, err := parseDateTime(string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.[%d]' value: %w", objPath, i, err)
+			return newParsingError(fmt.Sprintf("%d", i), err)
 		}
 		(*s)[i] = time.Time(value)
 	}

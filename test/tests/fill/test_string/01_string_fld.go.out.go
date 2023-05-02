@@ -21,32 +21,32 @@ func (s *TestStr01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestStr01.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestStr01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
-	if err = s.validate(v, objPath); err != nil {
+func (s *TestStr01) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _field := v.Get("field"); _field != nil {
 		var valField []byte
 		if valField, err = _field.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
+			return newParsingError("field", err)
 		}
 		s.Field = *(*string)(unsafe.Pointer(&valField))
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.fieldRef' value: %w", objPath, err)
+			return newParsingError("fieldRef", err)
 		}
 		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
 	}
 	if _defRef := v.Get("defRef"); valueIsNotNull(_defRef) {
 		var valDefRef []byte
 		if valDefRef, err = _defRef.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.defRef' value: %w", objPath, err)
+			return newParsingError("defRef", err)
 		}
 		s.DefRef = (*string)(unsafe.Pointer(&valDefRef))
 	} else {
@@ -59,7 +59,7 @@ func (s *TestStr01) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 }
 
 // validate checks for correct data structure
-func (s *TestStr01) validate(v *fastjson.Value, objPath string) error {
+func (s *TestStr01) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -72,21 +72,21 @@ func (s *TestStr01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', 'R', 'e', 'f'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'e', 'f', 'R', 'e', 'f'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
@@ -106,33 +106,33 @@ func (s *TestStr02) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestStr02.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestStr02) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestStr02) FillFromJSON(v *fastjson.Value) (err error) {
 	// strict rules
-	if err = s.validate(v, objPath); err != nil {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _field := v.Get("field"); _field != nil {
 		var valField []byte
 		if valField, err = _field.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.field' value: %w", objPath, err)
+			return newParsingError("field", err)
 		}
 		s.Field = *(*string)(unsafe.Pointer(&valField))
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.fieldRef' value: %w", objPath, err)
+			return newParsingError("fieldRef", err)
 		}
 		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
 	}
 	if _string := v.Get("string"); _string != nil {
 		var valString []byte
 		if valString, err = _string.StringBytes(); err != nil {
-			return fmt.Errorf("error parsing '%s.string' value: %w", objPath, err)
+			return newParsingError("string", err)
 		}
 		s.String = *(*FieldValueString)(unsafe.Pointer(&valString))
 	} else {
@@ -142,7 +142,7 @@ func (s *TestStr02) FillFromJSON(v *fastjson.Value, objPath string) (err error) 
 }
 
 // validate checks for correct data structure
-func (s *TestStr02) validate(v *fastjson.Value, objPath string) error {
+func (s *TestStr02) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -155,25 +155,25 @@ func (s *TestStr02) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'f', 'i', 'e', 'l', 'd', 'R', 'e', 'f'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'s', 't', 'r', 'i', 'n', 'g'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s'", string(key))
 	})
 	return err
 }

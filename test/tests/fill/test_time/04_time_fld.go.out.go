@@ -21,45 +21,45 @@ func (s *TestTime01) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTime01.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestTime01) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestTime01) FillFromJSON(v *fastjson.Value) (err error) {
 	// strict rules
-	if err = s.validate(v, objPath); err != nil {
+	if err = s.validate(v); err != nil {
 		return err
 	}
 	if _dateBegin := v.Get("date_begin"); _dateBegin != nil {
 		b, err := _dateBegin.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_begin' value: %w", objPath, err)
+			return newParsingError("date_begin", err)
 		}
 		valDateBegin, err := parseDateTime(string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_begin' value: %w", objPath, err)
+			return newParsingError("date_begin", err)
 		}
 		s.DateBegin = valDateBegin
 	}
 	if _dateCustom := v.Get("date_custom"); _dateCustom != nil {
 		b, err := _dateCustom.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_custom' value: %w", objPath, err)
+			return newParsingError("date_custom", err)
 		}
 		valDateCustom, err := time.Parse("2006.01.02", string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_custom' value: %w", objPath, err)
+			return newParsingError("date_custom", err)
 		}
 		s.DateCustom = valDateCustom
 	}
 	if _dateEnd := v.Get("date_end"); valueIsNotNull(_dateEnd) {
 		b, err := _dateEnd.StringBytes()
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_end' value: %w", objPath, err)
+			return newParsingError("date_end", err)
 		}
 		valDateEnd, err := parseDateTime(string(b))
 		if err != nil {
-			return fmt.Errorf("error parsing '%s.date_end' value: %w", objPath, err)
+			return newParsingError("date_end", err)
 		}
 		s.DateEnd = new(time.Time)
 		*s.DateEnd = time.Time(valDateEnd)
@@ -68,7 +68,7 @@ func (s *TestTime01) FillFromJSON(v *fastjson.Value, objPath string) (err error)
 }
 
 // validate checks for correct data structure
-func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
+func (s *TestTime01) validate(v *fastjson.Value) error {
 	o, err := v.Object()
 	if err != nil {
 		return err
@@ -81,25 +81,25 @@ func (s *TestTime01) validate(v *fastjson.Value, objPath string) error {
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'b', 'e', 'g', 'i', 'n'}) {
 			checkFields[0]++
 			if checkFields[0] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'c', 'u', 's', 't', 'o', 'm'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
 		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', '_', 'e', 'n', 'd'}) {
 			checkFields[2]++
 			if checkFields[2] > 1 {
-				err = fmt.Errorf("the '%s.%s' field appears in the object twice", objPath, string(key))
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
 		}
-		err = fmt.Errorf("unexpected field '%s.%s'", objPath, string(key))
+		err = fmt.Errorf("unexpected field '%s'", string(key))
 	})
 	return err
 }
@@ -116,14 +116,14 @@ func (s *TestTime2) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	defer jsonParserTestTime2.Put(parser)
-	return s.FillFromJSON(v, "(root)")
+	return s.FillFromJSON(v)
 }
 
 // FillFromJSON recursively fills the fields with fastjson.Value
-func (s *TestTime2) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
+func (s *TestTime2) FillFromJSON(v *fastjson.Value) (err error) {
 	b, err := v.StringBytes()
 	if err != nil {
-		return fmt.Errorf("error parsing '%s.' value: %w", objPath, err)
+		return newParsingError("", err)
 	}
 	_val, err := parseDateTime(string(b))
 	if err != nil {
