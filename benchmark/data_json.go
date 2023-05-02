@@ -291,7 +291,7 @@ func (s *Entities) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 		}
 		for _, listElem := range listA {
 			var elem Hashtag
-			err = elem.FillFromJSON(listElem, objPath+".")
+			err = elem.FillFromJSON(listElem, objPath)
 			if err != nil {
 				break
 			}
@@ -595,7 +595,7 @@ func (s *UserEntityURL) FillFromJSON(v *fastjson.Value, objPath string) (err err
 		}
 		for _, listElem := range listA {
 			var elem URL
-			err = elem.FillFromJSON(listElem, objPath+".")
+			err = elem.FillFromJSON(listElem, objPath)
 			if err != nil {
 				break
 			}
@@ -653,7 +653,7 @@ func (s *UserEntities) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 	}
 	if _description := v.Get("description"); _description != nil {
 		var valDescription UserEntityDescription
-		err = valDescription.FillFromJSON(_description, objPath+".description")
+		err = valDescription.FillFromJSON(_description, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.description' value: %w", objPath, err)
 		}
@@ -661,7 +661,7 @@ func (s *UserEntities) FillFromJSON(v *fastjson.Value, objPath string) (err erro
 	}
 	if _uRL := v.Get("url"); _uRL != nil {
 		var valURL UserEntityURL
-		err = valURL.FillFromJSON(_uRL, objPath+".url")
+		err = valURL.FillFromJSON(_uRL, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.url' value: %w", objPath, err)
 		}
@@ -759,7 +759,7 @@ func (s *User) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _entities := v.Get("entities"); _entities != nil {
 		var valEntities UserEntities
-		err = valEntities.FillFromJSON(_entities, objPath+".entities")
+		err = valEntities.FillFromJSON(_entities, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.entities' value: %w", objPath, err)
 		}
@@ -1410,7 +1410,7 @@ func (s *Status) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _entities := v.Get("entities"); _entities != nil {
 		var valEntities Entities
-		err = valEntities.FillFromJSON(_entities, objPath+".entities")
+		err = valEntities.FillFromJSON(_entities, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.entities' value: %w", objPath, err)
 		}
@@ -1483,7 +1483,7 @@ func (s *Status) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _metadata := v.Get("metadata"); _metadata != nil {
 		var valMetadata StatusMetadata
-		err = valMetadata.FillFromJSON(_metadata, objPath+".metadata")
+		err = valMetadata.FillFromJSON(_metadata, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.metadata' value: %w", objPath, err)
 		}
@@ -1536,7 +1536,7 @@ func (s *Status) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 	}
 	if _user := v.Get("user"); _user != nil {
 		var valUser User
-		err = valUser.FillFromJSON(_user, objPath+".user")
+		err = valUser.FillFromJSON(_user, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.user' value: %w", objPath, err)
 		}
@@ -1729,7 +1729,7 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value, objPath string) (err error
 	}
 	if _searchMetadata := v.Get("search_metadata"); _searchMetadata != nil {
 		var valSearchMetadata SearchMetadata
-		err = valSearchMetadata.FillFromJSON(_searchMetadata, objPath+".search_metadata")
+		err = valSearchMetadata.FillFromJSON(_searchMetadata, objPath)
 		if err != nil {
 			return fmt.Errorf("error parsing '%s.search_metadata' value: %w", objPath, err)
 		}
@@ -1747,7 +1747,7 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value, objPath string) (err error
 		}
 		for _, listElem := range listA {
 			var elem Status
-			err = elem.FillFromJSON(listElem, objPath+".")
+			err = elem.FillFromJSON(listElem, objPath)
 			if err != nil {
 				break
 			}
@@ -1822,7 +1822,7 @@ func (s *XLStruct) FillFromJSON(v *fastjson.Value, objPath string) (err error) {
 		}
 		for _, listElem := range listA {
 			var elem LargeStruct
-			err = elem.FillFromJSON(listElem, objPath+".")
+			err = elem.FillFromJSON(listElem, objPath)
 			if err != nil {
 				break
 			}
