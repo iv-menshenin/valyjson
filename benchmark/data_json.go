@@ -2145,7 +2145,7 @@ func (s *Entities) MarshalTo(result Writer) error {
 			if _v == nil {
 				result.WriteString("null")
 			} else {
-				writeString(result, *string(_v))
+				writeString(result, *_v)
 			}
 		}
 		result.WriteString("]")
@@ -2169,7 +2169,7 @@ func (s *Entities) MarshalTo(result Writer) error {
 			if _v == nil {
 				result.WriteString("null")
 			} else {
-				writeString(result, *string(_v))
+				writeString(result, *_v)
 			}
 		}
 		result.WriteString("]")
@@ -2231,7 +2231,7 @@ func (s *UserEntityDescription) MarshalTo(result Writer) error {
 			if _v == nil {
 				result.WriteString("null")
 			} else {
-				writeString(result, *string(_v))
+				writeString(result, *_v)
 			}
 		}
 		result.WriteString("]")

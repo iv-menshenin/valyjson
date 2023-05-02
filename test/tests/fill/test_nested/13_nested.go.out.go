@@ -95,6 +95,135 @@ func (s *Root) validate(v *fastjson.Value) error {
 	return err
 }
 
+// jsonParserMiddle used for pooling Parsers for Middle JSONs.
+var jsonParserMiddle fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *Middle) UnmarshalJSON(data []byte) error {
+	parser := jsonParserMiddle.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserMiddle.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *Middle) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _name := v.Get("name"); _name != nil {
+		var valName []byte
+		if valName, err = _name.StringBytes(); err != nil {
+			return newParsingError("name", err)
+		}
+		s.Name = *(*UserName)(unsafe.Pointer(&valName))
+	}
+	if _surname := v.Get("surname"); _surname != nil {
+		var valSurname []byte
+		if valSurname, err = _surname.StringBytes(); err != nil {
+			return newParsingError("surname", err)
+		}
+		s.Surname = *(*UserSurname)(unsafe.Pointer(&valSurname))
+	}
+	if _patname := v.Get("patname"); valueIsNotNull(_patname) {
+		var valPatname []byte
+		if valPatname, err = _patname.StringBytes(); err != nil {
+			return newParsingError("patname", err)
+		}
+		s.Patname = new(UserPatname)
+		*s.Patname = UserPatname(valPatname)
+	}
+	if _dateOfBorn := v.Get("dateOfBorn"); _dateOfBorn != nil {
+		b, err := _dateOfBorn.StringBytes()
+		if err != nil {
+			return newParsingError("dateOfBorn", err)
+		}
+		valDateOfBorn, err := parseDateTime(string(b))
+		if err != nil {
+			return newParsingError("dateOfBorn", err)
+		}
+		s.DateOfBorn = valDateOfBorn
+	}
+	if _tags := v.Get("tags"); _tags != nil {
+		o, err := _tags.Object()
+		if err != nil {
+			return newParsingError("tags", err)
+		}
+		var valTags = make(map[TagName]TagValue, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value []byte
+			value, err = v.StringBytes()
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
+				valTags[TagName(key)] = TagValue(value)
+			}
+		})
+		if err != nil {
+			return newParsingError("tags", err)
+		}
+		s.Tags = Tags(valTags)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *Middle) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [5]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'n', 'a', 'm', 'e'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'s', 'u', 'r', 'n', 'a', 'm', 'e'}) {
+			checkFields[1]++
+			if checkFields[1] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'p', 'a', 't', 'n', 'a', 'm', 'e'}) {
+			checkFields[2]++
+			if checkFields[2] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'d', 'a', 't', 'e', 'O', 'f', 'B', 'o', 'r', 'n'}) {
+			checkFields[3]++
+			if checkFields[3] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'t', 'a', 'g', 's'}) {
+			checkFields[4]++
+			if checkFields[4] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
 // jsonParserMiddles used for pooling Parsers for Middles JSONs.
 var jsonParserMiddles fastjson.ParserPool
 
@@ -495,6 +624,115 @@ func (s Root) IsZero() bool {
 		return false
 	}
 	if s.Data != nil {
+		return false
+	}
+	return true
+}
+
+var bufDataMiddle = cb{}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *Middle) MarshalJSON() ([]byte, error) {
+	var result = bufDataMiddle.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Middle) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Name != "" {
+		result.WriteString(`"name":`)
+		writeString(result, string(s.Name))
+		wantComma = true
+	} else {
+		result.WriteString(`"name":""`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Surname != "" {
+		result.WriteString(`"surname":`)
+		writeString(result, string(s.Surname))
+		wantComma = true
+	} else {
+		result.WriteString(`"surname":""`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Patname != nil {
+		result.WriteString(`"patname":`)
+		writeString(result, string(*s.Patname))
+		wantComma = true
+	} else {
+		result.WriteString(`"patname":null`)
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if !s.DateOfBorn.IsZero() {
+		result.WriteString(`"dateOfBorn":`)
+		writeTime(result, s.DateOfBorn, time.RFC3339Nano)
+		wantComma = true
+	} else {
+		result.WriteString(`"dateOfBorn":"0001-01-01T00:00:00Z"`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Tags != nil {
+		wantComma = true
+		result.WriteString(`"tags":{`)
+		var wantComma bool
+		for _k, _v := range s.Tags {
+			if wantComma {
+				result.WriteString(",")
+			}
+			wantComma = true
+			result.WriteString(`"`)
+			result.WriteString(string(_k))
+			result.WriteString(`":`)
+			writeString(result, string(_v))
+		}
+		result.WriteString("}")
+	} else {
+		wantComma = true
+		result.WriteString(`"tags":null`)
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Middle) IsZero() bool {
+	if s.Name != "" {
+		return false
+	}
+	if s.Surname != "" {
+		return false
+	}
+	if s.Patname != nil {
+		return false
+	}
+	if !s.DateOfBorn.IsZero() {
+		return false
+	}
+	if s.Tags != nil {
 		return false
 	}
 	return true
