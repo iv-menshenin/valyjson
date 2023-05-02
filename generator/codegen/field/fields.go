@@ -295,7 +295,7 @@ func GetValueExtractor(t, errExpr ast.Expr) ValueExtractor {
 				return decorStmt(src, []ast.Stmt{
 					asthlp.CallStmt(asthlp.Call(
 						names.WriteStringFunc,
-						asthlp.NewIdent(names.VarNameWriter), decorSrc(src),
+						asthlp.NewIdent(names.VarNameWriter), decorSrc(asthlp.ExpressionTypeConvert(src, asthlp.String)),
 					)),
 				})
 			}

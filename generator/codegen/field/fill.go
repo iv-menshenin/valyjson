@@ -272,15 +272,29 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 					IsNotEmpty(valFactory.TypedValue(value, "v", asthlp.StringConstant(f.tags.JsonName()).Expr()))...,
 				).
 				AppendStmt(
-					asthlp.If(
-						asthlp.IsNil(asthlp.NewIdent(names.VarNameError)),
+					asthlp.IfElse(
+						asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
+						// err = newParsingError(string(key), err)
+						asthlp.Block(
+							asthlp.Assign(
+								asthlp.MakeVarNames(names.VarNameError),
+								asthlp.Assignment,
+								asthlp.Call(
+									asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+									asthlp.VariableTypeConvert("key", asthlp.String),
+									asthlp.NewIdent(names.VarNameError),
+								),
+							),
+						),
 						// {dst}[string(key)] = prop
-						asthlp.Assign(
-							[]ast.Expr{
-								asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
-							},
-							asthlp.Assignment,
-							valueAsValue,
+						asthlp.Block(
+							asthlp.Assign(
+								asthlp.VarNames{
+									asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
+								},
+								asthlp.Assignment,
+								valueAsValue,
+							),
 						),
 					),
 				).
