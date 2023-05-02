@@ -42,7 +42,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value []byte
 			value, err = v.StringBytes()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valTags[string(key)] = string(value)
 			}
 		})
@@ -63,7 +65,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value Property
 			err = value.FillFromJSON(v)
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valProperties[string(key)] = Property(value)
 			}
 		})
@@ -84,7 +88,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value Property
 			err = value.FillFromJSON(v)
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valKeyTypedProperties[Key(key)] = Property(value)
 			}
 		})
@@ -105,7 +111,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value int
 			value, err = v.Int()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valIntegerVal[Key(key)] = int32(value)
 			}
 		})
@@ -126,7 +134,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value float64
 			value, err = v.Float64()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valFloatVal[Key(key)] = float64(value)
 			}
 		})
@@ -151,7 +161,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value uint
 			value, err = v.Uint()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valUintVal[Key(key)] = (*uint16)(unsafe.Pointer(&value))
 			}
 		})
@@ -172,7 +184,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value bool
 			value, err = v.Bool()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valBoolVal[Key(key)] = bool(value)
 			}
 		})
@@ -193,7 +207,9 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value uint64
 			value, err = v.Uint64()
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valTypedVal[Key(key)] = Val(value)
 			}
 		})
@@ -380,7 +396,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
-			writeString(result, _v)
+			writeString(result, string(_v))
 		}
 		result.WriteString("}")
 	} else {

@@ -234,7 +234,7 @@ func (s *TestSlice01) MarshalTo(result Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeString(result, _v)
+			writeString(result, string(_v))
 		}
 		result.WriteString("]")
 	} else {

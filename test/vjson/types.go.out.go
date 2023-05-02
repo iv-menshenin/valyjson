@@ -86,7 +86,9 @@ func (s *Person) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var value TableOf
 			err = value.FillFromJSON(v)
-			if err == nil {
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
 				valTables[string(key)] = TableOf(value)
 			}
 		})
