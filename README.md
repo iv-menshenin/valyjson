@@ -72,9 +72,9 @@ but we still need the generation of marshaller code.
 
 | lib      | json size | ns/op  |   MB/s |   B/op | allocs/op |
 |:---------|:----------|--------|-------:|-------:|----------:|
-| valyjson | large     | 186615 | 2368.8 | 452067 |        10 |
-| valyjson | regular   | 4299   | 3029.6 |   9495 |         1 |
-| valyjson | small     | 142.5  |  568.6 |     96 |         1 |
+| valyjson | large     | 192130 | 2300.8 | 453321 |        17 |
+| valyjson | regular   | 4812   | 2706.6 |   9521 |         1 |
+| valyjson | small     | 139.8  |  579.2 |     96 |         1 |
 |          |           |        |        |        |           |
 | easyjson | large     | 101827 | 4393.8 | 466120 |        30 |
 | easyjson | regular   | 2462   | 5290.9 |  10293 |         9 |

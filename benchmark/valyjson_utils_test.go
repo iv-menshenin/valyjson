@@ -47,13 +47,14 @@ func Test_bufWriter_Write(t *testing.T) {
 	})
 }
 
-// Benchmark_testWriter-8                     47090             25799 ns/op            8303 B/op         11 allocs/op
+// Benchmark_testWriter-8                     217779              5426 ns/op               0 B/op          0 allocs/op
 func Benchmark_testWriter(b *testing.B) {
+	var pool cb
 	var bx [256]byte
 	b.ResetTimer()
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
-		var w bufWriter
+		var w = pool.Get()
 		var x = 65535
 		for x > 0 {
 			pie := 255
