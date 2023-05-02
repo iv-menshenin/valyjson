@@ -25,6 +25,7 @@ type bufWriter struct {
 	br  int // current bucket
 	sz  int
 	cb  *cb
+	bp  bytebufferpool.Pool
 }
 
 func (b *bufWriter) Write(p []byte) (n int, err error) {
@@ -117,7 +118,7 @@ func tuneBuf(old, cur int) int {
 
 func (b *bufWriter) Close() error {
 	for i := range b.buf {
-		writeBuf.Put(b.buf[i])
+		b.bp.Put(b.buf[i])
 	}
 	if b.cb != nil {
 		b.cb.Put(b)
@@ -125,7 +126,7 @@ func (b *bufWriter) Close() error {
 	return nil
 }
 
-const defBufBlock = 8192
+const defBufBlock = 1024
 
 func (b *bufWriter) ensureSpace(minNeededSz int) (currBlockFree int) {
 	if len(b.buf) > 0 {
@@ -136,7 +137,7 @@ func (b *bufWriter) ensureSpace(minNeededSz int) (currBlockFree int) {
 		minNeededSz -= currBlockFree
 	}
 	for {
-		bb := writeBuf.Get()
+		bb := b.bp.Get()
 		if cap(bb.B) == 0 {
 			if b.sz == 0 {
 				b.sz = defBufBlock
@@ -156,8 +157,6 @@ func (b *bufWriter) ensureSpace(minNeededSz int) (currBlockFree int) {
 		minNeededSz -= cap(bb.B)
 	}
 }
-
-var writeBuf = bytebufferpool.Pool{}
 
 func valueIsNotNull(v *fastjson.Value) bool {
 	return v != nil && v.Type() != fastjson.TypeNull

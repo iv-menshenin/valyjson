@@ -70,8 +70,8 @@ func caseTestFillStatements(t *testing.T, testFile string) {
 	if err := g.Parse(); err != nil {
 		t.Fatal(err)
 	}
-	g.BuildFillers()
-	g.BuildJsoners()
+	g.BuildDecoders()
+	g.BuildEncoders()
 	g.FixImports(
 		"test_extr", "fill/test_extr",
 		"test_any", "fill/test_any",

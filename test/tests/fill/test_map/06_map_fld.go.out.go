@@ -396,7 +396,7 @@ func (s *TestMap01) MarshalTo(result Writer) error {
 			result.WriteString(`"`)
 			result.WriteString(_k)
 			result.WriteString(`":`)
-			writeString(result, string(_v))
+			writeString(result, _v)
 		}
 		result.WriteString("}")
 	} else {

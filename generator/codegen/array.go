@@ -212,7 +212,7 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 	)
 
 	errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+a.name+`" value at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-	ve := field.GetValueExtractor(denotedType(a.spec.Elt), errExpr)
+	ve := field.GetValueExtractor(denotedType(a.spec.Elt), errExpr, nil)
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {
