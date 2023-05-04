@@ -461,7 +461,6 @@ func (s *Root) MarshalTo(result Writer) error {
 	if err = s.Meta.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "meta" attribute: %w`, err)
 	}
-	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
@@ -526,10 +525,8 @@ func (s *Middle) MarshalTo(result Writer) error {
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, string(s.Name))
-		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -537,10 +534,8 @@ func (s *Middle) MarshalTo(result Writer) error {
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
 		writeString(result, string(s.Surname))
-		wantComma = true
 	} else {
 		result.WriteString(`"surname":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -548,7 +543,6 @@ func (s *Middle) MarshalTo(result Writer) error {
 	if s.Patname != nil {
 		result.WriteString(`"patname":`)
 		writeString(result, string(*s.Patname))
-		wantComma = true
 	} else {
 		result.WriteString(`"patname":null`)
 	}
@@ -558,10 +552,8 @@ func (s *Middle) MarshalTo(result Writer) error {
 	if !s.DateOfBorn.IsZero() {
 		result.WriteString(`"dateOfBorn":`)
 		writeTime(result, s.DateOfBorn, time.RFC3339Nano)
-		wantComma = true
 	} else {
 		result.WriteString(`"dateOfBorn":"0001-01-01T00:00:00Z"`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -675,10 +667,8 @@ func (s *Meta) MarshalTo(result Writer) error {
 	if s.Count != 0 {
 		result.WriteString(`"count":`)
 		writeInt64(result, int64(s.Count))
-		wantComma = true
 	} else {
 		result.WriteString(`"count":0`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -718,10 +708,8 @@ func (s *Personal) MarshalTo(result Writer) error {
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, string(s.Name))
-		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -729,10 +717,8 @@ func (s *Personal) MarshalTo(result Writer) error {
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
 		writeString(result, string(s.Surname))
-		wantComma = true
 	} else {
 		result.WriteString(`"surname":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -740,7 +726,6 @@ func (s *Personal) MarshalTo(result Writer) error {
 	if s.Patname != nil {
 		result.WriteString(`"patname":`)
 		writeString(result, string(*s.Patname))
-		wantComma = true
 	} else {
 		result.WriteString(`"patname":null`)
 	}

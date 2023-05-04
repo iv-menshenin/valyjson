@@ -1891,10 +1891,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.CompletedIn != 0 {
 		result.WriteString(`"completed_in":`)
 		writeFloat64(result, s.CompletedIn)
-		wantComma = true
 	} else {
 		result.WriteString(`"completed_in":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1902,10 +1900,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.Count != 0 {
 		result.WriteString(`"count":`)
 		writeInt64(result, int64(s.Count))
-		wantComma = true
 	} else {
 		result.WriteString(`"count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1913,10 +1909,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.MaxID != 0 {
 		result.WriteString(`"max_id":`)
 		writeInt64(result, s.MaxID)
-		wantComma = true
 	} else {
 		result.WriteString(`"max_id":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1924,10 +1918,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.MaxIDStr != "" {
 		result.WriteString(`"max_id_str":`)
 		writeString(result, s.MaxIDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"max_id_str":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1935,10 +1927,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.NextResults != "" {
 		result.WriteString(`"next_results":`)
 		writeString(result, s.NextResults)
-		wantComma = true
 	} else {
 		result.WriteString(`"next_results":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1946,10 +1936,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.Query != "" {
 		result.WriteString(`"query":`)
 		writeString(result, s.Query)
-		wantComma = true
 	} else {
 		result.WriteString(`"query":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1957,10 +1945,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.RefreshURL != "" {
 		result.WriteString(`"refresh_url":`)
 		writeString(result, s.RefreshURL)
-		wantComma = true
 	} else {
 		result.WriteString(`"refresh_url":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1968,10 +1954,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.SinceID != 0 {
 		result.WriteString(`"since_id":`)
 		writeInt64(result, s.SinceID)
-		wantComma = true
 	} else {
 		result.WriteString(`"since_id":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -1979,10 +1963,8 @@ func (s *SearchMetadata) MarshalTo(result Writer) error {
 	if s.SinceIDStr != "" {
 		result.WriteString(`"since_id_str":`)
 		writeString(result, s.SinceIDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"since_id_str":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -2066,10 +2048,8 @@ func (s *Hashtag) MarshalTo(result Writer) error {
 	if s.Text != "" {
 		result.WriteString(`"text":`)
 		writeString(result, s.Text)
-		wantComma = true
 	} else {
 		result.WriteString(`"text":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -2274,16 +2254,6 @@ func (s *URL) MarshalTo(result Writer) error {
 	if wantComma {
 		result.WriteString(",")
 	}
-	if s.ExpandedURL != nil {
-		result.WriteString(`"expanded_url":`)
-		writeString(result, *s.ExpandedURL)
-		wantComma = true
-	} else {
-		result.WriteString(`"expanded_url":null`)
-	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.Indices != nil {
 		wantComma = true
 		result.WriteString(`"indices":[`)
@@ -2301,16 +2271,21 @@ func (s *URL) MarshalTo(result Writer) error {
 		result.WriteString(`"indices":null`)
 		wantComma = true
 	}
+	if s.ExpandedURL != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"expanded_url":`)
+		writeString(result, *s.ExpandedURL)
+	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.URL != "" {
 		result.WriteString(`"url":`)
 		writeString(result, s.URL)
-		wantComma = true
 	} else {
 		result.WriteString(`"url":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -2405,22 +2380,24 @@ func (s *UserEntities) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
-	if wantComma {
-		result.WriteString(",")
+	if !s.Description.IsZero() {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"description":`)
+		if err = s.Description.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "description" attribute: %w`, err)
+		}
 	}
-	result.WriteString(`"description":`)
-	if err = s.Description.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "description" attribute: %w`, err)
+	if !s.URL.IsZero() {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"url":`)
+		if err = s.URL.MarshalTo(result); err != nil {
+			return fmt.Errorf(`can't marshal "url" attribute: %w`, err)
+		}
 	}
-	wantComma = true
-	if wantComma {
-		result.WriteString(",")
-	}
-	result.WriteString(`"url":`)
-	if err = s.URL.MarshalTo(result); err != nil {
-		return fmt.Errorf(`can't marshal "url" attribute: %w`, err)
-	}
-	wantComma = true
 	result.WriteString("}")
 	return err
 }
@@ -2461,10 +2438,8 @@ func (s *User) MarshalTo(result Writer) error {
 	}
 	if s.ContributorsEnabled {
 		result.WriteString(`"contributors_enabled":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"contributors_enabled":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2472,30 +2447,24 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.CreatedAt != "" {
 		result.WriteString(`"created_at":`)
 		writeString(result, s.CreatedAt)
-		wantComma = true
 	} else {
 		result.WriteString(`"created_at":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.DefaultProfile {
 		result.WriteString(`"default_profile":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"default_profile":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.DefaultProfileImage {
 		result.WriteString(`"default_profile_image":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"default_profile_image":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2503,10 +2472,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Description != "" {
 		result.WriteString(`"description":`)
 		writeString(result, s.Description)
-		wantComma = true
 	} else {
 		result.WriteString(`"description":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2515,17 +2482,14 @@ func (s *User) MarshalTo(result Writer) error {
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
-	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.FavouritesCount != 0 {
 		result.WriteString(`"favourites_count":`)
 		writeInt64(result, int64(s.FavouritesCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"favourites_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2533,7 +2497,6 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.FollowRequestSent != nil {
 		result.WriteString(`"follow_request_sent":`)
 		writeString(result, *s.FollowRequestSent)
-		wantComma = true
 	} else {
 		result.WriteString(`"follow_request_sent":null`)
 	}
@@ -2543,10 +2506,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.FollowersCount != 0 {
 		result.WriteString(`"followers_count":`)
 		writeInt64(result, int64(s.FollowersCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"followers_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2554,7 +2515,6 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Following != nil {
 		result.WriteString(`"following":`)
 		writeString(result, *s.Following)
-		wantComma = true
 	} else {
 		result.WriteString(`"following":null`)
 	}
@@ -2564,20 +2524,16 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.FriendsCount != 0 {
 		result.WriteString(`"friends_count":`)
 		writeInt64(result, int64(s.FriendsCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"friends_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.GeoEnabled {
 		result.WriteString(`"geo_enabled":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"geo_enabled":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2585,10 +2541,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ID != 0 {
 		result.WriteString(`"id":`)
 		writeInt64(result, int64(s.ID))
-		wantComma = true
 	} else {
 		result.WriteString(`"id":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2596,20 +2550,16 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.IDStr != "" {
 		result.WriteString(`"id_str":`)
 		writeString(result, s.IDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"id_str":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.IsTranslator {
 		result.WriteString(`"is_translator":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"is_translator":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2617,10 +2567,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Lang != "" {
 		result.WriteString(`"lang":`)
 		writeString(result, s.Lang)
-		wantComma = true
 	} else {
 		result.WriteString(`"lang":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2628,10 +2576,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ListedCount != 0 {
 		result.WriteString(`"listed_count":`)
 		writeInt64(result, int64(s.ListedCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"listed_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2639,10 +2585,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Location != "" {
 		result.WriteString(`"location":`)
 		writeString(result, s.Location)
-		wantComma = true
 	} else {
 		result.WriteString(`"location":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2650,10 +2594,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, s.Name)
-		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2661,7 +2603,6 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.Notifications != nil {
 		result.WriteString(`"notifications":`)
 		writeString(result, *s.Notifications)
-		wantComma = true
 	} else {
 		result.WriteString(`"notifications":null`)
 	}
@@ -2671,10 +2612,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileBackgroundColor != "" {
 		result.WriteString(`"profile_background_color":`)
 		writeString(result, s.ProfileBackgroundColor)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_background_color":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2682,10 +2621,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileBackgroundImageURL != "" {
 		result.WriteString(`"profile_background_image_url":`)
 		writeString(result, s.ProfileBackgroundImageURL)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_background_image_url":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2693,20 +2630,16 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileBackgroundImageURLHTTPS != "" {
 		result.WriteString(`"profile_background_image_url_https":`)
 		writeString(result, s.ProfileBackgroundImageURLHTTPS)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_background_image_url_https":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.ProfileBackgroundTile {
 		result.WriteString(`"profile_background_tile":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_background_tile":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2714,10 +2647,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileImageURL != "" {
 		result.WriteString(`"profile_image_url":`)
 		writeString(result, s.ProfileImageURL)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_image_url":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2725,10 +2656,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileImageURLHTTPS != "" {
 		result.WriteString(`"profile_image_url_https":`)
 		writeString(result, s.ProfileImageURLHTTPS)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_image_url_https":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2736,10 +2665,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileLinkColor != "" {
 		result.WriteString(`"profile_link_color":`)
 		writeString(result, s.ProfileLinkColor)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_link_color":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2747,10 +2674,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileSidebarBorderColor != "" {
 		result.WriteString(`"profile_sidebar_border_color":`)
 		writeString(result, s.ProfileSidebarBorderColor)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_sidebar_border_color":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2758,10 +2683,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileSidebarFillColor != "" {
 		result.WriteString(`"profile_sidebar_fill_color":`)
 		writeString(result, s.ProfileSidebarFillColor)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_sidebar_fill_color":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2769,30 +2692,24 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ProfileTextColor != "" {
 		result.WriteString(`"profile_text_color":`)
 		writeString(result, s.ProfileTextColor)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_text_color":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.ProfileUseBackgroundImage {
 		result.WriteString(`"profile_use_background_image":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"profile_use_background_image":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Protected {
 		result.WriteString(`"protected":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"protected":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2800,20 +2717,16 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.ScreenName != "" {
 		result.WriteString(`"screen_name":`)
 		writeString(result, s.ScreenName)
-		wantComma = true
 	} else {
 		result.WriteString(`"screen_name":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.ShowAllInlineMedia {
 		result.WriteString(`"show_all_inline_media":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"show_all_inline_media":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2821,10 +2734,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.StatusesCount != 0 {
 		result.WriteString(`"statuses_count":`)
 		writeInt64(result, int64(s.StatusesCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"statuses_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2832,10 +2743,8 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.TimeZone != "" {
 		result.WriteString(`"time_zone":`)
 		writeString(result, s.TimeZone)
-		wantComma = true
 	} else {
 		result.WriteString(`"time_zone":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -2843,7 +2752,6 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.URL != nil {
 		result.WriteString(`"url":`)
 		writeString(result, *s.URL)
-		wantComma = true
 	} else {
 		result.WriteString(`"url":null`)
 	}
@@ -2853,20 +2761,16 @@ func (s *User) MarshalTo(result Writer) error {
 	if s.UtcOffset != 0 {
 		result.WriteString(`"utc_offset":`)
 		writeInt64(result, int64(s.UtcOffset))
-		wantComma = true
 	} else {
 		result.WriteString(`"utc_offset":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Verified {
 		result.WriteString(`"verified":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"verified":false`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -3020,10 +2924,8 @@ func (s *StatusMetadata) MarshalTo(result Writer) error {
 	if s.IsoLanguageCode != "" {
 		result.WriteString(`"iso_language_code":`)
 		writeString(result, s.IsoLanguageCode)
-		wantComma = true
 	} else {
 		result.WriteString(`"iso_language_code":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3031,10 +2933,8 @@ func (s *StatusMetadata) MarshalTo(result Writer) error {
 	if s.ResultType != "" {
 		result.WriteString(`"result_type":`)
 		writeString(result, s.ResultType)
-		wantComma = true
 	} else {
 		result.WriteString(`"result_type":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -3077,7 +2977,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.Contributors != nil {
 		result.WriteString(`"contributors":`)
 		writeString(result, *s.Contributors)
-		wantComma = true
 	} else {
 		result.WriteString(`"contributors":null`)
 	}
@@ -3087,7 +2986,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.Coordinates != nil {
 		result.WriteString(`"coordinates":`)
 		writeString(result, *s.Coordinates)
-		wantComma = true
 	} else {
 		result.WriteString(`"coordinates":null`)
 	}
@@ -3097,10 +2995,8 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.CreatedAt != "" {
 		result.WriteString(`"created_at":`)
 		writeString(result, s.CreatedAt)
-		wantComma = true
 	} else {
 		result.WriteString(`"created_at":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3109,16 +3005,13 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
-	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Favorited {
 		result.WriteString(`"favorited":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"favorited":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3126,7 +3019,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.Geo != nil {
 		result.WriteString(`"geo":`)
 		writeString(result, *s.Geo)
-		wantComma = true
 	} else {
 		result.WriteString(`"geo":null`)
 	}
@@ -3136,10 +3028,8 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.ID != 0 {
 		result.WriteString(`"id":`)
 		writeInt64(result, s.ID)
-		wantComma = true
 	} else {
 		result.WriteString(`"id":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3147,10 +3037,8 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.IDStr != "" {
 		result.WriteString(`"id_str":`)
 		writeString(result, s.IDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"id_str":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3158,7 +3046,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.InReplyToScreenName != nil {
 		result.WriteString(`"in_reply_to_screen_name":`)
 		writeString(result, *s.InReplyToScreenName)
-		wantComma = true
 	} else {
 		result.WriteString(`"in_reply_to_screen_name":null`)
 	}
@@ -3168,7 +3055,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.InReplyToStatusID != nil {
 		result.WriteString(`"in_reply_to_status_id":`)
 		writeString(result, *s.InReplyToStatusID)
-		wantComma = true
 	} else {
 		result.WriteString(`"in_reply_to_status_id":null`)
 	}
@@ -3178,7 +3064,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.InReplyToStatusIDStr != nil {
 		result.WriteString(`"in_reply_to_status_id_str":`)
 		writeString(result, *s.InReplyToStatusIDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"in_reply_to_status_id_str":null`)
 	}
@@ -3188,7 +3073,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.InReplyToUserID != nil {
 		result.WriteString(`"in_reply_to_user_id":`)
 		writeString(result, *s.InReplyToUserID)
-		wantComma = true
 	} else {
 		result.WriteString(`"in_reply_to_user_id":null`)
 	}
@@ -3198,7 +3082,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.InReplyToUserIDStr != nil {
 		result.WriteString(`"in_reply_to_user_id_str":`)
 		writeString(result, *s.InReplyToUserIDStr)
-		wantComma = true
 	} else {
 		result.WriteString(`"in_reply_to_user_id_str":null`)
 	}
@@ -3209,14 +3092,12 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.Metadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "metadata" attribute: %w`, err)
 	}
-	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Place != nil {
 		result.WriteString(`"place":`)
 		writeString(result, *s.Place)
-		wantComma = true
 	} else {
 		result.WriteString(`"place":null`)
 	}
@@ -3226,20 +3107,16 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.RetweetCount != 0 {
 		result.WriteString(`"retweet_count":`)
 		writeInt64(result, int64(s.RetweetCount))
-		wantComma = true
 	} else {
 		result.WriteString(`"retweet_count":0`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Retweeted {
 		result.WriteString(`"retweeted":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"retweeted":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3247,10 +3124,8 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.Source != "" {
 		result.WriteString(`"source":`)
 		writeString(result, s.Source)
-		wantComma = true
 	} else {
 		result.WriteString(`"source":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3258,20 +3133,16 @@ func (s *Status) MarshalTo(result Writer) error {
 	if s.Text != "" {
 		result.WriteString(`"text":`)
 		writeString(result, s.Text)
-		wantComma = true
 	} else {
 		result.WriteString(`"text":""`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
 	}
 	if s.Truncated {
 		result.WriteString(`"truncated":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"truncated":false`)
-		wantComma = true
 	}
 	if wantComma {
 		result.WriteString(",")
@@ -3280,7 +3151,6 @@ func (s *Status) MarshalTo(result Writer) error {
 	if err = s.User.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "user" attribute: %w`, err)
 	}
-	wantComma = true
 	result.WriteString("}")
 	return err
 }
@@ -3380,7 +3250,6 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 	if err = s.SearchMetadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "search_metadata" attribute: %w`, err)
 	}
-	wantComma = true
 	if wantComma {
 		result.WriteString(",")
 	}

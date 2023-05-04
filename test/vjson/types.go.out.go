@@ -638,46 +638,52 @@ func (s *Person) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Name != "" {
 		result.WriteString(`"name":`)
 		writeString(result, s.Name)
-		wantComma = true
 	} else {
 		result.WriteString(`"name":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Surname != "" {
 		result.WriteString(`"surname":`)
 		writeString(result, s.Surname)
-		wantComma = true
 	} else {
 		result.WriteString(`"surname":""`)
-		wantComma = true
 	}
 	if s.Middle != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"middle":`)
 		writeString(result, *s.Middle)
-		wantComma = true
 	}
 	if s.DOB != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"dob":`)
 		writeTime(result, *s.DOB, time.RFC3339Nano)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Passport != nil {
 		result.WriteString(`"passport":`)
 		if err = s.Passport.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "passport" attribute: %w`, err)
 		}
-		wantComma = true
 	} else {
 		result.WriteString(`"passport":null`)
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Tables != nil {
 		wantComma = true
 		result.WriteString(`"tables":{`)
@@ -747,22 +753,23 @@ func (s *Passport) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Number != "" {
 		result.WriteString(`"number":`)
 		writeString(result, s.Number)
-		wantComma = true
 	} else {
 		result.WriteString(`"number":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if !s.DateDoc.IsZero() {
 		result.WriteString(`"dateDoc":`)
 		writeTime(result, s.DateDoc, time.RFC3339Nano)
-		wantComma = true
 	} else {
 		result.WriteString(`"dateDoc":"0001-01-01T00:00:00Z"`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -799,16 +806,19 @@ func (s *TableOf) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.TableName != "" {
 		result.WriteString(`"tableName":`)
 		writeString(result, s.TableName)
-		wantComma = true
 	} else {
 		result.WriteString(`"tableName":""`)
-		wantComma = true
 	}
 	if s.Tables != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		wantComma = true
 		result.WriteString(`"tables":[`)
 		var wantComma bool
@@ -860,16 +870,19 @@ func (s *Table) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Counter != 0 {
 		result.WriteString(`"counter":`)
 		writeInt64(result, int64(s.Counter))
-		wantComma = true
 	} else {
 		result.WriteString(`"counter":0`)
-		wantComma = true
 	}
 	if s.Assessments != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		wantComma = true
 		result.WriteString(`"assessments":[`)
 		var wantComma bool
@@ -883,25 +896,27 @@ func (s *Table) MarshalTo(result Writer) error {
 		}
 		result.WriteString("]")
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if !s.Time.IsZero() {
 		result.WriteString(`"time":`)
 		writeTime(result, s.Time, time.RFC3339Nano)
-		wantComma = true
 	} else {
 		result.WriteString(`"time":"0001-01-01T00:00:00Z"`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Avg != 0 {
 		result.WriteString(`"avg":`)
 		writeFloat64(result, s.Avg)
-		wantComma = true
 	} else {
 		result.WriteString(`"avg":0`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Tags != nil {
 		wantComma = true
 		result.WriteString(`"tags":[`)
@@ -966,22 +981,23 @@ func (s *Tag) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.TagName != "" {
 		result.WriteString(`"tagName":`)
 		writeString(result, s.TagName)
-		wantComma = true
 	} else {
 		result.WriteString(`"tagName":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.TagValue != "" {
 		result.WriteString(`"tagValue":`)
 		writeString(result, s.TagValue)
-		wantComma = true
 	} else {
 		result.WriteString(`"tagValue":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

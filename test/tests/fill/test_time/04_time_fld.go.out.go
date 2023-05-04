@@ -153,28 +153,30 @@ func (s *TestTime01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if !s.DateBegin.IsZero() {
 		result.WriteString(`"date_begin":`)
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
-		wantComma = true
 	} else {
 		result.WriteString(`"date_begin":"0001-01-01T00:00:00Z"`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if !s.DateCustom.IsZero() {
 		result.WriteString(`"date_custom":`)
 		writeTime(result, s.DateCustom, "2006.01.02")
-		wantComma = true
 	} else {
 		result.WriteString(`"date_custom":"0001.01.01"`)
-		wantComma = true
 	}
 	if s.DateEnd != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"date_end":`)
 		writeTime(result, *s.DateEnd, time.RFC3339Nano)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

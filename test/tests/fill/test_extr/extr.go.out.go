@@ -99,18 +99,21 @@ func (s *External) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	result.WriteString(`"test1":`)
 	if err = s.Test01.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "test1" attribute: %w`, err)
 	}
-	wantComma = true
 	if !s.Test02.IsZero() {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"test2":`)
 		if err = s.Test02.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "test2" attribute: %w`, err)
 		}
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

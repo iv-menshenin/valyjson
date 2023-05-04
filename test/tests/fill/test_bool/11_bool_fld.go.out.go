@@ -239,45 +239,49 @@ func (s *TestBool01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Bool {
 		result.WriteString(`"bl":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"bl":false`)
-		wantComma = true
 	}
 	if s.BlMaybe {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"mb":true`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.RefBool != nil {
 		if *s.RefBool {
 			result.WriteString(`"refBool":true`)
 		} else {
 			result.WriteString(`"refBool":false`)
 		}
-		wantComma = true
 	} else {
 		result.WriteString(`"refBool":null`)
 	}
 	if s.RefMaybe != nil {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		if *s.RefMaybe {
 			result.WriteString(`"refMaybe":true`)
 		} else {
 			result.WriteString(`"refMaybe":false`)
 		}
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.DefBool {
 		result.WriteString(`"defBool":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"defBool":false`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -323,17 +327,19 @@ func (s *TestBool02) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.I {
 		result.WriteString(`"i":true`)
-		wantComma = true
 	} else {
 		result.WriteString(`"i":false`)
-		wantComma = true
 	}
 	if s.X {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"x":true`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

@@ -198,27 +198,30 @@ func (s *TestStr01) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
 		writeString(result, s.Field)
-		wantComma = true
 	} else {
 		result.WriteString(`"field":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
 		writeString(result, *s.FieldRef)
-		wantComma = true
 	} else {
 		result.WriteString(`"fieldRef":null`)
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.DefRef != nil {
 		result.WriteString(`"defRef":`)
 		writeString(result, *s.DefRef)
-		wantComma = true
 	} else {
 		result.WriteString(`"defRef":null`)
 	}
@@ -260,30 +263,32 @@ func (s *TestStr02) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Field != "" {
 		result.WriteString(`"field":`)
 		writeString(result, s.Field)
-		wantComma = true
 	} else {
 		result.WriteString(`"field":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.FieldRef != nil {
 		result.WriteString(`"fieldRef":`)
 		writeString(result, *s.FieldRef)
-		wantComma = true
 	} else {
 		result.WriteString(`"fieldRef":null`)
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.String != "" {
 		result.WriteString(`"string":`)
 		writeString(result, string(s.String))
-		wantComma = true
 	} else {
 		result.WriteString(`"string":""`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

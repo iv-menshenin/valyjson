@@ -55,7 +55,7 @@ type UserEntityDescription struct {
 
 //json:optional
 type URL struct {
-	ExpandedURL *string `json:"expanded_url"`
+	ExpandedURL *string `json:"expanded_url,omitempty"`
 	Indices     []int   `json:"indices"`
 	URL         string  `json:"url"`
 }
@@ -67,8 +67,8 @@ type UserEntityURL struct {
 
 //json:optional
 type UserEntities struct {
-	Description UserEntityDescription `json:"description"`
-	URL         UserEntityURL         `json:"url"`
+	Description UserEntityDescription `json:"description,omitempty"`
+	URL         UserEntityURL         `json:"url,omitempty"`
 }
 
 //json:optional

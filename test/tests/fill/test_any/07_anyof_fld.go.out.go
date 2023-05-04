@@ -211,22 +211,23 @@ func (s *TestOneOfStruct) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Class != "" {
 		result.WriteString(`"class":`)
 		writeString(result, s.Class)
-		wantComma = true
 	} else {
 		result.WriteString(`"class":""`)
-		wantComma = true
 	}
-	result.WriteString(",")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Value != 0 {
 		result.WriteString(`"width":`)
 		writeFloat64(result, s.Value)
-		wantComma = true
 	} else {
 		result.WriteString(`"width":0`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -263,19 +264,21 @@ func (s *TestAllOfSecond) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if s.Comment != "" {
 		result.WriteString(`"comment":`)
 		writeString(result, s.Comment)
-		wantComma = true
 	} else {
 		result.WriteString(`"comment":""`)
-		wantComma = true
 	}
 	if s.Level != 0 {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"level":`)
 		writeInt64(result, s.Level)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -313,15 +316,18 @@ func (s *TestAllOfThird) MarshalTo(result Writer) error {
 	)
 	result.WriteString("{")
 	if s.Command != "" {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"command":`)
 		writeString(result, s.Command)
-		wantComma = true
 	}
 	if s.Range != 0 {
-		result.WriteString(",")
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"range":`)
 		writeInt64(result, s.Range)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

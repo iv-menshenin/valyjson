@@ -219,6 +219,26 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		).Decl()
 	}
 
+	varStmt := field.NeedVars()
+	var jsonFieldBlocks = make([]field.WriteBlock, 0, len(s.spec.Fields.List))
+	for _, fld := range s.spec.Fields.List {
+		jsonFieldBlocks = append(jsonFieldBlocks, jsonFieldStmts(fld)...)
+	}
+	for i := range jsonFieldBlocks {
+		if jsonFieldBlocks[i].AnywayWrites() {
+			if i > 0 {
+				first := jsonFieldBlocks[i]
+				copy(jsonFieldBlocks[1:], jsonFieldBlocks[:i])
+				jsonFieldBlocks[0] = first
+			}
+			break
+		}
+	}
+	var stmt = make([]ast.Stmt, 0, len(jsonFieldBlocks))
+	for _, b := range jsonFieldBlocks {
+		stmt = append(stmt, b.Render(field.PutCommaFirstIf)...)
+	}
+
 	fn.AppendStmt(
 		// 	if s == nil {
 		//		result.WriteString("null")
@@ -233,33 +253,32 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		// var (
 		// 	err    error
 		// )
-		field.NeedVars(),
+		varStmt,
 		// result.WriteString("{")
 		asthlp.CallStmt(asthlp.Call(
 			field.WriteStringFn,
 			asthlp.StringConstant("{").Expr(),
 		)),
 	)
-
-	var fs fieldsMarshalState
-	for _, fld := range s.spec.Fields.List {
-		fn.AppendStmt(fs.jsonFieldStmts(fld)...)
-	}
-
+	fn.AppendStmt(stmt...)
 	fn.AppendStmt(
 		makeWriteAndReturn("}")...,
 	)
 	return fn.Decl()
 }
 
-type fieldsMarshalState struct {
-	anywayWrites bool
-	someWrote    bool
+type vis struct {
+	visit func(ast.Node)
 }
 
-func (f *fieldsMarshalState) jsonFieldStmts(fld *ast.Field) []ast.Stmt {
+func (v *vis) Visit(node ast.Node) (w ast.Visitor) {
+	v.visit(node)
+	return v
+}
+
+func jsonFieldStmts(fld *ast.Field) []field.WriteBlock {
 	var (
-		result   []ast.Stmt
+		result   []field.WriteBlock
 		factory  = field.New(fld)
 		fldNames = make([]string, 0, len(fld.Names))
 	)
@@ -276,17 +295,7 @@ func (f *fieldsMarshalState) jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 		fldNames = append(fldNames, nm.Name)
 	}
 	for _, name := range fldNames {
-		block := factory.MarshalStatements(name)
-		var stmt = field.PutCommaStmt
-		if !f.anywayWrites {
-			stmt = field.PutCommaFirstIf
-		}
-		if !f.someWrote {
-			stmt = asthlp.EmptyStmt()
-		}
-		result = append(result, block.Render(stmt)...)
-		f.anywayWrites = f.anywayWrites || block.AnywayWrites()
-		f.someWrote = true
+		result = append(result, factory.MarshalStatements(name))
 	}
 	return result
 }

@@ -146,13 +146,15 @@ func (s *TestUUID) MarshalTo(result Writer) error {
 		wantComma bool
 	)
 	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
 	if buf, err := s.UUID.MarshalText(); err != nil {
 		return newParsingError("uuid", err)
 	} else {
 		result.WriteString(`"uuid":"`)
 		result.Write(buf)
 		result.WriteString(`"`)
-		wantComma = true
 	}
 	result.WriteString("}")
 	return err

@@ -19,7 +19,7 @@ type WriteBlock struct {
 }
 
 func (w WriteBlock) AnywayWrites() bool {
-	if w.IfZero != nil && w.NotZero == nil {
+	if w.NotZero != nil && w.IfZero == nil {
 		return false
 	}
 	return true
@@ -78,7 +78,6 @@ func timeMarshal(src ast.Expr, jsonName, layout string, omitempty, isStar bool) 
 			asthlp.CallStmt(
 				asthlp.Call(names.WriteTimeFunc, asthlp.NewIdent(names.VarNameWriter), src, layoutExpr),
 			),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -91,7 +90,6 @@ func timeMarshal(src ast.Expr, jsonName, layout string, omitempty, isStar bool) 
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":"%s"`, jsonName, zeroDate)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -132,7 +130,6 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.CallStmt(asthlp.Call(WriteBytesFn, bufVar)),
 					// result.WriteString(`"`)
 					putQuoteStmt,
-					SetCommaVar,
 				),
 			),
 		},
@@ -143,7 +140,6 @@ func uuidMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -165,7 +161,6 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 				asthlp.NewIdent(names.VarNameWriter), // result
 				srcInt64,                             // int64({src})
 			)),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -174,7 +169,6 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -197,7 +191,6 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 				asthlp.NewIdent(names.VarNameWriter),
 				srcUint64,
 			)),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -206,7 +199,6 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -227,7 +219,6 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 			asthlp.CallStmt(asthlp.Call(
 				names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), srcFloat64,
 			)),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -236,7 +227,6 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":0`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -250,7 +240,6 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":true`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -259,7 +248,6 @@ func boolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":false`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -271,7 +259,6 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 			WriteStringFn,
 			asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
 		)),
-		SetCommaVar,
 	}
 	if omitempty {
 		def = nil
@@ -289,7 +276,6 @@ func refBoolMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					asthlp.StringConstant(fmt.Sprintf(`"%s":false`, jsonName)).Expr(),
 				))),
 			),
-			SetCommaVar,
 		},
 		IfZero: def,
 	}
@@ -311,7 +297,6 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 			asthlp.CallStmt(asthlp.Call(
 				names.WriteStringFunc, asthlp.NewIdent(names.VarNameWriter), srcString,
 			)),
-			SetCommaVar,
 		},
 	}
 	if !omitempty {
@@ -320,7 +305,6 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 				WriteStringFn,
 				asthlp.StringConstant(fmt.Sprintf(`"%s":""`, jsonName)).Expr(),
 			)),
-			SetCommaVar,
 		}
 	}
 	return w
@@ -360,7 +344,6 @@ func structMarshal(src ast.Expr, jsonName string, omitempty bool) WriteBlock {
 					),
 				),
 			),
-			SetCommaVar,
 		},
 	}
 }
