@@ -320,7 +320,7 @@ func (s *Struct) ZeroFunc() ast.Decl {
 	}
 
 	for _, fld := range s.spec.Fields.List {
-		zero := helpers.ZeroValueOfT(fld.Type)
+		zero := helpers.ZeroValueOfT(helpers.DenotedType(fld.Type))
 		for _, name := range fld.Names {
 			var isNotZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), names.MethodNameZero))))
 			if zero != nil {

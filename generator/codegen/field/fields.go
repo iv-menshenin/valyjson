@@ -6,6 +6,8 @@ import (
 	"unicode"
 
 	asthlp "github.com/iv-menshenin/go-ast"
+
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
@@ -68,13 +70,12 @@ func (f *Field) prepareRef() {
 }
 
 func (f *Field) fillDenotedType() {
-	if i, ok := f.expr.(*ast.Ident); ok {
-		f.refx = denotedType(i)
-	} else {
-		f.refx = f.expr
-	}
+	f.refx = helpers.DenotedType(f.expr)
 }
 
+// denotedType allows to explore real type
+//
+// deprecated
 func denotedType(t *ast.Ident) ast.Expr {
 	if t.Obj != nil {
 		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
