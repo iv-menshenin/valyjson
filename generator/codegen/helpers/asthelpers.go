@@ -101,6 +101,7 @@ func StringFromType(t ast.Expr, val string) string {
 }
 
 // FmtError produces an error constructor
+//
 //	fmt.Errorf("{format}", {attrs[0]}, {attrs[1]}, ..., {attrs[n]})
 func FmtError(format string, attrs ...ast.Expr) ast.Expr {
 	var fmtAttrs []ast.Expr
@@ -167,4 +168,27 @@ func MakeIfItsNullTypeCondition() ast.Expr {
 		asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameJsonValue, "Type"))),
 		asthlp.SimpleSelector("fastjson", "TypeNull"),
 	)
+}
+
+func DenotedType(expr ast.Expr) ast.Expr {
+	switch typed := expr.(type) {
+	case *ast.Ident:
+		return denotedIdent(typed)
+
+	case *ast.SelectorExpr:
+		if typed.Sel.Name != "Time" && typed.Sel.Name != "UUID" {
+			return denotedIdent(typed.Sel)
+		}
+	}
+	return expr
+}
+
+func denotedIdent(t *ast.Ident) ast.Expr {
+	if t.Obj != nil {
+		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
+		if ok {
+			return ts.Type
+		}
+	}
+	return t
 }
