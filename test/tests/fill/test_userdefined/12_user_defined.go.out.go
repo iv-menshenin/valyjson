@@ -89,6 +89,80 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
 		}
 		s.Bool = DefinedBool(valBool)
 	}
+	if _refInt32 := v.Get("r_int32"); valueIsNotNull(_refInt32) {
+		var valRefInt32 int
+		valRefInt32, err = _refInt32.Int()
+		if err != nil {
+			return newParsingError("r_int32", err)
+		}
+		if valRefInt32 > math.MaxInt32 {
+			return newParsingError("r_int32", fmt.Errorf("%d exceeds maximum for data type int32", valRefInt32))
+		}
+		s.RefInt32 = new(DefinedInt32)
+		*s.RefInt32 = DefinedInt32(valRefInt32)
+	} else {
+		if _refInt32 == nil {
+			var __RefInt32 DefinedInt32 = 32
+			s.RefInt32 = &__RefInt32
+		}
+	}
+	if _refInt64 := v.Get("r_int64"); valueIsNotNull(_refInt64) {
+		var valRefInt64 int64
+		valRefInt64, err = _refInt64.Int64()
+		if err != nil {
+			return newParsingError("r_int64", err)
+		}
+		s.RefInt64 = new(DefinedInt64)
+		*s.RefInt64 = DefinedInt64(valRefInt64)
+	}
+	if _refFloat32 := v.Get("r_float32"); valueIsNotNull(_refFloat32) {
+		var valRefFloat32 float64
+		valRefFloat32, err = _refFloat32.Float64()
+		if err != nil {
+			return newParsingError("r_float32", err)
+		}
+		if valRefFloat32 > math.MaxFloat32 {
+			return newParsingError("r_float32", fmt.Errorf("%f exceeds maximum for data type float32", valRefFloat32))
+		}
+		s.RefFloat32 = new(DefinedFloat32)
+		*s.RefFloat32 = DefinedFloat32(valRefFloat32)
+	} else {
+		if _refFloat32 == nil {
+			var __RefFloat32 DefinedFloat32 = 123.01
+			s.RefFloat32 = &__RefFloat32
+		}
+	}
+	if _refFloat64 := v.Get("r_float64"); valueIsNotNull(_refFloat64) {
+		var valRefFloat64 float64
+		valRefFloat64, err = _refFloat64.Float64()
+		if err != nil {
+			return newParsingError("r_float64", err)
+		}
+		s.RefFloat64 = new(DefinedFloat64)
+		*s.RefFloat64 = DefinedFloat64(valRefFloat64)
+	}
+	if _refString := v.Get("r_string"); valueIsNotNull(_refString) {
+		var valRefString []byte
+		if valRefString, err = _refString.StringBytes(); err != nil {
+			return newParsingError("r_string", err)
+		}
+		s.RefString = new(DefinedString)
+		*s.RefString = DefinedString(valRefString)
+	} else {
+		if _refString == nil {
+			var __RefString DefinedString = "default_string"
+			s.RefString = &__RefString
+		}
+	}
+	if _refBool := v.Get("r_bool"); valueIsNotNull(_refBool) {
+		var valRefBool bool
+		valRefBool, err = _refBool.Bool()
+		if err != nil {
+			return newParsingError("r_bool", err)
+		}
+		s.RefBool = new(DefinedBool)
+		*s.RefBool = DefinedBool(valRefBool)
+	}
 	return nil
 }
 
@@ -98,7 +172,7 @@ func (s *TestUserDefined) validate(v *fastjson.Value) error {
 	if err != nil {
 		return err
 	}
-	var checkFields [6]int
+	var checkFields [12]int
 	o.Visit(func(key []byte, _ *fastjson.Value) {
 		if err != nil {
 			return
@@ -141,6 +215,48 @@ func (s *TestUserDefined) validate(v *fastjson.Value) error {
 		if bytes.Equal(key, []byte{'f', '_', 'b', 'o', 'o', 'l'}) {
 			checkFields[5]++
 			if checkFields[5] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 'i', 'n', 't', '3', '2'}) {
+			checkFields[6]++
+			if checkFields[6] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 'i', 'n', 't', '6', '4'}) {
+			checkFields[7]++
+			if checkFields[7] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 'f', 'l', 'o', 'a', 't', '3', '2'}) {
+			checkFields[8]++
+			if checkFields[8] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 'f', 'l', 'o', 'a', 't', '6', '4'}) {
+			checkFields[9]++
+			if checkFields[9] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 's', 't', 'r', 'i', 'n', 'g'}) {
+			checkFields[10]++
+			if checkFields[10] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'r', '_', 'b', 'o', 'o', 'l'}) {
+			checkFields[11]++
+			if checkFields[11] > 1 {
 				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
 			}
 			return
@@ -216,6 +332,57 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		}
 		result.WriteString(`"f_bool":true`)
 	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.RefInt32 != nil {
+		result.WriteString(`"r_int32":`)
+		writeInt64(result, int64(*s.RefInt32))
+	} else {
+		result.WriteString(`"r_int32":null`)
+	}
+	if s.RefInt64 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"r_int64":`)
+		writeInt64(result, int64(*s.RefInt64))
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.RefFloat32 != nil {
+		result.WriteString(`"r_float32":`)
+		writeFloat64(result, float64(*s.RefFloat32))
+	} else {
+		result.WriteString(`"r_float32":null`)
+	}
+	if s.RefFloat64 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
+		result.WriteString(`"r_float64":`)
+		writeFloat64(result, float64(*s.RefFloat64))
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.RefString != nil {
+		result.WriteString(`"r_string":`)
+		writeString(result, string(*s.RefString))
+	} else {
+		result.WriteString(`"r_string":null`)
+	}
+	if s.RefBool != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
+		if *s.RefBool {
+			result.WriteString(`"r_bool":true`)
+		} else {
+			result.WriteString(`"r_bool":false`)
+		}
+	}
 	result.WriteString("}")
 	return err
 }
@@ -238,6 +405,24 @@ func (s TestUserDefined) IsZero() bool {
 		return false
 	}
 	if s.Bool != false {
+		return false
+	}
+	if s.RefInt32 != nil {
+		return false
+	}
+	if s.RefInt64 != nil {
+		return false
+	}
+	if s.RefFloat32 != nil {
+		return false
+	}
+	if s.RefFloat64 != nil {
+		return false
+	}
+	if s.RefString != nil {
+		return false
+	}
+	if s.RefBool != nil {
 		return false
 	}
 	return true
