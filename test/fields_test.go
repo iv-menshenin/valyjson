@@ -101,6 +101,10 @@ func hashDir(dirPath string) []string {
 			panic(err)
 		}
 		for _, f := range files {
+			if f.IsDir() {
+				hashes = append(hashes, hashDir(path.Join(subDirPath, f.Name()))...)
+				continue
+			}
 			hashes = append(hashes, hashFile(path.Join(subDirPath, f.Name())))
 		}
 	}
