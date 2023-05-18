@@ -3,8 +3,10 @@ package test_userdefined
 
 import (
 	"bytes"
+	"fill/test_userdefined/userdefined"
 	"fmt"
 	"math"
+	"time"
 	"unsafe"
 
 	"github.com/valyala/fastjson"
@@ -100,11 +102,6 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
 		}
 		s.RefInt32 = new(DefinedInt32)
 		*s.RefInt32 = DefinedInt32(valRefInt32)
-	} else {
-		if _refInt32 == nil {
-			var __RefInt32 DefinedInt32 = 32
-			s.RefInt32 = &__RefInt32
-		}
 	}
 	if _refInt64 := v.Get("r_int64"); valueIsNotNull(_refInt64) {
 		var valRefInt64 int64
@@ -126,11 +123,6 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
 		}
 		s.RefFloat32 = new(DefinedFloat32)
 		*s.RefFloat32 = DefinedFloat32(valRefFloat32)
-	} else {
-		if _refFloat32 == nil {
-			var __RefFloat32 DefinedFloat32 = 123.01
-			s.RefFloat32 = &__RefFloat32
-		}
 	}
 	if _refFloat64 := v.Get("r_float64"); valueIsNotNull(_refFloat64) {
 		var valRefFloat64 float64
@@ -148,11 +140,6 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
 		}
 		s.RefString = new(DefinedString)
 		*s.RefString = DefinedString(valRefString)
-	} else {
-		if _refString == nil {
-			var __RefString DefinedString = "default_string"
-			s.RefString = &__RefString
-		}
 	}
 	if _refBool := v.Get("r_bool"); valueIsNotNull(_refBool) {
 		var valRefBool bool
@@ -265,6 +252,76 @@ func (s *TestUserDefined) validate(v *fastjson.Value) error {
 	return err
 }
 
+// jsonParserDefinedFieldAsUserDefined used for pooling Parsers for DefinedFieldAsUserDefined JSONs.
+var jsonParserDefinedFieldAsUserDefined fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *DefinedFieldAsUserDefined) UnmarshalJSON(data []byte) error {
+	parser := jsonParserDefinedFieldAsUserDefined.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserDefinedFieldAsUserDefined.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *DefinedFieldAsUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _status := v.Get("status"); _status != nil {
+		var valStatus []byte
+		if valStatus, err = _status.StringBytes(); err != nil {
+			return newParsingError("status", err)
+		}
+		s.Status = userdefined.DefinedFieldAsUserDefinedStatus(b2s(valStatus))
+	}
+	if _time := v.Get("time"); _time != nil {
+		b, err := _time.StringBytes()
+		if err != nil {
+			return newParsingError("time", err)
+		}
+		valTime, err := parseDateTime(string(b))
+		if err != nil {
+			return newParsingError("time", err)
+		}
+		s.Time = valTime
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *DefinedFieldAsUserDefined) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [2]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'s', 't', 'a', 't', 'u', 's'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'t', 'i', 'm', 'e'}) {
+			checkFields[1]++
+			if checkFields[1] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
 var bufDataTestUserDefined = cb{}
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -341,14 +398,13 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		result.WriteString(`"f_bool":true`)
 		wantComma = true
 	}
-	if wantComma {
-		result.WriteString(",")
-	}
 	if s.RefInt32 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"r_int32":`)
 		writeInt64(result, int64(*s.RefInt32))
-	} else {
-		result.WriteString(`"r_int32":null`)
+		wantComma = true
 	}
 	if s.RefInt64 != nil {
 		if wantComma {
@@ -356,15 +412,15 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		}
 		result.WriteString(`"r_int64":`)
 		writeInt64(result, int64(*s.RefInt64))
-	}
-	if wantComma {
-		result.WriteString(",")
+		wantComma = true
 	}
 	if s.RefFloat32 != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"r_float32":`)
 		writeFloat64(result, float64(*s.RefFloat32))
-	} else {
-		result.WriteString(`"r_float32":null`)
+		wantComma = true
 	}
 	if s.RefFloat64 != nil {
 		if wantComma {
@@ -372,15 +428,15 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		}
 		result.WriteString(`"r_float64":`)
 		writeFloat64(result, float64(*s.RefFloat64))
-	}
-	if wantComma {
-		result.WriteString(",")
+		wantComma = true
 	}
 	if s.RefString != nil {
+		if wantComma {
+			result.WriteString(",")
+		}
 		result.WriteString(`"r_string":`)
 		writeString(result, string(*s.RefString))
-	} else {
-		result.WriteString(`"r_string":null`)
+		wantComma = true
 	}
 	if s.RefBool != nil {
 		if wantComma {
@@ -391,6 +447,7 @@ func (s *TestUserDefined) MarshalTo(result Writer) error {
 		} else {
 			result.WriteString(`"r_bool":false`)
 		}
+		wantComma = true
 	}
 	result.WriteString("}")
 	return err
@@ -432,6 +489,63 @@ func (s TestUserDefined) IsZero() bool {
 		return false
 	}
 	if s.RefBool != nil {
+		return false
+	}
+	return true
+}
+
+var bufDataDefinedFieldAsUserDefined = cb{}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *DefinedFieldAsUserDefined) MarshalJSON() ([]byte, error) {
+	var result = bufDataDefinedFieldAsUserDefined.Get()
+	err := s.MarshalTo(result)
+	return result.Bytes(), err
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *DefinedFieldAsUserDefined) MarshalTo(result Writer) error {
+	if s == nil {
+		result.WriteString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.WriteString("{")
+	if wantComma {
+		result.WriteString(",")
+	}
+	if s.Status != "" {
+		result.WriteString(`"status":`)
+		writeString(result, string(s.Status))
+		wantComma = true
+	} else {
+		result.WriteString(`"status":""`)
+		wantComma = true
+	}
+	if wantComma {
+		result.WriteString(",")
+	}
+	if !s.Time.IsZero() {
+		result.WriteString(`"time":`)
+		writeTime(result, s.Time, time.RFC3339Nano)
+		wantComma = true
+	} else {
+		result.WriteString(`"time":"0001-01-01T00:00:00Z"`)
+		wantComma = true
+	}
+	result.WriteString("}")
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s DefinedFieldAsUserDefined) IsZero() bool {
+	if s.Status != "" {
+		return false
+	}
+	if !s.Time.IsZero() {
 		return false
 	}
 	return true

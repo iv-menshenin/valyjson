@@ -13,11 +13,11 @@ type TestUserDefined struct {
 	String  DefinedString  `json:"f_string" default:"default_string"`
 	Bool    DefinedBool    `json:"f_bool,omitempty"`
 
-	RefInt32   *DefinedInt32   `json:"r_int32" default:"33"`
+	RefInt32   *DefinedInt32   `json:"r_int32,omitempty"`
 	RefInt64   *DefinedInt64   `json:"r_int64,omitempty"`
-	RefFloat32 *DefinedFloat32 `json:"r_float32" default:"321.01"`
+	RefFloat32 *DefinedFloat32 `json:"r_float32,omitempty"`
 	RefFloat64 *DefinedFloat64 `json:"r_float64,omitempty"`
-	RefString  *DefinedString  `json:"r_string" default:"default_refstring"`
+	RefString  *DefinedString  `json:"r_string,omitempty"`
 	RefBool    *DefinedBool    `json:"r_bool,omitempty"`
 	// TODO @menshenin implement me
 	//Int32Ref   DefinedRefInt32   `json:"d_int32" default:"32"`

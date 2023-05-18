@@ -192,3 +192,20 @@ func denotedIdent(t *ast.Ident) ast.Expr {
 	}
 	return t
 }
+
+func Ordinal(s string) bool {
+	switch s {
+	case "int", "int8", "int16", "int32", "int64":
+		return true
+	case "uint", "uint8", "uint16", "uint32", "uint64":
+		return true
+	case "float32", "float64":
+		return true
+	case "bool":
+		return true
+	case "string":
+		return true
+	default:
+		return false
+	}
+}

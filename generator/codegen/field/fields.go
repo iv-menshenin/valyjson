@@ -70,7 +70,16 @@ func (f *Field) prepareRef() {
 }
 
 func (f *Field) fillDenotedType() {
-	f.refx = helpers.DenotedType(f.expr)
+	dt := helpers.DenotedType(f.expr)
+	if i, ok := dt.(*ast.Ident); ok && helpers.Ordinal(i.Name) {
+		f.refx = dt
+		return
+	}
+	if i, ok := f.expr.(*ast.Ident); ok {
+		f.refx = denotedType(i)
+		return
+	}
+	f.refx = f.expr
 }
 
 // denotedType allows to explore real type
