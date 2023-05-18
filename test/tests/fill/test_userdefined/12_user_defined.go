@@ -1,5 +1,7 @@
 package test_userdefined
 
+import "fill/test_userdefined/userdefined"
+
 // TestUserDefined tests inheritance
 //
 //json:optional
@@ -47,4 +49,12 @@ type (
 	//DefinedRefFloat64 *float64
 	//DefinedRefString  *string
 	//DefinedRefBool    *bool
+)
+
+type (
+	//json:json
+	DefinedFieldAsUserDefined struct {
+		userdefined.DefinedFieldAsUserDefined1 `json:",inline"`
+		userdefined.DefinedFieldAsUserDefined2 `json:",inline"`
+	}
 )
