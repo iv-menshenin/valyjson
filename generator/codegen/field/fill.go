@@ -462,7 +462,14 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	case *ast.StructType:
 		return result
 
-	case *ast.MapType, *ast.ArrayType, *ast.SelectorExpr:
+	case *ast.SelectorExpr:
+		if helpers.IsIdent(f.refx, "string") {
+			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
+		}
+		result = append(result, assign(dst, rhs))
+		return result
+
+	case *ast.MapType, *ast.ArrayType:
 		// {dst} = {rhs}
 		result = append(result, assign(dst, rhs))
 		return result

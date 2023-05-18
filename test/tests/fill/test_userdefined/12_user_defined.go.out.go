@@ -3,12 +3,12 @@ package test_userdefined
 
 import (
 	"bytes"
-	"fill/test_userdefined/userdefined"
 	"fmt"
 	"math"
 	"time"
 	"unsafe"
 
+	"fill/test_userdefined/userdefined"
 	"github.com/valyala/fastjson"
 )
 
@@ -277,7 +277,7 @@ func (s *DefinedFieldAsUserDefined) FillFromJSON(v *fastjson.Value) (err error) 
 		if valStatus, err = _status.StringBytes(); err != nil {
 			return newParsingError("status", err)
 		}
-		s.Status = userdefined.DefinedFieldAsUserDefinedStatus(b2s(valStatus))
+		s.Status = *(*userdefined.DefinedFieldAsUserDefinedStatus)(unsafe.Pointer(&valStatus))
 	}
 	if _time := v.Get("time"); _time != nil {
 		b, err := _time.StringBytes()
