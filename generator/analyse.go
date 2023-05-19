@@ -2,7 +2,6 @@ package generator
 
 import (
 	"fmt"
-	"github.com/iv-menshenin/go-ast/explorer"
 	"github.com/iv-menshenin/valyjson/generator/codegen"
 	"go/ast"
 	"strings"
@@ -16,7 +15,6 @@ type (
 		g     *Gen
 		over  *ast.Ident
 		decls []taggedDecl
-		pkgs  map[string]string
 	}
 	taggedDecl struct {
 		spec *ast.TypeSpec
@@ -35,7 +33,7 @@ type (
 )
 
 func (g *Gen) BuildDecoders() {
-	var v = visitor{g: g, pkgs: make(map[string]string)}
+	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
 		if structDecl.Tags().Custom() {
@@ -54,13 +52,10 @@ func (g *Gen) BuildDecoders() {
 			g.result.Decls = append(g.result.Decls, val)
 		}
 	}
-	for k, v := range v.getUsedPackages() {
-		explorer.RegisterPackage(k, v)
-	}
 }
 
 func (g *Gen) BuildEncoders() {
-	var v = visitor{g: g, pkgs: make(map[string]string)}
+	var v = visitor{g: g}
 	ast.Walk(&v, g.parsed)
 	for _, structDecl := range v.getNormalized() {
 		if structDecl.Tags().Custom() {
@@ -78,9 +73,6 @@ func (g *Gen) BuildEncoders() {
 		if appendFn := structDecl.ZeroFunc(); appendFn != nil {
 			g.result.Decls = append(g.result.Decls, appendFn)
 		}
-	}
-	for k, v := range v.getUsedPackages() {
-		explorer.RegisterPackage(k, v)
 	}
 }
 
@@ -146,17 +138,6 @@ func (v *visitor) getNormalized() []renderer {
 			continue
 		}
 		result = v.processDecl(decl, result)
-	}
-	return result
-}
-
-func (v *visitor) getUsedPackages() map[string]explorer.Package {
-	var result = make(map[string]explorer.Package)
-	for name, pathPkg := range v.pkgs {
-		result[name] = explorer.Package{
-			Path: pathPkg,
-			Kind: explorer.PkgKindInternal,
-		}
 	}
 	return result
 }
@@ -269,9 +250,7 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if err != nil {
 			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package: %+v", fld.Type, packIdent.Name, err))
 		}
-		v.registerExternalPkg(packIdent.Name)
-
-		var v1 = visitor{g: v.g, over: packIdent, pkgs: v.pkgs}
+		var v1 = visitor{g: v.g, over: packIdent}
 		ast.Walk(&v1, pkg)
 		decl := v1.getDeclByName(inlined.Sel.Name)
 		if decl == nil {
@@ -292,12 +271,4 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 	default:
 		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
 	}
-}
-
-func (v *visitor) registerExternalPkg(name string) {
-	pkgPath, err := v.g.discovery.GetPackageFullName(name)
-	if err != nil {
-		panic(err)
-	}
-	v.pkgs[name] = pkgPath
 }
