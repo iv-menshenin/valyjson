@@ -6,6 +6,9 @@ import (
 	"fmt"
 
 	"github.com/valyala/fastjson"
+
+	"fill/test_any"
+	"fill/test_string"
 )
 
 // jsonParserExternal used for pooling Parsers for External JSONs.

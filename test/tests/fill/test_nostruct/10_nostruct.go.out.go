@@ -7,6 +7,8 @@ import (
 	"unsafe"
 
 	"github.com/valyala/fastjson"
+
+	"fill/test_extr"
 )
 
 // jsonParserTestMap10 used for pooling Parsers for TestMap10 JSONs.

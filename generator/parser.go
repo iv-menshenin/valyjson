@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/iv-menshenin/go-ast/explorer"
 	"github.com/iv-menshenin/valyjson/generator/discoverer"
@@ -23,6 +24,7 @@ type (
 		packageN string
 
 		discovery *discoverer.Discoverer
+		packages  map[string]explorer.Package
 	}
 )
 
@@ -38,11 +40,33 @@ func (g *Gen) Parse() (err error) {
 	if err == nil {
 		g.result.Name = g.parsed.(*ast.File).Name
 	}
+	for _, imp := range g.parsed.(*ast.File).Imports {
+		var name string
+		if imp.Name != nil {
+			name = imp.Name.Name
+		}
+		pkgPath := strings.Trim(imp.Path.Value, `"`)
+		if !strings.HasPrefix(pkgPath, g.discovery.GetModuleName()) {
+			continue
+		}
+		if name == "" {
+			// FIXME @menshenin the name of package must be read from the package itself
+			split := strings.Split(pkgPath, "/")
+			name = split[len(split)-1]
+		}
+		g.packages[name] = explorer.Package{
+			Path: pkgPath,
+			Kind: explorer.PkgKindInternal,
+		}
+	}
 	return
 }
 
 func (g *Gen) FixImports(internals ...string) {
 	// discovery used imports and build their declaration
+	for name, pkg := range g.packages {
+		explorer.RegisterPackage(name, pkg)
+	}
 	for i := 0; i < len(internals); i += 2 {
 		explorer.RegisterPackage(internals[i], explorer.Package{
 			Path: internals[i+1],
@@ -114,5 +138,6 @@ func New(file string) *Gen {
 	return &Gen{
 		fileName:  file,
 		discovery: discoverer.New(path.Dir(file)),
+		packages:  make(map[string]explorer.Package),
 	}
 }

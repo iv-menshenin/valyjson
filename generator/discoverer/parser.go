@@ -38,3 +38,7 @@ func (d *Discoverer) GetPackageFullName(packageName string) (string, error) {
 	}
 	return packagePath, nil
 }
+
+func (d *Discoverer) GetModuleName() string {
+	return d.module
+}

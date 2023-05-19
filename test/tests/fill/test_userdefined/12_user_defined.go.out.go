@@ -9,6 +9,8 @@ import (
 	"unsafe"
 
 	"github.com/valyala/fastjson"
+
+	"fill/test_userdefined/userdefined"
 )
 
 // jsonParserTestUserDefined used for pooling Parsers for TestUserDefined JSONs.
