@@ -41,7 +41,7 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo))
 	fn.Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
-	fn.Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer")))
+	fn.Params(asthlp.Field(names.VarNameWriter, nil, asthlp.Star(asthlp.SimpleSelector("jwriter", "Writer"))))
 	fn.Results(
 		asthlp.Field("", nil, asthlp.ErrorType),
 	)
@@ -53,7 +53,7 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 	fn.AppendStmt(
 		asthlp.If(
 			asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.Nil),
-			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
+			asthlp.CallStmt(asthlp.Call(field.RawStringFn, asthlp.StringConstant("null").Expr())),
 			asthlp.Return(asthlp.Nil),
 		),
 	)
@@ -73,7 +73,15 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 						asthlp.Selector(asthlp.ExpressionTypeConvert(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver)), t.tran), "MarshalText"),
 					)),
 				),
-				asthlp.If(asthlp.IsNil(asthlp.NewIdent(names.VarNameError)), asthlp.CallStmt(asthlp.Call(field.WriteBytesFn, bufVar))),
+				asthlp.If(
+					asthlp.IsNil(asthlp.NewIdent(names.VarNameError)),
+					// result.RawByte('"')
+					asthlp.CallStmt(asthlp.Call(field.RawByteFn, asthlp.RuneConstant('"').Expr())),
+					// result.Buffer.AppendBytes(buf)
+					asthlp.CallStmt(asthlp.Call(field.BytesAppendFn, bufVar)),
+					// result.RawByte('"')
+					asthlp.CallStmt(asthlp.Call(field.RawByteFn, asthlp.RuneConstant('"').Expr())),
+				),
 				asthlp.Return(asthlp.NewIdent(names.VarNameError)),
 			).Decl()
 		}
@@ -113,7 +121,6 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		case "string":
 			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
 				names.WriteStringFunc,
-				asthlp.NewIdent(names.VarNameWriter),
 				asthlp.ExpressionTypeConvert(src, asthlp.String),
 			)))
 			fn.AppendStmt(asthlp.Return(asthlp.Nil))
@@ -125,13 +132,12 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		case "bool":
 			fn.AppendStmt(asthlp.IfElse(
 				src,
-				// result.WriteString
 				asthlp.Block(asthlp.CallStmt(asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "WriteString")),
+					field.RawStringFn,
 					asthlp.StringConstant("true").Expr(),
 				))),
 				asthlp.Block(asthlp.CallStmt(asthlp.Call(
-					asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "WriteString")),
+					field.RawStringFn,
 					asthlp.StringConstant("false").Expr(),
 				))),
 			))

@@ -63,6 +63,10 @@ func (g *Gen) Parse() (err error) {
 }
 
 func (g *Gen) FixImports(internals ...string) {
+	explorer.RegisterPackage("jwriter", explorer.Package{
+		Path: "github.com/mailru/easyjson/jwriter",
+		Kind: explorer.PkgKindExternal,
+	})
 	// discovery used imports and build their declaration
 	for name, pkg := range g.packages {
 		explorer.RegisterPackage(name, pkg)

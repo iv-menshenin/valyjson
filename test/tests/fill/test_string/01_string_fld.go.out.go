@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -178,58 +179,59 @@ func (s *TestStr02) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataTestStr01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestStr01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestStr01) MarshalTo(result Writer) error {
+func (s *TestStr01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field != "" {
-		result.WriteString(`"field":`)
-		writeString(result, s.Field)
+		result.RawString(`"field":`)
+		result.String(s.Field)
 		wantComma = true
 	} else {
-		result.WriteString(`"field":""`)
+		result.RawString(`"field":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FieldRef != nil {
-		result.WriteString(`"fieldRef":`)
-		writeString(result, *s.FieldRef)
+		result.RawString(`"fieldRef":`)
+		result.String(*s.FieldRef)
 		wantComma = true
 	} else {
-		result.WriteString(`"fieldRef":null`)
+		result.RawString(`"fieldRef":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.DefRef != nil {
-		result.WriteString(`"defRef":`)
-		writeString(result, *s.DefRef)
+		result.RawString(`"defRef":`)
+		result.String(*s.DefRef)
 		wantComma = true
 	} else {
-		result.WriteString(`"defRef":null`)
+		result.RawString(`"defRef":null`)
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -247,59 +249,60 @@ func (s TestStr01) IsZero() bool {
 	return true
 }
 
-var bufDataTestStr02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStr02) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestStr02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestStr02) MarshalTo(result Writer) error {
+func (s *TestStr02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field != "" {
-		result.WriteString(`"field":`)
-		writeString(result, s.Field)
+		result.RawString(`"field":`)
+		result.String(s.Field)
 		wantComma = true
 	} else {
-		result.WriteString(`"field":""`)
+		result.RawString(`"field":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FieldRef != nil {
-		result.WriteString(`"fieldRef":`)
-		writeString(result, *s.FieldRef)
+		result.RawString(`"fieldRef":`)
+		result.String(*s.FieldRef)
 		wantComma = true
 	} else {
-		result.WriteString(`"fieldRef":null`)
+		result.RawString(`"fieldRef":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.String != "" {
-		result.WriteString(`"string":`)
-		writeString(result, string(s.String))
+		result.RawString(`"string":`)
+		result.String(string(s.String))
 		wantComma = true
 	} else {
-		result.WriteString(`"string":""`)
+		result.RawString(`"string":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

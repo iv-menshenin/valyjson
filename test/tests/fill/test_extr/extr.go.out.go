@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 
 	"fill/test_any"
@@ -79,45 +80,46 @@ func (s *External) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataExternal = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *External) MarshalJSON() ([]byte, error) {
-	var result = bufDataExternal.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *External) MarshalTo(result Writer) error {
+func (s *External) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"test1":`)
+	result.RawString(`"test1":`)
 	if err = s.Test01.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "test1" attribute: %w`, err)
 	}
 	wantComma = true
 	if !s.Test02.IsZero() {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"test2":`)
+		result.RawString(`"test2":`)
 		if err = s.Test02.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "test2" attribute: %w`, err)
 		}
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

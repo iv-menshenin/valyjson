@@ -2,6 +2,8 @@ package benchmark
 
 import (
 	"testing"
+
+	"github.com/mailru/easyjson/jwriter"
 )
 
 func BenchmarkEJ_Unmarshal_M(b *testing.B) {
@@ -69,7 +71,7 @@ func BenchmarkEJ_Marshal_M_Parallel(b *testing.B) {
 	})
 }
 
-// BenchmarkEJ_Marshal_L_Parallel-8            7064	    164843 ns/op	2681.70 MB/s	  447951 B/op	       5 allocs/op
+// BenchmarkEJ_Marshal_L_Parallel-8           10178     117615 ns/op    3798.93 MB/s      457667 B/op         27 allocs/op
 func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
@@ -83,6 +85,26 @@ func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
 		}
 	})
 	b.SetBytes(l)
+}
+
+func BenchmarkEJ_Marshal_L_ToWriter_Parallel(b *testing.B) {
+	out := &DummyWriter{}
+	b.RunParallel(func(pb *testing.PB) {
+		var l int64
+		for pb.Next() {
+			w := jwriter.Writer{}
+
+			err := xlStructData.MarshalTo(&w)
+			if err != nil {
+				b.Error(w.Error)
+			}
+			l = int64(w.Size())
+			w.DumpTo(out)
+		}
+		if l > 0 {
+			b.SetBytes(l)
+		}
+	})
 }
 
 func BenchmarkEJ_Marshal_S(b *testing.B) {

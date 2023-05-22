@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -923,269 +924,270 @@ func (s *NumStruct02) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataNumStruct01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct01) MarshalJSON() ([]byte, error) {
-	var result = bufDataNumStruct01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *NumStruct01) MarshalTo(result Writer) error {
+func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld != 0 {
-		result.WriteString(`"int_fld":`)
+		result.RawString(`"int_fld":`)
 		writeInt64(result, int64(s.IntFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld":0`)
+		result.RawString(`"int_fld":0`)
 		wantComma = true
 	}
 	if s.IntFld8 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"int_fld8":`)
+		result.RawString(`"int_fld8":`)
 		writeInt64(result, int64(s.IntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld16 != 0 {
-		result.WriteString(`"int_fld16":`)
+		result.RawString(`"int_fld16":`)
 		writeInt64(result, int64(s.IntFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld16":0`)
+		result.RawString(`"int_fld16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld32 != 0 {
-		result.WriteString(`"int_fld32":`)
+		result.RawString(`"int_fld32":`)
 		writeInt64(result, int64(s.IntFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld32":0`)
+		result.RawString(`"int_fld32":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld64 != 0 {
-		result.WriteString(`"int_fld64":`)
+		result.RawString(`"int_fld64":`)
 		writeInt64(result, s.IntFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld64":0`)
+		result.RawString(`"int_fld64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld != 0 {
-		result.WriteString(`"Uint_fld":`)
+		result.RawString(`"Uint_fld":`)
 		writeUint64(result, uint64(s.UintFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld":0`)
+		result.RawString(`"Uint_fld":0`)
 		wantComma = true
 	}
 	if s.UintFld8 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"Uint_fld8":`)
+		result.RawString(`"Uint_fld8":`)
 		writeUint64(result, uint64(s.UintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld16 != 0 {
-		result.WriteString(`"Uint_fld16":`)
+		result.RawString(`"Uint_fld16":`)
 		writeUint64(result, uint64(s.UintFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld16":0`)
+		result.RawString(`"Uint_fld16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld32 != 0 {
-		result.WriteString(`"Uint_fld32":`)
+		result.RawString(`"Uint_fld32":`)
 		writeUint64(result, uint64(s.UintFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld32":0`)
+		result.RawString(`"Uint_fld32":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld64 != 0 {
-		result.WriteString(`"Uint_fld64":`)
+		result.RawString(`"Uint_fld64":`)
 		writeUint64(result, s.UintFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld64":0`)
+		result.RawString(`"Uint_fld64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FloatFld32 != 0 {
-		result.WriteString(`"fl23":`)
+		result.RawString(`"fl23":`)
 		writeFloat64(result, float64(s.FloatFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"fl23":0`)
+		result.RawString(`"fl23":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FloatFld64 != 0 {
-		result.WriteString(`"fl64":`)
+		result.RawString(`"fl64":`)
 		writeFloat64(result, s.FloatFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"fl64":0`)
+		result.RawString(`"fl64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld != nil {
-		result.WriteString(`"ref_int_fld":`)
+		result.RawString(`"ref_int_fld":`)
 		writeInt64(result, int64(*s.RefIntFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld":null`)
+		result.RawString(`"ref_int_fld":null`)
 	}
 	if s.RefIntFld8 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"ref_int_fld8":`)
+		result.RawString(`"ref_int_fld8":`)
 		writeInt64(result, int64(*s.RefIntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld16 != nil {
-		result.WriteString(`"ref_int_fld16":`)
+		result.RawString(`"ref_int_fld16":`)
 		writeInt64(result, int64(*s.RefIntFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld16":null`)
+		result.RawString(`"ref_int_fld16":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld32 != nil {
-		result.WriteString(`"ref_int_fld32":`)
+		result.RawString(`"ref_int_fld32":`)
 		writeInt64(result, int64(*s.RefIntFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld32":null`)
+		result.RawString(`"ref_int_fld32":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld64 != nil {
-		result.WriteString(`"ref_int_fld64":`)
+		result.RawString(`"ref_int_fld64":`)
 		writeInt64(result, *s.RefIntFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld64":null`)
+		result.RawString(`"ref_int_fld64":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld != nil {
-		result.WriteString(`"ref_Uint_fld":`)
+		result.RawString(`"ref_Uint_fld":`)
 		writeUint64(result, uint64(*s.RefUintFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld":null`)
+		result.RawString(`"ref_Uint_fld":null`)
 	}
 	if s.RefUintFld8 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"ref_Uint_fld8":`)
+		result.RawString(`"ref_Uint_fld8":`)
 		writeUint64(result, uint64(*s.RefUintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld16 != nil {
-		result.WriteString(`"ref_Uint_fld16":`)
+		result.RawString(`"ref_Uint_fld16":`)
 		writeUint64(result, uint64(*s.RefUintFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld16":null`)
+		result.RawString(`"ref_Uint_fld16":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld32 != nil {
-		result.WriteString(`"ref_Uint_fld32":`)
+		result.RawString(`"ref_Uint_fld32":`)
 		writeUint64(result, uint64(*s.RefUintFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld32":null`)
+		result.RawString(`"ref_Uint_fld32":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld64 != nil {
-		result.WriteString(`"ref_Uint_fld64":`)
+		result.RawString(`"ref_Uint_fld64":`)
 		writeUint64(result, *s.RefUintFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld64":null`)
+		result.RawString(`"ref_Uint_fld64":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefFloatFld32 != nil {
-		result.WriteString(`"ref_fl23":`)
+		result.RawString(`"ref_fl23":`)
 		writeFloat64(result, float64(*s.RefFloatFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_fl23":null`)
+		result.RawString(`"ref_fl23":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefFloatFld64 != nil {
-		result.WriteString(`"ref_fl64":`)
+		result.RawString(`"ref_fl64":`)
 		writeFloat64(result, *s.RefFloatFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_fl64":null`)
+		result.RawString(`"ref_fl64":null`)
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -1266,269 +1268,270 @@ func (s NumStruct01) IsZero() bool {
 	return true
 }
 
-var bufDataNumStruct02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct02) MarshalJSON() ([]byte, error) {
-	var result = bufDataNumStruct02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *NumStruct02) MarshalTo(result Writer) error {
+func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld != 0 {
-		result.WriteString(`"int_fld":`)
+		result.RawString(`"int_fld":`)
 		writeInt64(result, int64(s.IntFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld":0`)
+		result.RawString(`"int_fld":0`)
 		wantComma = true
 	}
 	if s.IntFld8 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"int_fld8":`)
+		result.RawString(`"int_fld8":`)
 		writeInt64(result, int64(s.IntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld16 != 0 {
-		result.WriteString(`"int_fld16":`)
+		result.RawString(`"int_fld16":`)
 		writeInt64(result, int64(s.IntFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld16":0`)
+		result.RawString(`"int_fld16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld32 != 0 {
-		result.WriteString(`"int_fld32":`)
+		result.RawString(`"int_fld32":`)
 		writeInt64(result, int64(s.IntFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld32":0`)
+		result.RawString(`"int_fld32":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IntFld64 != 0 {
-		result.WriteString(`"int_fld64":`)
+		result.RawString(`"int_fld64":`)
 		writeInt64(result, s.IntFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"int_fld64":0`)
+		result.RawString(`"int_fld64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld != 0 {
-		result.WriteString(`"Uint_fld":`)
+		result.RawString(`"Uint_fld":`)
 		writeUint64(result, uint64(s.UintFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld":0`)
+		result.RawString(`"Uint_fld":0`)
 		wantComma = true
 	}
 	if s.UintFld8 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"Uint_fld8":`)
+		result.RawString(`"Uint_fld8":`)
 		writeUint64(result, uint64(s.UintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld16 != 0 {
-		result.WriteString(`"Uint_fld16":`)
+		result.RawString(`"Uint_fld16":`)
 		writeUint64(result, uint64(s.UintFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld16":0`)
+		result.RawString(`"Uint_fld16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld32 != 0 {
-		result.WriteString(`"Uint_fld32":`)
+		result.RawString(`"Uint_fld32":`)
 		writeUint64(result, uint64(s.UintFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld32":0`)
+		result.RawString(`"Uint_fld32":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UintFld64 != 0 {
-		result.WriteString(`"Uint_fld64":`)
+		result.RawString(`"Uint_fld64":`)
 		writeUint64(result, s.UintFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"Uint_fld64":0`)
+		result.RawString(`"Uint_fld64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FloatFld32 != 0 {
-		result.WriteString(`"fl23":`)
+		result.RawString(`"fl23":`)
 		writeFloat64(result, float64(s.FloatFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"fl23":0`)
+		result.RawString(`"fl23":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FloatFld64 != 0 {
-		result.WriteString(`"fl64":`)
+		result.RawString(`"fl64":`)
 		writeFloat64(result, s.FloatFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"fl64":0`)
+		result.RawString(`"fl64":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld != nil {
-		result.WriteString(`"ref_int_fld":`)
+		result.RawString(`"ref_int_fld":`)
 		writeInt64(result, int64(*s.RefIntFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld":null`)
+		result.RawString(`"ref_int_fld":null`)
 	}
 	if s.RefIntFld8 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"ref_int_fld8":`)
+		result.RawString(`"ref_int_fld8":`)
 		writeInt64(result, int64(*s.RefIntFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld16 != nil {
-		result.WriteString(`"ref_int_fld16":`)
+		result.RawString(`"ref_int_fld16":`)
 		writeInt64(result, int64(*s.RefIntFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld16":null`)
+		result.RawString(`"ref_int_fld16":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld32 != nil {
-		result.WriteString(`"ref_int_fld32":`)
+		result.RawString(`"ref_int_fld32":`)
 		writeInt64(result, int64(*s.RefIntFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld32":null`)
+		result.RawString(`"ref_int_fld32":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefIntFld64 != nil {
-		result.WriteString(`"ref_int_fld64":`)
+		result.RawString(`"ref_int_fld64":`)
 		writeInt64(result, *s.RefIntFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_int_fld64":null`)
+		result.RawString(`"ref_int_fld64":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld != nil {
-		result.WriteString(`"ref_Uint_fld":`)
+		result.RawString(`"ref_Uint_fld":`)
 		writeUint64(result, uint64(*s.RefUintFld))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld":null`)
+		result.RawString(`"ref_Uint_fld":null`)
 	}
 	if s.RefUintFld8 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"ref_Uint_fld8":`)
+		result.RawString(`"ref_Uint_fld8":`)
 		writeUint64(result, uint64(*s.RefUintFld8))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld16 != nil {
-		result.WriteString(`"ref_Uint_fld16":`)
+		result.RawString(`"ref_Uint_fld16":`)
 		writeUint64(result, uint64(*s.RefUintFld16))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld16":null`)
+		result.RawString(`"ref_Uint_fld16":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld32 != nil {
-		result.WriteString(`"ref_Uint_fld32":`)
+		result.RawString(`"ref_Uint_fld32":`)
 		writeUint64(result, uint64(*s.RefUintFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld32":null`)
+		result.RawString(`"ref_Uint_fld32":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefUintFld64 != nil {
-		result.WriteString(`"ref_Uint_fld64":`)
+		result.RawString(`"ref_Uint_fld64":`)
 		writeUint64(result, *s.RefUintFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_Uint_fld64":null`)
+		result.RawString(`"ref_Uint_fld64":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefFloatFld32 != nil {
-		result.WriteString(`"ref_fl23":`)
+		result.RawString(`"ref_fl23":`)
 		writeFloat64(result, float64(*s.RefFloatFld32))
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_fl23":null`)
+		result.RawString(`"ref_fl23":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefFloatFld64 != nil {
-		result.WriteString(`"ref_fl64":`)
+		result.RawString(`"ref_fl64":`)
 		writeFloat64(result, *s.RefFloatFld64)
 		wantComma = true
 	} else {
-		result.WriteString(`"ref_fl64":null`)
+		result.RawString(`"ref_fl64":null`)
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

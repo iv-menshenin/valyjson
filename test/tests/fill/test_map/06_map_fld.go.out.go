@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -361,199 +362,192 @@ func (s *Property) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataTestMap01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestMap01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestMap01) MarshalTo(result Writer) error {
+func (s *TestMap01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Tags != nil {
 		wantComma = true
-		result.WriteString(`"tags":{`)
+		result.RawString(`"tags":{`)
 		var wantComma bool
 		for _k, _v := range s.Tags {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(_k)
-			result.WriteString(`":`)
-			writeString(result, _v)
+			result.String(_k)
+			result.RawByte(':')
+			result.String(_v)
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	} else {
 		wantComma = true
-		result.WriteString(`"tags":null`)
+		result.RawString(`"tags":null`)
 	}
 	if s.Properties != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"properties":{`)
+		result.RawString(`"properties":{`)
 		var wantComma bool
 		for _k, _v := range s.Properties {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(_k)
-			result.WriteString(`":`)
+			result.String(_k)
+			result.RawByte(':')
 			err = _v.MarshalTo(result)
 			if err != nil {
 				return fmt.Errorf(`can't marshal "properties" attribute %q: %w`, _k, err)
 			}
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.KeyTypedProperties != nil {
 		wantComma = true
-		result.WriteString(`"key_typed_properties":{`)
+		result.RawString(`"key_typed_properties":{`)
 		var wantComma bool
 		for _k, _v := range s.KeyTypedProperties {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			err = _v.MarshalTo(result)
 			if err != nil {
 				return fmt.Errorf(`can't marshal "key_typed_properties" attribute %q: %w`, _k, err)
 			}
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	} else {
 		wantComma = true
-		result.WriteString(`"key_typed_properties":null`)
+		result.RawString(`"key_typed_properties":null`)
 	}
 	if s.IntegerVal != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"integerVal":{`)
+		result.RawString(`"integerVal":{`)
 		var wantComma bool
 		for _k, _v := range s.IntegerVal {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			writeInt64(result, int64(_v))
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
 	if s.FloatVal != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"floatVal":{`)
+		result.RawString(`"floatVal":{`)
 		var wantComma bool
 		for _k, _v := range s.FloatVal {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			writeFloat64(result, float64(_v))
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
 	if s.UintVal != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"uintVal":{`)
+		result.RawString(`"uintVal":{`)
 		var wantComma bool
 		for _k, _v := range s.UintVal {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			if _v == nil {
-				result.WriteString("null")
+				result.RawString("null")
 			} else {
 				writeUint64(result, uint64(*_v))
 			}
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
 	if s.BoolVal != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"bool":{`)
+		result.RawString(`"bool":{`)
 		var wantComma bool
 		for _k, _v := range s.BoolVal {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			if _v {
-				result.WriteString("true")
+				result.RawString("true")
 			} else {
-				result.WriteString("false")
+				result.RawString("false")
 			}
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
 	if s.TypedVal != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"typed-val":{`)
+		result.RawString(`"typed-val":{`)
 		var wantComma bool
 		for _k, _v := range s.TypedVal {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
-			result.WriteString(`"`)
-			result.WriteString(string(_k))
-			result.WriteString(`":`)
+			result.String(string(_k))
+			result.RawByte(':')
 			writeUint64(result, uint64(_v))
 		}
-		result.WriteString("}")
+		result.RawByte('}')
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -586,49 +580,50 @@ func (s TestMap01) IsZero() bool {
 	return true
 }
 
-var bufDataProperty = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Property) MarshalJSON() ([]byte, error) {
-	var result = bufDataProperty.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Property) MarshalTo(result Writer) error {
+func (s *Property) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Name != "" {
-		result.WriteString(`"name":`)
-		writeString(result, s.Name)
+		result.RawString(`"name":`)
+		result.String(s.Name)
 		wantComma = true
 	} else {
-		result.WriteString(`"name":""`)
+		result.RawString(`"name":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Value != "" {
-		result.WriteString(`"value":`)
-		writeString(result, s.Value)
+		result.RawString(`"value":`)
+		result.String(s.Value)
 		wantComma = true
 	} else {
-		result.WriteString(`"value":""`)
+		result.RawString(`"value":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

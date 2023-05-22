@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -133,57 +134,58 @@ func (s *TestTime2) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestTime01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestTime01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestTime01) MarshalTo(result Writer) error {
+func (s *TestTime01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if !s.DateBegin.IsZero() {
-		result.WriteString(`"date_begin":`)
+		result.RawString(`"date_begin":`)
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"date_begin":"0001-01-01T00:00:00Z"`)
+		result.RawString(`"date_begin":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if !s.DateCustom.IsZero() {
-		result.WriteString(`"date_custom":`)
+		result.RawString(`"date_custom":`)
 		writeTime(result, s.DateCustom, "2006.01.02")
 		wantComma = true
 	} else {
-		result.WriteString(`"date_custom":"0001.01.01"`)
+		result.RawString(`"date_custom":"0001.01.01"`)
 		wantComma = true
 	}
 	if s.DateEnd != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"date_end":`)
+		result.RawString(`"date_end":`)
 		writeTime(result, *s.DateEnd, time.RFC3339Nano)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -201,24 +203,26 @@ func (s TestTime01) IsZero() bool {
 	return true
 }
 
-var bufDataTestTime2 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime2) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestTime2.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestTime2) MarshalTo(result Writer) error {
+func (s *TestTime2) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	_time, err := time.Time(*s).MarshalText()
 	if err == nil {
-		result.Write(_time)
+		result.RawByte('"')
+		result.Buffer.AppendBytes(_time)
+		result.RawByte('"')
 	}
 	return err
 }

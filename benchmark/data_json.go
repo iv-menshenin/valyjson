@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -1865,126 +1866,127 @@ func (s *XLStruct) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataSearchMetadata = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *SearchMetadata) MarshalJSON() ([]byte, error) {
-	var result = bufDataSearchMetadata.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *SearchMetadata) MarshalTo(result Writer) error {
+func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.CompletedIn != 0 {
-		result.WriteString(`"completed_in":`)
+		result.RawString(`"completed_in":`)
 		writeFloat64(result, s.CompletedIn)
 		wantComma = true
 	} else {
-		result.WriteString(`"completed_in":0`)
+		result.RawString(`"completed_in":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Count != 0 {
-		result.WriteString(`"count":`)
+		result.RawString(`"count":`)
 		writeInt64(result, int64(s.Count))
 		wantComma = true
 	} else {
-		result.WriteString(`"count":0`)
+		result.RawString(`"count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.MaxID != 0 {
-		result.WriteString(`"max_id":`)
+		result.RawString(`"max_id":`)
 		writeInt64(result, s.MaxID)
 		wantComma = true
 	} else {
-		result.WriteString(`"max_id":0`)
+		result.RawString(`"max_id":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.MaxIDStr != "" {
-		result.WriteString(`"max_id_str":`)
-		writeString(result, s.MaxIDStr)
+		result.RawString(`"max_id_str":`)
+		result.String(s.MaxIDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"max_id_str":""`)
+		result.RawString(`"max_id_str":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.NextResults != "" {
-		result.WriteString(`"next_results":`)
-		writeString(result, s.NextResults)
+		result.RawString(`"next_results":`)
+		result.String(s.NextResults)
 		wantComma = true
 	} else {
-		result.WriteString(`"next_results":""`)
+		result.RawString(`"next_results":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Query != "" {
-		result.WriteString(`"query":`)
-		writeString(result, s.Query)
+		result.RawString(`"query":`)
+		result.String(s.Query)
 		wantComma = true
 	} else {
-		result.WriteString(`"query":""`)
+		result.RawString(`"query":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefreshURL != "" {
-		result.WriteString(`"refresh_url":`)
-		writeString(result, s.RefreshURL)
+		result.RawString(`"refresh_url":`)
+		result.String(s.RefreshURL)
 		wantComma = true
 	} else {
-		result.WriteString(`"refresh_url":""`)
+		result.RawString(`"refresh_url":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.SinceID != 0 {
-		result.WriteString(`"since_id":`)
+		result.RawString(`"since_id":`)
 		writeInt64(result, s.SinceID)
 		wantComma = true
 	} else {
-		result.WriteString(`"since_id":0`)
+		result.RawString(`"since_id":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.SinceIDStr != "" {
-		result.WriteString(`"since_id_str":`)
-		writeString(result, s.SinceIDStr)
+		result.RawString(`"since_id_str":`)
+		result.String(s.SinceIDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"since_id_str":""`)
+		result.RawString(`"since_id_str":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2020,58 +2022,59 @@ func (s SearchMetadata) IsZero() bool {
 	return true
 }
 
-var bufDataHashtag = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Hashtag) MarshalJSON() ([]byte, error) {
-	var result = bufDataHashtag.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Hashtag) MarshalTo(result Writer) error {
+func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Indices != nil {
 		wantComma = true
-		result.WriteString(`"indices":[`)
+		result.RawString(`"indices":[`)
 		var wantComma bool
 		for _k, _v := range s.Indices {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			writeInt64(result, int64(_v))
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"indices":null`)
+		result.RawString(`"indices":null`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Text != "" {
-		result.WriteString(`"text":`)
-		writeString(result, s.Text)
+		result.RawString(`"text":`)
+		result.String(s.Text)
 		wantComma = true
 	} else {
-		result.WriteString(`"text":""`)
+		result.RawString(`"text":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2086,36 +2089,36 @@ func (s Hashtag) IsZero() bool {
 	return true
 }
 
-var bufDataEntities = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Entities) MarshalJSON() ([]byte, error) {
-	var result = bufDataEntities.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Entities) MarshalTo(result Writer) error {
+func (s *Entities) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Hashtags != nil {
 		wantComma = true
-		result.WriteString(`"hashtags":[`)
+		result.RawString(`"hashtags":[`)
 		var wantComma bool
 		for _k, _v := range s.Hashtags {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
@@ -2124,60 +2127,61 @@ func (s *Entities) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "hashtags" item at position %d: %w`, _k, err)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"hashtags":null`)
+		result.RawString(`"hashtags":null`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Urls != nil {
 		wantComma = true
-		result.WriteString(`"urls":[`)
+		result.RawString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			if _v == nil {
-				result.WriteString("null")
+				result.RawString("null")
 			} else {
-				writeString(result, *_v)
+				result.String(*_v)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"urls":null`)
+		result.RawString(`"urls":null`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UserMentions != nil {
 		wantComma = true
-		result.WriteString(`"user_mentions":[`)
+		result.RawString(`"user_mentions":[`)
 		var wantComma bool
 		for _k, _v := range s.UserMentions {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			if _v == nil {
-				result.WriteString("null")
+				result.RawString("null")
 			} else {
-				writeString(result, *_v)
+				result.String(*_v)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"user_mentions":null`)
+		result.RawString(`"user_mentions":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2195,51 +2199,52 @@ func (s Entities) IsZero() bool {
 	return true
 }
 
-var bufDataUserEntityDescription = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityDescription) MarshalJSON() ([]byte, error) {
-	var result = bufDataUserEntityDescription.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntityDescription) MarshalTo(result Writer) error {
+func (s *UserEntityDescription) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Urls != nil {
 		wantComma = true
-		result.WriteString(`"urls":[`)
+		result.RawString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			if _v == nil {
-				result.WriteString("null")
+				result.RawString("null")
 			} else {
-				writeString(result, *_v)
+				result.String(*_v)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"urls":null`)
+		result.RawString(`"urls":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2251,68 +2256,69 @@ func (s UserEntityDescription) IsZero() bool {
 	return true
 }
 
-var bufDataURL = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *URL) MarshalJSON() ([]byte, error) {
-	var result = bufDataURL.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *URL) MarshalTo(result Writer) error {
+func (s *URL) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ExpandedURL != nil {
-		result.WriteString(`"expanded_url":`)
-		writeString(result, *s.ExpandedURL)
+		result.RawString(`"expanded_url":`)
+		result.String(*s.ExpandedURL)
 		wantComma = true
 	} else {
-		result.WriteString(`"expanded_url":null`)
+		result.RawString(`"expanded_url":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Indices != nil {
 		wantComma = true
-		result.WriteString(`"indices":[`)
+		result.RawString(`"indices":[`)
 		var wantComma bool
 		for _k, _v := range s.Indices {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			writeInt64(result, int64(_v))
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"indices":null`)
+		result.RawString(`"indices":null`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.URL != "" {
-		result.WriteString(`"url":`)
-		writeString(result, s.URL)
+		result.RawString(`"url":`)
+		result.String(s.URL)
 		wantComma = true
 	} else {
-		result.WriteString(`"url":""`)
+		result.RawString(`"url":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2330,36 +2336,36 @@ func (s URL) IsZero() bool {
 	return true
 }
 
-var bufDataUserEntityURL = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityURL) MarshalJSON() ([]byte, error) {
-	var result = bufDataUserEntityURL.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntityURL) MarshalTo(result Writer) error {
+func (s *UserEntityURL) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Urls != nil {
 		wantComma = true
-		result.WriteString(`"urls":[`)
+		result.RawString(`"urls":[`)
 		var wantComma bool
 		for _k, _v := range s.Urls {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
@@ -2368,12 +2374,13 @@ func (s *UserEntityURL) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "urls" item at position %d: %w`, _k, err)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"urls":null`)
+		result.RawString(`"urls":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2385,43 +2392,44 @@ func (s UserEntityURL) IsZero() bool {
 	return true
 }
 
-var bufDataUserEntities = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntities) MarshalJSON() ([]byte, error) {
-	var result = bufDataUserEntities.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntities) MarshalTo(result Writer) error {
+func (s *UserEntities) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"description":`)
+	result.RawString(`"description":`)
 	if err = s.Description.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "description" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"url":`)
+	result.RawString(`"url":`)
 	if err = s.URL.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "url" attribute: %w`, err)
 	}
 	wantComma = true
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2436,439 +2444,440 @@ func (s UserEntities) IsZero() bool {
 	return true
 }
 
-var bufDataUser = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *User) MarshalJSON() ([]byte, error) {
-	var result = bufDataUser.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *User) MarshalTo(result Writer) error {
+func (s *User) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ContributorsEnabled {
-		result.WriteString(`"contributors_enabled":true`)
+		result.RawString(`"contributors_enabled":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"contributors_enabled":false`)
+		result.RawString(`"contributors_enabled":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.CreatedAt != "" {
-		result.WriteString(`"created_at":`)
-		writeString(result, s.CreatedAt)
+		result.RawString(`"created_at":`)
+		result.String(s.CreatedAt)
 		wantComma = true
 	} else {
-		result.WriteString(`"created_at":""`)
+		result.RawString(`"created_at":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.DefaultProfile {
-		result.WriteString(`"default_profile":true`)
+		result.RawString(`"default_profile":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"default_profile":false`)
+		result.RawString(`"default_profile":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.DefaultProfileImage {
-		result.WriteString(`"default_profile_image":true`)
+		result.RawString(`"default_profile_image":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"default_profile_image":false`)
+		result.RawString(`"default_profile_image":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Description != "" {
-		result.WriteString(`"description":`)
-		writeString(result, s.Description)
+		result.RawString(`"description":`)
+		result.String(s.Description)
 		wantComma = true
 	} else {
-		result.WriteString(`"description":""`)
+		result.RawString(`"description":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"entities":`)
+	result.RawString(`"entities":`)
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FavouritesCount != 0 {
-		result.WriteString(`"favourites_count":`)
+		result.RawString(`"favourites_count":`)
 		writeInt64(result, int64(s.FavouritesCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"favourites_count":0`)
+		result.RawString(`"favourites_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FollowRequestSent != nil {
-		result.WriteString(`"follow_request_sent":`)
-		writeString(result, *s.FollowRequestSent)
+		result.RawString(`"follow_request_sent":`)
+		result.String(*s.FollowRequestSent)
 		wantComma = true
 	} else {
-		result.WriteString(`"follow_request_sent":null`)
+		result.RawString(`"follow_request_sent":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FollowersCount != 0 {
-		result.WriteString(`"followers_count":`)
+		result.RawString(`"followers_count":`)
 		writeInt64(result, int64(s.FollowersCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"followers_count":0`)
+		result.RawString(`"followers_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Following != nil {
-		result.WriteString(`"following":`)
-		writeString(result, *s.Following)
+		result.RawString(`"following":`)
+		result.String(*s.Following)
 		wantComma = true
 	} else {
-		result.WriteString(`"following":null`)
+		result.RawString(`"following":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FriendsCount != 0 {
-		result.WriteString(`"friends_count":`)
+		result.RawString(`"friends_count":`)
 		writeInt64(result, int64(s.FriendsCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"friends_count":0`)
+		result.RawString(`"friends_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.GeoEnabled {
-		result.WriteString(`"geo_enabled":true`)
+		result.RawString(`"geo_enabled":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"geo_enabled":false`)
+		result.RawString(`"geo_enabled":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ID != 0 {
-		result.WriteString(`"id":`)
+		result.RawString(`"id":`)
 		writeInt64(result, int64(s.ID))
 		wantComma = true
 	} else {
-		result.WriteString(`"id":0`)
+		result.RawString(`"id":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IDStr != "" {
-		result.WriteString(`"id_str":`)
-		writeString(result, s.IDStr)
+		result.RawString(`"id_str":`)
+		result.String(s.IDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"id_str":""`)
+		result.RawString(`"id_str":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IsTranslator {
-		result.WriteString(`"is_translator":true`)
+		result.RawString(`"is_translator":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"is_translator":false`)
+		result.RawString(`"is_translator":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Lang != "" {
-		result.WriteString(`"lang":`)
-		writeString(result, s.Lang)
+		result.RawString(`"lang":`)
+		result.String(s.Lang)
 		wantComma = true
 	} else {
-		result.WriteString(`"lang":""`)
+		result.RawString(`"lang":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ListedCount != 0 {
-		result.WriteString(`"listed_count":`)
+		result.RawString(`"listed_count":`)
 		writeInt64(result, int64(s.ListedCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"listed_count":0`)
+		result.RawString(`"listed_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Location != "" {
-		result.WriteString(`"location":`)
-		writeString(result, s.Location)
+		result.RawString(`"location":`)
+		result.String(s.Location)
 		wantComma = true
 	} else {
-		result.WriteString(`"location":""`)
+		result.RawString(`"location":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Name != "" {
-		result.WriteString(`"name":`)
-		writeString(result, s.Name)
+		result.RawString(`"name":`)
+		result.String(s.Name)
 		wantComma = true
 	} else {
-		result.WriteString(`"name":""`)
+		result.RawString(`"name":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Notifications != nil {
-		result.WriteString(`"notifications":`)
-		writeString(result, *s.Notifications)
+		result.RawString(`"notifications":`)
+		result.String(*s.Notifications)
 		wantComma = true
 	} else {
-		result.WriteString(`"notifications":null`)
+		result.RawString(`"notifications":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileBackgroundColor != "" {
-		result.WriteString(`"profile_background_color":`)
-		writeString(result, s.ProfileBackgroundColor)
+		result.RawString(`"profile_background_color":`)
+		result.String(s.ProfileBackgroundColor)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_background_color":""`)
+		result.RawString(`"profile_background_color":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileBackgroundImageURL != "" {
-		result.WriteString(`"profile_background_image_url":`)
-		writeString(result, s.ProfileBackgroundImageURL)
+		result.RawString(`"profile_background_image_url":`)
+		result.String(s.ProfileBackgroundImageURL)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_background_image_url":""`)
+		result.RawString(`"profile_background_image_url":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileBackgroundImageURLHTTPS != "" {
-		result.WriteString(`"profile_background_image_url_https":`)
-		writeString(result, s.ProfileBackgroundImageURLHTTPS)
+		result.RawString(`"profile_background_image_url_https":`)
+		result.String(s.ProfileBackgroundImageURLHTTPS)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_background_image_url_https":""`)
+		result.RawString(`"profile_background_image_url_https":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileBackgroundTile {
-		result.WriteString(`"profile_background_tile":true`)
+		result.RawString(`"profile_background_tile":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_background_tile":false`)
+		result.RawString(`"profile_background_tile":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileImageURL != "" {
-		result.WriteString(`"profile_image_url":`)
-		writeString(result, s.ProfileImageURL)
+		result.RawString(`"profile_image_url":`)
+		result.String(s.ProfileImageURL)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_image_url":""`)
+		result.RawString(`"profile_image_url":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileImageURLHTTPS != "" {
-		result.WriteString(`"profile_image_url_https":`)
-		writeString(result, s.ProfileImageURLHTTPS)
+		result.RawString(`"profile_image_url_https":`)
+		result.String(s.ProfileImageURLHTTPS)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_image_url_https":""`)
+		result.RawString(`"profile_image_url_https":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileLinkColor != "" {
-		result.WriteString(`"profile_link_color":`)
-		writeString(result, s.ProfileLinkColor)
+		result.RawString(`"profile_link_color":`)
+		result.String(s.ProfileLinkColor)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_link_color":""`)
+		result.RawString(`"profile_link_color":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileSidebarBorderColor != "" {
-		result.WriteString(`"profile_sidebar_border_color":`)
-		writeString(result, s.ProfileSidebarBorderColor)
+		result.RawString(`"profile_sidebar_border_color":`)
+		result.String(s.ProfileSidebarBorderColor)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_sidebar_border_color":""`)
+		result.RawString(`"profile_sidebar_border_color":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileSidebarFillColor != "" {
-		result.WriteString(`"profile_sidebar_fill_color":`)
-		writeString(result, s.ProfileSidebarFillColor)
+		result.RawString(`"profile_sidebar_fill_color":`)
+		result.String(s.ProfileSidebarFillColor)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_sidebar_fill_color":""`)
+		result.RawString(`"profile_sidebar_fill_color":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileTextColor != "" {
-		result.WriteString(`"profile_text_color":`)
-		writeString(result, s.ProfileTextColor)
+		result.RawString(`"profile_text_color":`)
+		result.String(s.ProfileTextColor)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_text_color":""`)
+		result.RawString(`"profile_text_color":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ProfileUseBackgroundImage {
-		result.WriteString(`"profile_use_background_image":true`)
+		result.RawString(`"profile_use_background_image":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"profile_use_background_image":false`)
+		result.RawString(`"profile_use_background_image":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Protected {
-		result.WriteString(`"protected":true`)
+		result.RawString(`"protected":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"protected":false`)
+		result.RawString(`"protected":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ScreenName != "" {
-		result.WriteString(`"screen_name":`)
-		writeString(result, s.ScreenName)
+		result.RawString(`"screen_name":`)
+		result.String(s.ScreenName)
 		wantComma = true
 	} else {
-		result.WriteString(`"screen_name":""`)
+		result.RawString(`"screen_name":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ShowAllInlineMedia {
-		result.WriteString(`"show_all_inline_media":true`)
+		result.RawString(`"show_all_inline_media":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"show_all_inline_media":false`)
+		result.RawString(`"show_all_inline_media":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.StatusesCount != 0 {
-		result.WriteString(`"statuses_count":`)
+		result.RawString(`"statuses_count":`)
 		writeInt64(result, int64(s.StatusesCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"statuses_count":0`)
+		result.RawString(`"statuses_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.TimeZone != "" {
-		result.WriteString(`"time_zone":`)
-		writeString(result, s.TimeZone)
+		result.RawString(`"time_zone":`)
+		result.String(s.TimeZone)
 		wantComma = true
 	} else {
-		result.WriteString(`"time_zone":""`)
+		result.RawString(`"time_zone":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.URL != nil {
-		result.WriteString(`"url":`)
-		writeString(result, *s.URL)
+		result.RawString(`"url":`)
+		result.String(*s.URL)
 		wantComma = true
 	} else {
-		result.WriteString(`"url":null`)
+		result.RawString(`"url":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.UtcOffset != 0 {
-		result.WriteString(`"utc_offset":`)
+		result.RawString(`"utc_offset":`)
 		writeInt64(result, int64(s.UtcOffset))
 		wantComma = true
 	} else {
-		result.WriteString(`"utc_offset":0`)
+		result.RawString(`"utc_offset":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Verified {
-		result.WriteString(`"verified":true`)
+		result.RawString(`"verified":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"verified":false`)
+		result.RawString(`"verified":false`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -2994,49 +3003,50 @@ func (s User) IsZero() bool {
 	return true
 }
 
-var bufDataStatusMetadata = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *StatusMetadata) MarshalJSON() ([]byte, error) {
-	var result = bufDataStatusMetadata.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *StatusMetadata) MarshalTo(result Writer) error {
+func (s *StatusMetadata) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IsoLanguageCode != "" {
-		result.WriteString(`"iso_language_code":`)
-		writeString(result, s.IsoLanguageCode)
+		result.RawString(`"iso_language_code":`)
+		result.String(s.IsoLanguageCode)
 		wantComma = true
 	} else {
-		result.WriteString(`"iso_language_code":""`)
+		result.RawString(`"iso_language_code":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ResultType != "" {
-		result.WriteString(`"result_type":`)
-		writeString(result, s.ResultType)
+		result.RawString(`"result_type":`)
+		result.String(s.ResultType)
 		wantComma = true
 	} else {
-		result.WriteString(`"result_type":""`)
+		result.RawString(`"result_type":""`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -3051,237 +3061,238 @@ func (s StatusMetadata) IsZero() bool {
 	return true
 }
 
-var bufDataStatus = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Status) MarshalJSON() ([]byte, error) {
-	var result = bufDataStatus.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Status) MarshalTo(result Writer) error {
+func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Contributors != nil {
-		result.WriteString(`"contributors":`)
-		writeString(result, *s.Contributors)
+		result.RawString(`"contributors":`)
+		result.String(*s.Contributors)
 		wantComma = true
 	} else {
-		result.WriteString(`"contributors":null`)
+		result.RawString(`"contributors":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Coordinates != nil {
-		result.WriteString(`"coordinates":`)
-		writeString(result, *s.Coordinates)
+		result.RawString(`"coordinates":`)
+		result.String(*s.Coordinates)
 		wantComma = true
 	} else {
-		result.WriteString(`"coordinates":null`)
+		result.RawString(`"coordinates":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.CreatedAt != "" {
-		result.WriteString(`"created_at":`)
-		writeString(result, s.CreatedAt)
+		result.RawString(`"created_at":`)
+		result.String(s.CreatedAt)
 		wantComma = true
 	} else {
-		result.WriteString(`"created_at":""`)
+		result.RawString(`"created_at":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"entities":`)
+	result.RawString(`"entities":`)
 	if err = s.Entities.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "entities" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Favorited {
-		result.WriteString(`"favorited":true`)
+		result.RawString(`"favorited":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"favorited":false`)
+		result.RawString(`"favorited":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Geo != nil {
-		result.WriteString(`"geo":`)
-		writeString(result, *s.Geo)
+		result.RawString(`"geo":`)
+		result.String(*s.Geo)
 		wantComma = true
 	} else {
-		result.WriteString(`"geo":null`)
+		result.RawString(`"geo":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.ID != 0 {
-		result.WriteString(`"id":`)
+		result.RawString(`"id":`)
 		writeInt64(result, s.ID)
 		wantComma = true
 	} else {
-		result.WriteString(`"id":0`)
+		result.RawString(`"id":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.IDStr != "" {
-		result.WriteString(`"id_str":`)
-		writeString(result, s.IDStr)
+		result.RawString(`"id_str":`)
+		result.String(s.IDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"id_str":""`)
+		result.RawString(`"id_str":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.InReplyToScreenName != nil {
-		result.WriteString(`"in_reply_to_screen_name":`)
-		writeString(result, *s.InReplyToScreenName)
+		result.RawString(`"in_reply_to_screen_name":`)
+		result.String(*s.InReplyToScreenName)
 		wantComma = true
 	} else {
-		result.WriteString(`"in_reply_to_screen_name":null`)
+		result.RawString(`"in_reply_to_screen_name":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.InReplyToStatusID != nil {
-		result.WriteString(`"in_reply_to_status_id":`)
-		writeString(result, *s.InReplyToStatusID)
+		result.RawString(`"in_reply_to_status_id":`)
+		result.String(*s.InReplyToStatusID)
 		wantComma = true
 	} else {
-		result.WriteString(`"in_reply_to_status_id":null`)
+		result.RawString(`"in_reply_to_status_id":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.InReplyToStatusIDStr != nil {
-		result.WriteString(`"in_reply_to_status_id_str":`)
-		writeString(result, *s.InReplyToStatusIDStr)
+		result.RawString(`"in_reply_to_status_id_str":`)
+		result.String(*s.InReplyToStatusIDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"in_reply_to_status_id_str":null`)
+		result.RawString(`"in_reply_to_status_id_str":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.InReplyToUserID != nil {
-		result.WriteString(`"in_reply_to_user_id":`)
-		writeString(result, *s.InReplyToUserID)
+		result.RawString(`"in_reply_to_user_id":`)
+		result.String(*s.InReplyToUserID)
 		wantComma = true
 	} else {
-		result.WriteString(`"in_reply_to_user_id":null`)
+		result.RawString(`"in_reply_to_user_id":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.InReplyToUserIDStr != nil {
-		result.WriteString(`"in_reply_to_user_id_str":`)
-		writeString(result, *s.InReplyToUserIDStr)
+		result.RawString(`"in_reply_to_user_id_str":`)
+		result.String(*s.InReplyToUserIDStr)
 		wantComma = true
 	} else {
-		result.WriteString(`"in_reply_to_user_id_str":null`)
+		result.RawString(`"in_reply_to_user_id_str":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"metadata":`)
+	result.RawString(`"metadata":`)
 	if err = s.Metadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "metadata" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Place != nil {
-		result.WriteString(`"place":`)
-		writeString(result, *s.Place)
+		result.RawString(`"place":`)
+		result.String(*s.Place)
 		wantComma = true
 	} else {
-		result.WriteString(`"place":null`)
+		result.RawString(`"place":null`)
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RetweetCount != 0 {
-		result.WriteString(`"retweet_count":`)
+		result.RawString(`"retweet_count":`)
 		writeInt64(result, int64(s.RetweetCount))
 		wantComma = true
 	} else {
-		result.WriteString(`"retweet_count":0`)
+		result.RawString(`"retweet_count":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Retweeted {
-		result.WriteString(`"retweeted":true`)
+		result.RawString(`"retweeted":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"retweeted":false`)
+		result.RawString(`"retweeted":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Source != "" {
-		result.WriteString(`"source":`)
-		writeString(result, s.Source)
+		result.RawString(`"source":`)
+		result.String(s.Source)
 		wantComma = true
 	} else {
-		result.WriteString(`"source":""`)
+		result.RawString(`"source":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Text != "" {
-		result.WriteString(`"text":`)
-		writeString(result, s.Text)
+		result.RawString(`"text":`)
+		result.String(s.Text)
 		wantComma = true
 	} else {
-		result.WriteString(`"text":""`)
+		result.RawString(`"text":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Truncated {
-		result.WriteString(`"truncated":true`)
+		result.RawString(`"truncated":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"truncated":false`)
+		result.RawString(`"truncated":false`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"user":`)
+	result.RawString(`"user":`)
 	if err = s.User.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "user" attribute: %w`, err)
 	}
 	wantComma = true
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -3353,44 +3364,44 @@ func (s Status) IsZero() bool {
 	return true
 }
 
-var bufDataLargeStruct = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *LargeStruct) MarshalJSON() ([]byte, error) {
-	var result = bufDataLargeStruct.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *LargeStruct) MarshalTo(result Writer) error {
+func (s *LargeStruct) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"search_metadata":`)
+	result.RawString(`"search_metadata":`)
 	if err = s.SearchMetadata.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "search_metadata" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Statuses != nil {
 		wantComma = true
-		result.WriteString(`"statuses":[`)
+		result.RawString(`"statuses":[`)
 		var wantComma bool
 		for _k, _v := range s.Statuses {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
@@ -3399,12 +3410,13 @@ func (s *LargeStruct) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "statuses" item at position %d: %w`, _k, err)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"statuses":null`)
+		result.RawString(`"statuses":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -3419,36 +3431,36 @@ func (s LargeStruct) IsZero() bool {
 	return true
 }
 
-var bufDataXLStruct = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *XLStruct) MarshalJSON() ([]byte, error) {
-	var result = bufDataXLStruct.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *XLStruct) MarshalTo(result Writer) error {
+func (s *XLStruct) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Data != nil {
 		wantComma = true
-		result.WriteString(`"data":[`)
+		result.RawString(`"data":[`)
 		var wantComma bool
 		for _k, _v := range s.Data {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
@@ -3457,12 +3469,13 @@ func (s *XLStruct) MarshalTo(result Writer) error {
 				return fmt.Errorf(`can't marshal "data" item at position %d: %w`, _k, err)
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"data":null`)
+		result.RawString(`"data":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
