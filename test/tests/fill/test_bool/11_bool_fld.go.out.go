@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -219,78 +220,79 @@ func (s *TestInhBool) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestBool01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestBool01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestBool01) MarshalTo(result Writer) error {
+func (s *TestBool01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Bool {
-		result.WriteString(`"bl":true`)
+		result.RawString(`"bl":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"bl":false`)
+		result.RawString(`"bl":false`)
 		wantComma = true
 	}
 	if s.BlMaybe {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"mb":true`)
+		result.RawString(`"mb":true`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.RefBool != nil {
 		if *s.RefBool {
-			result.WriteString(`"refBool":true`)
+			result.RawString(`"refBool":true`)
 		} else {
-			result.WriteString(`"refBool":false`)
+			result.RawString(`"refBool":false`)
 		}
 		wantComma = true
 	} else {
-		result.WriteString(`"refBool":null`)
+		result.RawString(`"refBool":null`)
 	}
 	if s.RefMaybe != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		if *s.RefMaybe {
-			result.WriteString(`"refMaybe":true`)
+			result.RawString(`"refMaybe":true`)
 		} else {
-			result.WriteString(`"refMaybe":false`)
+			result.RawString(`"refMaybe":false`)
 		}
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.DefBool {
-		result.WriteString(`"defBool":true`)
+		result.RawString(`"defBool":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"defBool":false`)
+		result.RawString(`"defBool":false`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -314,44 +316,45 @@ func (s TestBool01) IsZero() bool {
 	return true
 }
 
-var bufDataTestBool02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool02) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestBool02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestBool02) MarshalTo(result Writer) error {
+func (s *TestBool02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.I {
-		result.WriteString(`"i":true`)
+		result.RawString(`"i":true`)
 		wantComma = true
 	} else {
-		result.WriteString(`"i":false`)
+		result.RawString(`"i":false`)
 		wantComma = true
 	}
 	if s.X {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"x":true`)
+		result.RawString(`"x":true`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -366,25 +369,25 @@ func (s TestBool02) IsZero() bool {
 	return true
 }
 
-var bufDataTestInhBool = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInhBool) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestInhBool.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestInhBool) MarshalTo(result Writer) error {
+func (s *TestInhBool) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	if *s {
-		result.WriteString("true")
+		result.RawString("true")
 	} else {
-		result.WriteString("false")
+		result.RawString("false")
 	}
 	return nil
 }

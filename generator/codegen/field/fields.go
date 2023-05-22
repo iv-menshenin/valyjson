@@ -260,9 +260,9 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 			return []ast.Stmt{
 				asthlp.IfElse(
 					asthlp.IsNil(src),
-					// result.WriteString("null")
+					// result.RawString("null")
 					asthlp.Block(asthlp.CallStmt(asthlp.Call(
-						WriteStringFn,
+						RawStringFn,
 						asthlp.StringConstant("null").Expr(),
 					))),
 					asthlp.Block(stmt...),
@@ -307,14 +307,14 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 				return decorStmt(src, []ast.Stmt{
 					asthlp.IfElse(
 						decorSrc(src),
-						// result.WriteString(`true`)
+						// result.RawString(`true`)
 						asthlp.Block(asthlp.CallStmt(asthlp.Call(
-							WriteStringFn,
+							RawStringFn,
 							asthlp.StringConstant(`true`).Expr(),
 						))),
 						// result.WriteString(`false`)
 						asthlp.Block(asthlp.CallStmt(asthlp.Call(
-							WriteStringFn,
+							RawStringFn,
 							asthlp.StringConstant(`false`).Expr(),
 						))),
 					),
@@ -327,7 +327,7 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 				return decorStmt(src, []ast.Stmt{
 					asthlp.CallStmt(asthlp.Call(
 						names.WriteStringFunc,
-						asthlp.NewIdent(names.VarNameWriter), decorSrc(src),
+						decorSrc(src),
 					)),
 				})
 			}

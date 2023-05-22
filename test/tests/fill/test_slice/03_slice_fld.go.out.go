@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -201,71 +202,72 @@ func (s *TestSlice02) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestSlice01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice01) MarshalTo(result Writer) error {
+func (s *TestSlice01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field != nil {
 		wantComma = true
-		result.WriteString(`"strs":[`)
+		result.RawString(`"strs":[`)
 		var wantComma bool
 		for _k, _v := range s.Field {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
-			writeString(result, _v)
+			result.String(_v)
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"strs":null`)
+		result.RawString(`"strs":null`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.FieldRef != nil {
 		wantComma = true
-		result.WriteString(`"ints":[`)
+		result.RawString(`"ints":[`)
 		var wantComma bool
 		for _k, _v := range s.FieldRef {
 			if wantComma {
-				result.WriteString(",")
+				result.RawByte(',')
 			}
 			wantComma = true
 			_k = _k
 			if _v == nil {
-				result.WriteString("null")
+				result.RawString("null")
 			} else {
 				writeInt64(result, int64(*_v))
 			}
 		}
-		result.WriteString("]")
+		result.RawByte(']')
 	} else {
-		result.WriteString(`"ints":null`)
+		result.RawString(`"ints":null`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -280,38 +282,39 @@ func (s TestSlice01) IsZero() bool {
 	return true
 }
 
-var bufDataTestSlice03 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice03) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice03.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice03) MarshalTo(result Writer) error {
+func (s *TestSlice03) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Data != 0 {
-		result.WriteString(`"data":`)
+		result.RawString(`"data":`)
 		writeInt64(result, s.Data)
 		wantComma = true
 	} else {
-		result.WriteString(`"data":0`)
+		result.RawString(`"data":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -323,29 +326,29 @@ func (s TestSlice03) IsZero() bool {
 	return true
 }
 
-var bufDataTestSlice02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice02) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice02) MarshalTo(result Writer) error {
+func (s *TestSlice02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("[")
+	result.RawByte('[')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
 		_k = _k
@@ -354,7 +357,8 @@ func (s *TestSlice02) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "TestSlice02" value at position %d: %w`, _k, err)
 		}
 	}
-	result.WriteString("]")
+	result.RawByte(']')
+	err = result.Error
 	return err
 }
 

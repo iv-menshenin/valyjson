@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -493,98 +494,99 @@ func (s *TestNested04) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestInh01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestInh01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestInh01) MarshalTo(result Writer) error {
+func (s *TestInh01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if s.BreakFirst != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"breakFirst":`)
+		result.RawString(`"breakFirst":`)
 		writeInt64(result, int64(s.BreakFirst))
 		wantComma = true
 	}
 	if !s.TestInh02.IsZero() {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"injected":`)
+		result.RawString(`"injected":`)
 		if err = s.TestInh02.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "injected" attribute: %w`, err)
 		}
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Int16 != 0 {
-		result.WriteString(`"int_16":`)
+		result.RawString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_16":0`)
+		result.RawString(`"int_16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Random != 0 {
-		result.WriteString(`"random":`)
+		result.RawString(`"random":`)
 		writeInt64(result, int64(s.Random))
 		wantComma = true
 	} else {
-		result.WriteString(`"random":0`)
+		result.RawString(`"random":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if !s.DateBegin.IsZero() {
-		result.WriteString(`"date_begin":`)
+		result.RawString(`"date_begin":`)
 		writeTime(result, s.DateBegin, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"date_begin":"0001-01-01T00:00:00Z"`)
+		result.RawString(`"date_begin":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
-	result.WriteString(`"nested1":`)
+	result.RawString(`"nested1":`)
 	if err = s.Nested1.MarshalTo(result); err != nil {
 		return fmt.Errorf(`can't marshal "nested1" attribute: %w`, err)
 	}
 	wantComma = true
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Nested2 != nil {
-		result.WriteString(`"nested2":`)
+		result.RawString(`"nested2":`)
 		if err = s.Nested2.MarshalTo(result); err != nil {
 			return fmt.Errorf(`can't marshal "nested2" attribute: %w`, err)
 		}
 		wantComma = true
 	} else {
-		result.WriteString(`"nested2":null`)
+		result.RawString(`"nested2":null`)
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -614,35 +616,36 @@ func (s TestInh01) IsZero() bool {
 	return true
 }
 
-var bufDataTestInh02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh02) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestInh02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestInh02) MarshalTo(result Writer) error {
+func (s *TestInh02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if s.Int32 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"int_32":`)
+		result.RawString(`"int_32":`)
 		writeInt64(result, int64(s.Int32))
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -654,49 +657,50 @@ func (s TestInh02) IsZero() bool {
 	return true
 }
 
-var bufDataTestInh03 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh03) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestInh03.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestInh03) MarshalTo(result Writer) error {
+func (s *TestInh03) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Int16 != 0 {
-		result.WriteString(`"int_16":`)
+		result.RawString(`"int_16":`)
 		writeInt64(result, int64(s.Int16))
 		wantComma = true
 	} else {
-		result.WriteString(`"int_16":0`)
+		result.RawString(`"int_16":0`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Random != 0 {
-		result.WriteString(`"random":`)
+		result.RawString(`"random":`)
 		writeInt64(result, int64(s.Random))
 		wantComma = true
 	} else {
-		result.WriteString(`"random":0`)
+		result.RawString(`"random":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -711,38 +715,39 @@ func (s TestInh03) IsZero() bool {
 	return true
 }
 
-var bufDataTestNested01 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested01) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestNested01.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestNested01) MarshalTo(result Writer) error {
+func (s *TestNested01) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field32 != 0 {
-		result.WriteString(`"field_32":`)
+		result.RawString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
 		wantComma = true
 	} else {
-		result.WriteString(`"field_32":0`)
+		result.RawString(`"field_32":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -754,38 +759,39 @@ func (s TestNested01) IsZero() bool {
 	return true
 }
 
-var bufDataTestNested02 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested02) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestNested02.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestNested02) MarshalTo(result Writer) error {
+func (s *TestNested02) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field32 != 0 {
-		result.WriteString(`"field_32":`)
+		result.RawString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
 		wantComma = true
 	} else {
-		result.WriteString(`"field_32":0`)
+		result.RawString(`"field_32":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -797,38 +803,39 @@ func (s TestNested02) IsZero() bool {
 	return true
 }
 
-var bufDataTestNested03 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested03) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestNested03.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestNested03) MarshalTo(result Writer) error {
+func (s *TestNested03) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Field32 != 0 {
-		result.WriteString(`"field_32":`)
+		result.RawString(`"field_32":`)
 		writeInt64(result, int64(s.Field32))
 		wantComma = true
 	} else {
-		result.WriteString(`"field_32":0`)
+		result.RawString(`"field_32":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -840,19 +847,19 @@ func (s TestNested03) IsZero() bool {
 	return true
 }
 
-var bufDataTestNested04 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested04) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestNested04.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestNested04) MarshalTo(result Writer) error {
+func (s *TestNested04) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	return (*TestNested03)(s).MarshalTo(result)

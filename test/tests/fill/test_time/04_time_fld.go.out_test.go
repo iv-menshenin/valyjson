@@ -1,6 +1,7 @@
 package test_time
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -138,7 +139,7 @@ func Test_UsedDefinedTime(t *testing.T) {
 		)
 		data, err := test.MarshalJSON()
 		require.NoError(t, err)
-		expected, err := now.MarshalText()
+		expected, err := json.Marshal(now)
 		require.NoError(t, err)
 		require.Equal(t, expected, data)
 	})

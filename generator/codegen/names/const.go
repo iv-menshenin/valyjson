@@ -21,7 +21,6 @@ const (
 	MethodNameMarshalTo = "MarshalTo"
 	MethodNameZero      = "IsZero"
 
-	WriteString  = "writeString"
 	WriteTime    = "writeTime"
 	WriteInt64   = "writeInt64"
 	WriteUint64  = "writeUint64"
@@ -51,8 +50,8 @@ var (
 		MinimumNumberOfArguments: 2,
 	}
 	WriteStringFunc = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(WriteString),
-		MinimumNumberOfArguments: 2,
+		FunctionName:             ast.SimpleSelector(VarNameWriter, "String"),
+		MinimumNumberOfArguments: 1,
 	}
 
 	TimeDefaultLayout = ast.SimpleSelector("time", "RFC3339Nano")

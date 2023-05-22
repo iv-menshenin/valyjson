@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -143,19 +144,19 @@ func (s *TestAllOfThird) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataTestOneOfInteger = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfInteger) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestOneOfInteger.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestOneOfInteger) MarshalTo(result Writer) error {
+func (s *TestOneOfInteger) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	writeInt64(result, int64(*s))
@@ -167,22 +168,22 @@ func (s TestOneOfInteger) IsZero() bool {
 	return s == TestOneOfInteger(0)
 }
 
-var bufDataTestOneOfString = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfString) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestOneOfString.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestOneOfString) MarshalTo(result Writer) error {
+func (s *TestOneOfString) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
-	writeString(result, string(*s))
+	result.String(string(*s))
 	return nil
 }
 
@@ -191,49 +192,50 @@ func (s TestOneOfString) IsZero() bool {
 	return s == TestOneOfString("")
 }
 
-var bufDataTestOneOfStruct = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfStruct) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestOneOfStruct.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestOneOfStruct) MarshalTo(result Writer) error {
+func (s *TestOneOfStruct) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Class != "" {
-		result.WriteString(`"class":`)
-		writeString(result, s.Class)
+		result.RawString(`"class":`)
+		result.String(s.Class)
 		wantComma = true
 	} else {
-		result.WriteString(`"class":""`)
+		result.RawString(`"class":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Value != 0 {
-		result.WriteString(`"width":`)
+		result.RawString(`"width":`)
 		writeFloat64(result, s.Value)
 		wantComma = true
 	} else {
-		result.WriteString(`"width":0`)
+		result.RawString(`"width":0`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -248,46 +250,47 @@ func (s TestOneOfStruct) IsZero() bool {
 	return true
 }
 
-var bufDataTestAllOfSecond = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestAllOfSecond.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestAllOfSecond) MarshalTo(result Writer) error {
+func (s *TestAllOfSecond) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Comment != "" {
-		result.WriteString(`"comment":`)
-		writeString(result, s.Comment)
+		result.RawString(`"comment":`)
+		result.String(s.Comment)
 		wantComma = true
 	} else {
-		result.WriteString(`"comment":""`)
+		result.RawString(`"comment":""`)
 		wantComma = true
 	}
 	if s.Level != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"level":`)
+		result.RawString(`"level":`)
 		writeInt64(result, s.Level)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -302,43 +305,44 @@ func (s TestAllOfSecond) IsZero() bool {
 	return true
 }
 
-var bufDataTestAllOfThird = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestAllOfThird.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestAllOfThird) MarshalTo(result Writer) error {
+func (s *TestAllOfThird) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if s.Command != "" {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"command":`)
-		writeString(result, s.Command)
+		result.RawString(`"command":`)
+		result.String(s.Command)
 		wantComma = true
 	}
 	if s.Range != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"range":`)
+		result.RawString(`"range":`)
 		writeInt64(result, s.Range)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

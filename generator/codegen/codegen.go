@@ -62,17 +62,15 @@ func NewUnmarshalFunc(structName string) []ast.Decl {
 	}
 }
 
-//	func (s *S) MarshalJSON() ([]byte, error) {
-//		var result = commonBuffer.Get()
-//		err := s.MarshalTo(result)
-//		return result.Bytes(), err
+//		func (s *TestStr01) MarshalJSON() ([]byte, error) {
+//		var result jwriter.Writer
+//		if err := s.MarshalTo(&result); err != nil {
+//			return nil, err
+//		}
+//		return result.BuildBytes()
 //	}
 func NewMarshalFunc(structName string) []ast.Decl {
-	var buffName = fmt.Sprintf("bufData%s", structName)
 	return []ast.Decl{
-		asthlp.DeclareVariable().AppendSpec(asthlp.VariableValue(
-			buffName, asthlp.StructLiteral(asthlp.NewIdent("cb")),
-		)).Decl(),
 		asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshal)).
 			Comments("// "+names.MethodNameMarshal+" serializes the structure with all its values into JSON format.").
 			Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(structName)))).
@@ -82,32 +80,35 @@ func NewMarshalFunc(structName string) []ast.Decl {
 			).
 			AppendStmt(
 				asthlp.Var(
-					asthlp.VariableValue(names.VarNameWriter, asthlp.FreeExpression(asthlp.Call(
-						asthlp.InlineFunc(asthlp.SimpleSelector(buffName, "Get")),
-					))),
+					asthlp.VariableType(names.VarNameWriter, asthlp.SimpleSelector("jwriter", "Writer")),
 				),
-				asthlp.Assign(
-					asthlp.MakeVarNames("err"),
-					asthlp.Definition,
-					asthlp.Call(
+				asthlp.IfInit(
+					asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Definition, asthlp.Call(
 						asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameReceiver, names.MethodNameMarshalTo)),
-						asthlp.NewIdent("result"),
-					),
+						asthlp.Ref(asthlp.NewIdent(names.VarNameWriter)),
+					)),
+					asthlp.NotNil(asthlp.NewIdent(names.VarNameError)),
+					asthlp.Return(asthlp.Nil, asthlp.NewIdent(names.VarNameError)),
 				),
 				asthlp.Return(
-					asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("result", "Bytes"))),
-					asthlp.NewIdent("err"),
+					asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "BuildBytes"))),
 				),
 			).Decl(),
 	}
 }
 
-func makeWriteAndReturn(s string) []ast.Stmt {
+func makeWriteAndReturn(r rune) []ast.Stmt {
 	return []ast.Stmt{
-		// result.WriteString(s)
+		// result.RawByte('}')
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteStringFn, asthlp.StringConstant(s).Expr(),
+			field.RawByteFn, asthlp.RuneConstant(r).Expr(),
 		)),
+		// err = result.Error
+		asthlp.Assign(
+			asthlp.MakeVarNames(names.VarNameError),
+			asthlp.Assignment,
+			asthlp.SimpleSelector(names.VarNameWriter, "Error"),
+		),
 		// return err
 		asthlp.Return(
 			asthlp.NewIdent(names.VarNameError),

@@ -8,6 +8,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 
 	"fill/test_userdefined/userdefined"
@@ -323,134 +324,135 @@ func (s *DefinedFieldAsUserDefined) validate(v *fastjson.Value) error {
 	return err
 }
 
-var bufDataTestUserDefined = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestUserDefined) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestUserDefined.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestUserDefined) MarshalTo(result Writer) error {
+func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Int32 != 0 {
-		result.WriteString(`"f_int32":`)
+		result.RawString(`"f_int32":`)
 		writeInt64(result, int64(s.Int32))
 		wantComma = true
 	} else {
-		result.WriteString(`"f_int32":0`)
+		result.RawString(`"f_int32":0`)
 		wantComma = true
 	}
 	if s.Int64 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"f_int64":`)
+		result.RawString(`"f_int64":`)
 		writeInt64(result, int64(s.Int64))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Float32 != 0 {
-		result.WriteString(`"f_float32":`)
+		result.RawString(`"f_float32":`)
 		writeFloat64(result, float64(s.Float32))
 		wantComma = true
 	} else {
-		result.WriteString(`"f_float32":0`)
+		result.RawString(`"f_float32":0`)
 		wantComma = true
 	}
 	if s.Float64 != 0 {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"f_float64":`)
+		result.RawString(`"f_float64":`)
 		writeFloat64(result, float64(s.Float64))
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.String != "" {
-		result.WriteString(`"f_string":`)
-		writeString(result, string(s.String))
+		result.RawString(`"f_string":`)
+		result.String(string(s.String))
 		wantComma = true
 	} else {
-		result.WriteString(`"f_string":""`)
+		result.RawString(`"f_string":""`)
 		wantComma = true
 	}
 	if s.Bool {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"f_bool":true`)
+		result.RawString(`"f_bool":true`)
 		wantComma = true
 	}
 	if s.RefInt32 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"r_int32":`)
+		result.RawString(`"r_int32":`)
 		writeInt64(result, int64(*s.RefInt32))
 		wantComma = true
 	}
 	if s.RefInt64 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"r_int64":`)
+		result.RawString(`"r_int64":`)
 		writeInt64(result, int64(*s.RefInt64))
 		wantComma = true
 	}
 	if s.RefFloat32 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"r_float32":`)
+		result.RawString(`"r_float32":`)
 		writeFloat64(result, float64(*s.RefFloat32))
 		wantComma = true
 	}
 	if s.RefFloat64 != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"r_float64":`)
+		result.RawString(`"r_float64":`)
 		writeFloat64(result, float64(*s.RefFloat64))
 		wantComma = true
 	}
 	if s.RefString != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
-		result.WriteString(`"r_string":`)
-		writeString(result, string(*s.RefString))
+		result.RawString(`"r_string":`)
+		result.String(string(*s.RefString))
 		wantComma = true
 	}
 	if s.RefBool != nil {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		if *s.RefBool {
-			result.WriteString(`"r_bool":true`)
+			result.RawString(`"r_bool":true`)
 		} else {
-			result.WriteString(`"r_bool":false`)
+			result.RawString(`"r_bool":false`)
 		}
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -495,49 +497,50 @@ func (s TestUserDefined) IsZero() bool {
 	return true
 }
 
-var bufDataDefinedFieldAsUserDefined = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *DefinedFieldAsUserDefined) MarshalJSON() ([]byte, error) {
-	var result = bufDataDefinedFieldAsUserDefined.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *DefinedFieldAsUserDefined) MarshalTo(result Writer) error {
+func (s *DefinedFieldAsUserDefined) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if s.Status != "" {
-		result.WriteString(`"status":`)
-		writeString(result, string(s.Status))
+		result.RawString(`"status":`)
+		result.String(string(s.Status))
 		wantComma = true
 	} else {
-		result.WriteString(`"status":""`)
+		result.RawString(`"status":""`)
 		wantComma = true
 	}
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if !s.Time.IsZero() {
-		result.WriteString(`"time":`)
+		result.RawString(`"time":`)
 		writeTime(result, s.Time, time.RFC3339Nano)
 		wantComma = true
 	} else {
-		result.WriteString(`"time":"0001-01-01T00:00:00Z"`)
+		result.RawString(`"time":"0001-01-01T00:00:00Z"`)
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 

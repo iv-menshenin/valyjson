@@ -1,6 +1,7 @@
 package test_bool
 
 import (
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -27,8 +28,9 @@ func TestTestBool01_MarshalJSON(t *testing.T) {
 			RefBool:  &True,
 			RefMaybe: &False,
 		}
+		var jw jwriter.Writer
 		n := testing.AllocsPerRun(1000, func() {
-			err := test.MarshalTo(Null{})
+			err := test.MarshalTo(&jw)
 			if err != nil {
 				t.Error(err)
 			}

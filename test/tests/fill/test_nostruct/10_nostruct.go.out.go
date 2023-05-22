@@ -6,6 +6,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 
 	"fill/test_extr"
@@ -248,37 +249,37 @@ func (s *TestSlice14) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestMap10 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap10) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestMap10.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestMap10) MarshalTo(result Writer) error {
+func (s *TestMap10) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"`)
-		result.WriteString(string(_k))
-		result.WriteString(`":`)
+		result.String(string(_k))
+		result.RawByte(':')
 		writeInt64(result, int64(_v))
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -287,40 +288,40 @@ func (s TestMap10) IsZero() bool {
 	return len(s) == 0
 }
 
-var bufDataTestMap11 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestMap11.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestMap11) MarshalTo(result Writer) error {
+func (s *TestMap11) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"`)
-		result.WriteString(string(_k))
-		result.WriteString(`":`)
+		result.String(string(_k))
+		result.RawByte(':')
 		err = _v.MarshalTo(result)
 		if err != nil {
 			return fmt.Errorf(`can't marshal "TestMap11" attribute %q: %w`, _k, err)
 		}
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -329,40 +330,40 @@ func (s TestMap11) IsZero() bool {
 	return len(s) == 0
 }
 
-var bufDataTestMap11Ref = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11Ref) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestMap11Ref.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestMap11Ref) MarshalTo(result Writer) error {
+func (s *TestMap11Ref) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
-		result.WriteString(`"`)
-		result.WriteString(string(_k))
-		result.WriteString(`":`)
+		result.String(string(_k))
+		result.RawByte(':')
 		err = _v.MarshalTo(result)
 		if err != nil {
 			return fmt.Errorf(`can't marshal "TestMap11Ref" attribute %q: %w`, _k, err)
 		}
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -371,35 +372,36 @@ func (s TestMap11Ref) IsZero() bool {
 	return len(s) == 0
 }
 
-var bufDataTestSlice12 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice12.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice12) MarshalTo(result Writer) error {
+func (s *TestSlice12) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("[")
+	result.RawByte('[')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
 		_k = _k
 		writeInt64(result, int64(_v))
 	}
-	result.WriteString("]")
+	result.RawByte(']')
+	err = result.Error
 	return err
 }
 
@@ -408,29 +410,29 @@ func (s TestSlice12) IsZero() bool {
 	return len(s) == 0
 }
 
-var bufDataTestSlice13 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice13) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice13.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice13) MarshalTo(result Writer) error {
+func (s *TestSlice13) MarshalTo(result *jwriter.Writer) error {
 	if s == nil || *s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("[")
+	result.RawByte('[')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
 		_k = _k
@@ -439,7 +441,8 @@ func (s *TestSlice13) MarshalTo(result Writer) error {
 			return fmt.Errorf(`can't marshal "TestSlice13" value at position %d: %w`, _k, err)
 		}
 	}
-	result.WriteString("]")
+	result.RawByte(']')
+	err = result.Error
 	return err
 }
 
@@ -448,35 +451,36 @@ func (s TestSlice13) IsZero() bool {
 	return len(s) == 0
 }
 
-var bufDataTestSlice14 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestSlice14.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestSlice14) MarshalTo(result Writer) error {
+func (s *TestSlice14) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("[")
+	result.RawByte('[')
 	for _k, _v := range *s {
 		if wantComma {
-			result.WriteString(",")
+			result.RawByte(',')
 		}
 		wantComma = true
 		_k = _k
 		writeTime(result, _v, time.RFC3339Nano)
 	}
-	result.WriteString("]")
+	result.RawByte(']')
+	err = result.Error
 	return err
 }
 

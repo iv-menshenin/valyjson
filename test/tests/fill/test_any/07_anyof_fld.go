@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/mailru/easyjson/jwriter"
 )
 
 // TestAllOf01 tests allOf
@@ -73,10 +75,10 @@ func (t *TestAllOfFirstIsOne) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.OneOf)
 }
 
-func (t *TestAllOfFirstIsOne) MarshalTo(result *bufWriter) error {
+func (t *TestAllOfFirstIsOne) MarshalTo(result *jwriter.Writer) error {
 	if t == nil {
-		_, err := result.WriteString("null")
-		return err
+		result.RawString("null")
+		return nil
 	}
 	if t1, ok := t.OneOf.(TestOneOfInteger); ok {
 		return t1.MarshalTo(result)
@@ -119,44 +121,44 @@ func (t *TestAllOf01) UnmarshalJSON(data []byte) (err error) {
 	return nil
 }
 
-var commonBuffer = cb{}
-
 func (t *TestAllOf01) MarshalJSON() ([]byte, error) {
 	var err error
-	var result = commonBuffer.Get()
-	result.WriteString("{")
+	var result jwriter.Writer
+	result.RawByte('{')
 
-	var result1 = commonBuffer.Get()
-	if err = t.TestAllOfFirstIsOne.MarshalTo(result1); err != nil {
+	var result1 jwriter.Writer
+	if err = t.TestAllOfFirstIsOne.MarshalTo(&result1); err != nil {
 		return nil, err
 	}
-	result.WriteString(`"value":`)
-	_, err = result.Write(result1.Bytes())
+	result.RawString(`"value":`)
+	result.Raw(result1.BuildBytes())
 
-	var result2 = commonBuffer.Get()
-	if err = t.TestAllOfSecond.MarshalTo(result2); err != nil {
+	var result2 jwriter.Writer
+	if err = t.TestAllOfSecond.MarshalTo(&result2); err != nil {
 		return nil, err
 	}
-	if b := result2.Bytes(); len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
-		result.WriteString(",")
-		_, err = result.Write(b[1 : len(b)-1])
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	var result3 = commonBuffer.Get()
-	if err = t.TestAllOfThird.MarshalTo(result3); err != nil {
+	b, err := result2.BuildBytes()
+	if err != nil {
 		return nil, err
 	}
-	if b := result3.Bytes(); len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
-		result.WriteString(",")
-		_, err = result.Write(b[1 : len(b)-1])
-		if err != nil {
-			return nil, err
-		}
+	if len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
+		result.RawByte(',')
+		result.Raw(b[1:len(b)-1], err)
 	}
 
-	result.WriteString("}")
-	return result.Bytes(), nil
+	var result3 jwriter.Writer
+	if err = t.TestAllOfThird.MarshalTo(&result3); err != nil {
+		return nil, err
+	}
+	b, err = result3.BuildBytes()
+	if err != nil {
+		return nil, err
+	}
+	if len(b) > 2 && !bytes.Equal(b, []byte{'n', 'u', 'l', 'l'}) {
+		result.RawByte(',')
+		result.Raw(b[1:len(b)-1], err)
+	}
+
+	result.RawByte('}')
+	return result.BuildBytes()
 }

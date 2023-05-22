@@ -1,12 +1,12 @@
 package codegen
 
 import (
-	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"go/ast"
 
 	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/field"
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
@@ -209,12 +209,12 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name)))).
-		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
+		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.Star(asthlp.SimpleSelector("jwriter", "Writer")))).
 		Results(asthlp.Field("", nil, asthlp.ErrorType))
 
 	if len(s.spec.Fields.List) == 0 {
 		return fn.AppendStmt(
-			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("{}").Expr())),
+			asthlp.CallStmt(asthlp.Call(field.RawStringFn, asthlp.StringConstant("{}").Expr())),
 			asthlp.Return(asthlp.Nil),
 		).Decl()
 	}
@@ -226,18 +226,18 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 		//	}
 		asthlp.If(
 			asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver)),
-			// result.WriteString("null")
-			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
+			// result.RawString("null")
+			asthlp.CallStmt(asthlp.Call(field.RawStringFn, asthlp.StringConstant("null").Expr())),
 			asthlp.Return(asthlp.Nil),
 		),
 		// var (
 		// 	err    error
 		// )
 		field.NeedVars(),
-		// result.WriteString("{")
+		// result.RawByte('{')
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteStringFn,
-			asthlp.StringConstant("{").Expr(),
+			field.RawByteFn,
+			asthlp.RuneConstant('{').Expr(),
 		)),
 	)
 
@@ -246,7 +246,7 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 	}
 
 	fn.AppendStmt(
-		makeWriteAndReturn("}")...,
+		makeWriteAndReturn('}')...,
 	)
 	return fn.Decl()
 }

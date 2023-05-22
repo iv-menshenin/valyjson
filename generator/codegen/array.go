@@ -175,7 +175,7 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(a.name)))).
-		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.NewIdent("Writer"))).
+		Params(asthlp.Field(names.VarNameWriter, nil, asthlp.Star(asthlp.SimpleSelector("jwriter", "Writer")))).
 		Results(asthlp.Field("", nil, asthlp.ErrorType))
 
 	var nilCondition = asthlp.IsNil(asthlp.NewIdent(names.VarNameReceiver))
@@ -192,8 +192,8 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 		//	}
 		asthlp.If(
 			nilCondition,
-			// result.WriteString("null")
-			asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant("null").Expr())),
+			// result.RawString("null")
+			asthlp.CallStmt(asthlp.Call(field.RawStringFn, asthlp.StringConstant("null").Expr())),
 			asthlp.Return(asthlp.Nil),
 		),
 	)
@@ -204,10 +204,10 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 		//  filled bool
 		// )
 		field.NeedVars(),
-		// result.WriteString("{")
+		// result.RawByte("{")
 		asthlp.CallStmt(asthlp.Call(
-			field.WriteStringFn,
-			asthlp.StringConstant("[").Expr(),
+			field.RawByteFn,
+			asthlp.RuneConstant('[').Expr(),
 		)),
 	)
 
@@ -216,9 +216,9 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {
-		//		result.WriteString(",")
+		//		result.RawByte(",")
 		//	}
-		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.WriteStringFn, asthlp.StringConstant(",").Expr()))),
+		asthlp.If(field.WantCommaVar, asthlp.CallStmt(asthlp.Call(field.RawByteFn, asthlp.RuneConstant(',').Expr()))),
 		// filled = true
 		field.SetCommaVar,
 		// _k = _k
@@ -237,7 +237,7 @@ func (a *Array) AppendJsonFunc() ast.Decl {
 	))
 
 	fn.AppendStmt(
-		makeWriteAndReturn("]")...,
+		makeWriteAndReturn(']')...,
 	)
 	return fn.Decl()
 }

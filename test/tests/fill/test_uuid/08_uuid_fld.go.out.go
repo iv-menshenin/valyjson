@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
 )
 
@@ -126,38 +127,39 @@ func (s *InheritUUID) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
-var bufDataTestUUID = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestUUID) MarshalJSON() ([]byte, error) {
-	var result = bufDataTestUUID.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *TestUUID) MarshalTo(result Writer) error {
+func (s *TestUUID) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	var (
 		err       error
 		wantComma bool
 	)
-	result.WriteString("{")
+	result.RawByte('{')
 	if wantComma {
-		result.WriteString(",")
+		result.RawByte(',')
 	}
 	if buf, err := s.UUID.MarshalText(); err != nil {
 		return newParsingError("uuid", err)
 	} else {
-		result.WriteString(`"uuid":"`)
-		result.Write(buf)
-		result.WriteString(`"`)
+		result.RawString(`"uuid":"`)
+		result.Buffer.AppendBytes(buf)
+		result.RawByte('"')
 		wantComma = true
 	}
-	result.WriteString("}")
+	result.RawByte('}')
+	err = result.Error
 	return err
 }
 
@@ -169,19 +171,19 @@ func (s TestUUID) IsZero() bool {
 	return true
 }
 
-var bufDataInheritUUID2 = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *InheritUUID2) MarshalJSON() ([]byte, error) {
-	var result = bufDataInheritUUID2.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *InheritUUID2) MarshalTo(result Writer) error {
+func (s *InheritUUID2) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	return (*InheritUUID)(s).MarshalTo(result)
@@ -192,24 +194,26 @@ func (s InheritUUID2) IsZero() bool {
 	return s == InheritUUID2(uuid.Nil)
 }
 
-var bufDataInheritUUID = cb{}
-
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *InheritUUID) MarshalJSON() ([]byte, error) {
-	var result = bufDataInheritUUID.Get()
-	err := s.MarshalTo(result)
-	return result.Bytes(), err
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *InheritUUID) MarshalTo(result Writer) error {
+func (s *InheritUUID) MarshalTo(result *jwriter.Writer) error {
 	if s == nil {
-		result.WriteString("null")
+		result.RawString("null")
 		return nil
 	}
 	_uuid, err := uuid.UUID(*s).MarshalText()
 	if err == nil {
-		result.Write(_uuid)
+		result.RawByte('"')
+		result.Buffer.AppendBytes(_uuid)
+		result.RawByte('"')
 	}
 	return err
 }

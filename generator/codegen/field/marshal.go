@@ -2,11 +2,9 @@ package field
 
 import (
 	"fmt"
+	asthlp "github.com/iv-menshenin/go-ast"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"go/ast"
-	"go/token"
-
-	asthlp "github.com/iv-menshenin/go-ast"
 
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 )
@@ -21,30 +19,30 @@ func NeedVars() ast.Stmt {
 	)
 }
 
-// putQuoteStmt puts quote
-//  result.WriteString(`"`)
-var putQuoteStmt = asthlp.CallStmt(asthlp.Call(
-	WriteStringFn,
-	asthlp.StringConstant(`"`).Expr(),
-))
-
 var SetCommaVar = asthlp.Assign(asthlp.VarNames{WantCommaVar}, asthlp.Assignment, asthlp.True)
 
 // putCommaStmt puts comma
-//  result.WriteString(",")
+//
+//	if wantComma {
+//		result.RawByte(',')
+//	}
 var putCommaStmt = asthlp.CallStmt(asthlp.Call(
-	WriteStringFn,
-	asthlp.StringConstant(",").Expr(),
+	RawByteFn,
+	asthlp.RuneConstant(',').Expr(),
 ))
 
-//  if wantComma {
-//    result.Write([]byte{','})
-//  }
+//	if wantComma {
+//	  result.Write([]byte{','})
+//	}
 var putCommaFirstIf = asthlp.If(WantCommaVar, putCommaStmt)
 
 var (
-	WriteStringFn = asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString"))
-	WriteBytesFn  = asthlp.InlineFunc(asthlp.SimpleSelector("result", "Write"))
+	RawStringFn = asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "RawString"))
+	RawByteFn   = asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "RawByte"))
+	StringFn    = asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameWriter, "String"))
+	// BytesAppendFn
+	//	result.Buffer.AppendBytes(buf)
+	BytesAppendFn = asthlp.InlineFunc(asthlp.Selector(asthlp.SimpleSelector(names.VarNameWriter, "Buffer"), "AppendBytes"))
 )
 
 // result.WriteString("\"{json}\":")
@@ -89,7 +87,7 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 		if f.tags.JsonAppendix() != "omitempty" {
 			wb.IfZero = []ast.Stmt{
 				asthlp.CallStmt(asthlp.Call(
-					WriteStringFn,
+					RawStringFn,
 					asthlp.StringConstant(fmt.Sprintf(`"%s":null`, f.tags.JsonName())).Expr(),
 				)),
 			}
@@ -123,21 +121,19 @@ func (f *Field) typeMarshalDefault(t string) []ast.Stmt {
 		panic(fmt.Errorf("default value for %q is not implemented", t))
 	}
 	return []ast.Stmt{
-		asthlp.CallStmt(asthlp.Call(
-			asthlp.InlineFunc(asthlp.SimpleSelector("result", "WriteString")),
-			writeArg,
-		)),
+		asthlp.CallStmt(asthlp.Call(RawStringFn, writeArg)),
 	}
 }
 
-// if s.HeightRef != nil {
-//     {v} := *{src}
-//     result.WriteString("\"{json}\":")
-//     b = strconv.AppendUint(buf[:0], uint64({v}), 10)
-//     result.Write(b)
-// } else {
-//     result.WriteString("\"{json}\":{default}")
-// }
+//	if s.HeightRef != nil {
+//	    {v} := *{src}
+//	    result.WriteString("\"{json}\":")
+//	    b = strconv.AppendUint(buf[:0], uint64({v}), 10)
+//	    result.Write(b)
+//	} else {
+//
+//	    result.WriteString("\"{json}\":{default}")
+//	}
 func (f *Field) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var result = []ast.Stmt{
 		define(ast.NewIdent(v), asthlp.Star(src)),
@@ -167,26 +163,17 @@ func (f *Field) ifNil() []ast.Stmt {
 		if f.tags.JsonTags().Has("omitempty") {
 			return nil
 		}
-		// result.WriteString("\"{name}\":null")
-		return []ast.Stmt{
-			&ast.ExprStmt{
-				X: &ast.CallExpr{
-					Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
-					Args: []ast.Expr{
-						&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.tags.JsonName() + `\":null"`},
-					},
-				},
-			},
-		}
+		return asthlp.Block(
+			asthlp.CallStmt(asthlp.Call(
+				RawStringFn,
+				asthlp.StringConstant(`"\"`+f.tags.JsonName()+`\":null"`).Expr(),
+			)),
+		).List
 	}
-	return []ast.Stmt{
-		&ast.ExprStmt{
-			X: &ast.CallExpr{
-				Fun: &ast.SelectorExpr{X: ast.NewIdent("result"), Sel: ast.NewIdent("WriteString")},
-				Args: []ast.Expr{
-					&ast.BasicLit{Kind: token.STRING, Value: `"\"` + f.tags.JsonName() + `\":` + helpers.StringFromType(f.expr, f.tags.DefaultValue()) + `"`},
-				},
-			},
-		},
-	}
+	return asthlp.Block(
+		asthlp.CallStmt(asthlp.Call(
+			RawStringFn,
+			asthlp.StringConstant(`"\"`+f.tags.JsonName()+`\":`+helpers.StringFromType(f.expr, f.tags.DefaultValue())+`"`).Expr(),
+		)),
+	).List
 }
