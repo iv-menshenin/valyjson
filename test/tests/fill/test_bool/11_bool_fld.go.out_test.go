@@ -6,16 +6,6 @@ import (
 	"testing"
 )
 
-type Null struct{}
-
-func (Null) Write(p []byte) (n int, err error) {
-	return len(p), nil
-}
-
-func (Null) WriteString(p string) (n int, err error) {
-	return len(p), nil
-}
-
 func TestTestBool01_MarshalJSON(t *testing.T) {
 	t.Run("allocations", func(t *testing.T) {
 		var (
