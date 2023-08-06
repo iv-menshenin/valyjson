@@ -24,7 +24,7 @@ type (
 		packageN string
 
 		discovery *discoverer.Discoverer
-		packages  map[string]explorer.Package
+		packages  map[string][]explorer.Package
 	}
 )
 
@@ -54,10 +54,13 @@ func (g *Gen) Parse() (err error) {
 			split := strings.Split(pkgPath, "/")
 			name = split[len(split)-1]
 		}
-		g.packages[name] = explorer.Package{
-			Path: pkgPath,
-			Kind: explorer.PkgKindInternal,
-		}
+		g.packages[name] = append(
+			g.packages[name],
+			explorer.Package{
+				Path: pkgPath,
+				Kind: explorer.PkgKindInternal,
+			},
+		)
 	}
 	return
 }
@@ -69,7 +72,9 @@ func (g *Gen) FixImports(internals ...string) {
 	})
 	// discovery used imports and build their declaration
 	for name, pkg := range g.packages {
-		explorer.RegisterPackage(name, pkg)
+		for i := range pkg {
+			explorer.RegisterPackage(name, pkg[i])
+		}
 	}
 	for i := 0; i < len(internals); i += 2 {
 		explorer.RegisterPackage(internals[i], explorer.Package{
@@ -142,6 +147,6 @@ func New(file string) *Gen {
 	return &Gen{
 		fileName:  file,
 		discovery: discoverer.New(path.Dir(file)),
-		packages:  make(map[string]explorer.Package),
+		packages:  make(map[string][]explorer.Package),
 	}
 }

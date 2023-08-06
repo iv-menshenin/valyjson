@@ -15,13 +15,13 @@ type (
 		modData  []byte
 		modPath  string
 		module   string
-		packages map[string]string
+		packages map[string][]string
 	}
 )
 
 func New(dir string) *Discoverer {
 	var d = Discoverer{
-		packages: make(map[string]string),
+		packages: make(map[string][]string),
 	}
 	err := d.discoveryModFile(dir)
 	if err != nil {
@@ -91,14 +91,13 @@ func (d *Discoverer) discoverPackage(goFilePath string) error {
 		return err
 	}
 	goFileDir := path.Dir(goFilePath)
-	if packPath, exists := d.packages[f.Name.Name]; exists {
-		if packPath == goFileDir {
-			return nil
+	if packPaths, exists := d.packages[f.Name.Name]; exists {
+		for _, packPath := range packPaths {
+			if packPath == goFileDir {
+				return nil
+			}
 		}
-		// TODO
-		//   return fmt.Errorf("package name `%s` appears twice, first in `%s` and then in `%s`", f.Name.Name, packPath, goFileDir)
-		return nil
 	}
-	d.packages[f.Name.Name] = goFileDir
+	d.packages[f.Name.Name] = append(d.packages[f.Name.Name], goFileDir)
 	return nil
 }

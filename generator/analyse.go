@@ -246,7 +246,7 @@ func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
 		if !ok {
 			panic(fmt.Errorf("can't inline struct kind %+v; can't recognize %+v expression", fld.Type, inlined.X))
 		}
-		pkg, err := v.g.discovery.GetPackage(packIdent.Name)
+		pkg, err := v.g.discovery.GetPackage(packIdent.Name, inlined.Sel.Name)
 		if err != nil {
 			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package: %+v", fld.Type, packIdent.Name, err))
 		}
