@@ -42,6 +42,13 @@ func (d *Discoverer) GetPackagePath(packageName string, hints ...string) (string
 	return "", fmt.Errorf("can't find package '%s'", packageName)
 }
 
+func (d *Discoverer) PackagePathFromPath(packagePath string) string {
+	if strings.HasPrefix(packagePath, d.module+"/") {
+		packagePath = packagePath[len(d.module)+1:]
+	}
+	return d.modPath + "/" + packagePath
+}
+
 func (d *Discoverer) GetPackageFullName(packageName string, hints ...string) (string, error) {
 	packagePaths, ok := d.packages[packageName]
 	if !ok {

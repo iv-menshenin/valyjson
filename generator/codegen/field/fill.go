@@ -454,7 +454,7 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	switch t := f.expr.(type) {
 
 	case *ast.Ident:
-		if helpers.IsIdent(f.refx, "string") {
+		if helpers.IsOrdinal(f.refx) {
 			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
 		}
 		return f.typedFillIn(rhs, dst, t.Name)
@@ -463,7 +463,7 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 		return result
 
 	case *ast.SelectorExpr:
-		if helpers.IsIdent(f.refx, "string") {
+		if helpers.IsOrdinal(f.refx) {
 			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
 		}
 		result = append(result, assign(dst, rhs))

@@ -17,6 +17,13 @@ func IsIdent(expr ast.Expr, ident string) bool {
 	return false
 }
 
+func IsOrdinal(expr ast.Expr) bool {
+	if i, ok := expr.(*ast.Ident); ok {
+		return Ordinal(i.Name)
+	}
+	return false
+}
+
 func BasicLiteralFromType(t ast.Expr, val string) ast.Expr {
 	switch i := t.(type) {
 

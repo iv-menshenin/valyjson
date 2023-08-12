@@ -2,11 +2,12 @@ package generator
 
 import (
 	"fmt"
-	"github.com/iv-menshenin/valyjson/generator/codegen"
 	"go/ast"
 	"strings"
 	"unicode"
 
+	"github.com/iv-menshenin/go-ast/explorer"
+	"github.com/iv-menshenin/valyjson/generator/codegen"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
@@ -210,6 +211,10 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 				panic(fmt.Errorf("all fields should have tags, but %q haven't", fld.Names[0].Name))
 			}
 		}
+		if sel, ok := fld.Type.(*ast.SelectorExpr); ok && sel.Sel.Obj == nil {
+			// try to resolve external type
+			sel.Sel.Obj = v.resolveExternal(sel)
+		}
 		if v.over != nil {
 			if i, ok := fld.Type.(*ast.Ident); ok && unicode.IsUpper([]rune(i.Name)[0]) {
 				fld.Type = &ast.SelectorExpr{
@@ -225,6 +230,25 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 		flds = append(flds, fld)
 	}
 	return flds
+}
+
+func (v *visitor) resolveExternal(sel *ast.SelectorExpr) *ast.Object {
+	packages, ok := v.g.packages[sel.X.(*ast.Ident).String()]
+	if ok {
+		for _, p := range packages {
+			if p.Kind == explorer.PkgKindSystem {
+				continue
+			}
+			if decl := v.g.ExploreType(p, sel.Sel.Name); decl != nil {
+				return &ast.Object{
+					Kind: ast.Typ,
+					Name: sel.Sel.Name,
+					Decl: decl,
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {

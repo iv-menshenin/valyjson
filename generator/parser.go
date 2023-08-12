@@ -120,6 +120,36 @@ func (g *Gen) Print(name string) {
 	}
 }
 
+func (g *Gen) ExploreType(p explorer.Package, objName string) *ast.TypeSpec {
+	parsed, err := parsePackage(g.discovery.PackagePathFromPath(p.Path))
+	if err != nil {
+		return nil
+	}
+	for name, pack := range parsed {
+		if strings.HasSuffix(name, "_test") {
+			continue
+		}
+		for _, file := range pack.Files {
+			for _, decl := range file.Decls {
+				genDecl, ok := decl.(*ast.GenDecl)
+				if !ok {
+					continue
+				}
+				for _, spec := range genDecl.Specs {
+					t, ok := spec.(*ast.TypeSpec)
+					if !ok {
+						continue
+					}
+					if t.Name.Name == objName {
+						return t
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func fmtGOFile(fileName string) (err error) {
 	var fileSet = token.NewFileSet()
 	f, err := parser.ParseFile(fileSet, fileName, nil, parser.ParseComments)
@@ -141,6 +171,11 @@ func fmtGOFile(fileName string) (err error) {
 func parseGo(file string) (ast.Node, error) {
 	f := token.NewFileSet()
 	return parser.ParseFile(f, file, nil, parser.ParseComments|parser.AllErrors)
+}
+
+func parsePackage(path string) (map[string]*ast.Package, error) {
+	f := token.NewFileSet()
+	return parser.ParseDir(f, path, nil, parser.ParseComments|parser.AllErrors)
 }
 
 func New(file string) *Gen {
