@@ -60,28 +60,28 @@ func (s *SearchMetadata) FillFromJSON(v *fastjson.Value) (err error) {
 		if valMaxIDStr, err = _maxIDStr.StringBytes(); err != nil {
 			return newParsingError("max_id_str", err)
 		}
-		s.MaxIDStr = *(*string)(unsafe.Pointer(&valMaxIDStr))
+		s.MaxIDStr = string(valMaxIDStr)
 	}
 	if _nextResults := v.Get("next_results"); _nextResults != nil {
 		var valNextResults []byte
 		if valNextResults, err = _nextResults.StringBytes(); err != nil {
 			return newParsingError("next_results", err)
 		}
-		s.NextResults = *(*string)(unsafe.Pointer(&valNextResults))
+		s.NextResults = string(valNextResults)
 	}
 	if _query := v.Get("query"); _query != nil {
 		var valQuery []byte
 		if valQuery, err = _query.StringBytes(); err != nil {
 			return newParsingError("query", err)
 		}
-		s.Query = *(*string)(unsafe.Pointer(&valQuery))
+		s.Query = string(valQuery)
 	}
 	if _refreshURL := v.Get("refresh_url"); _refreshURL != nil {
 		var valRefreshURL []byte
 		if valRefreshURL, err = _refreshURL.StringBytes(); err != nil {
 			return newParsingError("refresh_url", err)
 		}
-		s.RefreshURL = *(*string)(unsafe.Pointer(&valRefreshURL))
+		s.RefreshURL = string(valRefreshURL)
 	}
 	if _sinceID := v.Get("since_id"); _sinceID != nil {
 		var valSinceID int64
@@ -96,7 +96,7 @@ func (s *SearchMetadata) FillFromJSON(v *fastjson.Value) (err error) {
 		if valSinceIDStr, err = _sinceIDStr.StringBytes(); err != nil {
 			return newParsingError("since_id_str", err)
 		}
-		s.SinceIDStr = *(*string)(unsafe.Pointer(&valSinceIDStr))
+		s.SinceIDStr = string(valSinceIDStr)
 	}
 	return nil
 }
@@ -228,7 +228,7 @@ func (s *Hashtag) FillFromJSON(v *fastjson.Value) (err error) {
 		if valText, err = _text.StringBytes(); err != nil {
 			return newParsingError("text", err)
 		}
-		s.Text = *(*string)(unsafe.Pointer(&valText))
+		s.Text = string(valText)
 	}
 	return nil
 }
@@ -527,7 +527,7 @@ func (s *URL) FillFromJSON(v *fastjson.Value) (err error) {
 		if valURL, err = _uRL.StringBytes(); err != nil {
 			return newParsingError("url", err)
 		}
-		s.URL = *(*string)(unsafe.Pointer(&valURL))
+		s.URL = string(valURL)
 	}
 	return nil
 }
@@ -738,7 +738,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valCreatedAt, err = _createdAt.StringBytes(); err != nil {
 			return newParsingError("created_at", err)
 		}
-		s.CreatedAt = *(*string)(unsafe.Pointer(&valCreatedAt))
+		s.CreatedAt = string(valCreatedAt)
 	}
 	if _defaultProfile := v.Get("default_profile"); _defaultProfile != nil {
 		var valDefaultProfile bool
@@ -761,7 +761,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valDescription, err = _description.StringBytes(); err != nil {
 			return newParsingError("description", err)
 		}
-		s.Description = *(*string)(unsafe.Pointer(&valDescription))
+		s.Description = string(valDescription)
 	}
 	if _entities := v.Get("entities"); _entities != nil {
 		var valEntities UserEntities
@@ -830,7 +830,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valIDStr, err = _iDStr.StringBytes(); err != nil {
 			return newParsingError("id_str", err)
 		}
-		s.IDStr = *(*string)(unsafe.Pointer(&valIDStr))
+		s.IDStr = string(valIDStr)
 	}
 	if _isTranslator := v.Get("is_translator"); _isTranslator != nil {
 		var valIsTranslator bool
@@ -845,7 +845,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valLang, err = _lang.StringBytes(); err != nil {
 			return newParsingError("lang", err)
 		}
-		s.Lang = *(*string)(unsafe.Pointer(&valLang))
+		s.Lang = string(valLang)
 	}
 	if _listedCount := v.Get("listed_count"); _listedCount != nil {
 		var valListedCount int
@@ -860,14 +860,14 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valLocation, err = _location.StringBytes(); err != nil {
 			return newParsingError("location", err)
 		}
-		s.Location = *(*string)(unsafe.Pointer(&valLocation))
+		s.Location = string(valLocation)
 	}
 	if _name := v.Get("name"); _name != nil {
 		var valName []byte
 		if valName, err = _name.StringBytes(); err != nil {
 			return newParsingError("name", err)
 		}
-		s.Name = *(*string)(unsafe.Pointer(&valName))
+		s.Name = string(valName)
 	}
 	if _notifications := v.Get("notifications"); valueIsNotNull(_notifications) {
 		var valNotifications []byte
@@ -881,21 +881,21 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valProfileBackgroundColor, err = _profileBackgroundColor.StringBytes(); err != nil {
 			return newParsingError("profile_background_color", err)
 		}
-		s.ProfileBackgroundColor = *(*string)(unsafe.Pointer(&valProfileBackgroundColor))
+		s.ProfileBackgroundColor = string(valProfileBackgroundColor)
 	}
 	if _profileBackgroundImageURL := v.Get("profile_background_image_url"); _profileBackgroundImageURL != nil {
 		var valProfileBackgroundImageURL []byte
 		if valProfileBackgroundImageURL, err = _profileBackgroundImageURL.StringBytes(); err != nil {
 			return newParsingError("profile_background_image_url", err)
 		}
-		s.ProfileBackgroundImageURL = *(*string)(unsafe.Pointer(&valProfileBackgroundImageURL))
+		s.ProfileBackgroundImageURL = string(valProfileBackgroundImageURL)
 	}
 	if _profileBackgroundImageURLHTTPS := v.Get("profile_background_image_url_https"); _profileBackgroundImageURLHTTPS != nil {
 		var valProfileBackgroundImageURLHTTPS []byte
 		if valProfileBackgroundImageURLHTTPS, err = _profileBackgroundImageURLHTTPS.StringBytes(); err != nil {
 			return newParsingError("profile_background_image_url_https", err)
 		}
-		s.ProfileBackgroundImageURLHTTPS = *(*string)(unsafe.Pointer(&valProfileBackgroundImageURLHTTPS))
+		s.ProfileBackgroundImageURLHTTPS = string(valProfileBackgroundImageURLHTTPS)
 	}
 	if _profileBackgroundTile := v.Get("profile_background_tile"); _profileBackgroundTile != nil {
 		var valProfileBackgroundTile bool
@@ -910,42 +910,42 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valProfileImageURL, err = _profileImageURL.StringBytes(); err != nil {
 			return newParsingError("profile_image_url", err)
 		}
-		s.ProfileImageURL = *(*string)(unsafe.Pointer(&valProfileImageURL))
+		s.ProfileImageURL = string(valProfileImageURL)
 	}
 	if _profileImageURLHTTPS := v.Get("profile_image_url_https"); _profileImageURLHTTPS != nil {
 		var valProfileImageURLHTTPS []byte
 		if valProfileImageURLHTTPS, err = _profileImageURLHTTPS.StringBytes(); err != nil {
 			return newParsingError("profile_image_url_https", err)
 		}
-		s.ProfileImageURLHTTPS = *(*string)(unsafe.Pointer(&valProfileImageURLHTTPS))
+		s.ProfileImageURLHTTPS = string(valProfileImageURLHTTPS)
 	}
 	if _profileLinkColor := v.Get("profile_link_color"); _profileLinkColor != nil {
 		var valProfileLinkColor []byte
 		if valProfileLinkColor, err = _profileLinkColor.StringBytes(); err != nil {
 			return newParsingError("profile_link_color", err)
 		}
-		s.ProfileLinkColor = *(*string)(unsafe.Pointer(&valProfileLinkColor))
+		s.ProfileLinkColor = string(valProfileLinkColor)
 	}
 	if _profileSidebarBorderColor := v.Get("profile_sidebar_border_color"); _profileSidebarBorderColor != nil {
 		var valProfileSidebarBorderColor []byte
 		if valProfileSidebarBorderColor, err = _profileSidebarBorderColor.StringBytes(); err != nil {
 			return newParsingError("profile_sidebar_border_color", err)
 		}
-		s.ProfileSidebarBorderColor = *(*string)(unsafe.Pointer(&valProfileSidebarBorderColor))
+		s.ProfileSidebarBorderColor = string(valProfileSidebarBorderColor)
 	}
 	if _profileSidebarFillColor := v.Get("profile_sidebar_fill_color"); _profileSidebarFillColor != nil {
 		var valProfileSidebarFillColor []byte
 		if valProfileSidebarFillColor, err = _profileSidebarFillColor.StringBytes(); err != nil {
 			return newParsingError("profile_sidebar_fill_color", err)
 		}
-		s.ProfileSidebarFillColor = *(*string)(unsafe.Pointer(&valProfileSidebarFillColor))
+		s.ProfileSidebarFillColor = string(valProfileSidebarFillColor)
 	}
 	if _profileTextColor := v.Get("profile_text_color"); _profileTextColor != nil {
 		var valProfileTextColor []byte
 		if valProfileTextColor, err = _profileTextColor.StringBytes(); err != nil {
 			return newParsingError("profile_text_color", err)
 		}
-		s.ProfileTextColor = *(*string)(unsafe.Pointer(&valProfileTextColor))
+		s.ProfileTextColor = string(valProfileTextColor)
 	}
 	if _profileUseBackgroundImage := v.Get("profile_use_background_image"); _profileUseBackgroundImage != nil {
 		var valProfileUseBackgroundImage bool
@@ -968,7 +968,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valScreenName, err = _screenName.StringBytes(); err != nil {
 			return newParsingError("screen_name", err)
 		}
-		s.ScreenName = *(*string)(unsafe.Pointer(&valScreenName))
+		s.ScreenName = string(valScreenName)
 	}
 	if _showAllInlineMedia := v.Get("show_all_inline_media"); _showAllInlineMedia != nil {
 		var valShowAllInlineMedia bool
@@ -991,7 +991,7 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valTimeZone, err = _timeZone.StringBytes(); err != nil {
 			return newParsingError("time_zone", err)
 		}
-		s.TimeZone = *(*string)(unsafe.Pointer(&valTimeZone))
+		s.TimeZone = string(valTimeZone)
 	}
 	if _uRL := v.Get("url"); valueIsNotNull(_uRL) {
 		var valURL []byte
@@ -1332,14 +1332,14 @@ func (s *StatusMetadata) FillFromJSON(v *fastjson.Value) (err error) {
 		if valIsoLanguageCode, err = _isoLanguageCode.StringBytes(); err != nil {
 			return newParsingError("iso_language_code", err)
 		}
-		s.IsoLanguageCode = *(*string)(unsafe.Pointer(&valIsoLanguageCode))
+		s.IsoLanguageCode = string(valIsoLanguageCode)
 	}
 	if _resultType := v.Get("result_type"); _resultType != nil {
 		var valResultType []byte
 		if valResultType, err = _resultType.StringBytes(); err != nil {
 			return newParsingError("result_type", err)
 		}
-		s.ResultType = *(*string)(unsafe.Pointer(&valResultType))
+		s.ResultType = string(valResultType)
 	}
 	return nil
 }
@@ -1412,7 +1412,7 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valCreatedAt, err = _createdAt.StringBytes(); err != nil {
 			return newParsingError("created_at", err)
 		}
-		s.CreatedAt = *(*string)(unsafe.Pointer(&valCreatedAt))
+		s.CreatedAt = string(valCreatedAt)
 	}
 	if _entities := v.Get("entities"); _entities != nil {
 		var valEntities Entities
@@ -1450,7 +1450,7 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valIDStr, err = _iDStr.StringBytes(); err != nil {
 			return newParsingError("id_str", err)
 		}
-		s.IDStr = *(*string)(unsafe.Pointer(&valIDStr))
+		s.IDStr = string(valIDStr)
 	}
 	if _inReplyToScreenName := v.Get("in_reply_to_screen_name"); valueIsNotNull(_inReplyToScreenName) {
 		var valInReplyToScreenName []byte
@@ -1523,14 +1523,14 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valSource, err = _source.StringBytes(); err != nil {
 			return newParsingError("source", err)
 		}
-		s.Source = *(*string)(unsafe.Pointer(&valSource))
+		s.Source = string(valSource)
 	}
 	if _text := v.Get("text"); _text != nil {
 		var valText []byte
 		if valText, err = _text.StringBytes(); err != nil {
 			return newParsingError("text", err)
 		}
-		s.Text = *(*string)(unsafe.Pointer(&valText))
+		s.Text = string(valText)
 	}
 	if _truncated := v.Get("truncated"); _truncated != nil {
 		var valTruncated bool

@@ -84,6 +84,10 @@ func Test_GenerateRace(t *testing.T) {
 	caseTestFillStatements(t, "./race/types.go")
 }
 
+func Test_GenerateRace1(t *testing.T) {
+	caseTestFillStatements(t, "../benchmark/data.go")
+}
+
 func hashDir(dirPath string) []string {
 	dirs, err := os.ReadDir(dirPath)
 	if err != nil {
