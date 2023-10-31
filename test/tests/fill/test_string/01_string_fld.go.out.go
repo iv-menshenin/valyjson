@@ -35,7 +35,7 @@ func (s *TestStr01) FillFromJSON(v *fastjson.Value) (err error) {
 		if valField, err = _field.StringBytes(); err != nil {
 			return newParsingError("field", err)
 		}
-		s.Field = *(*string)(unsafe.Pointer(&valField))
+		s.Field = string(valField)
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
@@ -121,7 +121,7 @@ func (s *TestStr02) FillFromJSON(v *fastjson.Value) (err error) {
 		if valField, err = _field.StringBytes(); err != nil {
 			return newParsingError("field", err)
 		}
-		s.Field = *(*string)(unsafe.Pointer(&valField))
+		s.Field = string(valField)
 	}
 	if _fieldRef := v.Get("fieldRef"); valueIsNotNull(_fieldRef) {
 		var valFieldRef []byte
@@ -135,7 +135,7 @@ func (s *TestStr02) FillFromJSON(v *fastjson.Value) (err error) {
 		if valString, err = _string.StringBytes(); err != nil {
 			return newParsingError("string", err)
 		}
-		s.String = *(*FieldValueString)(unsafe.Pointer(&valString))
+		s.String = FieldValueString(valString)
 	} else {
 		s.String = "value-foo-bar"
 	}

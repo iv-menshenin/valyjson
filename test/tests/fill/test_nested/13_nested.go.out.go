@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -121,14 +120,14 @@ func (s *Middle) FillFromJSON(v *fastjson.Value) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return newParsingError("name", err)
 		}
-		s.Name = *(*UserName)(unsafe.Pointer(&valName))
+		s.Name = UserName(valName)
 	}
 	if _surname := v.Get("surname"); _surname != nil {
 		var valSurname []byte
 		if valSurname, err = _surname.StringBytes(); err != nil {
 			return newParsingError("surname", err)
 		}
-		s.Surname = *(*UserSurname)(unsafe.Pointer(&valSurname))
+		s.Surname = UserSurname(valSurname)
 	}
 	if _patname := v.Get("patname"); valueIsNotNull(_patname) {
 		var valPatname []byte
@@ -339,14 +338,14 @@ func (s *Personal) FillFromJSON(v *fastjson.Value) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return newParsingError("name", err)
 		}
-		s.Name = *(*UserName)(unsafe.Pointer(&valName))
+		s.Name = UserName(valName)
 	}
 	if _surname := v.Get("surname"); _surname != nil {
 		var valSurname []byte
 		if valSurname, err = _surname.StringBytes(); err != nil {
 			return newParsingError("surname", err)
 		}
-		s.Surname = *(*UserSurname)(unsafe.Pointer(&valSurname))
+		s.Surname = UserSurname(valSurname)
 	}
 	if _patname := v.Get("patname"); valueIsNotNull(_patname) {
 		var valPatname []byte

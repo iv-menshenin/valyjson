@@ -320,14 +320,14 @@ func (s *Property) FillFromJSON(v *fastjson.Value) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return newParsingError("name", err)
 		}
-		s.Name = *(*string)(unsafe.Pointer(&valName))
+		s.Name = string(valName)
 	}
 	if _value := v.Get("value"); _value != nil {
 		var valValue []byte
 		if valValue, err = _value.StringBytes(); err != nil {
 			return newParsingError("value", err)
 		}
-		s.Value = *(*string)(unsafe.Pointer(&valValue))
+		s.Value = string(valValue)
 	}
 	return nil
 }

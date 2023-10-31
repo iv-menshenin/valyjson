@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"time"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -81,7 +80,7 @@ func (s *TestUserDefined) FillFromJSON(v *fastjson.Value) (err error) {
 		if valString, err = _string.StringBytes(); err != nil {
 			return newParsingError("f_string", err)
 		}
-		s.String = *(*DefinedString)(unsafe.Pointer(&valString))
+		s.String = DefinedString(valString)
 	} else {
 		s.String = "default_string"
 	}
@@ -279,7 +278,7 @@ func (s *DefinedFieldAsUserDefined) FillFromJSON(v *fastjson.Value) (err error) 
 		if valStatus, err = _status.StringBytes(); err != nil {
 			return newParsingError("status", err)
 		}
-		s.Status = *(*userdefined.DefinedFieldAsUserDefinedStatus)(unsafe.Pointer(&valStatus))
+		s.Status = userdefined.DefinedFieldAsUserDefinedStatus(valStatus)
 	}
 	if _time := v.Get("time"); _time != nil {
 		b, err := _time.StringBytes()

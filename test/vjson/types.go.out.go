@@ -38,14 +38,14 @@ func (s *Person) FillFromJSON(v *fastjson.Value) (err error) {
 		if valName, err = _name.StringBytes(); err != nil {
 			return newParsingError("name", err)
 		}
-		s.Name = *(*string)(unsafe.Pointer(&valName))
+		s.Name = string(valName)
 	}
 	if _surname := v.Get("surname"); _surname != nil {
 		var valSurname []byte
 		if valSurname, err = _surname.StringBytes(); err != nil {
 			return newParsingError("surname", err)
 		}
-		s.Surname = *(*string)(unsafe.Pointer(&valSurname))
+		s.Surname = string(valSurname)
 	}
 	if _middle := v.Get("middle"); valueIsNotNull(_middle) {
 		var valMiddle []byte
@@ -185,7 +185,7 @@ func (s *Passport) FillFromJSON(v *fastjson.Value) (err error) {
 		if valNumber, err = _number.StringBytes(); err != nil {
 			return newParsingError("number", err)
 		}
-		s.Number = *(*string)(unsafe.Pointer(&valNumber))
+		s.Number = string(valNumber)
 	}
 	if _dateDoc := v.Get("dateDoc"); _dateDoc != nil {
 		b, err := _dateDoc.StringBytes()
@@ -257,7 +257,7 @@ func (s *TableOf) FillFromJSON(v *fastjson.Value) (err error) {
 		if valTableName, err = _tableName.StringBytes(); err != nil {
 			return newParsingError("tableName", err)
 		}
-		s.TableName = *(*string)(unsafe.Pointer(&valTableName))
+		s.TableName = string(valTableName)
 	}
 	if _tables := v.Get("tables"); valueIsNotNull(_tables) {
 		var listA []*fastjson.Value
@@ -497,14 +497,14 @@ func (s *Tag) FillFromJSON(v *fastjson.Value) (err error) {
 		if valTagName, err = _tagName.StringBytes(); err != nil {
 			return newParsingError("tagName", err)
 		}
-		s.TagName = *(*string)(unsafe.Pointer(&valTagName))
+		s.TagName = string(valTagName)
 	}
 	if _tagValue := v.Get("tagValue"); _tagValue != nil {
 		var valTagValue []byte
 		if valTagValue, err = _tagValue.StringBytes(); err != nil {
 			return newParsingError("tagValue", err)
 		}
-		s.TagValue = *(*string)(unsafe.Pointer(&valTagValue))
+		s.TagValue = string(valTagValue)
 	}
 	return nil
 }

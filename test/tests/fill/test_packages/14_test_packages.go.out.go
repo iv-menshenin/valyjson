@@ -4,7 +4,6 @@ package test_packages
 import (
 	"bytes"
 	"fmt"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -38,7 +37,7 @@ func (s *Test01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("field", err)
 		}
-		s.Field = *(*pack_a.Test)(unsafe.Pointer(&valField))
+		s.Field = pack_a.Test(valField)
 	}
 	return nil
 }

@@ -454,9 +454,6 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 	switch t := f.expr.(type) {
 
 	case *ast.Ident:
-		if helpers.IsIdent(f.refx, "string") {
-			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
-		}
 		return f.typedFillIn(rhs, dst, t.Name)
 
 	case *ast.StructType:
@@ -464,7 +461,7 @@ func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
 
 	case *ast.SelectorExpr:
 		if helpers.IsOrdinal(f.refx) {
-			return []ast.Stmt{unsafeTypeConversion(dst, rhs, f.expr)}
+			return []ast.Stmt{assign(dst, asthlp.ExpressionTypeConvert(rhs, f.expr))}
 		}
 		result = append(result, assign(dst, rhs))
 		return result
@@ -483,7 +480,7 @@ func (f *Field) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 	switch t {
 	case "string":
 		return []ast.Stmt{
-			unsafeTypeConversion(dst, rhs, asthlp.NewIdent("string")),
+			assign(dst, asthlp.ExpressionTypeConvert(rhs, asthlp.NewIdent("string"))),
 		}
 
 	case "int", "uint", "int64", "uint64", "float64", "bool", "byte", "rune":
@@ -501,20 +498,6 @@ func (f *Field) typedFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 			assign(dst, asthlp.ExpressionTypeConvert(rhs, ast.NewIdent(t))),
 		}
 	}
-}
-
-func unsafeTypeConversion(dst, rhs, t ast.Expr) ast.Stmt {
-	return asthlp.Assign(
-		asthlp.VarNames{dst},
-		asthlp.Assignment,
-		asthlp.Star(asthlp.Call(
-			asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(t))),
-			asthlp.Call(
-				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-				asthlp.Ref(rhs),
-			),
-		)),
-	)
 }
 
 func assign(dst, rhs ast.Expr) ast.Stmt {
