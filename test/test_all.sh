@@ -20,9 +20,14 @@ cd $ROOT/test/tests/fill/ || exit 1
 go test -json -v ./... || echo "##teamcity[testFailed name='generator.GeneratedCode']"
 echo "##teamcity[testSuiteFinished name='generator.GeneratedCode']"
 
-echo "##teamcity[testSuiteStarted name='generator.GeneratedCode']"
+echo "##teamcity[testSuiteStarted name='generator.Functional']"
 cd $ROOT/test/vjson/ || exit 1
-go test -json -v ./... || echo "##teamcity[testFailed name='generator.GeneratedCode']"
-echo "##teamcity[testSuiteFinished name='generator.GeneratedCode']"
+go test -json -v ./... || echo "##teamcity[testFailed name='generator.Functional']"
+echo "##teamcity[testSuiteFinished name='generator.Functional']"
+
+echo "##teamcity[testSuiteStarted name='generator.RaceTests']"
+cd $ROOT/test/race/ || exit 1
+go test -race -json -v ./... || echo "##teamcity[testFailed name='generator.RaceTests']"
+echo "##teamcity[testSuiteFinished name='generator.RaceTests']"
 
 echo "##teamcity[blockClosed name='Tests_Execution']"
