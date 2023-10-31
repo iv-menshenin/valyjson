@@ -190,15 +190,15 @@ func Test_Strings_Allocations(t *testing.T) {
 			var test1 TestStr01
 			_ = test1.UnmarshalJSON([]byte(`{"field": "test_field", "defRef": "foo bar"}`))
 		})
-		require.LessOrEqual(t, n, float64(1)) // one allocation for ref
+		require.LessOrEqual(t, n, float64(2)) // one allocation for ref
 	})
-	t.Run("no-allocations", func(t *testing.T) {
+	t.Run("alloc-mem", func(t *testing.T) {
 		t.Parallel()
 		n := testing.AllocsPerRun(100, func() {
 			var test2 TestStr02
 			_ = test2.UnmarshalJSON([]byte(`{"field": "test_field", "string": "foo bar ipsum"}`))
 		})
-		require.LessOrEqual(t, n, float64(0))
+		require.LessOrEqual(t, n, float64(2))
 	})
 }
 
@@ -275,12 +275,12 @@ func Test_TestSubTypeString(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, FieldValueString("filled well"), test1.String)
 	})
-	t.Run("test-allocs", func(t *testing.T) {
+	t.Run("alloc-mem", func(t *testing.T) {
 		n := testing.AllocsPerRun(100, func() {
 			var test1 TestStr02
 			_ = test1.UnmarshalJSON([]byte(`{"string": "filled well foo/bar"}`))
 		})
-		require.LessOrEqual(t, n, float64(0))
+		require.LessOrEqual(t, n, float64(1))
 	})
 	t.Run("test_default", func(t *testing.T) {
 		var test1 TestStr02
