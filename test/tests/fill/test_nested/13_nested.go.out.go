@@ -434,6 +434,112 @@ func (s *Tags) FillFromJSON(v *fastjson.Value) (err error) {
 	return err
 }
 
+// jsonParserCustomEvent used for pooling Parsers for CustomEvent JSONs.
+var jsonParserCustomEvent fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *CustomEvent) UnmarshalJSON(data []byte) error {
+	parser := jsonParserCustomEvent.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserCustomEvent.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *CustomEvent) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _wRRetry := v; _wRRetry != nil {
+		var valWRRetry WRRetry
+		err = valWRRetry.FillFromJSON(_wRRetry)
+		if err != nil {
+			return newParsingError("", err)
+		}
+		s.WRRetry = WRRetry(valWRRetry)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *CustomEvent) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
+// jsonParserWRRetry used for pooling Parsers for WRRetry JSONs.
+var jsonParserWRRetry fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *WRRetry) UnmarshalJSON(data []byte) error {
+	parser := jsonParserWRRetry.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserWRRetry.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *WRRetry) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _wRRetry := v.Get("WR-Retry"); _wRRetry != nil {
+		var valWRRetry int
+		valWRRetry, err = _wRRetry.Int()
+		if err != nil {
+			return newParsingError("WR-Retry", err)
+		}
+		s.WRRetry = valWRRetry
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *WRRetry) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'W', 'R', '-', 'R', 'e', 't', 'r', 'y'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Root) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -803,4 +909,85 @@ func (s *Tags) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s Tags) IsZero() bool {
 	return len(s) == 0
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *CustomEvent) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *CustomEvent) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if !s.WRRetry.IsZero() {
+		if wantComma {
+			result.RawByte(',')
+		}
+		result.Raw(unpackObject(s.WRRetry.MarshalJSON()))
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s CustomEvent) IsZero() bool {
+	if !s.WRRetry.IsZero() {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *WRRetry) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *WRRetry) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if s.WRRetry != 0 {
+		if wantComma {
+			result.RawByte(',')
+		}
+		result.RawString(`"WR-Retry":`)
+		writeInt64(result, int64(s.WRRetry))
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s WRRetry) IsZero() bool {
+	if s.WRRetry != 0 {
+		return false
+	}
+	return true
 }

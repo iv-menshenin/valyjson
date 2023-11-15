@@ -358,6 +358,11 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 }
 
 func marshalTransit(src ast.Expr, name string, omitempty, isStar bool) WriteBlock {
+	if name == "" {
+		// inlined
+		// result.Raw(unpackObject(s.Field.MarshalJSON()))
+		return inlineStructMarshal(src)
+	}
 	var block WriteBlock
 	if isStar {
 		block = refStructMarshal(src, name, omitempty)

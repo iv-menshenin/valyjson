@@ -20,6 +20,10 @@ var (
 
 // offset := v.Get("offset")
 func (f *Field) extract(v string) ast.Stmt {
+	if f.tags.JsonName() == "" {
+		// inlined structure; so there is no json name
+		return asthlp.Assign(asthlp.MakeVarNames(v), asthlp.Definition, asthlp.NewIdent(names.VarNameJsonValue))
+	}
 	return asthlp.Assign(asthlp.MakeVarNames(v), asthlp.Definition, f.getValue())
 }
 

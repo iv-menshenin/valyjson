@@ -319,6 +319,26 @@ func stringMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Writ
 	return w
 }
 
+// structMarshal makes WriteBlock for inlined structure marshalling
+//
+//	result.Raw(unpackObject(s.Field.MarshalJSON()))
+func inlineStructMarshal(src ast.Expr) WriteBlock {
+	return WriteBlock{
+		NotZero: asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameZero)))),
+		Block: []ast.Stmt{
+			// result.Raw(unpackObject(s.Field.MarshalJSON()))
+			asthlp.CallStmt(asthlp.Call(
+				asthlp.InlineFunc(asthlp.Selector(asthlp.NewIdent(names.VarNameWriter), "Raw")),
+				asthlp.Call(
+					asthlp.InlineFunc(asthlp.NewIdent(names.UnpackObjFunc)),
+					asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameMarshal))),
+				),
+			)),
+			SetCommaVar,
+		},
+	}
+}
+
 // structMarshal makes WriteBlock for structure marshalling
 //
 //	result.WriteString(`"injected":`)

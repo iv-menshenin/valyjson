@@ -224,8 +224,12 @@ func (v *visitor) collectFields(src []*ast.Field) []*ast.Field {
 			}
 		}
 		if tag.JsonAppendix() == "inline" {
-			flds = append(flds, v.exploreInlined(fld)...)
-			continue
+			inlinedFields, canInline := v.exploreInlined(fld)
+			if canInline {
+				flds = append(flds, inlinedFields...)
+				continue
+			}
+			// cant inline? try to process as a field
 		}
 		flds = append(flds, fld)
 	}
@@ -251,48 +255,73 @@ func (v *visitor) resolveExternal(sel *ast.SelectorExpr) *ast.Object {
 	return nil
 }
 
-func (v *visitor) exploreInlined(fld *ast.Field) []*ast.Field {
+func (v *visitor) exploreInlined(fld *ast.Field) ([]*ast.Field, bool) {
 	switch inlined := fld.Type.(type) {
-
 	case *ast.Ident:
-		decl := v.getDeclByName(inlined.Name)
-		if decl == nil {
-			panic("can't resolve inlined field by name")
-		}
-		stct, ok := decl.spec.Type.(*ast.StructType)
-		if !ok {
-			panic("can't inline")
-		}
-		return v.collectFields(stct.Fields.List)
+		return v.exploreInlinedIdent(inlined)
 
 	case *ast.SelectorExpr:
-		packIdent, ok := inlined.X.(*ast.Ident)
-		if !ok {
-			panic(fmt.Errorf("can't inline struct kind %+v; can't recognize %+v expression", fld.Type, inlined.X))
-		}
-		pkg, err := v.g.discovery.GetPackage(packIdent.Name, inlined.Sel.Name)
-		if err != nil {
-			panic(fmt.Errorf("can't inline struct kind %+v; can't parse '%s' package: %+v", fld.Type, packIdent.Name, err))
-		}
-		var v1 = visitor{g: v.g, over: packIdent}
-		ast.Walk(&v1, pkg)
-		decl := v1.getDeclByName(inlined.Sel.Name)
-		if decl == nil {
-			panic("can't resolve inlined field by name")
-		}
-		stct, ok := decl.spec.Type.(*ast.StructType)
-		if !ok {
-			panic("can't inline")
-		}
 		if len(fld.Names) == 0 {
-			return v1.collectFields(stct.Fields.List)
+			return v.exploreInlinedSelector(inlined)
 		}
 		if len(fld.Names) > 1 {
 			panic("can't inline named fields")
 		}
-		return []*ast.Field{fld}
+		return []*ast.Field{fld}, true
 
 	default:
 		panic(fmt.Errorf("can't inline struct kind %+v", fld.Type))
 	}
+}
+
+func (v *visitor) exploreInlinedIdent(ident *ast.Ident) (fields []*ast.Field, canInline bool) {
+	decl := v.getDeclByName(ident.Name)
+	if decl == nil {
+		panic("can't resolve inlined field by name")
+	}
+	stct, ok := decl.spec.Type.(*ast.StructType)
+	if !ok {
+		panic("can't inline")
+	}
+	fields = v.collectFields(stct.Fields.List)
+	// you can't inline if there is the same name field as the inlined structure
+	canInline = findFieldWithName(fields, ident.Name) == nil
+	return
+}
+
+func (v *visitor) exploreInlinedSelector(inlined *ast.SelectorExpr) (fields []*ast.Field, canInline bool) {
+	packIdent, ok := inlined.X.(*ast.Ident)
+	if !ok {
+		panic(fmt.Errorf("can't inline struct %q; can't recognize %+v expression", inlined.Sel.Name, inlined.X))
+	}
+	pkg, err := v.g.discovery.GetPackage(packIdent.Name, inlined.Sel.Name)
+	if err != nil {
+		panic(fmt.Errorf("can't inline struct %q; can't parse '%s' package: %+v", inlined.Sel.Name, packIdent.Name, err))
+	}
+	var v1 = visitor{g: v.g, over: packIdent}
+	ast.Walk(&v1, pkg)
+	decl := v1.getDeclByName(inlined.Sel.Name)
+	if decl == nil {
+		panic("can't resolve inlined field by name")
+	}
+	stct, ok := decl.spec.Type.(*ast.StructType)
+	if !ok {
+		panic("can't inline")
+	}
+	fields = v1.collectFields(stct.Fields.List)
+	// you can't inline if there is the same name field as the inlined structure
+	canInline = findFieldWithName(fields, inlined.Sel.Name) == nil
+	return
+}
+
+func findFieldWithName(fields []*ast.Field, name string) *ast.Field {
+	for _, field := range fields {
+		for _, fldName := range field.Names {
+			if fldName.Name != name {
+				continue
+			}
+			return field
+		}
+	}
+	return nil
 }

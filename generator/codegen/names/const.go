@@ -20,6 +20,7 @@ const (
 	MethodNameValidate  = "validate"
 	MethodNameMarshalTo = "MarshalTo"
 	MethodNameZero      = "IsZero"
+	UnpackObjFunc       = "unpackObject"
 
 	WriteTime    = "writeTime"
 	WriteInt64   = "writeInt64"

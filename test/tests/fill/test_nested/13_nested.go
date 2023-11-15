@@ -33,4 +33,14 @@ type (
 	UserName    string
 	UserSurname string
 	UserPatname string
+
+	//json:marshal
+	CustomEvent struct {
+		WRRetry `json:",inline"`
+	}
+	// Field with the same name
+	//json:marshal
+	WRRetry struct {
+		WRRetry int `json:"WR-Retry,omitempty"`
+	}
 )

@@ -102,3 +102,17 @@ func (p parsingError) WrapPath(objPath string) error {
 func (p parsingError) Error() string {
 	return fmt.Sprintf("error parsing '%s': %+v", p.path, p.err)
 }
+
+func unpackObject(data []byte, err error) ([]byte, error) {
+	if err != nil {
+		return data, err
+	}
+	l := len(data)
+	if l < 2 {
+		return data, nil
+	}
+	if data[0] != '{' || data[l-1] != '}' {
+		return data, fmt.Errorf("expected object")
+	}
+	return data[1 : l-1], nil
+}
