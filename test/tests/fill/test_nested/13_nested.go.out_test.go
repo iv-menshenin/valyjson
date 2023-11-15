@@ -1,6 +1,7 @@
 package test_nested
 
 import (
+	"encoding/json"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -54,6 +55,17 @@ func Test_InlinedNestedStructures(t *testing.T) {
 		require.NoError(t, err)
 		require.JSONEq(t, `{"WR-Retry": 3}`, string(data))
 	})
+	t.Run("marshal-the-same-as-std", func(t *testing.T) {
+		t.Parallel()
+		var ce = CustomEvent{WRRetry{WRRetry: 312}}
+		data1, err := ce.MarshalJSON()
+		require.NoError(t, err)
+
+		data2, err := json.Marshal(ce)
+		require.NoError(t, err)
+
+		require.JSONEq(t, string(data1), string(data2))
+	})
 	t.Run("unmarshal", func(t *testing.T) {
 		t.Parallel()
 		const jsonData = `{"WR-Retry": 304}`
@@ -65,5 +77,18 @@ func Test_InlinedNestedStructures(t *testing.T) {
 		var got CustomEvent
 		require.NoError(t, got.UnmarshalJSON([]byte(jsonData)))
 		require.Equal(t, expected, got)
+	})
+	t.Run("unmarshal-the-same-as-std", func(t *testing.T) {
+		t.Parallel()
+		const jsonData = `{"WR-Retry": 5666}`
+		var expected = CustomEvent{WRRetry{WRRetry: 5666}}
+		var got1 CustomEvent
+
+		require.NoError(t, got1.UnmarshalJSON([]byte(jsonData)))
+		require.Equal(t, expected, got1)
+
+		var got2 CustomEvent
+		require.NoError(t, json.Unmarshal([]byte(jsonData), &got2))
+		require.Equal(t, expected, got2)
 	})
 }
