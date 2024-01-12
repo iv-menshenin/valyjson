@@ -1876,7 +1876,7 @@ func (s *SearchMetadata) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
+func (s *SearchMetadata) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -1891,7 +1891,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.CompletedIn != 0 {
 		result.RawString(`"completed_in":`)
-		writeFloat64(result, s.CompletedIn)
+		result.Float64(s.CompletedIn)
 		wantComma = true
 	} else {
 		result.RawString(`"completed_in":0`)
@@ -1902,7 +1902,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Count != 0 {
 		result.RawString(`"count":`)
-		writeInt64(result, int64(s.Count))
+		result.Int(s.Count)
 		wantComma = true
 	} else {
 		result.RawString(`"count":0`)
@@ -1913,7 +1913,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.MaxID != 0 {
 		result.RawString(`"max_id":`)
-		writeInt64(result, s.MaxID)
+		result.Int64(s.MaxID)
 		wantComma = true
 	} else {
 		result.RawString(`"max_id":0`)
@@ -1968,7 +1968,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.SinceID != 0 {
 		result.RawString(`"since_id":`)
-		writeInt64(result, s.SinceID)
+		result.Int64(s.SinceID)
 		wantComma = true
 	} else {
 		result.RawString(`"since_id":0`)
@@ -1986,7 +1986,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2032,7 +2032,7 @@ func (s *Hashtag) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
+func (s *Hashtag) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2055,7 +2055,7 @@ func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeInt64(result, int64(_v))
+			result.Int(_v)
 		}
 		result.RawByte(']')
 	} else {
@@ -2074,7 +2074,7 @@ func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2099,7 +2099,7 @@ func (s *Entities) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Entities) MarshalTo(result *jwriter.Writer) error {
+func (s *Entities) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2181,7 +2181,7 @@ func (s *Entities) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2209,7 +2209,7 @@ func (s *UserEntityDescription) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntityDescription) MarshalTo(result *jwriter.Writer) error {
+func (s *UserEntityDescription) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2244,7 +2244,7 @@ func (s *UserEntityDescription) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2266,7 +2266,7 @@ func (s *URL) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *URL) MarshalTo(result *jwriter.Writer) error {
+func (s *URL) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2299,7 +2299,7 @@ func (s *URL) MarshalTo(result *jwriter.Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeInt64(result, int64(_v))
+			result.Int(_v)
 		}
 		result.RawByte(']')
 	} else {
@@ -2318,7 +2318,7 @@ func (s *URL) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2346,7 +2346,7 @@ func (s *UserEntityURL) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntityURL) MarshalTo(result *jwriter.Writer) error {
+func (s *UserEntityURL) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2380,7 +2380,7 @@ func (s *UserEntityURL) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2402,7 +2402,7 @@ func (s *UserEntities) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *UserEntities) MarshalTo(result *jwriter.Writer) error {
+func (s *UserEntities) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2429,7 +2429,7 @@ func (s *UserEntities) MarshalTo(result *jwriter.Writer) error {
 	}
 	wantComma = true
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -2454,7 +2454,7 @@ func (s *User) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *User) MarshalTo(result *jwriter.Writer) error {
+func (s *User) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -2529,7 +2529,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FavouritesCount != 0 {
 		result.RawString(`"favourites_count":`)
-		writeInt64(result, int64(s.FavouritesCount))
+		result.Int(s.FavouritesCount)
 		wantComma = true
 	} else {
 		result.RawString(`"favourites_count":0`)
@@ -2550,7 +2550,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FollowersCount != 0 {
 		result.RawString(`"followers_count":`)
-		writeInt64(result, int64(s.FollowersCount))
+		result.Int(s.FollowersCount)
 		wantComma = true
 	} else {
 		result.RawString(`"followers_count":0`)
@@ -2571,7 +2571,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FriendsCount != 0 {
 		result.RawString(`"friends_count":`)
-		writeInt64(result, int64(s.FriendsCount))
+		result.Int(s.FriendsCount)
 		wantComma = true
 	} else {
 		result.RawString(`"friends_count":0`)
@@ -2592,7 +2592,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ID != 0 {
 		result.RawString(`"id":`)
-		writeInt64(result, int64(s.ID))
+		result.Int(s.ID)
 		wantComma = true
 	} else {
 		result.RawString(`"id":0`)
@@ -2635,7 +2635,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ListedCount != 0 {
 		result.RawString(`"listed_count":`)
-		writeInt64(result, int64(s.ListedCount))
+		result.Int(s.ListedCount)
 		wantComma = true
 	} else {
 		result.RawString(`"listed_count":0`)
@@ -2828,7 +2828,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.StatusesCount != 0 {
 		result.RawString(`"statuses_count":`)
-		writeInt64(result, int64(s.StatusesCount))
+		result.Int(s.StatusesCount)
 		wantComma = true
 	} else {
 		result.RawString(`"statuses_count":0`)
@@ -2860,7 +2860,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UtcOffset != 0 {
 		result.RawString(`"utc_offset":`)
-		writeInt64(result, int64(s.UtcOffset))
+		result.Int(s.UtcOffset)
 		wantComma = true
 	} else {
 		result.RawString(`"utc_offset":0`)
@@ -2877,7 +2877,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -3013,7 +3013,7 @@ func (s *StatusMetadata) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *StatusMetadata) MarshalTo(result *jwriter.Writer) error {
+func (s *StatusMetadata) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -3046,7 +3046,7 @@ func (s *StatusMetadata) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -3071,7 +3071,7 @@ func (s *Status) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *Status) MarshalTo(result *jwriter.Writer) error {
+func (s *Status) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -3145,7 +3145,7 @@ func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ID != 0 {
 		result.RawString(`"id":`)
-		writeInt64(result, s.ID)
+		result.Int64(s.ID)
 		wantComma = true
 	} else {
 		result.RawString(`"id":0`)
@@ -3235,7 +3235,7 @@ func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RetweetCount != 0 {
 		result.RawString(`"retweet_count":`)
-		writeInt64(result, int64(s.RetweetCount))
+		result.Int(s.RetweetCount)
 		wantComma = true
 	} else {
 		result.RawString(`"retweet_count":0`)
@@ -3292,7 +3292,7 @@ func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	}
 	wantComma = true
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -3374,7 +3374,7 @@ func (s *LargeStruct) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *LargeStruct) MarshalTo(result *jwriter.Writer) error {
+func (s *LargeStruct) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -3416,7 +3416,7 @@ func (s *LargeStruct) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 
@@ -3441,7 +3441,7 @@ func (s *XLStruct) MarshalJSON() ([]byte, error) {
 }
 
 // MarshalTo serializes all fields of the structure using a buffer.
-func (s *XLStruct) MarshalTo(result *jwriter.Writer) error {
+func (s *XLStruct) MarshalTo(result BufWriter) error {
 	if s == nil {
 		result.RawString("null")
 		return nil
@@ -3475,7 +3475,7 @@ func (s *XLStruct) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 	}
 	result.RawByte('}')
-	err = result.Error
+
 	return err
 }
 

@@ -88,6 +88,7 @@ func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
 }
 
 func BenchmarkEJ_Marshal_L_ToWriter_Parallel(b *testing.B) {
+	b.ReportAllocs()
 	out := &DummyWriter{}
 	b.RunParallel(func(pb *testing.PB) {
 		var l int64

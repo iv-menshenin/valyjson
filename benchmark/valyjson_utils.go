@@ -3,12 +3,49 @@ package benchmark
 
 import (
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fastjson"
 )
+
+type BufWriter interface {
+	Size() int
+	DumpTo(io.Writer) (int, error)
+	ReadCloser() (io.ReadCloser, error)
+	String(string)
+	RawByte(byte)
+	RawString(string)
+	Base64Bytes([]byte)
+	Uint8(uint8)
+	Uint16(uint16)
+	Uint32(uint32)
+	Uint(uint)
+	Uint64(uint64)
+	Int8(int8)
+	Int16(int16)
+	Int32(int32)
+	Int(int)
+	Int64(int64)
+	Uint8Str(uint8)
+	Uint16Str(uint16)
+	Uint32Str(uint32)
+	UintStr(uint)
+	Uint64Str(uint64)
+	UintptrStr(uintptr)
+	Int8Str(int8)
+	Int16Str(int16)
+	Int32Str(int32)
+	IntStr(int)
+	Int64Str(int64)
+	Float32(float32)
+	Float32Str(float32)
+	Float64(float64)
+	Float64Str(float64)
+	Bool(bool)
+}
 
 func valueIsNotNull(v *fastjson.Value) bool {
 	return v != nil && v.Type() != fastjson.TypeNull
@@ -42,22 +79,6 @@ func parseDate(s string) (time.Time, error) {
 		}
 	}
 	return time.Time{}, fmt.Errorf("can't parse date from string '%s'", s)
-}
-
-var intBuf = bytebufferpool.Pool{}
-
-func writeInt64(w *jwriter.Writer, i int64) {
-	w.Int64(i)
-}
-
-func writeUint64(w *jwriter.Writer, i uint64) {
-	w.Uint64(i)
-}
-
-var fltBuf = bytebufferpool.Pool{}
-
-func writeFloat64(w *jwriter.Writer, f float64) {
-	w.Float64(f)
 }
 
 var timeBuf = bytebufferpool.Pool{}
