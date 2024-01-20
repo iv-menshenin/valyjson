@@ -263,3 +263,58 @@ func Test_TestBool02(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 }
+
+func Test_RequiredRequired(t *testing.T) {
+	t.Run("NotRequiredUnmarshal", func(t *testing.T) {
+		var got TestBool03
+		var expected = TestBool03{}
+		const data = `{}`
+		err := got.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, got)
+	})
+	t.Run("NotRequiredMarshal", func(t *testing.T) {
+		var test = TestBool03{}
+		const expected = `{"required":false}`
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("RequiredUnmarshal", func(t *testing.T) {
+		var got TestBool04
+		var expected = TestBool04{}
+		const data = `{"required":false}`
+		err := got.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, got)
+	})
+	t.Run("RequiredCheck", func(t *testing.T) {
+		var got TestBool04
+		const data = `{}`
+		err := got.UnmarshalJSON([]byte(data))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "'required' is missing")
+	})
+	t.Run("RequiredMarshal", func(t *testing.T) {
+		var test = TestBool04{}
+		const expected = `{"required":false}`
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("OmittedRequiredUnmarshal", func(t *testing.T) {
+		var got TestBool05
+		var expected = TestBool05{}
+		const data = `{}`
+		err := got.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, got)
+	})
+	t.Run("OmittedRequiredMarshal", func(t *testing.T) {
+		var test = TestBool05{}
+		const expected = `{}`
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+}
