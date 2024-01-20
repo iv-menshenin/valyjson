@@ -50,7 +50,7 @@ func Test_fld_FillStatements(t *testing.T) {
 			cnt++
 			fileName := f.Name()
 			t.Run(f.Name(), func(t *testing.T) {
-				caseTestFillStatements(t, path.Join(dirPath, fileName))
+				caseTestFillStatements(t, path.Join(dirPath, fileName), "")
 			})
 		}
 	}
@@ -65,7 +65,7 @@ func Test_fld_FillStatements(t *testing.T) {
 	}
 }
 
-func caseTestFillStatements(t *testing.T, testFile string) {
+func caseTestFillStatements(t *testing.T, testFile, newFilename string) {
 	g := generator.New(testFile)
 	if err := g.Parse(); err != nil {
 		t.Fatal(err)
@@ -73,19 +73,22 @@ func caseTestFillStatements(t *testing.T, testFile string) {
 	g.BuildDecoders()
 	g.BuildEncoders()
 	g.FixImports()
-	g.Print(testFile + ".out.go")
+	if newFilename == "" {
+		newFilename = testFile + ".out.go"
+	}
+	g.Print(newFilename)
 }
 
 func Test_GenerateVJson(t *testing.T) {
-	caseTestFillStatements(t, "./vjson/types.go")
+	caseTestFillStatements(t, "./vjson/types.go", "")
 }
 
 func Test_GenerateRace(t *testing.T) {
-	caseTestFillStatements(t, "./race/types.go")
+	caseTestFillStatements(t, "./race/types.go", "")
 }
 
 func Test_GenerateRace1(t *testing.T) {
-	caseTestFillStatements(t, "../benchmark/data.go")
+	caseTestFillStatements(t, "../benchmark/data.go", "../benchmark/data_json.go")
 }
 
 func hashDir(dirPath string) []string {
