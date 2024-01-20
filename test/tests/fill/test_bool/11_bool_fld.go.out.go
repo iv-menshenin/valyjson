@@ -220,6 +220,173 @@ func (s *TestInhBool) FillFromJSON(v *fastjson.Value) (err error) {
 	return nil
 }
 
+// jsonParserTestBool03 used for pooling Parsers for TestBool03 JSONs.
+var jsonParserTestBool03 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestBool03) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestBool03.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestBool03.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestBool03) FillFromJSON(v *fastjson.Value) (err error) {
+	// strict rules
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _required := v.Get("required"); _required != nil {
+		var valRequired bool
+		valRequired, err = _required.Bool()
+		if err != nil {
+			return newParsingError("required", err)
+		}
+		s.Required = valRequired
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestBool03) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'r', 'e', 'q', 'u', 'i', 'r', 'e', 'd'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s'", string(key))
+	})
+	return err
+}
+
+// jsonParserTestBool04 used for pooling Parsers for TestBool04 JSONs.
+var jsonParserTestBool04 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestBool04) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestBool04.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestBool04.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestBool04) FillFromJSON(v *fastjson.Value) (err error) {
+	// strict rules
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _required := v.Get("required"); _required != nil {
+		var valRequired bool
+		valRequired, err = _required.Bool()
+		if err != nil {
+			return newParsingError("required", err)
+		}
+		s.Required = valRequired
+	} else {
+		return newParsingError("required", fmt.Errorf("required element '%s' is missing", "required"))
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestBool04) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'r', 'e', 'q', 'u', 'i', 'r', 'e', 'd'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s'", string(key))
+	})
+	return err
+}
+
+// jsonParserTestBool05 used for pooling Parsers for TestBool05 JSONs.
+var jsonParserTestBool05 fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestBool05) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestBool05.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestBool05.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestBool05) FillFromJSON(v *fastjson.Value) (err error) {
+	// strict rules
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _required := v.Get("required"); _required != nil {
+		var valRequired bool
+		valRequired, err = _required.Bool()
+		if err != nil {
+			return newParsingError("required", err)
+		}
+		s.Required = valRequired
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestBool05) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [1]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'r', 'e', 'q', 'u', 'i', 'r', 'e', 'd'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		err = fmt.Errorf("unexpected field '%s'", string(key))
+	})
+	return err
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestBool01) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -395,4 +562,130 @@ func (s *TestInhBool) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestInhBool) IsZero() bool {
 	return s == TestInhBool(false)
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestBool03) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestBool03) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.Required {
+		result.RawString(`"required":true`)
+		wantComma = true
+	} else {
+		result.RawString(`"required":false`)
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestBool03) IsZero() bool {
+	if s.Required != false {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestBool04) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestBool04) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.Required {
+		result.RawString(`"required":true`)
+		wantComma = true
+	} else {
+		result.RawString(`"required":false`)
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestBool04) IsZero() bool {
+	if s.Required != false {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestBool05) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestBool05) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if s.Required {
+		if wantComma {
+			result.RawByte(',')
+		}
+		result.RawString(`"required":true`)
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestBool05) IsZero() bool {
+	if s.Required != false {
+		return false
+	}
+	return true
 }

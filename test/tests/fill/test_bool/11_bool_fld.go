@@ -24,3 +24,24 @@ type TestBool02 struct {
 //
 //json:json
 type TestInhBool bool
+
+// TestBool03 tests bool
+//
+//json:strict
+type TestBool03 struct {
+	Required bool `json:"required"`
+}
+
+// TestBool04 tests bool
+//
+//json:strict
+type TestBool04 struct {
+	Required bool `json:"required,required"`
+}
+
+// TestBool05 tests bool
+//
+//json:strict
+type TestBool05 struct {
+	Required bool `json:"required,omitempty"`
+}

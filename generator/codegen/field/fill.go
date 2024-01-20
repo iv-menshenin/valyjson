@@ -537,14 +537,14 @@ func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 //	}
 func (f *Field) ifDefault(varName, name string) []ast.Stmt {
 	if f.tags.DefaultValue() == "" {
-		if f.tags.JsonTags().Has("required") {
+		if f.tags.JsonTags()[1:].Has("required") {
 			// return fmt.Errorf("required element '{json}' is missing", objPath)
 			return []ast.Stmt{
 				asthlp.Return(
 					asthlp.Call(
 						asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
 						asthlp.StringConstant(f.tags.JsonName()).Expr(),
-						helpers.FmtError("\"required element '%s' is missing\"", asthlp.StringConstant(f.tags.JsonName()).Expr()),
+						helpers.FmtError("required element '%s' is missing", asthlp.StringConstant(f.tags.JsonName()).Expr()),
 					),
 				),
 			}
