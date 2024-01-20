@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"io"
 	"time"
+	"unsafe"
 
-	"github.com/mailru/easyjson/jwriter"
-	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fastjson"
 )
 
@@ -81,15 +80,12 @@ func parseDate(s string) (time.Time, error) {
 	return time.Time{}, fmt.Errorf("can't parse date from string '%s'", s)
 }
 
-var timeBuf = bytebufferpool.Pool{}
-
-func writeTime(w *jwriter.Writer, t time.Time, layout string) {
-	buf := timeBuf.Get()
-	buf.B = append(buf.B[:0], '"')
-	buf.B = t.AppendFormat(buf.B, layout)
-	buf.B = append(buf.B, '"')
-	w.Buffer.AppendBytes(buf.B)
-	timeBuf.Put(buf)
+func writeTime(w BufWriter, t time.Time, layout string) {
+	var buf = make([]byte, 0, 32)
+	buf = append(buf, '"')
+	buf = t.AppendFormat(buf, layout)
+	buf = append(buf, '"')
+	w.RawString(*(*string)(unsafe.Pointer(&buf)))
 }
 
 type parsingError struct {
