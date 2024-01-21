@@ -1,6 +1,7 @@
 package test_slice
 
 // TestSlice01 tests struct with array fields
+//
 //json:json
 type TestSlice01 struct {
 	Field    []string `json:"strs"`
@@ -16,4 +17,11 @@ type (
 	TestSlice03 struct {
 		Data int64 `json:"data"`
 	}
+
+	//json:optional
+	CampaignSites struct {
+		Excluded []FieldValueString  `json:"excluded,omitempty"`
+		Included [5]FieldValueString `json:"included,omitempty"`
+	}
+	FieldValueString string
 )

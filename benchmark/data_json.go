@@ -2058,6 +2058,7 @@ func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
 			writeInt64(result, int64(_v))
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"indices":null`)
 		wantComma = true
@@ -2128,6 +2129,7 @@ func (s *Entities) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"hashtags":null`)
 		wantComma = true
@@ -2152,6 +2154,7 @@ func (s *Entities) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"urls":null`)
 		wantComma = true
@@ -2176,6 +2179,7 @@ func (s *Entities) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"user_mentions":null`)
 		wantComma = true
@@ -2239,6 +2243,7 @@ func (s *UserEntityDescription) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"urls":null`)
 		wantComma = true
@@ -2302,6 +2307,7 @@ func (s *URL) MarshalTo(result *jwriter.Writer) error {
 			writeInt64(result, int64(_v))
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"indices":null`)
 		wantComma = true
@@ -2375,6 +2381,7 @@ func (s *UserEntityURL) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"urls":null`)
 		wantComma = true
@@ -3411,6 +3418,7 @@ func (s *LargeStruct) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"statuses":null`)
 		wantComma = true
@@ -3470,6 +3478,7 @@ func (s *XLStruct) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"data":null`)
 		wantComma = true

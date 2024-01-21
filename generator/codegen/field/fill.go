@@ -66,7 +66,7 @@ func makeBufVariable(name string) *ast.Ident {
 //	}
 //
 // valList = append(valList, int32(elem))
-func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
+func (f *Field) appendElem(dst ast.Expr, v string) []ast.Stmt {
 	var bufVariable = asthlp.NewIdent("elem")
 	var result []ast.Stmt
 	if f.isNullable {
@@ -105,6 +105,40 @@ func appendStmt(dst, el ast.Expr) ast.Stmt {
 	)
 }
 
+func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
+	var bufVariable = asthlp.NewIdent("elem")
+	var result []ast.Stmt
+	if f.isNullable {
+		//if !valueIsNotNull(listElem) {
+		//	valFieldRef = append(valFieldRef, nil)
+		//	continue
+		//}
+		result = append(result, asthlp.If(
+			asthlp.Not(asthlp.Call(valueIsNotNull, ast.NewIdent(v))),
+			appendStmt(dst, ast.NewIdent("nil")),
+			asthlp.Continue(),
+		))
+	}
+	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum"))))...)
+	result = append(result, f.breakErr()...)
+
+	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
+	// valList[_elemNum] = int32(elem)
+	if f.isStar {
+		const newElem = "newElem"
+		result = append(
+			result,
+			asthlp.Assign(asthlp.MakeVarNames(newElem), asthlp.Definition, elemAsParticularType),
+			asthlp.Assign(asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(asthlp.NewIdent("_elemNum")))}, asthlp.Assignment, asthlp.Ref(ast.NewIdent(newElem))),
+		)
+		return result
+	}
+	return append(
+		result,
+		asthlp.Assign(asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(asthlp.NewIdent("_elemNum")))}, asthlp.Assignment, elemAsParticularType),
+	)
+}
+
 //	 var val{name} {type}
 //		val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []ast.Stmt {
@@ -136,7 +170,11 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 			tags: tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
 		}
 		intF.prepareRef()
-		result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.fillElem(dst, "listElem"))...)
+		if t.Len == nil {
+			result = append(result, sliceExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.appendElem(dst, "listElem"))...)
+		} else {
+			result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t, intF.fillElem(dst, "listElem"))...)
+		}
 		return result
 
 	case *ast.MapType:

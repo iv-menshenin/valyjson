@@ -187,11 +187,12 @@ func (f *Field) MarshalStatements(name string) []ast.Stmt {
 
 	case *ast.ArrayType:
 		var valType = tt.Elt
+		dec := GetDecorExpr(valType)
 		if i, ok := valType.(*ast.Ident); ok {
 			valType = denotedType(i)
 		}
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, nil))
+		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
 		return block.Render(putCommaFirstIf)
 
 	default:
