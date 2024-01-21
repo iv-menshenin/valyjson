@@ -352,6 +352,10 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 	case *ast.StructType:
 		return transitMarshaller
 
+	case *ast.InterfaceType:
+		// TODO
+		panic("not implemented")
+
 	default:
 		panic("not implemented")
 	}

@@ -143,7 +143,11 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 		result = append(result, f.mapExtraction(dst, t, v, f.tags.JsonName())...)
 
 	case *ast.InterfaceType:
-		// TODO
+		// supported empty interface only
+		if len(t.Methods.List) > 0 {
+			panic("interface is not supported")
+		}
+		result = append(result, f.interfaceExtraction(dst, t, v, f.tags.JsonName())...)
 
 	default:
 		return nil
@@ -305,6 +309,11 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 				Lit(),
 		)),
 	).List
+}
+
+func (f *Field) interfaceExtraction(*ast.Ident, *ast.InterfaceType, string, string) []ast.Stmt {
+	// TODO
+	panic("not implemented")
 }
 
 //	if err != nil {
