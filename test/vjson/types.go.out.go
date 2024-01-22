@@ -849,6 +849,7 @@ func (s *TableOf) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	}
 	result.RawByte('}')
 	err = result.Error
@@ -913,6 +914,7 @@ func (s *Table) MarshalTo(result *jwriter.Writer) error {
 			writeInt64(result, int64(_v))
 		}
 		result.RawByte(']')
+		wantComma = true
 	}
 	if wantComma {
 		result.RawByte(',')
@@ -955,6 +957,7 @@ func (s *Table) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"tags":null`)
 		wantComma = true

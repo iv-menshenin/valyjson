@@ -462,7 +462,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 	return w
 }
 
-func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor) WriteBlock {
+func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor, isSlice bool) WriteBlock {
 	const (
 		key = "_k"
 		val = "_v"
@@ -481,18 +481,26 @@ func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtract
 		iterBlock,
 		ve(asthlp.NewIdent(val))...,
 	)
+	var notNil = asthlp.NotNil(src)
+	var wComma = asthlp.Var(asthlp.VariableType(WantCommaVar.Name, asthlp.Bool))
+	if !isSlice {
+		notNil = nil
+		wComma = asthlp.Assign(asthlp.MakeVarNames(WantCommaVar.Name), asthlp.Assignment, asthlp.False)
+	}
 	var w = WriteBlock{
-		NotZero: asthlp.NotNil(src),
+		NotZero: notNil,
 		Block: []ast.Stmt{
 			SetCommaVar,
 			// result.RawString(`"jsonName":[`)
 			asthlp.CallStmt(asthlp.Call(RawStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":[`, jsonName)).Expr())),
-			// var filled bool
-			asthlp.Var(asthlp.VariableType(WantCommaVar.Name, asthlp.Bool)),
+			// var wantComma bool
+			wComma,
 			// for key, val := range {src} {
 			asthlp.Range(true, key, val, src, iterBlock...),
 			// result.RawByte("]")
 			asthlp.CallStmt(asthlp.Call(RawByteFn, asthlp.RuneConstant(']').Expr())),
+			// wantComma = true
+			asthlp.Assign(asthlp.MakeVarNames(WantCommaVar.Name), asthlp.Assignment, asthlp.True),
 		},
 	}
 	if !omitempty {

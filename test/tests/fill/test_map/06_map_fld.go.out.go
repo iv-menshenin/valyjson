@@ -362,6 +362,104 @@ func (s *Property) validate(v *fastjson.Value) error {
 	return err
 }
 
+// jsonParserCampaignSites used for pooling Parsers for CampaignSites JSONs.
+var jsonParserCampaignSites fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *CampaignSites) UnmarshalJSON(data []byte) error {
+	parser := jsonParserCampaignSites.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserCampaignSites.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _excluded := v.Get("excluded"); valueIsNotNull(_excluded) {
+		o, err := _excluded.Object()
+		if err != nil {
+			return newParsingError("excluded", err)
+		}
+		var valExcluded = make(map[string]FieldValueString, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value []byte
+			value, err = v.StringBytes()
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
+				valExcluded[string(key)] = FieldValueString(value)
+			}
+		})
+		if err != nil {
+			return newParsingError("excluded", err)
+		}
+		s.Excluded = valExcluded
+	}
+	if _included := v.Get("included"); valueIsNotNull(_included) {
+		o, err := _included.Object()
+		if err != nil {
+			return newParsingError("included", err)
+		}
+		var valIncluded = make(map[FieldValueString]string, o.Len())
+		o.Visit(func(key []byte, v *fastjson.Value) {
+			if err != nil {
+				return
+			}
+			var value []byte
+			value, err = v.StringBytes()
+			if err != nil {
+				err = newParsingError(string(key), err)
+			} else {
+				valIncluded[FieldValueString(key)] = string(value)
+			}
+		})
+		if err != nil {
+			return newParsingError("included", err)
+		}
+		s.Included = valIncluded
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *CampaignSites) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [2]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'e', 'x', 'c', 'l', 'u', 'd', 'e', 'd'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'i', 'n', 'c', 'l', 'u', 'd', 'e', 'd'}) {
+			checkFields[1]++
+			if checkFields[1] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap01) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -633,6 +731,78 @@ func (s Property) IsZero() bool {
 		return false
 	}
 	if s.Value != "" {
+		return false
+	}
+	return true
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *CampaignSites) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *CampaignSites) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if s.Excluded != nil {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		result.RawString(`"excluded":{`)
+		var wantComma bool
+		for _k, _v := range s.Excluded {
+			if wantComma {
+				result.RawByte(',')
+			}
+			wantComma = true
+			result.String(_k)
+			result.RawByte(':')
+			result.String(string(_v))
+		}
+		result.RawByte('}')
+	}
+	if s.Included != nil {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		result.RawString(`"included":{`)
+		var wantComma bool
+		for _k, _v := range s.Included {
+			if wantComma {
+				result.RawByte(',')
+			}
+			wantComma = true
+			result.String(string(_k))
+			result.RawByte(':')
+			result.String(_v)
+		}
+		result.RawByte('}')
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s CampaignSites) IsZero() bool {
+	if s.Excluded != nil {
+		return false
+	}
+	if s.Included != nil {
 		return false
 	}
 	return true

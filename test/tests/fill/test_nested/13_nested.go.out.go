@@ -587,6 +587,7 @@ func (s *Root) MarshalTo(result *jwriter.Writer) error {
 			}
 		}
 		result.RawByte(']')
+		wantComma = true
 	} else {
 		result.RawString(`"data":null`)
 		wantComma = true

@@ -10,8 +10,8 @@ import (
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
-// arrayExtraction makes a block of code that extracts values from json array
-func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, body []ast.Stmt) []ast.Stmt {
+// sliceExtraction makes a block of code that extracts values from json array
+func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, body []ast.Stmt) []ast.Stmt {
 	varListA := asthlp.Var(
 		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
 	)
@@ -56,6 +56,46 @@ func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, b
 				),
 			),
 			asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, valListSliceMake),
+		),
+		// for _, listElem := range listA {
+		asthlp.Range(true, "_elemNum", names.VarNameListElem, asthlp.NewIdent(names.VarNameListOfArrayValues), body...),
+	).List
+}
+
+func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t *ast.ArrayType, body []ast.Stmt) []ast.Stmt {
+	varListA := asthlp.Var(
+		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
+	)
+	stmtGetListArray := asthlp.Assign(
+		asthlp.MakeVarNames(names.VarNameListOfArrayValues, names.VarNameError),
+		asthlp.Assignment, asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(v, "Array"))),
+	)
+	valListDeclare := asthlp.DeclareVariable().AppendSpec(
+		asthlp.TypeSpec(dst.Name, t),
+	)
+	return asthlp.Block(
+		// var listA []*fastjson.Value
+		varListA,
+		// listA, err = list.Array()
+		stmtGetListArray,
+		// 	if err != nil {
+		// 		return fmt.Errorf("error parsing '%slist' value: %w", objPath, err)
+		// 	}
+		checkErrAndReturnParsingError(asthlp.StringConstant(json).Expr()),
+		//	var valList []Type
+		valListDeclare.Stmt(),
+		//	if len(listA) != 3 {
+		//		return fmt.Error
+		//	}
+		asthlp.If(
+			asthlp.Binary(asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues)), t.Len, token.NEQ),
+			asthlp.Return(
+				asthlp.Call(
+					asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
+					asthlp.StringConstant(json).Expr(),
+					asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant("array len mismatch").Expr()),
+				),
+			),
 		),
 		// for _, listElem := range listA {
 		asthlp.Range(true, "_elemNum", names.VarNameListElem, asthlp.NewIdent(names.VarNameListOfArrayValues), body...),

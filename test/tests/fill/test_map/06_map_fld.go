@@ -1,6 +1,7 @@
 package test_map
 
 // TestMap01 tests maps
+//
 //json:strict
 type TestMap01 struct {
 	Tags               map[string]string   `json:"tags"`
@@ -14,6 +15,7 @@ type TestMap01 struct {
 }
 
 // Property tests properties
+//
 //json:strict
 type Property struct {
 	Name  string `json:"name"`
@@ -23,3 +25,10 @@ type Property struct {
 type Key string
 
 type Val uint64
+
+//json:optional
+type CampaignSites struct {
+	Excluded map[string]FieldValueString `json:"excluded,omitempty"`
+	Included map[FieldValueString]string `json:"included,omitempty"`
+}
+type FieldValueString string
