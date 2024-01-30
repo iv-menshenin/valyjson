@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/bytebufferpool"
 	"github.com/valyala/fastjson"
@@ -88,7 +90,7 @@ func newParsingError(objPath string, err error) error {
 	}
 	return parsingError{
 		path: objPath,
-		err:  err,
+		err:  errors.WithStack(err),
 	}
 }
 
