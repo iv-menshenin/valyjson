@@ -54,11 +54,11 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 | codec    | regular   | 35267  | 369.1 | 12840 |       125 |
 | codec    | small     | 455    | 180.2 |   144 |         1 |
 |          |           |        |       |       |           |
-| valyjson | regular   | 32251  | 403.9 |  6785 |       122 |
-| valyjson | small     | 461    | 177.7 |    80 |         3 |
+| valyjson | regular   | 153757 |  84.7 |  6786 |       122 |
+| valyjson | small     | 4532   |  40.4 |   280 |        13 |
 |          |           |        |       |       |           |
-| easyjson | regular   | 26220  | 499.7 |  9512 |       126 |
-| easyjson | small     | 414.6  | 197.9 |   128 |         3 |
+| easyjson | regular   | 107585 | 121.1 |  9512 |       126 |
+| easyjson | small     | 4583   |  39.9 |   416 |        13 |
 
 Tests of unpacking JSON objects show a nice gain in memory allocation.
 This is not surprising, I used [valyala/fastjson](https://github.com/valyala/fastjson) parser,
@@ -74,11 +74,11 @@ but still need the generation of marshaller code.
 |:---------|:----------|--------|-------:|-------:|----------:|
 | valyjson | large     | 117508 | 3802.4 | 459605 |        27 |
 | valyjson | regular   | 3096   | 4206.4 |  10238 |         9 |
-| valyjson | small     | 61.53  | 1316.4 |    128 |         1 |
+| valyjson | small     | 214    |  848.6 |    768 |         4 |
 |          |           |        |        |        |           |
 | easyjson | large     | 101827 | 4393.8 | 466120 |        30 |
 | easyjson | regular   | 2462   | 5290.9 |  10293 |         9 |
-| easyjson | small     | 42.12  | 1923.2 |    128 |         1 |
+| easyjson | small     | 223    |  814.2 |    768 |         4 |
 
 Here I lost a bit in processing speed, but won in the number of requests to the memory allocator.
 Not a great achievement, but I achieved my goals (see above).
