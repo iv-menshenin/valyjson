@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"fmt"
 	"go/ast"
 
 	asthlp "github.com/iv-menshenin/go-ast"
@@ -77,8 +78,15 @@ func fillFieldStmts(fld *ast.Field) []ast.Stmt {
 		if tag.JsonAppendix() == "inline" {
 			// panic("dfs")
 		}
-		if i, ok := fld.Type.(*ast.Ident); ok {
+		switch i := fld.Type.(type) {
+		case *ast.Ident:
 			result = append(result, factory.FillStatements(i.Name)...)
+
+		case *ast.SelectorExpr:
+			result = append(result, factory.FillStatements(i.Sel.Name)...)
+
+		default:
+			panic(fmt.Errorf("can't bild fill statements for %+v", fld.Type))
 		}
 	}
 	return result
@@ -252,8 +260,8 @@ func (s *Struct) AppendJsonFunc() ast.Decl {
 }
 
 func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
+	factory := field.New(fld)
 	if len(fld.Names) == 0 {
-		factory := field.New(fld)
 		name := ""
 		switch t := fld.Type.(type) {
 
@@ -266,7 +274,6 @@ func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 		return factory.MarshalStatements(name)
 	}
 	var result []ast.Stmt
-	factory := field.New(fld)
 	for _, name := range fld.Names {
 		result = append(result, factory.MarshalStatements(name.Name)...)
 	}

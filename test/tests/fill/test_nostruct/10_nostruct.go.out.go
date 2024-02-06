@@ -276,7 +276,7 @@ func (s *TestMap10) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 		result.String(string(_k))
 		result.RawByte(':')
-		writeInt64(result, int64(_v))
+		result.Int64(int64(_v))
 	}
 	result.RawByte('}')
 	err = result.Error
@@ -398,7 +398,7 @@ func (s *TestSlice12) MarshalTo(result *jwriter.Writer) error {
 		}
 		wantComma = true
 		_k = _k
-		writeInt64(result, int64(_v))
+		result.Int64(int64(_v))
 	}
 	result.RawByte(']')
 	err = result.Error

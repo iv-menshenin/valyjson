@@ -348,7 +348,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Int32 != 0 {
 		result.RawString(`"f_int32":`)
-		writeInt64(result, int64(s.Int32))
+		result.Int64(int64(s.Int32))
 		wantComma = true
 	} else {
 		result.RawString(`"f_int32":0`)
@@ -359,7 +359,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"f_int64":`)
-		writeInt64(result, int64(s.Int64))
+		result.Int64(int64(s.Int64))
 		wantComma = true
 	}
 	if wantComma {
@@ -367,7 +367,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Float32 != 0 {
 		result.RawString(`"f_float32":`)
-		writeFloat64(result, float64(s.Float32))
+		result.Float64(float64(s.Float32))
 		wantComma = true
 	} else {
 		result.RawString(`"f_float32":0`)
@@ -378,7 +378,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"f_float64":`)
-		writeFloat64(result, float64(s.Float64))
+		result.Float64(float64(s.Float64))
 		wantComma = true
 	}
 	if wantComma {
@@ -404,7 +404,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"r_int32":`)
-		writeInt64(result, int64(*s.RefInt32))
+		result.Int64(int64(*s.RefInt32))
 		wantComma = true
 	}
 	if s.RefInt64 != nil {
@@ -412,7 +412,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"r_int64":`)
-		writeInt64(result, int64(*s.RefInt64))
+		result.Int64(int64(*s.RefInt64))
 		wantComma = true
 	}
 	if s.RefFloat32 != nil {
@@ -420,7 +420,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"r_float32":`)
-		writeFloat64(result, float64(*s.RefFloat32))
+		result.Float64(float64(*s.RefFloat32))
 		wantComma = true
 	}
 	if s.RefFloat64 != nil {
@@ -428,7 +428,7 @@ func (s *TestUserDefined) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"r_float64":`)
-		writeFloat64(result, float64(*s.RefFloat64))
+		result.Float64(float64(*s.RefFloat64))
 		wantComma = true
 	}
 	if s.RefString != nil {

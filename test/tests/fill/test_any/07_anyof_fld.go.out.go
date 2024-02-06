@@ -158,7 +158,7 @@ func (s *TestOneOfInteger) MarshalTo(result *jwriter.Writer) error {
 		result.RawString("null")
 		return nil
 	}
-	writeInt64(result, int64(*s))
+	result.Int64(int64(*s))
 	return nil
 }
 
@@ -227,7 +227,7 @@ func (s *TestOneOfStruct) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Value != 0 {
 		result.RawString(`"width":`)
-		writeFloat64(result, s.Value)
+		result.Float64(s.Value)
 		wantComma = true
 	} else {
 		result.RawString(`"width":0`)
@@ -285,7 +285,7 @@ func (s *TestAllOfSecond) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"level":`)
-		writeInt64(result, s.Level)
+		result.Int64(s.Level)
 		wantComma = true
 	}
 	result.RawByte('}')
@@ -337,7 +337,7 @@ func (s *TestAllOfThird) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"range":`)
-		writeInt64(result, s.Range)
+		result.Int64(s.Range)
 		wantComma = true
 	}
 	result.RawByte('}')

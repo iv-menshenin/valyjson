@@ -584,7 +584,7 @@ func (f *Field) typedRefFillIn(rhs, dst ast.Expr, t string) []ast.Stmt {
 //	}
 func (f *Field) ifDefault(varName, name string) []ast.Stmt {
 	if f.tags.DefaultValue() == "" {
-		if f.tags.JsonTags()[1:].Has("required") {
+		if f.tags.JsonAppendix() == "required" {
 			// return fmt.Errorf("required element '{json}' is missing", objPath)
 			return []ast.Stmt{
 				asthlp.Return(

@@ -89,7 +89,7 @@ func (s *Test01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Field != 0 {
 		result.RawString(`"field":`)
-		writeInt64(result, int64(s.Field))
+		result.Int64(int64(s.Field))
 		wantComma = true
 	} else {
 		result.RawString(`"field":0`)

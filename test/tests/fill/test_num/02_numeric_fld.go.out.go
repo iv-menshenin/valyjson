@@ -949,7 +949,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld != 0 {
 		result.RawString(`"int_fld":`)
-		writeInt64(result, int64(s.IntFld))
+		result.Int64(int64(s.IntFld))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld":0`)
@@ -960,7 +960,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"int_fld8":`)
-		writeInt64(result, int64(s.IntFld8))
+		result.Int64(int64(s.IntFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -968,7 +968,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld16 != 0 {
 		result.RawString(`"int_fld16":`)
-		writeInt64(result, int64(s.IntFld16))
+		result.Int64(int64(s.IntFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld16":0`)
@@ -979,7 +979,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld32 != 0 {
 		result.RawString(`"int_fld32":`)
-		writeInt64(result, int64(s.IntFld32))
+		result.Int64(int64(s.IntFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld32":0`)
@@ -990,7 +990,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld64 != 0 {
 		result.RawString(`"int_fld64":`)
-		writeInt64(result, s.IntFld64)
+		result.Int64(s.IntFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld64":0`)
@@ -1001,7 +1001,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld != 0 {
 		result.RawString(`"Uint_fld":`)
-		writeUint64(result, uint64(s.UintFld))
+		result.Uint64(uint64(s.UintFld))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld":0`)
@@ -1012,7 +1012,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"Uint_fld8":`)
-		writeUint64(result, uint64(s.UintFld8))
+		result.Uint64(uint64(s.UintFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1020,7 +1020,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld16 != 0 {
 		result.RawString(`"Uint_fld16":`)
-		writeUint64(result, uint64(s.UintFld16))
+		result.Uint64(uint64(s.UintFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld16":0`)
@@ -1031,7 +1031,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld32 != 0 {
 		result.RawString(`"Uint_fld32":`)
-		writeUint64(result, uint64(s.UintFld32))
+		result.Uint64(uint64(s.UintFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld32":0`)
@@ -1042,7 +1042,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld64 != 0 {
 		result.RawString(`"Uint_fld64":`)
-		writeUint64(result, s.UintFld64)
+		result.Uint64(s.UintFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld64":0`)
@@ -1053,7 +1053,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FloatFld32 != 0 {
 		result.RawString(`"fl23":`)
-		writeFloat64(result, float64(s.FloatFld32))
+		result.Float64(float64(s.FloatFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"fl23":0`)
@@ -1064,7 +1064,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FloatFld64 != 0 {
 		result.RawString(`"fl64":`)
-		writeFloat64(result, s.FloatFld64)
+		result.Float64(s.FloatFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"fl64":0`)
@@ -1075,7 +1075,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld != nil {
 		result.RawString(`"ref_int_fld":`)
-		writeInt64(result, int64(*s.RefIntFld))
+		result.Int64(int64(*s.RefIntFld))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld":null`)
@@ -1085,7 +1085,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"ref_int_fld8":`)
-		writeInt64(result, int64(*s.RefIntFld8))
+		result.Int64(int64(*s.RefIntFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1093,7 +1093,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld16 != nil {
 		result.RawString(`"ref_int_fld16":`)
-		writeInt64(result, int64(*s.RefIntFld16))
+		result.Int64(int64(*s.RefIntFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld16":null`)
@@ -1103,7 +1103,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld32 != nil {
 		result.RawString(`"ref_int_fld32":`)
-		writeInt64(result, int64(*s.RefIntFld32))
+		result.Int64(int64(*s.RefIntFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld32":null`)
@@ -1113,7 +1113,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld64 != nil {
 		result.RawString(`"ref_int_fld64":`)
-		writeInt64(result, *s.RefIntFld64)
+		result.Int64(*s.RefIntFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld64":null`)
@@ -1123,7 +1123,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld != nil {
 		result.RawString(`"ref_Uint_fld":`)
-		writeUint64(result, uint64(*s.RefUintFld))
+		result.Uint64(uint64(*s.RefUintFld))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld":null`)
@@ -1133,7 +1133,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"ref_Uint_fld8":`)
-		writeUint64(result, uint64(*s.RefUintFld8))
+		result.Uint64(uint64(*s.RefUintFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1141,7 +1141,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld16 != nil {
 		result.RawString(`"ref_Uint_fld16":`)
-		writeUint64(result, uint64(*s.RefUintFld16))
+		result.Uint64(uint64(*s.RefUintFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld16":null`)
@@ -1151,7 +1151,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld32 != nil {
 		result.RawString(`"ref_Uint_fld32":`)
-		writeUint64(result, uint64(*s.RefUintFld32))
+		result.Uint64(uint64(*s.RefUintFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld32":null`)
@@ -1161,7 +1161,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld64 != nil {
 		result.RawString(`"ref_Uint_fld64":`)
-		writeUint64(result, *s.RefUintFld64)
+		result.Uint64(*s.RefUintFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld64":null`)
@@ -1171,7 +1171,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefFloatFld32 != nil {
 		result.RawString(`"ref_fl23":`)
-		writeFloat64(result, float64(*s.RefFloatFld32))
+		result.Float64(float64(*s.RefFloatFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_fl23":null`)
@@ -1181,7 +1181,7 @@ func (s *NumStruct01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefFloatFld64 != nil {
 		result.RawString(`"ref_fl64":`)
-		writeFloat64(result, *s.RefFloatFld64)
+		result.Float64(*s.RefFloatFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_fl64":null`)
@@ -1293,7 +1293,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld != 0 {
 		result.RawString(`"int_fld":`)
-		writeInt64(result, int64(s.IntFld))
+		result.Int64(int64(s.IntFld))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld":0`)
@@ -1304,7 +1304,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"int_fld8":`)
-		writeInt64(result, int64(s.IntFld8))
+		result.Int64(int64(s.IntFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1312,7 +1312,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld16 != 0 {
 		result.RawString(`"int_fld16":`)
-		writeInt64(result, int64(s.IntFld16))
+		result.Int64(int64(s.IntFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld16":0`)
@@ -1323,7 +1323,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld32 != 0 {
 		result.RawString(`"int_fld32":`)
-		writeInt64(result, int64(s.IntFld32))
+		result.Int64(int64(s.IntFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld32":0`)
@@ -1334,7 +1334,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.IntFld64 != 0 {
 		result.RawString(`"int_fld64":`)
-		writeInt64(result, s.IntFld64)
+		result.Int64(s.IntFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"int_fld64":0`)
@@ -1345,7 +1345,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld != 0 {
 		result.RawString(`"Uint_fld":`)
-		writeUint64(result, uint64(s.UintFld))
+		result.Uint64(uint64(s.UintFld))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld":0`)
@@ -1356,7 +1356,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"Uint_fld8":`)
-		writeUint64(result, uint64(s.UintFld8))
+		result.Uint64(uint64(s.UintFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1364,7 +1364,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld16 != 0 {
 		result.RawString(`"Uint_fld16":`)
-		writeUint64(result, uint64(s.UintFld16))
+		result.Uint64(uint64(s.UintFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld16":0`)
@@ -1375,7 +1375,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld32 != 0 {
 		result.RawString(`"Uint_fld32":`)
-		writeUint64(result, uint64(s.UintFld32))
+		result.Uint64(uint64(s.UintFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld32":0`)
@@ -1386,7 +1386,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UintFld64 != 0 {
 		result.RawString(`"Uint_fld64":`)
-		writeUint64(result, s.UintFld64)
+		result.Uint64(s.UintFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"Uint_fld64":0`)
@@ -1397,7 +1397,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FloatFld32 != 0 {
 		result.RawString(`"fl23":`)
-		writeFloat64(result, float64(s.FloatFld32))
+		result.Float64(float64(s.FloatFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"fl23":0`)
@@ -1408,7 +1408,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FloatFld64 != 0 {
 		result.RawString(`"fl64":`)
-		writeFloat64(result, s.FloatFld64)
+		result.Float64(s.FloatFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"fl64":0`)
@@ -1419,7 +1419,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld != nil {
 		result.RawString(`"ref_int_fld":`)
-		writeInt64(result, int64(*s.RefIntFld))
+		result.Int64(int64(*s.RefIntFld))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld":null`)
@@ -1429,7 +1429,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"ref_int_fld8":`)
-		writeInt64(result, int64(*s.RefIntFld8))
+		result.Int64(int64(*s.RefIntFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1437,7 +1437,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld16 != nil {
 		result.RawString(`"ref_int_fld16":`)
-		writeInt64(result, int64(*s.RefIntFld16))
+		result.Int64(int64(*s.RefIntFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld16":null`)
@@ -1447,7 +1447,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld32 != nil {
 		result.RawString(`"ref_int_fld32":`)
-		writeInt64(result, int64(*s.RefIntFld32))
+		result.Int64(int64(*s.RefIntFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld32":null`)
@@ -1457,7 +1457,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefIntFld64 != nil {
 		result.RawString(`"ref_int_fld64":`)
-		writeInt64(result, *s.RefIntFld64)
+		result.Int64(*s.RefIntFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_int_fld64":null`)
@@ -1467,7 +1467,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld != nil {
 		result.RawString(`"ref_Uint_fld":`)
-		writeUint64(result, uint64(*s.RefUintFld))
+		result.Uint64(uint64(*s.RefUintFld))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld":null`)
@@ -1477,7 +1477,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"ref_Uint_fld8":`)
-		writeUint64(result, uint64(*s.RefUintFld8))
+		result.Uint64(uint64(*s.RefUintFld8))
 		wantComma = true
 	}
 	if wantComma {
@@ -1485,7 +1485,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld16 != nil {
 		result.RawString(`"ref_Uint_fld16":`)
-		writeUint64(result, uint64(*s.RefUintFld16))
+		result.Uint64(uint64(*s.RefUintFld16))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld16":null`)
@@ -1495,7 +1495,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld32 != nil {
 		result.RawString(`"ref_Uint_fld32":`)
-		writeUint64(result, uint64(*s.RefUintFld32))
+		result.Uint64(uint64(*s.RefUintFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld32":null`)
@@ -1505,7 +1505,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefUintFld64 != nil {
 		result.RawString(`"ref_Uint_fld64":`)
-		writeUint64(result, *s.RefUintFld64)
+		result.Uint64(*s.RefUintFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_Uint_fld64":null`)
@@ -1515,7 +1515,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefFloatFld32 != nil {
 		result.RawString(`"ref_fl23":`)
-		writeFloat64(result, float64(*s.RefFloatFld32))
+		result.Float64(float64(*s.RefFloatFld32))
 		wantComma = true
 	} else {
 		result.RawString(`"ref_fl23":null`)
@@ -1525,7 +1525,7 @@ func (s *NumStruct02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RefFloatFld64 != nil {
 		result.RawString(`"ref_fl64":`)
-		writeFloat64(result, *s.RefFloatFld64)
+		result.Float64(*s.RefFloatFld64)
 		wantComma = true
 	} else {
 		result.RawString(`"ref_fl64":null`)

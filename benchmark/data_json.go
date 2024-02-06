@@ -1891,7 +1891,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.CompletedIn != 0 {
 		result.RawString(`"completed_in":`)
-		writeFloat64(result, s.CompletedIn)
+		result.Float64(s.CompletedIn)
 		wantComma = true
 	} else {
 		result.RawString(`"completed_in":0`)
@@ -1902,7 +1902,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Count != 0 {
 		result.RawString(`"count":`)
-		writeInt64(result, int64(s.Count))
+		result.Int64(int64(s.Count))
 		wantComma = true
 	} else {
 		result.RawString(`"count":0`)
@@ -1913,7 +1913,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.MaxID != 0 {
 		result.RawString(`"max_id":`)
-		writeInt64(result, s.MaxID)
+		result.Int64(s.MaxID)
 		wantComma = true
 	} else {
 		result.RawString(`"max_id":0`)
@@ -1968,7 +1968,7 @@ func (s *SearchMetadata) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.SinceID != 0 {
 		result.RawString(`"since_id":`)
-		writeInt64(result, s.SinceID)
+		result.Int64(s.SinceID)
 		wantComma = true
 	} else {
 		result.RawString(`"since_id":0`)
@@ -2055,7 +2055,7 @@ func (s *Hashtag) MarshalTo(result *jwriter.Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeInt64(result, int64(_v))
+			result.Int64(int64(_v))
 		}
 		result.RawByte(']')
 		wantComma = true
@@ -2304,7 +2304,7 @@ func (s *URL) MarshalTo(result *jwriter.Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeInt64(result, int64(_v))
+			result.Int64(int64(_v))
 		}
 		result.RawByte(']')
 		wantComma = true
@@ -2536,7 +2536,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FavouritesCount != 0 {
 		result.RawString(`"favourites_count":`)
-		writeInt64(result, int64(s.FavouritesCount))
+		result.Int64(int64(s.FavouritesCount))
 		wantComma = true
 	} else {
 		result.RawString(`"favourites_count":0`)
@@ -2557,7 +2557,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FollowersCount != 0 {
 		result.RawString(`"followers_count":`)
-		writeInt64(result, int64(s.FollowersCount))
+		result.Int64(int64(s.FollowersCount))
 		wantComma = true
 	} else {
 		result.RawString(`"followers_count":0`)
@@ -2578,7 +2578,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.FriendsCount != 0 {
 		result.RawString(`"friends_count":`)
-		writeInt64(result, int64(s.FriendsCount))
+		result.Int64(int64(s.FriendsCount))
 		wantComma = true
 	} else {
 		result.RawString(`"friends_count":0`)
@@ -2599,7 +2599,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ID != 0 {
 		result.RawString(`"id":`)
-		writeInt64(result, int64(s.ID))
+		result.Int64(int64(s.ID))
 		wantComma = true
 	} else {
 		result.RawString(`"id":0`)
@@ -2642,7 +2642,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ListedCount != 0 {
 		result.RawString(`"listed_count":`)
-		writeInt64(result, int64(s.ListedCount))
+		result.Int64(int64(s.ListedCount))
 		wantComma = true
 	} else {
 		result.RawString(`"listed_count":0`)
@@ -2835,7 +2835,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.StatusesCount != 0 {
 		result.RawString(`"statuses_count":`)
-		writeInt64(result, int64(s.StatusesCount))
+		result.Int64(int64(s.StatusesCount))
 		wantComma = true
 	} else {
 		result.RawString(`"statuses_count":0`)
@@ -2867,7 +2867,7 @@ func (s *User) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.UtcOffset != 0 {
 		result.RawString(`"utc_offset":`)
-		writeInt64(result, int64(s.UtcOffset))
+		result.Int64(int64(s.UtcOffset))
 		wantComma = true
 	} else {
 		result.RawString(`"utc_offset":0`)
@@ -3152,7 +3152,7 @@ func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.ID != 0 {
 		result.RawString(`"id":`)
-		writeInt64(result, s.ID)
+		result.Int64(s.ID)
 		wantComma = true
 	} else {
 		result.RawString(`"id":0`)
@@ -3242,7 +3242,7 @@ func (s *Status) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.RetweetCount != 0 {
 		result.RawString(`"retweet_count":`)
-		writeInt64(result, int64(s.RetweetCount))
+		result.Int64(int64(s.RetweetCount))
 		wantComma = true
 	} else {
 		result.RawString(`"retweet_count":0`)

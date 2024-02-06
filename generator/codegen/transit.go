@@ -94,7 +94,6 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		case "int", "int8", "int16", "int32", "int64":
 			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
 				names.WriteInt64Func,
-				asthlp.NewIdent(names.VarNameWriter),
 				asthlp.ExpressionTypeConvert(src, asthlp.Int64),
 			)))
 			fn.AppendStmt(asthlp.Return(asthlp.Nil))
@@ -103,7 +102,6 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		case "uint", "uint8", "uint16", "uint32", "uint64":
 			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
 				names.WriteUint64Func,
-				asthlp.NewIdent(names.VarNameWriter),
 				asthlp.ExpressionTypeConvert(src, asthlp.UInt64),
 			)))
 			fn.AppendStmt(asthlp.Return(asthlp.Nil))
@@ -112,7 +110,6 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 		case "float32", "float64":
 			fn.AppendStmt(asthlp.CallStmt(asthlp.Call(
 				names.WriteFloat64Func,
-				asthlp.NewIdent(names.VarNameWriter),
 				asthlp.ExpressionTypeConvert(src, asthlp.Float64),
 			)))
 			fn.AppendStmt(asthlp.Return(asthlp.Nil))

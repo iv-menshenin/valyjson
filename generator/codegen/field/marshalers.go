@@ -152,12 +152,8 @@ func intMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteBl
 		Block: []ast.Stmt{
 			// result.RawString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(RawStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
-			// writeInt64(result, int64(s.Field))
-			asthlp.CallStmt(asthlp.Call(
-				names.WriteInt64Func,
-				asthlp.NewIdent(names.VarNameWriter), // result
-				srcInt64,                             // int64({src})
-			)),
+			// result.Int64(int64(s.Field))
+			asthlp.CallStmt(asthlp.Call(names.WriteInt64Func, srcInt64)),
 			SetCommaVar,
 		},
 	}
@@ -184,12 +180,8 @@ func uintMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) WriteB
 		Block: []ast.Stmt{
 			// result.RawString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(RawStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
-			// writeUint64(result, uint64({src}))
-			asthlp.CallStmt(asthlp.Call(
-				names.WriteUint64Func,
-				asthlp.NewIdent(names.VarNameWriter),
-				srcUint64,
-			)),
+			// result.Uint64(uint64({src}))
+			asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, srcUint64)),
 			SetCommaVar,
 		},
 	}
@@ -216,9 +208,9 @@ func floatMarshal(src ast.Expr, jsonName string, omitempty, needCast bool) Write
 		Block: []ast.Stmt{
 			// result.RawString(`"field":`)
 			asthlp.CallStmt(asthlp.Call(RawStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
-			// writeFloat64(result, float64({src}))
+			// result.Float64(float64({src}))
 			asthlp.CallStmt(asthlp.Call(
-				names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), srcFloat64,
+				names.WriteFloat64Func, srcFloat64,
 			)),
 			SetCommaVar,
 		},

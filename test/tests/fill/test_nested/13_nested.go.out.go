@@ -783,7 +783,7 @@ func (s *Meta) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Count != 0 {
 		result.RawString(`"count":`)
-		writeInt64(result, int64(s.Count))
+		result.Int64(int64(s.Count))
 		wantComma = true
 	} else {
 		result.RawString(`"count":0`)
@@ -977,7 +977,7 @@ func (s *WRRetry) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"WR-Retry":`)
-		writeInt64(result, int64(s.WRRetry))
+		result.Int64(int64(s.WRRetry))
 		wantComma = true
 	}
 	result.RawByte('}')

@@ -3,10 +3,10 @@
 package benchmark
 
 import (
-	"io/ioutil"
+	"os"
 )
 
-var largeStructText, _ = ioutil.ReadFile("example.json")
+var largeStructText, _ = os.ReadFile("example.json")
 var xlStructData XLStruct
 
 func init() {
@@ -15,11 +15,15 @@ func init() {
 	}
 }
 
-var smallStructText = []byte(`{"hashtags":[{"indices":[5, 10],"text":"some-text"}],"urls":[],"user_mentions":[]}`)
+var smallStructText = []byte(`{"hashtags":[{"indices":[5, 10],"text":"some-text"}],"urls":["https://github.com/iv-menshenin/valyjson","github.com/valyala/fastjson"],"user_mentions":["iv-menshenin","valyala",null]}`)
 var smallStructData = Entities{
 	Hashtags:     []Hashtag{{Indices: []int{5, 10}, Text: "some-text"}},
-	Urls:         []*string{},
-	UserMentions: []*string{},
+	Urls:         []*string{strToRef("https://github.com/iv-menshenin/valyjson"), strToRef("github.com/valyala/fastjson")},
+	UserMentions: []*string{strToRef("iv-menshenin"), strToRef("valyala"), nil},
+}
+
+func strToRef(s string) *string {
+	return &s
 }
 
 //json:optional

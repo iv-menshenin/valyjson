@@ -22,10 +22,7 @@ const (
 	MethodNameZero      = "IsZero"
 	UnpackObjFunc       = "unpackObject"
 
-	WriteTime    = "writeTime"
-	WriteInt64   = "writeInt64"
-	WriteUint64  = "writeUint64"
-	WriteFloat64 = "writeFloat64"
+	WriteTime = "writeTime"
 
 	ParsingError = "newParsingError"
 )
@@ -38,18 +35,22 @@ var (
 		FunctionName:             ast.NewIdent(WriteTime),
 		MinimumNumberOfArguments: 3,
 	}
+	// WriteInt64Func equal result.Int64(?)
 	WriteInt64Func = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(WriteInt64),
-		MinimumNumberOfArguments: 2,
+		FunctionName:             ast.SimpleSelector(VarNameWriter, "Int64"),
+		MinimumNumberOfArguments: 1,
 	}
+	// WriteUint64Func equal result.Uint64(?)
 	WriteUint64Func = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(WriteUint64),
-		MinimumNumberOfArguments: 2,
+		FunctionName:             ast.SimpleSelector(VarNameWriter, "Uint64"),
+		MinimumNumberOfArguments: 1,
 	}
+	// WriteFloat64Func equal result.Float64(?)
 	WriteFloat64Func = ast.CallFunctionDescriber{
-		FunctionName:             ast.NewIdent(WriteFloat64),
-		MinimumNumberOfArguments: 2,
+		FunctionName:             ast.SimpleSelector(VarNameWriter, "Float64"),
+		MinimumNumberOfArguments: 1,
 	}
+	// WriteStringFunc equal result.String(?)
 	WriteStringFunc = ast.CallFunctionDescriber{
 		FunctionName:             ast.SimpleSelector(VarNameWriter, "String"),
 		MinimumNumberOfArguments: 1,

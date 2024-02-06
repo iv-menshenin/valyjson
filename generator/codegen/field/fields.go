@@ -280,8 +280,8 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 			return func(src ast.Expr) []ast.Stmt {
 				int64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.Int64)
 				return decorStmt(src, []ast.Stmt{
-					// writeInt64(result, int64({src}))
-					asthlp.CallStmt(asthlp.Call(names.WriteInt64Func, asthlp.NewIdent(names.VarNameWriter), int64Expression)),
+					// result.Int64(int64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteInt64Func, int64Expression)),
 				})
 			}
 
@@ -289,8 +289,8 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 			return func(src ast.Expr) []ast.Stmt {
 				uint64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.UInt64)
 				return decorStmt(src, []ast.Stmt{
-					// writeUint64(result, uint64({src}))
-					asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, asthlp.NewIdent(names.VarNameWriter), uint64Expression)),
+					// result.Uint64(uint64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteUint64Func, uint64Expression)),
 				})
 			}
 
@@ -298,8 +298,8 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 			return func(src ast.Expr) []ast.Stmt {
 				float64Expression := asthlp.ExpressionTypeConvert(decorSrc(src), asthlp.Float64)
 				return decorStmt(src, []ast.Stmt{
-					// writeFloat64(result, float64({src}))
-					asthlp.CallStmt(asthlp.Call(names.WriteFloat64Func, asthlp.NewIdent(names.VarNameWriter), float64Expression)),
+					// result.Float64(float64({src}))
+					asthlp.CallStmt(asthlp.Call(names.WriteFloat64Func, float64Expression)),
 				})
 			}
 
@@ -324,7 +324,7 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 
 		case "string":
 			return func(src ast.Expr) []ast.Stmt {
-				// writeString(result, _v)
+				// result.String(_v)
 				return decorStmt(src, []ast.Stmt{
 					asthlp.CallStmt(asthlp.Call(
 						names.WriteStringFunc,

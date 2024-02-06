@@ -519,7 +519,7 @@ func (s *TestInh01) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"breakFirst":`)
-		writeInt64(result, int64(s.BreakFirst))
+		result.Int64(int64(s.BreakFirst))
 		wantComma = true
 	}
 	if !s.TestInh02.IsZero() {
@@ -537,7 +537,7 @@ func (s *TestInh01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Int16 != 0 {
 		result.RawString(`"int_16":`)
-		writeInt64(result, int64(s.Int16))
+		result.Int64(int64(s.Int16))
 		wantComma = true
 	} else {
 		result.RawString(`"int_16":0`)
@@ -548,7 +548,7 @@ func (s *TestInh01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Random != 0 {
 		result.RawString(`"random":`)
-		writeInt64(result, int64(s.Random))
+		result.Int64(int64(s.Random))
 		wantComma = true
 	} else {
 		result.RawString(`"random":0`)
@@ -641,7 +641,7 @@ func (s *TestInh02) MarshalTo(result *jwriter.Writer) error {
 			result.RawByte(',')
 		}
 		result.RawString(`"int_32":`)
-		writeInt64(result, int64(s.Int32))
+		result.Int64(int64(s.Int32))
 		wantComma = true
 	}
 	result.RawByte('}')
@@ -682,7 +682,7 @@ func (s *TestInh03) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Int16 != 0 {
 		result.RawString(`"int_16":`)
-		writeInt64(result, int64(s.Int16))
+		result.Int64(int64(s.Int16))
 		wantComma = true
 	} else {
 		result.RawString(`"int_16":0`)
@@ -693,7 +693,7 @@ func (s *TestInh03) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Random != 0 {
 		result.RawString(`"random":`)
-		writeInt64(result, int64(s.Random))
+		result.Int64(int64(s.Random))
 		wantComma = true
 	} else {
 		result.RawString(`"random":0`)
@@ -740,7 +740,7 @@ func (s *TestNested01) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Field32 != 0 {
 		result.RawString(`"field_32":`)
-		writeInt64(result, int64(s.Field32))
+		result.Int64(int64(s.Field32))
 		wantComma = true
 	} else {
 		result.RawString(`"field_32":0`)
@@ -784,7 +784,7 @@ func (s *TestNested02) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Field32 != 0 {
 		result.RawString(`"field_32":`)
-		writeInt64(result, int64(s.Field32))
+		result.Int64(int64(s.Field32))
 		wantComma = true
 	} else {
 		result.RawString(`"field_32":0`)
@@ -828,7 +828,7 @@ func (s *TestNested03) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Field32 != 0 {
 		result.RawString(`"field_32":`)
-		writeInt64(result, int64(s.Field32))
+		result.Int64(int64(s.Field32))
 		wantComma = true
 	} else {
 		result.RawString(`"field_32":0`)
