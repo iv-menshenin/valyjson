@@ -560,7 +560,7 @@ func (s *TestMap01) MarshalTo(result *jwriter.Writer) error {
 			wantComma = true
 			result.String(string(_k))
 			result.RawByte(':')
-			writeInt64(result, int64(_v))
+			result.Int64(int64(_v))
 		}
 		result.RawByte('}')
 	}
@@ -578,7 +578,7 @@ func (s *TestMap01) MarshalTo(result *jwriter.Writer) error {
 			wantComma = true
 			result.String(string(_k))
 			result.RawByte(':')
-			writeFloat64(result, float64(_v))
+			result.Float64(float64(_v))
 		}
 		result.RawByte('}')
 	}
@@ -599,7 +599,7 @@ func (s *TestMap01) MarshalTo(result *jwriter.Writer) error {
 			if _v == nil {
 				result.RawString("null")
 			} else {
-				writeUint64(result, uint64(*_v))
+				result.Uint64(uint64(*_v))
 			}
 		}
 		result.RawByte('}')
@@ -640,7 +640,7 @@ func (s *TestMap01) MarshalTo(result *jwriter.Writer) error {
 			wantComma = true
 			result.String(string(_k))
 			result.RawByte(':')
-			writeUint64(result, uint64(_v))
+			result.Uint64(uint64(_v))
 		}
 		result.RawByte('}')
 	}

@@ -892,7 +892,7 @@ func (s *Table) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Counter != 0 {
 		result.RawString(`"counter":`)
-		writeInt64(result, int64(s.Counter))
+		result.Int64(int64(s.Counter))
 		wantComma = true
 	} else {
 		result.RawString(`"counter":0`)
@@ -911,7 +911,7 @@ func (s *Table) MarshalTo(result *jwriter.Writer) error {
 			}
 			wantComma = true
 			_k = _k
-			writeInt64(result, int64(_v))
+			result.Int64(int64(_v))
 		}
 		result.RawByte(']')
 		wantComma = true
@@ -932,7 +932,7 @@ func (s *Table) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Avg != 0 {
 		result.RawString(`"avg":`)
-		writeFloat64(result, s.Avg)
+		result.Float64(s.Avg)
 		wantComma = true
 	} else {
 		result.RawString(`"avg":0`)
@@ -1114,7 +1114,7 @@ func (s *MapInt64) MarshalTo(result *jwriter.Writer) error {
 		wantComma = true
 		result.String(string(_k))
 		result.RawByte(':')
-		writeInt64(result, int64(_v))
+		result.Int64(int64(_v))
 	}
 	result.RawByte('}')
 	err = result.Error

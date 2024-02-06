@@ -6,7 +6,10 @@ import (
 	"github.com/mailru/easyjson/jwriter"
 )
 
-func BenchmarkEJ_Unmarshal_M(b *testing.B) {
+// BenchmarkEJ_Unmarshal_M-8                   	   10000	    107585 ns/op	 121.06 MB/s	    9512 B/op	     126 allocs/op
+// BenchmarkEJ_Unmarshal_S-8                   	  240164	      4583 ns/op	  39.93 MB/s	     416 B/op	      13 allocs/op
+
+func BenchmarkVJ_Unmarshal_M(b *testing.B) {
 	b.ReportAllocs()
 	b.SetBytes(int64(len(largeStructText)))
 	for i := 0; i < b.N; i++ {
@@ -18,7 +21,7 @@ func BenchmarkEJ_Unmarshal_M(b *testing.B) {
 	}
 }
 
-func BenchmarkEJ_Unmarshal_S(b *testing.B) {
+func BenchmarkVJ_Unmarshal_S(b *testing.B) {
 	b.ReportAllocs()
 	b.SetBytes(int64(len(smallStructText)))
 
@@ -31,7 +34,7 @@ func BenchmarkEJ_Unmarshal_S(b *testing.B) {
 	}
 }
 
-func BenchmarkEJ_Marshal_M(b *testing.B) {
+func BenchmarkVJ_Marshal_M(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
 	for i := 0; i < b.N; i++ {
@@ -44,7 +47,7 @@ func BenchmarkEJ_Marshal_M(b *testing.B) {
 	b.SetBytes(l)
 }
 
-func BenchmarkEJ_Marshal_L(b *testing.B) {
+func BenchmarkVJ_Marshal_L(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
 	for i := 0; i < b.N; i++ {
@@ -57,7 +60,7 @@ func BenchmarkEJ_Marshal_L(b *testing.B) {
 	b.SetBytes(l)
 }
 
-func BenchmarkEJ_Marshal_M_Parallel(b *testing.B) {
+func BenchmarkVJ_Marshal_M_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	b.SetBytes(int64(len(largeStructText)))
 
@@ -72,7 +75,7 @@ func BenchmarkEJ_Marshal_M_Parallel(b *testing.B) {
 }
 
 // BenchmarkEJ_Marshal_L_Parallel-8           10178     117615 ns/op    3798.93 MB/s      457667 B/op         27 allocs/op
-func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
+func BenchmarkVJ_Marshal_L_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
 	b.RunParallel(func(pb *testing.PB) {
@@ -87,7 +90,7 @@ func BenchmarkEJ_Marshal_L_Parallel(b *testing.B) {
 	b.SetBytes(l)
 }
 
-func BenchmarkEJ_Marshal_L_ToWriter_Parallel(b *testing.B) {
+func BenchmarkVJ_Marshal_L_ToWriter_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	out := &DummyWriter{}
 	b.RunParallel(func(pb *testing.PB) {
@@ -108,7 +111,7 @@ func BenchmarkEJ_Marshal_L_ToWriter_Parallel(b *testing.B) {
 	})
 }
 
-func BenchmarkEJ_Marshal_S(b *testing.B) {
+func BenchmarkVJ_Marshal_S(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
 	for i := 0; i < b.N; i++ {
@@ -121,7 +124,7 @@ func BenchmarkEJ_Marshal_S(b *testing.B) {
 	b.SetBytes(l)
 }
 
-func BenchmarkEJ_Marshal_S_Parallel(b *testing.B) {
+func BenchmarkVJ_Marshal_S_Parallel(b *testing.B) {
 	b.ReportAllocs()
 	var l int64
 	b.RunParallel(func(pb *testing.PB) {

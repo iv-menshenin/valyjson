@@ -363,7 +363,7 @@ func (s *TestSlice01) MarshalTo(result *jwriter.Writer) error {
 			if _v == nil {
 				result.RawString("null")
 			} else {
-				writeInt64(result, int64(*_v))
+				result.Int64(int64(*_v))
 			}
 		}
 		result.RawByte(']')
@@ -413,7 +413,7 @@ func (s *TestSlice03) MarshalTo(result *jwriter.Writer) error {
 	}
 	if s.Data != 0 {
 		result.RawString(`"data":`)
-		writeInt64(result, s.Data)
+		result.Int64(s.Data)
 		wantComma = true
 	} else {
 		result.RawString(`"data":0`)
