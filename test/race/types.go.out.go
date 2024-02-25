@@ -311,6 +311,15 @@ func (s TestStruct) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestStruct) Reset() {
+	s.HasCodes = false
+	s.Referer = ""
+	s.SiteID = ""
+	s.URL = ""
+	s.UserID = ""
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestStructTyped) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -393,4 +402,13 @@ func (s TestStructTyped) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestStructTyped) Reset() {
+	s.HasCodes = false
+	s.Referer = ""
+	s.SiteID = ""
+	s.URL = URL("")
+	s.UserID = ""
 }

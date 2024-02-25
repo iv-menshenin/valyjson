@@ -496,6 +496,22 @@ func (s TestUserDefined) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestUserDefined) Reset() {
+	s.Int32 = DefinedInt32(0)
+	s.Int64 = DefinedInt64(0)
+	s.Float32 = DefinedFloat32(0)
+	s.Float64 = DefinedFloat64(0)
+	s.String = DefinedString("")
+	s.Bool = DefinedBool(false)
+	s.RefInt32 = nil
+	s.RefInt64 = nil
+	s.RefFloat32 = nil
+	s.RefFloat64 = nil
+	s.RefString = nil
+	s.RefBool = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *DefinedFieldAsUserDefined) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -552,4 +568,10 @@ func (s DefinedFieldAsUserDefined) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *DefinedFieldAsUserDefined) Reset() {
+	s.Status = userdefined.DefinedFieldAsUserDefinedStatus("")
+	s.Time = time.Time{}
 }

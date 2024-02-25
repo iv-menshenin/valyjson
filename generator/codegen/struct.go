@@ -295,6 +295,7 @@ func (s *Struct) ZeroFunc() ast.Decl {
 		}
 	}
 	if isArrayContains {
+		// FIXME arrays can be zero when they contains only default values
 		fn.AppendStmt(asthlp.Return(asthlp.False))
 		return fn.Decl()
 	}
@@ -328,5 +329,28 @@ func (s *Struct) ZeroFunc() ast.Decl {
 		}
 	}
 	fn.AppendStmt(asthlp.Return(asthlp.True))
+	return fn.Decl()
+}
+
+func (s *Struct) ResetFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameReset)).
+		Comments("// " + names.MethodNameReset + " resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name))))
+
+	for _, fld := range s.spec.Fields.List {
+		for _, name := range fld.Names {
+			fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, name.Name)))
+		}
+		if len(fld.Names) == 0 {
+			switch t := fld.Type.(type) {
+
+			case *ast.Ident:
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Name)))
+
+			case *ast.SelectorExpr:
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name)))
+			}
+		}
+	}
 	return fn.Decl()
 }

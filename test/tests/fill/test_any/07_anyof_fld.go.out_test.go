@@ -8,7 +8,9 @@ import (
 )
 
 func Test_TestAllOfAnyOf01(t *testing.T) {
+	t.Parallel()
 	t.Run("one_int_", func(t *testing.T) {
+		t.Parallel()
 		var value = TestAllOf01{
 			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
 				OneOf: 33,
@@ -25,8 +27,12 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 		require.EqualValues(t, 332, val)
 		require.Empty(t, outValue.Comment)
 		require.Empty(t, outValue.Level)
+
+		outValue.Reset()
+		require.Empty(t, outValue)
 	})
 	t.Run("one_string_", func(t *testing.T) {
+		t.Parallel()
 		var value = TestAllOf01{
 			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
 				OneOf: "some string",
@@ -43,8 +49,12 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 		require.EqualValues(t, "some string 1", val)
 		require.Empty(t, outValue.Comment)
 		require.Empty(t, outValue.Level)
+
+		outValue.Reset()
+		require.Empty(t, outValue)
 	})
 	t.Run("one_struct_", func(t *testing.T) {
+		t.Parallel()
 		var value = TestAllOf01{
 			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
 				OneOf: TestOneOfStruct{
@@ -67,8 +77,12 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 		}, val)
 		require.Empty(t, outValue.Comment)
 		require.Empty(t, outValue.Level)
+
+		outValue.Reset()
+		require.Empty(t, outValue)
 	})
 	t.Run("all_of", func(t *testing.T) {
+		t.Parallel()
 		var value = TestAllOf01{
 			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
 				OneOf: TestOneOfStruct{
@@ -101,8 +115,12 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 		require.EqualValues(t, 1, outValue.Level)
 		require.Equal(t, "bar", outValue.Command)
 		require.EqualValues(t, 5, outValue.Range)
+
+		outValue.Reset()
+		require.Empty(t, outValue)
 	})
 	t.Run("all_of_with_integer", func(t *testing.T) {
+		t.Parallel()
 		var value = TestAllOf01{
 			TestAllOfFirstIsOne: TestAllOfFirstIsOne{
 				OneOf: TestOneOfInteger(999),
@@ -129,5 +147,51 @@ func Test_TestAllOfAnyOf01(t *testing.T) {
 		require.EqualValues(t, 1, outValue.Level)
 		require.Equal(t, "bar", outValue.Command)
 		require.EqualValues(t, 5, outValue.Range)
+
+		outValue.Reset()
+		require.Empty(t, outValue)
+	})
+}
+
+func TestReset(t *testing.T) {
+	t.Parallel()
+	t.Run("TestOneOfInteger", func(t *testing.T) {
+		t.Parallel()
+		var val TestOneOfInteger = 1
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestOneOfString", func(t *testing.T) {
+		t.Parallel()
+		var val TestOneOfString = "1"
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestOneOfStruct", func(t *testing.T) {
+		t.Parallel()
+		var val = TestOneOfStruct{
+			Class: "tst",
+			Value: 120,
+		}
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestAllOfSecond", func(t *testing.T) {
+		t.Parallel()
+		var val = TestAllOfSecond{
+			Comment: "foo",
+			Level:   9983,
+		}
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestAllOfThird", func(t *testing.T) {
+		t.Parallel()
+		var val = TestAllOfThird{
+			Command: "bar",
+			Range:   6665,
+		}
+		val.Reset()
+		require.Empty(t, val)
 	})
 }

@@ -616,6 +616,17 @@ func (s TestInh01) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestInh01) Reset() {
+	s.BreakFirst = 0
+	s.TestInh02.Reset()
+	s.Int16 = 0
+	s.Random = 0
+	s.DateBegin = time.Time{}
+	s.Nested1.Reset()
+	s.Nested2 = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestInh02) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -655,6 +666,11 @@ func (s TestInh02) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestInh02) Reset() {
+	s.Int32 = 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -715,6 +731,12 @@ func (s TestInh03) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestInh03) Reset() {
+	s.Int16 = 0
+	s.Random = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested01) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -757,6 +779,11 @@ func (s TestNested01) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestNested01) Reset() {
+	s.Field32 = 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -803,6 +830,11 @@ func (s TestNested02) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestNested02) Reset() {
+	s.Field32 = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested03) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -847,6 +879,11 @@ func (s TestNested03) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestNested03) Reset() {
+	s.Field32 = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestNested04) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -868,4 +905,11 @@ func (s *TestNested04) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestNested04) IsZero() bool {
 	return TestNested03(s).IsZero()
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestNested04) Reset() {
+	var tmp TestNested03
+	tmp.Reset()
+	*s = TestNested04(tmp)
 }

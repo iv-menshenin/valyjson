@@ -608,6 +608,12 @@ func (s Root) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Root) Reset() {
+	s.Meta.Reset()
+	s.Data = Middles(nil)
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Middle) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -717,6 +723,15 @@ func (s Middle) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Middle) Reset() {
+	s.Name = UserName("")
+	s.Surname = UserSurname("")
+	s.Patname = nil
+	s.DateOfBorn = time.Time{}
+	s.Tags = Tags(nil)
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Middles) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -756,6 +771,11 @@ func (s *Middles) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s Middles) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Middles) Reset() {
+	*s = (*s)[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -800,6 +820,11 @@ func (s Meta) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Meta) Reset() {
+	s.Count = 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -873,6 +898,13 @@ func (s Personal) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Personal) Reset() {
+	s.Name = UserName("")
+	s.Surname = UserSurname("")
+	s.Patname = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Tags) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -910,6 +942,14 @@ func (s *Tags) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s Tags) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s Tags) Reset() {
+	for k, v := range s {
+		v = TagValue("")
+		s[k] = v
+	}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -952,6 +992,11 @@ func (s CustomEvent) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *CustomEvent) Reset() {
+	s.WRRetry.Reset()
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *WRRetry) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -991,4 +1036,9 @@ func (s WRRetry) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *WRRetry) Reset() {
+	s.WRRetry = 0
 }

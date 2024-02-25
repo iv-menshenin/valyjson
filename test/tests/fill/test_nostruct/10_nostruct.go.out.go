@@ -288,6 +288,14 @@ func (s TestMap10) IsZero() bool {
 	return len(s) == 0
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s TestMap10) Reset() {
+	for k, v := range s {
+		v = 0
+		s[k] = v
+	}
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestMap11) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -328,6 +336,14 @@ func (s *TestMap11) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestMap11) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s TestMap11) Reset() {
+	for k, v := range s {
+		v.Reset()
+		s[k] = v
+	}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -372,6 +388,14 @@ func (s TestMap11Ref) IsZero() bool {
 	return len(s) == 0
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s TestMap11Ref) Reset() {
+	for k, v := range s {
+		v = nil
+		s[k] = v
+	}
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice12) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -408,6 +432,11 @@ func (s *TestSlice12) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestSlice12) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice12) Reset() {
+	*s = (*s)[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -451,6 +480,11 @@ func (s TestSlice13) IsZero() bool {
 	return len(s) == 0
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice13) Reset() {
+	*s = (*s)[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice14) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -492,4 +526,9 @@ func (s TestSlice14) IsZero() bool {
 		}
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice14) Reset() {
+	*s = TestSlice14{}
 }

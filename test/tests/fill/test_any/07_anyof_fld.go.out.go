@@ -167,6 +167,13 @@ func (s TestOneOfInteger) IsZero() bool {
 	return s == TestOneOfInteger(0)
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestOneOfInteger) Reset() {
+	var tmp int64
+	tmp = 0
+	*s = TestOneOfInteger(tmp)
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestOneOfString) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -189,6 +196,13 @@ func (s *TestOneOfString) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestOneOfString) IsZero() bool {
 	return s == TestOneOfString("")
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestOneOfString) Reset() {
+	var tmp string
+	tmp = ""
+	*s = TestOneOfString(tmp)
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -249,6 +263,12 @@ func (s TestOneOfStruct) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestOneOfStruct) Reset() {
+	s.Class = ""
+	s.Value = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfSecond) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -304,6 +324,12 @@ func (s TestAllOfSecond) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestAllOfSecond) Reset() {
+	s.Comment = ""
+	s.Level = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestAllOfThird) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -354,4 +380,10 @@ func (s TestAllOfThird) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestAllOfThird) Reset() {
+	s.Command = ""
+	s.Range = 0
 }

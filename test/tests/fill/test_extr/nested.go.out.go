@@ -154,3 +154,10 @@ func (s ExternalNested) IsZero() bool {
 	}
 	return true
 }
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *ExternalNested) Reset() {
+	s.TestAllOfSecond.Reset()
+	s.TestAllOfThird.Reset()
+	s.TestStr01.Reset()
+}

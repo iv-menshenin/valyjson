@@ -388,6 +388,12 @@ func (s TestSlice01) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice01) Reset() {
+	s.Field = s.Field[:0]
+	s.FieldRef = s.FieldRef[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice03) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -432,6 +438,11 @@ func (s TestSlice03) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice03) Reset() {
+	s.Data = 0
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice02) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -471,6 +482,11 @@ func (s *TestSlice02) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestSlice02) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSlice02) Reset() {
+	*s = (*s)[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -535,4 +551,10 @@ func (s *CampaignSites) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s CampaignSites) IsZero() bool {
 	return false
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *CampaignSites) Reset() {
+	s.Excluded = s.Excluded[:0]
+	s.Included = [5]FieldValueString{}
 }

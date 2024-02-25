@@ -57,7 +57,7 @@ func timeMarshal(src ast.Expr, jsonName, layout string, omitempty, isStar bool) 
 	if layout != "" {
 		layoutExpr = asthlp.StringConstant(layout).Expr()
 	}
-	var notZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, "IsZero"))))
+	var notZero = asthlp.Not(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(src, names.MethodNameZero))))
 	if isStar {
 		notZero = asthlp.NotNil(src)
 		src = asthlp.Star(src)

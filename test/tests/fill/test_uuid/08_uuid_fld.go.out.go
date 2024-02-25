@@ -171,6 +171,11 @@ func (s TestUUID) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestUUID) Reset() {
+	s.UUID = uuid.Nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *InheritUUID2) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -192,6 +197,13 @@ func (s *InheritUUID2) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s InheritUUID2) IsZero() bool {
 	return s == InheritUUID2(uuid.Nil)
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *InheritUUID2) Reset() {
+	var tmp InheritUUID
+	tmp = InheritUUID(uuid.Nil)
+	*s = InheritUUID2(tmp)
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -221,4 +233,11 @@ func (s *InheritUUID) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s InheritUUID) IsZero() bool {
 	return s == InheritUUID(uuid.Nil)
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *InheritUUID) Reset() {
+	var tmp uuid.UUID
+	tmp = uuid.Nil
+	*s = InheritUUID(tmp)
 }

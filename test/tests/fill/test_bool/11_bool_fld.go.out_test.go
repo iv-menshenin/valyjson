@@ -107,6 +107,9 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		err := test.UnmarshalJSON([]byte(`{"bl": false, "mb": true, "refBool": true, "refMaybe": false}`))
 		require.NoError(t, err)
 		require.Equal(t, expected, test)
+		require.NotEmpty(t, test)
+		test.Reset()
+		require.Empty(t, test)
 	})
 	t.Run("omit-fields", func(t *testing.T) {
 		var True = true
@@ -121,6 +124,9 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		err := test.UnmarshalJSON([]byte(`{"bl": true, "refBool": true}`))
 		require.NoError(t, err)
 		require.Equal(t, expected, test)
+		require.NotEmpty(t, test)
+		test.Reset()
+		require.Empty(t, test)
 	})
 	t.Run("refs-as-null", func(t *testing.T) {
 		var test TestBool01
@@ -132,6 +138,9 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		err := test.UnmarshalJSON([]byte(`{"mb": true, "refBool": null, "refMaybe": null}`))
 		require.NoError(t, err)
 		require.Equal(t, expected, test)
+		require.NotEmpty(t, test)
+		test.Reset()
+		require.Empty(t, test)
 	})
 	t.Run("def-bool-false", func(t *testing.T) {
 		var test TestBool01
@@ -143,6 +152,9 @@ func TestTestBool01_UnmarshalJSON(t *testing.T) {
 		err := test.UnmarshalJSON([]byte(`{"mb": true, "defBool": false}`))
 		require.NoError(t, err)
 		require.Equal(t, expected, test)
+		require.NotEmpty(t, test)
+		test.Reset()
+		require.Empty(t, test)
 	})
 	t.Run("invalid-type", func(t *testing.T) {
 		var test TestBool01
@@ -316,5 +328,55 @@ func Test_RequiredRequired(t *testing.T) {
 		data, err := test.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(data))
+	})
+}
+
+func TestReset(t *testing.T) {
+	t.Parallel()
+	t.Run("TestBool01", func(t *testing.T) {
+		t.Parallel()
+		var v1 = true
+		var val = TestBool01{
+			Bool:     true,
+			BlMaybe:  true,
+			RefBool:  &v1,
+			RefMaybe: &v1,
+			DefBool:  true,
+		}
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestBool02", func(t *testing.T) {
+		t.Parallel()
+		var val = TestBool02{
+			I: true,
+			X: true,
+		}
+		val.Reset()
+		require.Empty(t, val)
+	})
+	t.Run("TestInhBool", func(t *testing.T) {
+		t.Parallel()
+		var val TestInhBool = true
+		val.Reset()
+		require.False(t, bool(val))
+	})
+	t.Run("TestBool03", func(t *testing.T) {
+		t.Parallel()
+		var val = TestBool03{Required: true}
+		val.Reset()
+		require.False(t, val.Required)
+	})
+	t.Run("TestBool04", func(t *testing.T) {
+		t.Parallel()
+		var val = TestBool04{Required: true}
+		val.Reset()
+		require.False(t, val.Required)
+	})
+	t.Run("TestBool05", func(t *testing.T) {
+		t.Parallel()
+		var val = TestBool05{Required: true}
+		val.Reset()
+		require.False(t, val.Required)
 	})
 }

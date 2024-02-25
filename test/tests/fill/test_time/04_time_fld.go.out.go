@@ -203,6 +203,13 @@ func (s TestTime01) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestTime01) Reset() {
+	s.DateBegin = time.Time{}
+	s.DateCustom = time.Time{}
+	s.DateEnd = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestTime2) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -230,4 +237,11 @@ func (s *TestTime2) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s TestTime2) IsZero() bool {
 	return time.Time(s).IsZero()
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestTime2) Reset() {
+	var tmp time.Time
+	tmp = time.Time{}
+	*s = TestTime2(tmp)
 }

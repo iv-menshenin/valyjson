@@ -276,3 +276,17 @@ func (a *Array) ZeroFunc() ast.Decl {
 	}
 	return fn.Decl()
 }
+
+func (a *Array) ResetFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameReset)).
+		Comments("// " + names.MethodNameReset + " resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(a.name))))
+
+	if a.spec.Len != nil {
+		fn.AppendStmt(asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.StructLiteral(ast.NewIdent(a.name)).Expr()))
+	} else {
+		fn.AppendStmt(asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.SliceExpr(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver)), nil, asthlp.IntegerConstant(0))))
+	}
+
+	return fn.Decl()
+}

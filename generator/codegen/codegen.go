@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"go/ast"
 
 	"github.com/iv-menshenin/go-ast"
@@ -114,4 +115,39 @@ func makeWriteAndReturn(r rune) []ast.Stmt {
 			asthlp.NewIdent(names.VarNameError),
 		),
 	}
+}
+
+func resetStmt(t, name ast.Expr) ast.Stmt {
+	switch tt := t.(type) {
+	case *ast.ArrayType:
+		if tt.Len == nil {
+			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SliceExpr(name, nil, asthlp.IntegerConstant(0)))
+		} else {
+			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.StructLiteral(tt).Expr())
+		}
+
+	case *ast.SelectorExpr:
+		// uuid.Nil
+		if tt.Sel.Name == "UUID" {
+			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SimpleSelector("uuid", "Nil"))
+		}
+		if tt.Sel.Name == "Time" {
+			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.StructLiteral(tt).Expr())
+		}
+	}
+
+	d := helpers.DenotedType(t)
+	zero := helpers.ZeroValueOfT(d)
+	if zero != nil {
+		// v.Field = 0
+		if t != d {
+			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.ExpressionTypeConvert(zero, t))
+		}
+		return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, zero)
+	}
+
+	// v.Field.Reset()
+	return asthlp.CallStmt(asthlp.Call(
+		asthlp.InlineFunc(asthlp.Selector(name, names.MethodNameReset)),
+	))
 }

@@ -678,6 +678,18 @@ func (s TestMap01) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestMap01) Reset() {
+	s.Tags = nil
+	s.Properties = nil
+	s.KeyTypedProperties = nil
+	s.IntegerVal = nil
+	s.FloatVal = nil
+	s.UintVal = nil
+	s.BoolVal = nil
+	s.TypedVal = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Property) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -734,6 +746,12 @@ func (s Property) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Property) Reset() {
+	s.Name = ""
+	s.Value = ""
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -806,4 +824,10 @@ func (s CampaignSites) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *CampaignSites) Reset() {
+	s.Excluded = nil
+	s.Included = nil
 }

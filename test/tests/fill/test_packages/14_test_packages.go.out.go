@@ -107,3 +107,8 @@ func (s Test01) IsZero() bool {
 	}
 	return true
 }
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Test01) Reset() {
+	s.Field = pack_a.Test(0)
+}

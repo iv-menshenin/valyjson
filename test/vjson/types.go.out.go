@@ -741,6 +741,16 @@ func (s Person) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Person) Reset() {
+	s.Name = ""
+	s.Surname = ""
+	s.Middle = nil
+	s.DOB = nil
+	s.Passport = nil
+	s.Tables = MapTable(nil)
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Passport) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -797,6 +807,12 @@ func (s Passport) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Passport) Reset() {
+	s.Number = ""
+	s.DateDoc = time.Time{}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -865,6 +881,12 @@ func (s TableOf) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TableOf) Reset() {
+	s.TableName = ""
+	s.Tables = s.Tables[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -987,6 +1009,15 @@ func (s Table) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Table) Reset() {
+	s.Counter = 0
+	s.Assessments = s.Assessments[:0]
+	s.Time = time.Time{}
+	s.Avg = 0
+	s.Tags = s.Tags[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Tag) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -1045,6 +1076,12 @@ func (s Tag) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Tag) Reset() {
+	s.TagName = ""
+	s.TagValue = ""
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapTable) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -1087,6 +1124,14 @@ func (s MapTable) IsZero() bool {
 	return len(s) == 0
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s MapTable) Reset() {
+	for k, v := range s {
+		v.Reset()
+		s[k] = v
+	}
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *MapInt64) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -1124,4 +1169,12 @@ func (s *MapInt64) MarshalTo(result *jwriter.Writer) error {
 // IsZero shows whether the object is an empty value.
 func (s MapInt64) IsZero() bool {
 	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s MapInt64) Reset() {
+	for k, v := range s {
+		v = 0
+		s[k] = v
+	}
 }

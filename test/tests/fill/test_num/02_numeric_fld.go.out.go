@@ -1268,6 +1268,34 @@ func (s NumStruct01) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *NumStruct01) Reset() {
+	s.IntFld = 0
+	s.IntFld8 = 0
+	s.IntFld16 = 0
+	s.IntFld32 = 0
+	s.IntFld64 = 0
+	s.UintFld = 0
+	s.UintFld8 = 0
+	s.UintFld16 = 0
+	s.UintFld32 = 0
+	s.UintFld64 = 0
+	s.FloatFld32 = 0
+	s.FloatFld64 = 0
+	s.RefIntFld = nil
+	s.RefIntFld8 = nil
+	s.RefIntFld16 = nil
+	s.RefIntFld32 = nil
+	s.RefIntFld64 = nil
+	s.RefUintFld = nil
+	s.RefUintFld8 = nil
+	s.RefUintFld16 = nil
+	s.RefUintFld32 = nil
+	s.RefUintFld64 = nil
+	s.RefFloatFld32 = nil
+	s.RefFloatFld64 = nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *NumStruct02) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -1610,4 +1638,32 @@ func (s NumStruct02) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *NumStruct02) Reset() {
+	s.IntFld = 0
+	s.IntFld8 = 0
+	s.IntFld16 = 0
+	s.IntFld32 = 0
+	s.IntFld64 = 0
+	s.UintFld = 0
+	s.UintFld8 = 0
+	s.UintFld16 = 0
+	s.UintFld32 = 0
+	s.UintFld64 = 0
+	s.FloatFld32 = 0
+	s.FloatFld64 = 0
+	s.RefIntFld = nil
+	s.RefIntFld8 = nil
+	s.RefIntFld16 = nil
+	s.RefIntFld32 = nil
+	s.RefIntFld64 = nil
+	s.RefUintFld = nil
+	s.RefUintFld8 = nil
+	s.RefUintFld16 = nil
+	s.RefUintFld32 = nil
+	s.RefUintFld64 = nil
+	s.RefFloatFld32 = nil
+	s.RefFloatFld64 = nil
 }

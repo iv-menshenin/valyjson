@@ -162,3 +162,9 @@ func (t *TestAllOf01) MarshalJSON() ([]byte, error) {
 	result.RawByte('}')
 	return result.BuildBytes()
 }
+
+func (t *TestAllOf01) Reset() {
+	t.TestAllOfFirstIsOne.OneOf = nil
+	t.TestAllOfSecond.Reset()
+	t.TestAllOfThird.Reset()
+}

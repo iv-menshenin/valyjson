@@ -30,6 +30,7 @@ type (
 		MarshalFunc() []ast.Decl
 		AppendJsonFunc() ast.Decl
 		ZeroFunc() ast.Decl
+		ResetFunc() ast.Decl
 	}
 )
 
@@ -72,6 +73,9 @@ func (g *Gen) BuildEncoders() {
 			g.result.Decls = append(g.result.Decls, appendFn)
 		}
 		if appendFn := structDecl.ZeroFunc(); appendFn != nil {
+			g.result.Decls = append(g.result.Decls, appendFn)
+		}
+		if appendFn := structDecl.ResetFunc(); appendFn != nil {
 			g.result.Decls = append(g.result.Decls, appendFn)
 		}
 	}

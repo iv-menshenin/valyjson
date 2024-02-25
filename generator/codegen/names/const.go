@@ -21,6 +21,7 @@ const (
 	MethodNameMarshalTo = "MarshalTo"
 	MethodNameZero      = "IsZero"
 	UnpackObjFunc       = "unpackObject"
+	MethodNameReset     = "Reset"
 
 	WriteTime = "writeTime"
 

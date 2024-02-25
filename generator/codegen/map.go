@@ -286,3 +286,25 @@ func (m *Map) ZeroFunc() ast.Decl {
 	)
 	return fn.Decl()
 }
+
+func (m *Map) ResetFunc() ast.Decl {
+	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameReset)).
+		Comments("// " + names.MethodNameReset + " resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.").
+		Receiver(asthlp.Field(names.VarNameReceiver, nil, ast.NewIdent(m.name)))
+
+	fn.AppendStmt(
+		asthlp.Range(
+			true,
+			"k", "v",
+			asthlp.NewIdent(names.VarNameReceiver),
+			resetStmt(m.spec.Value, asthlp.NewIdent("v")),
+			asthlp.Assign(
+				asthlp.VarNames{asthlp.Index(asthlp.NewIdent(names.VarNameReceiver), asthlp.FreeExpression(asthlp.NewIdent("k")))},
+				asthlp.Assignment,
+				asthlp.NewIdent("v"),
+			),
+		),
+	)
+
+	return fn.Decl()
+}

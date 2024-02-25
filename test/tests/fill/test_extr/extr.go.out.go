@@ -133,3 +133,9 @@ func (s External) IsZero() bool {
 	}
 	return true
 }
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *External) Reset() {
+	s.Test01.Reset()
+	s.Test02.Reset()
+}
