@@ -209,14 +209,11 @@ func (s *Hashtag) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valIndices) < l || (l == 0 && s.Indices == nil) {
 			valIndices = make([]int, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
+		for _key, _val := range listA {
+			valIndices = valIndices[:len(valIndices)+1]
 			var elem int
-			elem, err = listElem.Int()
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valIndices = append(valIndices, int(elem))
+			elem, err = _val.Int()
+			valIndices[_key] = int(elem)
 		}
 		if err != nil {
 			return newParsingError("indices", err)
@@ -292,14 +289,10 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valHashtags) < l || (l == 0 && s.Hashtags == nil) {
 			valHashtags = make([]Hashtag, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem Hashtag
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valHashtags = append(valHashtags, Hashtag(elem))
+		for _, _val := range listA {
+			valHashtags = valHashtags[:len(valHashtags)+1]
+			var elem = &valHashtags[len(valHashtags)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("hashtags", err)
@@ -316,17 +309,18 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]*string, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			if !valueIsNotNull(listElem) {
-				valUrls = append(valUrls, nil)
+		for _key, _val := range listA {
+			valUrls = valUrls[:len(valUrls)+1]
+			if !valueIsNotNull(_val) {
+				valUrls[len(valUrls)-1] = nil
 				continue
 			}
 			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+			if elem, err = _val.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
 			newElem := string(elem)
-			valUrls = append(valUrls, &newElem)
+			valUrls[_key] = &newElem
 		}
 		if err != nil {
 			return newParsingError("urls", err)
@@ -343,17 +337,18 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valUserMentions) < l || (l == 0 && s.UserMentions == nil) {
 			valUserMentions = make([]*string, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			if !valueIsNotNull(listElem) {
-				valUserMentions = append(valUserMentions, nil)
+		for _key, _val := range listA {
+			valUserMentions = valUserMentions[:len(valUserMentions)+1]
+			if !valueIsNotNull(_val) {
+				valUserMentions[len(valUserMentions)-1] = nil
 				continue
 			}
 			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+			if elem, err = _val.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
 			newElem := string(elem)
-			valUserMentions = append(valUserMentions, &newElem)
+			valUserMentions[_key] = &newElem
 		}
 		if err != nil {
 			return newParsingError("user_mentions", err)
@@ -429,17 +424,18 @@ func (s *UserEntityDescription) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]*string, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			if !valueIsNotNull(listElem) {
-				valUrls = append(valUrls, nil)
+		for _key, _val := range listA {
+			valUrls = valUrls[:len(valUrls)+1]
+			if !valueIsNotNull(_val) {
+				valUrls[len(valUrls)-1] = nil
 				continue
 			}
 			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+			if elem, err = _val.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
 			newElem := string(elem)
-			valUrls = append(valUrls, &newElem)
+			valUrls[_key] = &newElem
 		}
 		if err != nil {
 			return newParsingError("urls", err)
@@ -508,14 +504,11 @@ func (s *URL) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valIndices) < l || (l == 0 && s.Indices == nil) {
 			valIndices = make([]int, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
+		for _key, _val := range listA {
+			valIndices = valIndices[:len(valIndices)+1]
 			var elem int
-			elem, err = listElem.Int()
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valIndices = append(valIndices, int(elem))
+			elem, err = _val.Int()
+			valIndices[_key] = int(elem)
 		}
 		if err != nil {
 			return newParsingError("indices", err)
@@ -598,14 +591,10 @@ func (s *UserEntityURL) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]URL, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem URL
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valUrls = append(valUrls, URL(elem))
+		for _, _val := range listA {
+			valUrls = valUrls[:len(valUrls)+1]
+			var elem = &valUrls[len(valUrls)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("urls", err)
@@ -658,20 +647,18 @@ func (s *UserEntities) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _description := v.Get("description"); _description != nil {
-		var valDescription UserEntityDescription
+		var valDescription = &s.Description
 		err = valDescription.FillFromJSON(_description)
 		if err != nil {
 			return newParsingError("description", err)
 		}
-		s.Description = UserEntityDescription(valDescription)
 	}
 	if _uRL := v.Get("url"); _uRL != nil {
-		var valURL UserEntityURL
+		var valURL = &s.URL
 		err = valURL.FillFromJSON(_uRL)
 		if err != nil {
 			return newParsingError("url", err)
 		}
-		s.URL = UserEntityURL(valURL)
 	}
 	return nil
 }
@@ -764,12 +751,11 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		s.Description = string(valDescription)
 	}
 	if _entities := v.Get("entities"); _entities != nil {
-		var valEntities UserEntities
+		var valEntities = &s.Entities
 		err = valEntities.FillFromJSON(_entities)
 		if err != nil {
 			return newParsingError("entities", err)
 		}
-		s.Entities = UserEntities(valEntities)
 	}
 	if _favouritesCount := v.Get("favourites_count"); _favouritesCount != nil {
 		var valFavouritesCount int
@@ -1415,12 +1401,11 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		s.CreatedAt = string(valCreatedAt)
 	}
 	if _entities := v.Get("entities"); _entities != nil {
-		var valEntities Entities
+		var valEntities = &s.Entities
 		err = valEntities.FillFromJSON(_entities)
 		if err != nil {
 			return newParsingError("entities", err)
 		}
-		s.Entities = Entities(valEntities)
 	}
 	if _favorited := v.Get("favorited"); _favorited != nil {
 		var valFavorited bool
@@ -1488,12 +1473,11 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		s.InReplyToUserIDStr = (*string)(unsafe.Pointer(&valInReplyToUserIDStr))
 	}
 	if _metadata := v.Get("metadata"); _metadata != nil {
-		var valMetadata StatusMetadata
+		var valMetadata = &s.Metadata
 		err = valMetadata.FillFromJSON(_metadata)
 		if err != nil {
 			return newParsingError("metadata", err)
 		}
-		s.Metadata = StatusMetadata(valMetadata)
 	}
 	if _place := v.Get("place"); valueIsNotNull(_place) {
 		var valPlace []byte
@@ -1541,12 +1525,11 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		s.Truncated = valTruncated
 	}
 	if _user := v.Get("user"); _user != nil {
-		var valUser User
+		var valUser = &s.User
 		err = valUser.FillFromJSON(_user)
 		if err != nil {
 			return newParsingError("user", err)
 		}
-		s.User = User(valUser)
 	}
 	return nil
 }
@@ -1734,12 +1717,11 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _searchMetadata := v.Get("search_metadata"); _searchMetadata != nil {
-		var valSearchMetadata SearchMetadata
+		var valSearchMetadata = &s.SearchMetadata
 		err = valSearchMetadata.FillFromJSON(_searchMetadata)
 		if err != nil {
 			return newParsingError("search_metadata", err)
 		}
-		s.SearchMetadata = SearchMetadata(valSearchMetadata)
 	}
 	if _statuses := v.Get("statuses"); valueIsNotNull(_statuses) {
 		var listA []*fastjson.Value
@@ -1751,14 +1733,10 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valStatuses) < l || (l == 0 && s.Statuses == nil) {
 			valStatuses = make([]Status, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem Status
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valStatuses = append(valStatuses, Status(elem))
+		for _, _val := range listA {
+			valStatuses = valStatuses[:len(valStatuses)+1]
+			var elem = &valStatuses[len(valStatuses)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("statuses", err)
@@ -1827,14 +1805,10 @@ func (s *XLStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]LargeStruct, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem LargeStruct
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valData = append(valData, LargeStruct(elem))
+		for _, _val := range listA {
+			valData = valData[:len(valData)+1]
+			var elem = &valData[len(valData)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("data", err)
@@ -2022,6 +1996,19 @@ func (s SearchMetadata) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *SearchMetadata) Reset() {
+	s.CompletedIn = 0
+	s.Count = 0
+	s.MaxID = 0
+	s.MaxIDStr = ""
+	s.NextResults = ""
+	s.Query = ""
+	s.RefreshURL = ""
+	s.SinceID = 0
+	s.SinceIDStr = ""
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *Hashtag) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -2088,6 +2075,15 @@ func (s Hashtag) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Hashtag) Reset() {
+	for i := range s.Indices {
+		s.Indices[i] = 0
+	}
+	s.Indices = s.Indices[:0]
+	s.Text = ""
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2203,6 +2199,22 @@ func (s Entities) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Entities) Reset() {
+	for i := range s.Hashtags {
+		s.Hashtags[i].Reset()
+	}
+	s.Hashtags = s.Hashtags[:0]
+	for i := range s.Urls {
+		s.Urls[i] = nil
+	}
+	s.Urls = s.Urls[:0]
+	for i := range s.UserMentions {
+		s.UserMentions[i] = nil
+	}
+	s.UserMentions = s.UserMentions[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityDescription) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -2259,6 +2271,14 @@ func (s UserEntityDescription) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *UserEntityDescription) Reset() {
+	for i := range s.Urls {
+		s.Urls[i] = nil
+	}
+	s.Urls = s.Urls[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -2342,6 +2362,16 @@ func (s URL) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *URL) Reset() {
+	s.ExpandedURL = nil
+	for i := range s.Indices {
+		s.Indices[i] = 0
+	}
+	s.Indices = s.Indices[:0]
+	s.URL = ""
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntityURL) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -2399,6 +2429,14 @@ func (s UserEntityURL) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *UserEntityURL) Reset() {
+	for i := range s.Urls {
+		s.Urls[i].Reset()
+	}
+	s.Urls = s.Urls[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *UserEntities) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -2449,6 +2487,12 @@ func (s UserEntities) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *UserEntities) Reset() {
+	s.Description.Reset()
+	s.URL.Reset()
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -3010,6 +3054,49 @@ func (s User) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *User) Reset() {
+	s.ContributorsEnabled = false
+	s.CreatedAt = ""
+	s.DefaultProfile = false
+	s.DefaultProfileImage = false
+	s.Description = ""
+	s.Entities.Reset()
+	s.FavouritesCount = 0
+	s.FollowRequestSent = nil
+	s.FollowersCount = 0
+	s.Following = nil
+	s.FriendsCount = 0
+	s.GeoEnabled = false
+	s.ID = 0
+	s.IDStr = ""
+	s.IsTranslator = false
+	s.Lang = ""
+	s.ListedCount = 0
+	s.Location = ""
+	s.Name = ""
+	s.Notifications = nil
+	s.ProfileBackgroundColor = ""
+	s.ProfileBackgroundImageURL = ""
+	s.ProfileBackgroundImageURLHTTPS = ""
+	s.ProfileBackgroundTile = false
+	s.ProfileImageURL = ""
+	s.ProfileImageURLHTTPS = ""
+	s.ProfileLinkColor = ""
+	s.ProfileSidebarBorderColor = ""
+	s.ProfileSidebarFillColor = ""
+	s.ProfileTextColor = ""
+	s.ProfileUseBackgroundImage = false
+	s.Protected = false
+	s.ScreenName = ""
+	s.ShowAllInlineMedia = false
+	s.StatusesCount = 0
+	s.TimeZone = ""
+	s.URL = nil
+	s.UtcOffset = 0
+	s.Verified = false
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *StatusMetadata) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -3066,6 +3153,12 @@ func (s StatusMetadata) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *StatusMetadata) Reset() {
+	s.IsoLanguageCode = ""
+	s.ResultType = ""
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -3371,6 +3464,31 @@ func (s Status) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Status) Reset() {
+	s.Contributors = nil
+	s.Coordinates = nil
+	s.CreatedAt = ""
+	s.Entities.Reset()
+	s.Favorited = false
+	s.Geo = nil
+	s.ID = 0
+	s.IDStr = ""
+	s.InReplyToScreenName = nil
+	s.InReplyToStatusID = nil
+	s.InReplyToStatusIDStr = nil
+	s.InReplyToUserID = nil
+	s.InReplyToUserIDStr = nil
+	s.Metadata.Reset()
+	s.Place = nil
+	s.RetweetCount = 0
+	s.Retweeted = false
+	s.Source = ""
+	s.Text = ""
+	s.Truncated = false
+	s.User.Reset()
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *LargeStruct) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -3439,6 +3557,15 @@ func (s LargeStruct) IsZero() bool {
 	return true
 }
 
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *LargeStruct) Reset() {
+	s.SearchMetadata.Reset()
+	for i := range s.Statuses {
+		s.Statuses[i].Reset()
+	}
+	s.Statuses = s.Statuses[:0]
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *XLStruct) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -3494,4 +3621,12 @@ func (s XLStruct) IsZero() bool {
 		return false
 	}
 	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *XLStruct) Reset() {
+	for i := range s.Data {
+		s.Data[i].Reset()
+	}
+	s.Data = s.Data[:0]
 }

@@ -52,7 +52,7 @@ func (m *Map) UnmarshalFunc() []ast.Decl {
 //		}
 //		return nil
 //	}
-func (m *Map) FillerFunc() ast.Decl {
+func (m *Map) FillFromFunc() ast.Decl {
 	const (
 		v = "v"
 		o = "o"
@@ -188,7 +188,7 @@ func (m *Map) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(m.name)
 }
 
-func (m *Map) AppendJsonFunc() ast.Decl {
+func (m *Map) MarshalToFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(m.name)))).
@@ -297,12 +297,14 @@ func (m *Map) ResetFunc() ast.Decl {
 			true,
 			"k", "v",
 			asthlp.NewIdent(names.VarNameReceiver),
-			resetStmt(m.spec.Value, asthlp.NewIdent("v")),
-			asthlp.Assign(
-				asthlp.VarNames{asthlp.Index(asthlp.NewIdent(names.VarNameReceiver), asthlp.FreeExpression(asthlp.NewIdent("k")))},
-				asthlp.Assignment,
-				asthlp.NewIdent("v"),
-			),
+			append(
+				resetStmt(m.spec.Value, asthlp.NewIdent("v")),
+				asthlp.Assign(
+					asthlp.VarNames{asthlp.Index(asthlp.NewIdent(names.VarNameReceiver), asthlp.FreeExpression(asthlp.NewIdent("k")))},
+					asthlp.Assignment,
+					asthlp.NewIdent("v"),
+				),
+			)...,
 		),
 	)
 

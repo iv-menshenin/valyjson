@@ -40,12 +40,13 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
 			valField = make([]string, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
+		for _key, _val := range listA {
+			valField = valField[:len(valField)+1]
 			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+			if elem, err = _val.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
-			valField = append(valField, string(elem))
+			valField[_key] = string(elem)
 		}
 		if err != nil {
 			return newParsingError("strs", err)
@@ -62,19 +63,16 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
 			valFieldRef = make([]*int, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			if !valueIsNotNull(listElem) {
-				valFieldRef = append(valFieldRef, nil)
+		for _key, _val := range listA {
+			valFieldRef = valFieldRef[:len(valFieldRef)+1]
+			if !valueIsNotNull(_val) {
+				valFieldRef[len(valFieldRef)-1] = nil
 				continue
 			}
 			var elem int
-			elem, err = listElem.Int()
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
+			elem, err = _val.Int()
 			newElem := int(elem)
-			valFieldRef = append(valFieldRef, &newElem)
+			valFieldRef[_key] = &newElem
 		}
 		if err != nil {
 			return newParsingError("ints", err)
@@ -232,16 +230,13 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valExcluded) < l || (l == 0 && s.Excluded == nil) {
 			valExcluded = make([]FieldValueString, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
+		for _key, _val := range listA {
+			valExcluded = valExcluded[:len(valExcluded)+1]
 			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+			if elem, err = _val.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valExcluded = append(valExcluded, FieldValueString(elem))
+			valExcluded[_key] = FieldValueString(elem)
 		}
 		if err != nil {
 			return newParsingError("excluded", err)
@@ -258,16 +253,16 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if len(listA) != 5 {
 			return newParsingError("included", fmt.Errorf("array len mismatch"))
 		}
-		for _elemNum, listElem := range listA {
-			var elem []byte
-			if elem, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_elemNum), err)
+		for _key, listElem := range listA {
+			var _tmp []byte
+			if _tmp, err = listElem.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key), err)
 			}
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
+				err = newParsingError(strconv.Itoa(_key), err)
 				break
 			}
-			valIncluded[_elemNum] = FieldValueString(elem)
+			valIncluded[_key] = FieldValueString(_tmp)
 		}
 		if err != nil {
 			return newParsingError("included", err)
@@ -390,7 +385,13 @@ func (s TestSlice01) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestSlice01) Reset() {
+	for i := range s.Field {
+		s.Field[i] = ""
+	}
 	s.Field = s.Field[:0]
+	for i := range s.FieldRef {
+		s.FieldRef[i] = nil
+	}
 	s.FieldRef = s.FieldRef[:0]
 }
 
@@ -555,6 +556,9 @@ func (s CampaignSites) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *CampaignSites) Reset() {
+	for i := range s.Excluded {
+		s.Excluded[i] = FieldValueString("")
+	}
 	s.Excluded = s.Excluded[:0]
 	s.Included = [5]FieldValueString{}
 }

@@ -7,9 +7,6 @@ import (
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
-
-	"fill/test_any"
-	"fill/test_string"
 )
 
 // jsonParserExternal used for pooling Parsers for External JSONs.
@@ -33,20 +30,18 @@ func (s *External) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _test01 := v.Get("test1"); _test01 != nil {
-		var valTest01 test_any.TestAllOfSecond
+		var valTest01 = &s.Test01
 		err = valTest01.FillFromJSON(_test01)
 		if err != nil {
 			return newParsingError("test1", err)
 		}
-		s.Test01 = valTest01
 	}
 	if _test02 := v.Get("test2"); _test02 != nil {
-		var valTest02 test_string.TestStr01
+		var valTest02 = &s.Test02
 		err = valTest02.FillFromJSON(_test02)
 		if err != nil {
 			return newParsingError("test2", err)
 		}
-		s.Test02 = valTest02
 	}
 	return nil
 }

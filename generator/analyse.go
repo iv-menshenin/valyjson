@@ -25,10 +25,10 @@ type (
 		Name() string
 		Tags() tags.StructTags
 		UnmarshalFunc() []ast.Decl
-		FillerFunc() ast.Decl
+		FillFromFunc() ast.Decl
 		ValidatorFunc() ast.Decl
 		MarshalFunc() []ast.Decl
-		AppendJsonFunc() ast.Decl
+		MarshalToFunc() ast.Decl
 		ZeroFunc() ast.Decl
 		ResetFunc() ast.Decl
 	}
@@ -47,7 +47,7 @@ func (g *Gen) BuildDecoders() {
 		if unm := structDecl.UnmarshalFunc(); len(unm) > 0 {
 			g.result.Decls = append(g.result.Decls, unm...)
 		}
-		if fil := structDecl.FillerFunc(); fil != nil {
+		if fil := structDecl.FillFromFunc(); fil != nil {
 			g.result.Decls = append(g.result.Decls, fil)
 		}
 		if val := structDecl.ValidatorFunc(); val != nil {
@@ -69,7 +69,7 @@ func (g *Gen) BuildEncoders() {
 		if marshalFn := structDecl.MarshalFunc(); marshalFn != nil {
 			g.result.Decls = append(g.result.Decls, marshalFn...)
 		}
-		if appendFn := structDecl.AppendJsonFunc(); appendFn != nil {
+		if appendFn := structDecl.MarshalToFunc(); appendFn != nil {
 			g.result.Decls = append(g.result.Decls, appendFn)
 		}
 		if appendFn := structDecl.ZeroFunc(); appendFn != nil {

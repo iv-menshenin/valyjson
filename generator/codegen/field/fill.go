@@ -39,9 +39,14 @@ func (f *Field) getValue() ast.Expr {
 //	    return fmt.Errorf("error parsing '%s.limit' value: %w", objPath, err)
 //	}
 func (f *Field) fillFrom(name, v string) []ast.Stmt {
-	f.field = &ast.SelectorExpr{X: ast.NewIdent(names.VarNameReceiver), Sel: ast.NewIdent(name)}
+	f.field = asthlp.SimpleSelector(names.VarNameReceiver, name)
 	var bufVariable = makeBufVariable(name)
-	var result []ast.Stmt
+
+	var result = make([]ast.Stmt, 0, 10)
+	//append(
+	//	make([]ast.Stmt, 0, 10),
+	//	asthlp.Var(asthlp.VariableValue(bufVariable.Name, asthlp.FreeExpression(f.field))),
+	//)
 
 	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.StringConstant(f.tags.JsonName()).Expr()))...)
 	result = append(result, f.checkErr(bufVariable)...)
@@ -58,43 +63,85 @@ func makeBufVariable(name string) *ast.Ident {
 	return asthlp.NewIdent("val" + name)
 }
 
-// var elem int
-//
-//	if elem, err = listElem.Int(); err != nil {
-//		err = newParsingError(strconv.Itoa(listElemNum), err)
-//		break
-//	}
-//
-// valList = append(valList, int32(elem))
-func (f *Field) appendElem(dst ast.Expr, v string) []ast.Stmt {
-	var bufVariable = asthlp.NewIdent("elem")
-	var result []ast.Stmt
+type fillArrayResult struct {
+	varElem *ast.Ident
+	varNum  *ast.Ident
+	body    []ast.Stmt
+}
+
+func (f *fillArrayResult) append(stmt ...ast.Stmt) {
+	f.body = append(f.body, stmt...)
+}
+
+//	 valData = valData[:len(valData)+1]
+//	 err = valData[i].FillFromJSON(listElem)
+//		if valData, err = listElem.Int(); err != nil {
+//			err = newParsingError(strconv.Itoa(listElemNum), err)
+//			break
+//		}
+func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult {
+	r := fillArrayResult{
+		varElem: asthlp.NewIdent(valVariableName),
+		varNum:  asthlp.NewIdent("_key"),
+	}
+	bufVariable := asthlp.NewIdent("_tmp")
+	if ident, ok := dst.(*ast.Ident); ok {
+		bufVariable = ident
+	}
+	var (
+		bufLenValue = asthlp.Call(asthlp.LengthFn, bufVariable)
+		reference   = asthlp.Index(bufVariable, asthlp.FreeExpression(asthlp.Sub(bufLenValue, asthlp.IntegerConstant(1).Expr())))
+	)
+	r.append(
+		// every iteration must extend this slice
+		asthlp.Assign(
+			asthlp.VarNames{bufVariable},
+			asthlp.Assignment,
+			asthlp.SliceExpr(bufVariable, nil, asthlp.FreeExpression(asthlp.Add(bufLenValue, asthlp.IntegerConstant(1).Expr()))),
+		),
+	)
 	if f.isNullable {
 		//if !valueIsNotNull(listElem) {
-		//	valFieldRef = append(valFieldRef, nil)
+		//	valData[len(valData)-1] = nil
 		//	continue
 		//}
-		result = append(result, asthlp.If(
-			asthlp.Not(asthlp.Call(valueIsNotNull, ast.NewIdent(v))),
-			appendStmt(dst, ast.NewIdent("nil")),
+		r.append(asthlp.If(
+			asthlp.Not(asthlp.Call(valueIsNotNull, r.varElem)),
+			asthlp.Assign(asthlp.VarNames{reference}, asthlp.Assignment, asthlp.Nil),
 			asthlp.Continue(),
 		))
 	}
-	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum"))))...)
-	result = append(result, f.breakErr()...)
 
-	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
+	r.append(IsNotEmpty(
+		f.TypedValue(asthlp.NewIdent("elem"), r.varElem.Name, asthlp.Call(asthlp.StrconvItoaFn, r.varNum)),
+	)...)
+	// result = append(result, f.breakErr()...)
+
+	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), asthlp.NewIdent("elem"))
 	// valList = append(valList, int32(elem))
 	if f.isStar {
 		const newElem = "newElem"
-		result = append(
-			result,
+		r.append(
 			asthlp.Assign(asthlp.MakeVarNames(newElem), asthlp.Definition, elemAsParticularType),
-			appendStmt(dst, asthlp.Ref(ast.NewIdent(newElem))),
+			asthlp.Assign(
+				asthlp.VarNames{asthlp.Index(bufVariable, asthlp.FreeExpression(r.varNum))},
+				asthlp.Assignment,
+				asthlp.Ref(ast.NewIdent(newElem)),
+			),
 		)
-		return result
+		return r
 	}
-	return append(result, appendStmt(dst, elemAsParticularType))
+	if !f.filled {
+		// valExcluded[_elemNum] = FieldValueString(elem)
+		r.append(asthlp.Assign(
+			asthlp.VarNames{asthlp.Index(bufVariable, asthlp.FreeExpression(r.varNum))},
+			asthlp.Assignment,
+			elemAsParticularType,
+		))
+		return r
+	}
+	r.varNum = nil
+	return r
 }
 
 func appendStmt(dst, el ast.Expr) ast.Stmt {
@@ -105,42 +152,47 @@ func appendStmt(dst, el ast.Expr) ast.Stmt {
 	)
 }
 
-func (f *Field) fillElem(dst ast.Expr, v string) []ast.Stmt {
-	var bufVariable = asthlp.NewIdent("elem")
-	var result []ast.Stmt
+func (f *Field) fillElem(dst ast.Expr, valVariableName string) fillArrayResult {
+	r := fillArrayResult{
+		varElem: asthlp.NewIdent(valVariableName),
+		varNum:  asthlp.NewIdent("_key"),
+	}
+	var bufVariable = asthlp.NewIdent("_tmp")
 	if f.isNullable {
 		//if !valueIsNotNull(listElem) {
 		//	valFieldRef = append(valFieldRef, nil)
 		//	continue
 		//}
-		result = append(result, asthlp.If(
-			asthlp.Not(asthlp.Call(valueIsNotNull, ast.NewIdent(v))),
+		r.append(asthlp.If(
+			asthlp.Not(asthlp.Call(valueIsNotNull, r.varElem)),
 			appendStmt(dst, ast.NewIdent("nil")),
 			asthlp.Continue(),
 		))
 	}
-	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum"))))...)
-	result = append(result, f.breakErr()...)
+	r.append(IsNotEmpty(f.TypedValue(bufVariable, r.varElem.Name, asthlp.Call(asthlp.StrconvItoaFn, r.varNum)))...)
+	r.append(f.breakErr(r.varNum)...)
 
 	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), bufVariable)
 	// valList[_elemNum] = int32(elem)
 	if f.isStar {
 		const newElem = "newElem"
-		result = append(
-			result,
+		r.append(
 			asthlp.Assign(asthlp.MakeVarNames(newElem), asthlp.Definition, elemAsParticularType),
-			asthlp.Assign(asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(asthlp.NewIdent("_elemNum")))}, asthlp.Assignment, asthlp.Ref(ast.NewIdent(newElem))),
+			asthlp.Assign(asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(r.varNum))}, asthlp.Assignment, asthlp.Ref(ast.NewIdent(newElem))),
 		)
-		return result
+		return r
 	}
-	return append(
-		result,
-		asthlp.Assign(asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(asthlp.NewIdent("_elemNum")))}, asthlp.Assignment, elemAsParticularType),
-	)
+	// valExcluded[_elemNum] = FieldValueString(elem)
+	r.append(asthlp.Assign(
+		asthlp.VarNames{asthlp.Index(dst, asthlp.FreeExpression(r.varNum))},
+		asthlp.Assignment,
+		elemAsParticularType,
+	))
+	return r
 }
 
-//	 var val{name} {type}
-//		val{name}, err = {v}.(Int|Int64|String|Bool)()
+// var val{name} {type}
+// val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []ast.Stmt {
 	var result []ast.Stmt
 	switch t := f.refx.(type) {
@@ -161,17 +213,22 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 			result = append(result, uuidExtraction(dst, f.refx, v, f.tags.JsonName())...)
 
 		default:
-			result = append(result, nestedExtraction(dst, f.expr, v, f.tags.JsonName())...)
+			result = append(result, f.nestedExtraction(dst, f.field, f.expr, asthlp.NewIdent(v))...)
 		}
 
 	case *ast.ArrayType:
 		intF := Field{
+			// &valData[len(valData)-1]
+			field: asthlp.Index(
+				dst,
+				asthlp.FreeExpression(asthlp.Sub(asthlp.Call(asthlp.LengthFn, dst), asthlp.IntegerConstant(1).Expr())),
+			),
 			expr: t.Elt,
 			tags: tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
 		}
 		intF.prepareRef()
 		if t.Len == nil {
-			result = append(result, sliceExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.appendElem(dst, "listElem"))...)
+			result = append(result, sliceExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.appendElem(dst, "_val"))...)
 		} else {
 			result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t, intF.fillElem(dst, "listElem"))...)
 		}
@@ -228,7 +285,7 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string, elemPathExpr ast.Exp
 		return stringExtraction(dst, v, elemPathExpr)
 
 	default:
-		return nestedExtraction(dst, f.expr, v, f.tags.JsonName())
+		return f.nestedExtraction(dst, f.field, f.expr, asthlp.NewIdent(v))
 
 	}
 }
@@ -297,10 +354,17 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 			asthlp.InlineFunc(asthlp.SimpleSelector(v, "Object")),
 		)),
 		checkErrAndReturnParsingError(asthlp.StringConstant(json).Expr()),
-		// var {dst} = make(map[Key]Property, o.Len())
-		asthlp.Var(asthlp.VariableValue(dst.Name, asthlp.FreeExpression(asthlp.Call(
-			asthlp.MakeFn, t, asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("o", "Len"))),
-		)))),
+		//	{dst} := s.Tags
+		//	if {dst} == nil {
+		//		{dst} = make(map[Key]Property, o.Len())
+		//	}
+		asthlp.Assign(asthlp.MakeVarNames(dst.Name), asthlp.Definition, f.field),
+		asthlp.If(
+			asthlp.IsNil(asthlp.NewIdent(dst.Name)),
+			asthlp.Assign(asthlp.MakeVarNames(dst.Name), asthlp.Assignment, asthlp.Call(
+				asthlp.MakeFn, t, asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector("o", "Len"))),
+			)),
+		),
 		// o.Visit(func(key []byte, v *fastjson.Value) {
 		asthlp.CallStmt(asthlp.Call(
 			asthlp.InlineFunc(asthlp.SimpleSelector("o", "Visit")),
@@ -433,7 +497,7 @@ func getMaxByType(t *ast.Ident) ast.Expr {
 //		err = newParsingError(strconv.Itoa(_elemNum), err)
 //		break
 //	}
-func (f *Field) breakErr() []ast.Stmt {
+func (f *Field) breakErr(elemNumVar ast.Expr) []ast.Stmt {
 	if helpers.IsIdent(f.expr, "string") {
 		// no error checking for string
 		return nil
@@ -443,7 +507,7 @@ func (f *Field) breakErr() []ast.Stmt {
 			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
 			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
-				asthlp.Call(asthlp.StrconvItoaFn, asthlp.NewIdent("_elemNum")),
+				asthlp.Call(asthlp.StrconvItoaFn, elemNumVar),
 				ast.NewIdent(names.VarNameError),
 			)),
 			asthlp.Break(),
@@ -501,6 +565,9 @@ func (f *Field) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
 }
 
 func (f *Field) fillField(rhs, dst ast.Expr) []ast.Stmt {
+	if f.filled {
+		return nil
+	}
 	var result []ast.Stmt
 	switch t := f.expr.(type) {
 

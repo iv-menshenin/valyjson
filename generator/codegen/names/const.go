@@ -8,7 +8,6 @@ const (
 	VarNameError             = "err"
 	VarNameReceiver          = "s"
 	VarNameListOfArrayValues = "listA"
-	VarNameListElem          = "listElem"
 	VarPrefixPool            = "jsonParser"
 	VarNameData              = "data"
 

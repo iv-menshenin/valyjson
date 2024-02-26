@@ -4,7 +4,6 @@ package vjson
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"time"
 	"unsafe"
 
@@ -80,7 +79,10 @@ func (s *Person) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("tables", err)
 		}
-		var valTables = make(map[string]TableOf, o.Len())
+		valTables := s.Tables
+		if valTables == nil {
+			valTables = make(map[string]TableOf, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -269,19 +271,16 @@ func (s *TableOf) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valTables) < l || (l == 0 && s.Tables == nil) {
 			valTables = make([]*Table, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			if !valueIsNotNull(listElem) {
-				valTables = append(valTables, nil)
+		for _key, _val := range listA {
+			valTables = valTables[:len(valTables)+1]
+			if !valueIsNotNull(_val) {
+				valTables[len(valTables)-1] = nil
 				continue
 			}
 			var elem Table
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
+			err = elem.FillFromJSON(_val)
 			newElem := Table(elem)
-			valTables = append(valTables, &newElem)
+			valTables[_key] = &newElem
 		}
 		if err != nil {
 			return newParsingError("tables", err)
@@ -360,14 +359,11 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valAssessments) < l || (l == 0 && s.Assessments == nil) {
 			valAssessments = make([]int, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
+		for _key, _val := range listA {
+			valAssessments = valAssessments[:len(valAssessments)+1]
 			var elem int
-			elem, err = listElem.Int()
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valAssessments = append(valAssessments, int(elem))
+			elem, err = _val.Int()
+			valAssessments[_key] = int(elem)
 		}
 		if err != nil {
 			return newParsingError("assessments", err)
@@ -403,14 +399,10 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valTags) < l || (l == 0 && s.Tags == nil) {
 			valTags = make([]Tag, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem Tag
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valTags = append(valTags, Tag(elem))
+		for _, _val := range listA {
+			valTags = valTags[:len(valTags)+1]
+			var elem = &valTags[len(valTags)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("tags", err)
@@ -748,7 +740,13 @@ func (s *Person) Reset() {
 	s.Middle = nil
 	s.DOB = nil
 	s.Passport = nil
-	s.Tables = MapTable(nil)
+	if len(s.Tables) > 10000 {
+		s.Tables = nil
+	} else {
+		for key := range s.Tables {
+			delete(s.Tables, key)
+		}
+	}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -886,6 +884,9 @@ func (s TableOf) IsZero() bool {
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TableOf) Reset() {
 	s.TableName = ""
+	for i := range s.Tables {
+		s.Tables[i] = nil
+	}
 	s.Tables = s.Tables[:0]
 }
 
@@ -1012,9 +1013,15 @@ func (s Table) IsZero() bool {
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *Table) Reset() {
 	s.Counter = 0
+	for i := range s.Assessments {
+		s.Assessments[i] = 0
+	}
 	s.Assessments = s.Assessments[:0]
 	s.Time = time.Time{}
 	s.Avg = 0
+	for i := range s.Tags {
+		s.Tags[i].Reset()
+	}
 	s.Tags = s.Tags[:0]
 }
 

@@ -29,6 +29,8 @@ type (
 		isNullable bool
 		// dontCheckErr do not check error and not to return
 		dontCheckErr bool
+		// filled if already filled this field (by reference for example)
+		filled bool
 	}
 )
 

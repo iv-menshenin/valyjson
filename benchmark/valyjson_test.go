@@ -1,6 +1,7 @@
 package benchmark
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/mailru/easyjson/jwriter"
@@ -18,6 +19,24 @@ func BenchmarkVJ_Unmarshal_M(b *testing.B) {
 		if err != nil {
 			b.Error(err)
 		}
+	}
+}
+
+// BenchmarkVJ_Unmarshal_M_Reuse-8   	   10000	    128808 ns/op	 101.11 MB/s	    3209 B/op	     105 allocs/op
+
+var LargeStructPool = sync.Pool{New: func() any { return &LargeStruct{} }}
+
+func BenchmarkVJ_Unmarshal_M_Reuse(b *testing.B) {
+	b.ReportAllocs()
+	b.SetBytes(int64(len(largeStructText)))
+	for i := 0; i < b.N; i++ {
+		var s = LargeStructPool.Get().(*LargeStruct)
+		err := s.UnmarshalJSON(largeStructText)
+		if err != nil {
+			b.Error(err)
+		}
+		s.Reset()
+		LargeStructPool.Put(s)
 	}
 }
 

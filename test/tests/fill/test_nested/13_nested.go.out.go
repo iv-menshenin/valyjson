@@ -4,7 +4,6 @@ package test_nested
 import (
 	"bytes"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/mailru/easyjson/jwriter"
@@ -32,12 +31,11 @@ func (s *Root) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _meta := v.Get("meta"); _meta != nil {
-		var valMeta Meta
+		var valMeta = &s.Meta
 		err = valMeta.FillFromJSON(_meta)
 		if err != nil {
 			return newParsingError("meta", err)
 		}
-		s.Meta = Meta(valMeta)
 	}
 	if _data := v.Get("data"); _data != nil {
 		var listA []*fastjson.Value
@@ -49,14 +47,10 @@ func (s *Root) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]Middle, 0, len(listA))
 		}
-		for _elemNum, listElem := range listA {
-			var elem Middle
-			err = elem.FillFromJSON(listElem)
-			if err != nil {
-				err = newParsingError(strconv.Itoa(_elemNum), err)
-				break
-			}
-			valData = append(valData, Middle(elem))
+		for _, _val := range listA {
+			valData = valData[:len(valData)+1]
+			var elem = &valData[len(valData)-1]
+			err = elem.FillFromJSON(_val)
 		}
 		if err != nil {
 			return newParsingError("data", err)
@@ -153,7 +147,10 @@ func (s *Middle) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("tags", err)
 		}
-		var valTags = make(map[TagName]TagValue, o.Len())
+		valTags := s.Tags
+		if valTags == nil {
+			valTags = make(map[TagName]TagValue, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -455,12 +452,11 @@ func (s *CustomEvent) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _wRRetry := v; _wRRetry != nil {
-		var valWRRetry WRRetry
+		var valWRRetry = &s.WRRetry
 		err = valWRRetry.FillFromJSON(_wRRetry)
 		if err != nil {
 			return newParsingError("", err)
 		}
-		s.WRRetry = WRRetry(valWRRetry)
 	}
 	return nil
 }
@@ -611,7 +607,10 @@ func (s Root) IsZero() bool {
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *Root) Reset() {
 	s.Meta.Reset()
-	s.Data = Middles(nil)
+	for i := range s.Data {
+		s.Data[i].Reset()
+	}
+	s.Data = s.Data[:0]
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -729,7 +728,13 @@ func (s *Middle) Reset() {
 	s.Surname = UserSurname("")
 	s.Patname = nil
 	s.DateOfBorn = time.Time{}
-	s.Tags = Tags(nil)
+	if len(s.Tags) > 10000 {
+		s.Tags = nil
+	} else {
+		for key := range s.Tags {
+			delete(s.Tags, key)
+		}
+	}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.

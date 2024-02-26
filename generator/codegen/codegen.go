@@ -117,22 +117,69 @@ func makeWriteAndReturn(r rune) []ast.Stmt {
 	}
 }
 
-func resetStmt(t, name ast.Expr) ast.Stmt {
-	switch tt := t.(type) {
+func resetStmt(t, name ast.Expr) []ast.Stmt {
+	var needCast = t != denotedType(t)
+	switch tt := denotedType(t).(type) {
 	case *ast.ArrayType:
 		if tt.Len == nil {
-			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SliceExpr(name, nil, asthlp.IntegerConstant(0)))
+			//for i := range s.Data {
+			//	s.Data[i].Reset()
+			//}
+			//s.Data = s.Data[:0]
+			return []ast.Stmt{
+				asthlp.Range(true, "i", "", name,
+					resetStmt(tt.Elt, asthlp.Index(name, asthlp.FreeExpression(asthlp.NewIdent("i"))))...,
+				),
+				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SliceExpr(name, nil, asthlp.IntegerConstant(0))),
+			}
 		} else {
-			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.StructLiteral(tt).Expr())
+			return []ast.Stmt{
+				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.StructLiteral(tt).Expr()),
+			}
 		}
 
 	case *ast.SelectorExpr:
+		var wrapFunc = func(x ast.Expr) ast.Expr {
+			return x
+		}
+		if needCast {
+			wrapFunc = func(x ast.Expr) ast.Expr {
+				return asthlp.ExpressionTypeConvert(x, t)
+			}
+		}
 		// uuid.Nil
 		if tt.Sel.Name == "UUID" {
-			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SimpleSelector("uuid", "Nil"))
+			return []ast.Stmt{
+				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, wrapFunc(asthlp.SimpleSelector("uuid", "Nil"))),
+			}
 		}
 		if tt.Sel.Name == "Time" {
-			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.StructLiteral(tt).Expr())
+			return []ast.Stmt{
+				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, wrapFunc(asthlp.StructLiteral(tt).Expr())),
+			}
+		}
+
+	case *ast.MapType:
+		// if len(s.Tags) > 10000 {
+		//   s.Tags = nil
+		// } else {
+		//   for key := range s.Tags {
+		//     delete(s.Tags, key)
+		//   }
+		// }
+		return []ast.Stmt{
+			asthlp.IfElse(
+				asthlp.Great(asthlp.Call(asthlp.LengthFn, name), asthlp.IntegerConstant(10000).Expr()),
+				asthlp.Block(asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.Nil)),
+				asthlp.Block(
+					asthlp.Range(
+						true, "key", "", name,
+						asthlp.CallStmt(
+							asthlp.Call(asthlp.InlineFunc(asthlp.NewIdent("delete")), name, asthlp.NewIdent("key")),
+						),
+					),
+				),
+			),
 		}
 	}
 
@@ -141,13 +188,19 @@ func resetStmt(t, name ast.Expr) ast.Stmt {
 	if zero != nil {
 		// v.Field = 0
 		if t != d {
-			return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.ExpressionTypeConvert(zero, t))
+			return []ast.Stmt{
+				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.ExpressionTypeConvert(zero, t)),
+			}
 		}
-		return asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, zero)
+		return []ast.Stmt{
+			asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, zero),
+		}
 	}
 
 	// v.Field.Reset()
-	return asthlp.CallStmt(asthlp.Call(
-		asthlp.InlineFunc(asthlp.Selector(name, names.MethodNameReset)),
-	))
+	return []ast.Stmt{
+		asthlp.CallStmt(asthlp.Call(
+			asthlp.InlineFunc(asthlp.Selector(name, names.MethodNameReset)),
+		)),
+	}
 }

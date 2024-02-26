@@ -29,7 +29,7 @@ func (a *Array) UnmarshalFunc() []ast.Decl {
 	return NewUnmarshalFunc(a.Name())
 }
 
-func (a *Array) FillerFunc() ast.Decl {
+func (a *Array) FillFromFunc() ast.Decl {
 	const (
 		_v = "v"
 		_a = "a"
@@ -171,7 +171,7 @@ func (a *Array) MarshalFunc() []ast.Decl {
 //
 // result.WriteRune(']')
 // return result.Bytes(), err
-func (a *Array) AppendJsonFunc() ast.Decl {
+func (a *Array) MarshalToFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(a.name)))).

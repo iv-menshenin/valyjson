@@ -31,10 +31,10 @@ func (s *Struct) UnmarshalFunc() []ast.Decl {
 	return NewUnmarshalFunc(s.name)
 }
 
-// FillerFunc generates function code that will fill in all fields of the structure with the fastjson.Value attribute
+// FillFromFunc generates function code that will fill in all fields of the structure with the fastjson.Value attribute
 //
 //	func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) { ... }
-func (s *Struct) FillerFunc() ast.Decl {
+func (s *Struct) FillFromFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameFill))
 	fn.Comments("// " + names.MethodNameFill + " recursively fills the fields with fastjson.Value")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(s.name))))
@@ -213,7 +213,7 @@ func (s *Struct) MarshalFunc() []ast.Decl {
 }
 
 // AppendJsonFunc produces MarshalAppend(dst []byte) ([]byte, error)
-func (s *Struct) AppendJsonFunc() ast.Decl {
+func (s *Struct) MarshalToFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(s.name)))).
@@ -339,16 +339,16 @@ func (s *Struct) ResetFunc() ast.Decl {
 
 	for _, fld := range s.spec.Fields.List {
 		for _, name := range fld.Names {
-			fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, name.Name)))
+			fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, name.Name))...)
 		}
 		if len(fld.Names) == 0 {
 			switch t := fld.Type.(type) {
 
 			case *ast.Ident:
-				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Name)))
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Name))...)
 
 			case *ast.SelectorExpr:
-				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name)))
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name))...)
 			}
 		}
 	}

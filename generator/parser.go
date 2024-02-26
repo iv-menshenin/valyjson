@@ -82,6 +82,15 @@ func (g *Gen) FixImports(internals ...string) {
 			Kind: explorer.PkgKindInternal,
 		})
 	}
+	g.imports()
+}
+
+func (g *Gen) imports() {
+	defer func() {
+		if r := recover(); r != nil {
+			panic(fmt.Errorf("PANIC at %q: %+v", g.fileName, r))
+		}
+	}()
 	discovery := explorer.New()
 	discovery.Explore(&g.result)
 	var decls = make([]ast.Decl, 0, len(g.result.Decls)+1)

@@ -7,9 +7,6 @@ import (
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
-
-	"fill/test_any"
-	"fill/test_string"
 )
 
 // jsonParserExternalNested used for pooling Parsers for ExternalNested JSONs.
@@ -33,28 +30,25 @@ func (s *ExternalNested) FillFromJSON(v *fastjson.Value) (err error) {
 		return err
 	}
 	if _testAllOfSecond := v; _testAllOfSecond != nil {
-		var valTestAllOfSecond test_any.TestAllOfSecond
+		var valTestAllOfSecond = &s.TestAllOfSecond
 		err = valTestAllOfSecond.FillFromJSON(_testAllOfSecond)
 		if err != nil {
 			return newParsingError("", err)
 		}
-		s.TestAllOfSecond = valTestAllOfSecond
 	}
 	if _testAllOfThird := v; _testAllOfThird != nil {
-		var valTestAllOfThird test_any.TestAllOfThird
+		var valTestAllOfThird = &s.TestAllOfThird
 		err = valTestAllOfThird.FillFromJSON(_testAllOfThird)
 		if err != nil {
 			return newParsingError("", err)
 		}
-		s.TestAllOfThird = valTestAllOfThird
 	}
 	if _testStr01 := v; _testStr01 != nil {
-		var valTestStr01 test_string.TestStr01
+		var valTestStr01 = &s.TestStr01
 		err = valTestStr01.FillFromJSON(_testStr01)
 		if err != nil {
 			return newParsingError("", err)
 		}
-		s.TestStr01 = valTestStr01
 	}
 	return nil
 }

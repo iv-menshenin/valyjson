@@ -6,7 +6,9 @@ import (
 )
 
 func Test_TestMap01_Unmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("test-all-empty", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -15,6 +17,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("test-all-null", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"tags":null, "properties":null, "key_typed_properties":null}`))
 		require.NoError(t, err)
@@ -23,6 +26,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("test-incorrect-type", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"tags":324, "properties":null, "key_typed_properties":null}`))
 		require.ErrorContains(t, err, "error parsing 'tags':")
@@ -32,6 +36,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("fill-booleans", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"bool":{"foo":true, "bar":false}}`))
 		require.NoError(t, err)
@@ -45,6 +50,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("fill-simple-strings", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"tags":{"test":"maps", "foo":"bar"}}`))
 		require.NoError(t, err)
@@ -57,6 +63,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("fill-key-strings", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"properties":{"test":{"value":"maps","name":"test"}, "foo":{"name": "foo","value":"bar"}}}`))
 		require.NoError(t, err)
@@ -69,6 +76,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.KeyTypedProperties)
 	})
 	t.Run("fill-key-typed", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"key_typed_properties":{"test":{"value":"maps","name":"test"}, "foo":{"name": "foo","value":"bar"}}}`))
 		require.NoError(t, err)
@@ -81,6 +89,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.Properties)
 	})
 	t.Run("test-int-values", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"integerVal":{"123": 123, "0": 0, "-1": -1}}`))
 		require.NoError(t, err)
@@ -93,6 +102,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.EqualValues(t, test1.IntegerVal["-1"], -1)
 	})
 	t.Run("test-uint-error", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"uintVal":{"123": 123, "0": 0, "-1": -1}}`))
 		require.Error(t, err)
@@ -100,6 +110,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.ErrorContains(t, err, "-1")
 	})
 	t.Run("test-uint-values", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"uintVal":{"123": 123, "0": 0,"nil": null}}`))
 		require.NoError(t, err)
@@ -116,6 +127,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.Nil(t, val)
 	})
 	t.Run("test-float-values", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"floatVal":{"123": 123, "0": 0, "-1": -1}}`))
 		require.NoError(t, err)
@@ -128,6 +140,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.EqualValues(t, test1.FloatVal["-1"], -1)
 	})
 	t.Run("test-typed-error", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"typed-val":{"123": 123, "0": 0, "minus": -2}}`))
 		require.Error(t, err)
@@ -135,6 +148,7 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 		require.ErrorContains(t, err, "-2")
 	})
 	t.Run("test-typed-values", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestMap01
 		err := test1.UnmarshalJSON([]byte(`{"typed-val":{"123": 123, "0": 0, "-1": 1}}`))
 		require.NoError(t, err)
@@ -149,7 +163,9 @@ func Test_TestMap01_Unmarshal(t *testing.T) {
 }
 
 func Test_TestMap01_Marshal(t *testing.T) {
+	t.Parallel()
 	t.Run("fulfill", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":{"test":"maps", "lorem":"ipsum"},"properties":{"test":{"value":"foo","name":"bar"}, "foo":{"name": "foo","value":"lorem ipsum"}},"key_typed_properties":null}`
 		var test = TestMap01{
 			Tags: map[string]string{
@@ -173,6 +189,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("omit-properties", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":{"test":"maps", "lorem":"ipsum"},"key_typed_properties":{"test":{"value":"foo","name":"bar"}, "foo":{"name": "foo","value":"lorem ipsum"}}}`
 		var test = TestMap01{
 			Tags: map[string]string{
@@ -195,6 +212,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("null", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null}`
 		var test = TestMap01{}
 		b, err := test.MarshalJSON()
@@ -202,6 +220,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("empty", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":{},"properties":{},"key_typed_properties":{}}`
 		var test = TestMap01{
 			Tags:               map[string]string{},
@@ -213,6 +232,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("int-values", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null,"integerVal":{"344": 344, "345": 345, "0": 0}}`
 		var test = TestMap01{
 			IntegerVal: map[Key]int32{
@@ -224,6 +244,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("float-values", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null,"floatVal":{"344": 344, "345": 345, "0": 0}}`
 		var test = TestMap01{
 			FloatVal: map[Key]float64{
@@ -235,6 +256,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("uint-values", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null,"uintVal":{"344": 344, "345": 345, "0": 0}}`
 		var (
 			v344 uint16 = 344
@@ -251,6 +273,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("typed-values", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null,"typed-val":{"344": 344, "345": 345, "0": 0}}`
 		var test = TestMap01{
 			TypedVal: map[Key]Val{
@@ -262,6 +285,7 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("boolean-values", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"tags":null,"key_typed_properties":null,"bool":{"foo": true, "bar": false}}`
 		var test = TestMap01{
 			BoolVal: map[Key]bool{
@@ -271,5 +295,48 @@ func Test_TestMap01_Marshal(t *testing.T) {
 		b, err := test.MarshalJSON()
 		require.NoError(t, err)
 		require.JSONEq(t, expected, string(b))
+	})
+}
+
+func TestReset(t *testing.T) {
+	t.Parallel()
+	t.Run("TestMap01", func(t *testing.T) {
+		t.Parallel()
+		var val = TestMap01{
+			Tags: map[string]string{
+				"foo": "bar",
+			},
+			Properties: map[string]Property{
+				"empty": {},
+			},
+			KeyTypedProperties: map[Key]Property{
+				"test": {},
+			},
+			IntegerVal: map[Key]int32{
+				"{}": 2,
+				"[]": 3,
+			},
+			FloatVal: map[Key]float64{
+				"33.2": 33.2,
+			},
+			UintVal: map[Key]*uint16{
+				"nil": nil,
+			},
+			BoolVal: map[Key]bool{
+				"true": true,
+			},
+			TypedVal: map[Key]Val{
+				"val": 34,
+			},
+		}
+		val.Reset()
+		require.Empty(t, val.Tags)
+		require.Empty(t, val.Properties)
+		require.Empty(t, val.KeyTypedProperties)
+		require.Empty(t, val.IntegerVal)
+		require.Empty(t, val.FloatVal)
+		require.Empty(t, val.UintVal)
+		require.Empty(t, val.BoolVal)
+		require.Empty(t, val.TypedVal)
 	})
 }

@@ -37,7 +37,7 @@ func (t *Transitive) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(t.name)
 }
 
-func (t *Transitive) AppendJsonFunc() ast.Decl {
+func (t *Transitive) MarshalToFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo))
 	fn.Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
@@ -157,7 +157,7 @@ func (t *Transitive) AppendJsonFunc() ast.Decl {
 //	func (s *Struct) FillFromJson(v *fastjson.Value, objPath string) (err error) {
 //	    return (*StructElem)(s).FillFromJson(v, objPath)
 //	}
-func (t *Transitive) FillerFunc() ast.Decl {
+func (t *Transitive) FillFromFunc() ast.Decl {
 	fn := asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameFill))
 	fn.Comments("// " + names.MethodNameFill + " recursively fills the fields with fastjson.Value")
 	fn.Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(asthlp.NewIdent(t.name))))
@@ -218,7 +218,11 @@ func (t *Transitive) ResetFunc() ast.Decl {
 
 	fn.AppendStmt(
 		asthlp.Var(asthlp.VariableType("tmp", t.tran)),
-		resetStmt(t.tran, asthlp.NewIdent("tmp")),
+	)
+	fn.AppendStmt(
+		resetStmt(t.tran, asthlp.NewIdent("tmp"))...,
+	)
+	fn.AppendStmt(
 		asthlp.Assign(
 			asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))},
 			asthlp.Assignment,

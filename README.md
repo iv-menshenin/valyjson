@@ -54,6 +54,7 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 | codec    | regular   | 35267  | 369.1 | 12840 |       125 |
 | codec    | small     | 455    | 180.2 |   144 |         1 |
 |          |           |        |       |       |           |
+| valyjson | reuse     | 128808 | 101.1 |  3209 |       105 |
 | valyjson | regular   | 153757 |  84.7 |  6786 |       122 |
 | valyjson | small     | 4532   |  40.4 |   280 |        13 |
 |          |           |        |       |       |           |
@@ -63,6 +64,10 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 Tests of unpacking JSON objects show a nice gain in memory allocation.
 This is not surprising, I used [valyala/fastjson](https://github.com/valyala/fastjson) parser,
 and Aliaksandr Valialkin knows how to save memory.
+
+Due to `Reset` methods, which return the structure to a null state by reducing the length of internal slices to zero,
+it became possible to reuse the allocated memory, reducing the number of allocations by an additional 20%.
+The results of testing this approach are shown in the "reuse" line.
 
 ### Marshaling
 

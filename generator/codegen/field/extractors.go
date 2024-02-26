@@ -11,7 +11,7 @@ import (
 )
 
 // sliceExtraction makes a block of code that extracts values from json array
-func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, body []ast.Stmt) []ast.Stmt {
+func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, fa fillArrayResult) []ast.Stmt {
 	varListA := asthlp.Var(
 		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
 	)
@@ -30,6 +30,10 @@ func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, b
 		asthlp.Definition,
 		asthlp.SliceExpr(fld, nil, asthlp.IntegerConstant(0)),
 	)
+	var keyName = asthlp.Blank.Name
+	if fa.varNum != nil {
+		keyName = fa.varNum.Name
+	}
 	return asthlp.Block(
 		// var listA []*fastjson.Value
 		varListA,
@@ -58,11 +62,11 @@ func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, b
 			asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, valListSliceMake),
 		),
 		// for _, listElem := range listA {
-		asthlp.Range(true, "_elemNum", names.VarNameListElem, asthlp.NewIdent(names.VarNameListOfArrayValues), body...),
+		asthlp.Range(true, keyName, fa.varElem.Name, asthlp.NewIdent(names.VarNameListOfArrayValues), fa.body...),
 	).List
 }
 
-func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t *ast.ArrayType, body []ast.Stmt) []ast.Stmt {
+func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t *ast.ArrayType, fa fillArrayResult) []ast.Stmt {
 	varListA := asthlp.Var(
 		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
 	)
@@ -73,6 +77,10 @@ func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t *ast.ArrayT
 	valListDeclare := asthlp.DeclareVariable().AppendSpec(
 		asthlp.TypeSpec(dst.Name, t),
 	)
+	var keyName = asthlp.Blank.Name
+	if fa.varNum != nil {
+		keyName = fa.varNum.Name
+	}
 	return asthlp.Block(
 		// var listA []*fastjson.Value
 		varListA,
@@ -98,7 +106,7 @@ func arrayExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t *ast.ArrayT
 			),
 		),
 		// for _, listElem := range listA {
-		asthlp.Range(true, "_elemNum", names.VarNameListElem, asthlp.NewIdent(names.VarNameListOfArrayValues), body...),
+		asthlp.Range(true, keyName, fa.varElem.Name, asthlp.NewIdent(names.VarNameListOfArrayValues), fa.body...),
 	).List
 }
 
@@ -226,12 +234,18 @@ func particularTypeExtraction(dst, v string, varType ast.Expr, method string) []
 	).List
 }
 
-func nestedExtraction(dst *ast.Ident, t ast.Expr, v, json string) []ast.Stmt {
+func (f *Field) nestedExtraction(dst *ast.Ident, src, t ast.Expr, v ast.Expr) []ast.Stmt {
+	var declare ast.Stmt
+	if src == nil || f.isStar {
+		declare = asthlp.Var(asthlp.VariableType(dst.Name, t))
+	} else {
+		f.filled = true
+		declare = asthlp.Var(asthlp.VariableValue(dst.Name, asthlp.FreeExpression(asthlp.Ref(src))))
+	}
 	return []ast.Stmt{
-		asthlp.Var(asthlp.VariableType(dst.Name, t)),
+		declare,
 		asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
-			asthlp.InlineFunc(asthlp.Selector(dst, names.MethodNameFill)),
-			asthlp.NewIdent(v),
+			asthlp.InlineFunc(asthlp.Selector(dst, names.MethodNameFill)), v,
 		)),
 	}
 }

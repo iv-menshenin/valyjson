@@ -41,12 +41,11 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value) (err error) {
 		s.BreakFirst = valBreakFirst
 	}
 	if _testInh02 := v.Get("injected"); _testInh02 != nil {
-		var valTestInh02 TestInh02
+		var valTestInh02 = &s.TestInh02
 		err = valTestInh02.FillFromJSON(_testInh02)
 		if err != nil {
 			return newParsingError("injected", err)
 		}
-		s.TestInh02 = TestInh02(valTestInh02)
 	}
 	if _int16 := v.Get("int_16"); _int16 != nil {
 		var valInt16 int
@@ -79,12 +78,11 @@ func (s *TestInh01) FillFromJSON(v *fastjson.Value) (err error) {
 		s.DateBegin = valDateBegin
 	}
 	if _nested1 := v.Get("nested1"); _nested1 != nil {
-		var valNested1 TestInh03
+		var valNested1 = &s.Nested1
 		err = valNested1.FillFromJSON(_nested1)
 		if err != nil {
 			return newParsingError("nested1", err)
 		}
-		s.Nested1 = TestInh03(valNested1)
 	}
 	if _nested2 := v.Get("nested2"); valueIsNotNull(_nested2) {
 		var valNested2 TestInh03

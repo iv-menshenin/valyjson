@@ -36,7 +36,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("tags", err)
 		}
-		var valTags = make(map[string]string, o.Len())
+		valTags := s.Tags
+		if valTags == nil {
+			valTags = make(map[string]string, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -59,7 +62,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("properties", err)
 		}
-		var valProperties = make(map[string]Property, o.Len())
+		valProperties := s.Properties
+		if valProperties == nil {
+			valProperties = make(map[string]Property, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -82,7 +88,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("key_typed_properties", err)
 		}
-		var valKeyTypedProperties = make(map[Key]Property, o.Len())
+		valKeyTypedProperties := s.KeyTypedProperties
+		if valKeyTypedProperties == nil {
+			valKeyTypedProperties = make(map[Key]Property, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -105,7 +114,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("integerVal", err)
 		}
-		var valIntegerVal = make(map[Key]int32, o.Len())
+		valIntegerVal := s.IntegerVal
+		if valIntegerVal == nil {
+			valIntegerVal = make(map[Key]int32, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -128,7 +140,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("floatVal", err)
 		}
-		var valFloatVal = make(map[Key]float64, o.Len())
+		valFloatVal := s.FloatVal
+		if valFloatVal == nil {
+			valFloatVal = make(map[Key]float64, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -151,7 +166,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("uintVal", err)
 		}
-		var valUintVal = make(map[Key]*uint16, o.Len())
+		valUintVal := s.UintVal
+		if valUintVal == nil {
+			valUintVal = make(map[Key]*uint16, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -178,7 +196,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("bool", err)
 		}
-		var valBoolVal = make(map[Key]bool, o.Len())
+		valBoolVal := s.BoolVal
+		if valBoolVal == nil {
+			valBoolVal = make(map[Key]bool, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -201,7 +222,10 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("typed-val", err)
 		}
-		var valTypedVal = make(map[Key]Val, o.Len())
+		valTypedVal := s.TypedVal
+		if valTypedVal == nil {
+			valTypedVal = make(map[Key]Val, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -387,7 +411,10 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("excluded", err)
 		}
-		var valExcluded = make(map[string]FieldValueString, o.Len())
+		valExcluded := s.Excluded
+		if valExcluded == nil {
+			valExcluded = make(map[string]FieldValueString, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -410,7 +437,10 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("included", err)
 		}
-		var valIncluded = make(map[FieldValueString]string, o.Len())
+		valIncluded := s.Included
+		if valIncluded == nil {
+			valIncluded = make(map[FieldValueString]string, o.Len())
+		}
 		o.Visit(func(key []byte, v *fastjson.Value) {
 			if err != nil {
 				return
@@ -680,14 +710,62 @@ func (s TestMap01) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestMap01) Reset() {
-	s.Tags = nil
-	s.Properties = nil
-	s.KeyTypedProperties = nil
-	s.IntegerVal = nil
-	s.FloatVal = nil
-	s.UintVal = nil
-	s.BoolVal = nil
-	s.TypedVal = nil
+	if len(s.Tags) > 10000 {
+		s.Tags = nil
+	} else {
+		for key := range s.Tags {
+			delete(s.Tags, key)
+		}
+	}
+	if len(s.Properties) > 10000 {
+		s.Properties = nil
+	} else {
+		for key := range s.Properties {
+			delete(s.Properties, key)
+		}
+	}
+	if len(s.KeyTypedProperties) > 10000 {
+		s.KeyTypedProperties = nil
+	} else {
+		for key := range s.KeyTypedProperties {
+			delete(s.KeyTypedProperties, key)
+		}
+	}
+	if len(s.IntegerVal) > 10000 {
+		s.IntegerVal = nil
+	} else {
+		for key := range s.IntegerVal {
+			delete(s.IntegerVal, key)
+		}
+	}
+	if len(s.FloatVal) > 10000 {
+		s.FloatVal = nil
+	} else {
+		for key := range s.FloatVal {
+			delete(s.FloatVal, key)
+		}
+	}
+	if len(s.UintVal) > 10000 {
+		s.UintVal = nil
+	} else {
+		for key := range s.UintVal {
+			delete(s.UintVal, key)
+		}
+	}
+	if len(s.BoolVal) > 10000 {
+		s.BoolVal = nil
+	} else {
+		for key := range s.BoolVal {
+			delete(s.BoolVal, key)
+		}
+	}
+	if len(s.TypedVal) > 10000 {
+		s.TypedVal = nil
+	} else {
+		for key := range s.TypedVal {
+			delete(s.TypedVal, key)
+		}
+	}
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -828,6 +906,18 @@ func (s CampaignSites) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *CampaignSites) Reset() {
-	s.Excluded = nil
-	s.Included = nil
+	if len(s.Excluded) > 10000 {
+		s.Excluded = nil
+	} else {
+		for key := range s.Excluded {
+			delete(s.Excluded, key)
+		}
+	}
+	if len(s.Included) > 10000 {
+		s.Included = nil
+	} else {
+		for key := range s.Included {
+			delete(s.Included, key)
+		}
+	}
 }
