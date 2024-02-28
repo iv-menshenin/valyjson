@@ -865,14 +865,14 @@ func (s *TestUserDefinedRef) MarshalTo(result *jwriter.Writer) error {
 	if wantComma {
 		result.RawByte(',')
 	}
-	if *s.RefInt32Ref != nil || s.RefInt32Ref != nil {
+	if s.RefInt32Ref != nil && *s.RefInt32Ref != nil {
 		result.RawString(`"x_int32":`)
 		result.Int64(int64(**s.RefInt32Ref))
 		wantComma = true
 	} else {
 		result.RawString(`"x_int32":null`)
 	}
-	if *s.RefInt64Ref != nil || s.RefInt64Ref != nil {
+	if s.RefInt64Ref != nil && *s.RefInt64Ref != nil {
 		if wantComma {
 			result.RawByte(',')
 		}
@@ -883,14 +883,14 @@ func (s *TestUserDefinedRef) MarshalTo(result *jwriter.Writer) error {
 	if wantComma {
 		result.RawByte(',')
 	}
-	if *s.RefFloat32Ref != nil || s.RefFloat32Ref != nil {
+	if s.RefFloat32Ref != nil && *s.RefFloat32Ref != nil {
 		result.RawString(`"x_float32":`)
 		result.Float64(float64(**s.RefFloat32Ref))
 		wantComma = true
 	} else {
 		result.RawString(`"x_float32":null`)
 	}
-	if *s.RefFloat64Ref != nil || s.RefFloat64Ref != nil {
+	if s.RefFloat64Ref != nil && *s.RefFloat64Ref != nil {
 		if wantComma {
 			result.RawByte(',')
 		}
@@ -901,14 +901,14 @@ func (s *TestUserDefinedRef) MarshalTo(result *jwriter.Writer) error {
 	if wantComma {
 		result.RawByte(',')
 	}
-	if *s.RefStringRef != nil || s.RefStringRef != nil {
+	if s.RefStringRef != nil && *s.RefStringRef != nil {
 		result.RawString(`"x_string":`)
 		result.String(string(**s.RefStringRef))
 		wantComma = true
 	} else {
 		result.RawString(`"x_string":null`)
 	}
-	if *s.RefBoolRef != nil || s.RefBoolRef != nil {
+	if s.RefBoolRef != nil && *s.RefBoolRef != nil {
 		if wantComma {
 			result.RawByte(',')
 		}

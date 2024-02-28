@@ -85,7 +85,7 @@ func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	if f.isStar {
 		wb.NotZero = asthlp.NotNil(src)
 		if s, ok := src.(*ast.StarExpr); ok {
-			wb.NotZero = asthlp.Or(wb.NotZero, asthlp.NotNil(s.X))
+			wb.NotZero = asthlp.And(asthlp.NotNil(s.X), wb.NotZero)
 		}
 		if f.tags.JsonAppendix() != "omitempty" {
 			wb.IfZero = []ast.Stmt{
