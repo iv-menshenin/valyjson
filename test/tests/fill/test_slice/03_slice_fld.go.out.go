@@ -71,6 +71,10 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var elem int
 			elem, err = _val.Int()
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 			newElem := int(elem)
 			valFieldRef[_key] = &newElem
 		}
@@ -235,6 +239,10 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 			var elem []byte
 			if elem, err = _val.StringBytes(); err != nil {
 				return newParsingError(strconv.Itoa(_key), err)
+			}
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
 			}
 			valExcluded[_key] = FieldValueString(elem)
 		}

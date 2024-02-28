@@ -14,6 +14,13 @@ import (
 
 func Test_Unmarshal(t *testing.T) {
 	t.Parallel()
+	t.Run("has_error_array", func(t *testing.T) {
+		t.Parallel()
+		const data = `{"meta":{"count": 3}, "data":[{"name":"Igor", "surname":"Menshenin"},{"name":554, "surname":"Petrov"},{"name":"Igor", "surname":"Menshenin"}]}`
+		var v Root
+		err := v.UnmarshalJSON([]byte(data))
+		require.Error(t, err)
+	})
 	t.Run("path_to_error_array", func(t *testing.T) {
 		t.Parallel()
 		const data = `{"meta":{"count": 2}, "data":[{"name":"Igor", "surname":"Menshenin"},{},{"name":554, "surname":"Petrov"}]}`

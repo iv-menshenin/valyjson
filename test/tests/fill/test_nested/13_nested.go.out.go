@@ -4,6 +4,7 @@ package test_nested
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/mailru/easyjson/jwriter"
@@ -47,10 +48,14 @@ func (s *Root) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]Middle, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valData = valData[:len(valData)+1]
 			var elem = &valData[len(valData)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("data", err)

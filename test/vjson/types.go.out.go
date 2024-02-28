@@ -4,6 +4,7 @@ package vjson
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"time"
 	"unsafe"
 
@@ -279,6 +280,10 @@ func (s *TableOf) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			var elem Table
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 			newElem := Table(elem)
 			valTables[_key] = &newElem
 		}
@@ -363,6 +368,10 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 			valAssessments = valAssessments[:len(valAssessments)+1]
 			var elem int
 			elem, err = _val.Int()
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 			valAssessments[_key] = int(elem)
 		}
 		if err != nil {
@@ -399,10 +408,14 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valTags) < l || (l == 0 && s.Tags == nil) {
 			valTags = make([]Tag, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valTags = valTags[:len(valTags)+1]
 			var elem = &valTags[len(valTags)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("tags", err)

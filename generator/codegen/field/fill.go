@@ -115,7 +115,7 @@ func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult
 	r.append(IsNotEmpty(
 		f.TypedValue(asthlp.NewIdent("elem"), r.varElem.Name, asthlp.Call(asthlp.StrconvItoaFn, r.varNum)),
 	)...)
-	// result = append(result, f.breakErr()...)
+	r.append(f.breakErr(r.varNum)...)
 
 	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), asthlp.NewIdent("elem"))
 	// valList = append(valList, int32(elem))
@@ -138,9 +138,7 @@ func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult
 			asthlp.Assignment,
 			elemAsParticularType,
 		))
-		return r
 	}
-	r.varNum = nil
 	return r
 }
 
@@ -497,7 +495,7 @@ func getMaxByType(t *ast.Ident) ast.Expr {
 //		err = newParsingError(strconv.Itoa(_elemNum), err)
 //		break
 //	}
-func (f *Field) breakErr(elemNumVar ast.Expr) []ast.Stmt {
+func (f *Field) breakErr(elemPathChain ast.Expr) []ast.Stmt {
 	if helpers.IsIdent(f.expr, "string") {
 		// no error checking for string
 		return nil
@@ -507,7 +505,7 @@ func (f *Field) breakErr(elemNumVar ast.Expr) []ast.Stmt {
 			asthlp.NotNil(ast.NewIdent(names.VarNameError)),
 			asthlp.Assign(asthlp.MakeVarNames(names.VarNameError), asthlp.Assignment, asthlp.Call(
 				asthlp.InlineFunc(asthlp.NewIdent(names.ParsingError)),
-				asthlp.Call(asthlp.StrconvItoaFn, elemNumVar),
+				asthlp.Call(asthlp.StrconvItoaFn, elemPathChain),
 				ast.NewIdent(names.VarNameError),
 			)),
 			asthlp.Break(),

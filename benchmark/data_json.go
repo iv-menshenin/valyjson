@@ -213,6 +213,10 @@ func (s *Hashtag) FillFromJSON(v *fastjson.Value) (err error) {
 			valIndices = valIndices[:len(valIndices)+1]
 			var elem int
 			elem, err = _val.Int()
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 			valIndices[_key] = int(elem)
 		}
 		if err != nil {
@@ -289,10 +293,14 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valHashtags) < l || (l == 0 && s.Hashtags == nil) {
 			valHashtags = make([]Hashtag, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valHashtags = valHashtags[:len(valHashtags)+1]
 			var elem = &valHashtags[len(valHashtags)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("hashtags", err)
@@ -508,6 +516,10 @@ func (s *URL) FillFromJSON(v *fastjson.Value) (err error) {
 			valIndices = valIndices[:len(valIndices)+1]
 			var elem int
 			elem, err = _val.Int()
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 			valIndices[_key] = int(elem)
 		}
 		if err != nil {
@@ -591,10 +603,14 @@ func (s *UserEntityURL) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]URL, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valUrls = valUrls[:len(valUrls)+1]
 			var elem = &valUrls[len(valUrls)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("urls", err)
@@ -1733,10 +1749,14 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valStatuses) < l || (l == 0 && s.Statuses == nil) {
 			valStatuses = make([]Status, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valStatuses = valStatuses[:len(valStatuses)+1]
 			var elem = &valStatuses[len(valStatuses)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("statuses", err)
@@ -1805,10 +1825,14 @@ func (s *XLStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]LargeStruct, 0, len(listA))
 		}
-		for _, _val := range listA {
+		for _key, _val := range listA {
 			valData = valData[:len(valData)+1]
 			var elem = &valData[len(valData)-1]
 			err = elem.FillFromJSON(_val)
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key), err)
+				break
+			}
 		}
 		if err != nil {
 			return newParsingError("data", err)
