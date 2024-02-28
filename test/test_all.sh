@@ -22,7 +22,7 @@ echo "##teamcity[testSuiteFinished name='generator.GeneratedCode']"
 
 echo "##teamcity[testSuiteStarted name='generator.Functional']"
 cd $ROOT/test/vjson/ || exit 1
-go test -json -v ./... || echo "##teamcity[testFailed name='generator.Functional']"
+go test -race -json -v ./... || echo "##teamcity[testFailed name='generator.Functional']"
 echo "##teamcity[testSuiteFinished name='generator.Functional']"
 
 echo "##teamcity[testSuiteStarted name='generator.RaceTests']"

@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/mailru/easyjson v0.7.7
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
-	github.com/valyala/bytebufferpool v1.0.0
 	github.com/valyala/fastjson v1.6.4
 )
 

@@ -56,6 +56,7 @@ func TestPerson_UnmarshalJSON(t *testing.T) {
 // BenchmarkMarshal-8     	  425655	      2666 ns/op	     872 B/op	       9 allocs/op
 // BenchmarkMarshal-8   	  676693	      1866 ns/op	     768 B/op	       2 allocs/op
 // EASY JSON Benchmark     	  685834	      1847 ns/op	    1192 B/op	       8 allocs/op
+// BenchmarkMarshal-8     	 1000000	      5538 ns/op	    1256 B/op	       9 allocs/op
 func BenchmarkMarshal(b *testing.B) {
 	b.ReportAllocs()
 	person := fulfilledPerson()
@@ -68,6 +69,7 @@ func BenchmarkMarshal(b *testing.B) {
 // BenchmarkUnmarshal-8   	  383025	      3094 ns/op	    1056 B/op	      25 allocs/op
 // BenchmarkUnmarshal-8   	  400539	      3015 ns/op	     988 B/op	      18 allocs/op
 // EASY JSON Benchmark   	  403358	      3021 ns/op	    1872 B/op	      23 allocs/op
+// BenchmarkUnmarshal-8   	  493149	     12653 ns/op	    1000 B/op	      21 allocs/op
 func BenchmarkUnmarshal(b *testing.B) {
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
