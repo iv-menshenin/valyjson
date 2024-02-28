@@ -212,7 +212,7 @@ func (s *Struct) MarshalFunc() []ast.Decl {
 	return NewMarshalFunc(s.name)
 }
 
-// AppendJsonFunc produces MarshalAppend(dst []byte) ([]byte, error)
+// MarshalToFunc produces MarshalAppend(dst []byte) ([]byte, error)
 func (s *Struct) MarshalToFunc() ast.Decl {
 	var fn = asthlp.DeclareFunction(asthlp.NewIdent(names.MethodNameMarshalTo)).
 		Comments("// " + names.MethodNameMarshalTo + " serializes all fields of the structure using a buffer.").
@@ -271,11 +271,11 @@ func jsonFieldStmts(fld *ast.Field) []ast.Stmt {
 		case *ast.SelectorExpr:
 			name = t.Sel.Name
 		}
-		return factory.MarshalStatements(name)
+		return factory.MarshalStatements(asthlp.SimpleSelector(names.VarNameReceiver, name), name)
 	}
 	var result []ast.Stmt
 	for _, name := range fld.Names {
-		result = append(result, factory.MarshalStatements(name.Name)...)
+		result = append(result, factory.MarshalStatements(asthlp.SimpleSelector(names.VarNameReceiver, name.Name), name.Name)...)
 	}
 	return result
 }

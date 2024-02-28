@@ -51,12 +51,13 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.StringConstant(f.tags.JsonName()).Expr()))...)
 	result = append(result, f.checkErr(bufVariable)...)
 
-	if f.isStar {
-		result = append(result, f.fillRefField(bufVariable, f.field)...)
-	} else {
-		result = append(result, f.fillField(bufVariable, f.field)...)
+	if f.isStarType {
+		return append(result, f.fillFieldRef(bufVariable, f.field)...)
 	}
-	return result
+	if f.isStar {
+		return append(result, f.fillRefField(bufVariable, f.field)...)
+	}
+	return append(result, f.fillField(bufVariable, f.field)...)
 }
 
 func makeBufVariable(name string) *ast.Ident {
@@ -197,6 +198,12 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 
 	case *ast.Ident:
 		result = append(result, f.typeExtraction(dst, v, t.Name, elemPathExpr)...)
+
+	case *ast.StarExpr:
+		f.isStarType = true
+		intF := *f
+		intF.refx = t.X
+		return intF.TypedValue(dst, v, elemPathExpr)
 
 	case *ast.StructType:
 		result = append(result, f.typeExtraction(dst, v, "struct", elemPathExpr)...)
@@ -553,6 +560,59 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 	}
 }
 
+// var _tmp = int32(valInt32Ref)
+// s.Int32Ref = DefinedRefInt32(&_tmp)
+func (f *Field) fillFieldRef(rhs, dst ast.Expr) []ast.Stmt {
+	var tmpName = asthlp.NewIdent("_ref")
+	var result = []ast.Stmt{
+		asthlp.Var(asthlp.VariableType(tmpName.Name, f.refx.(*ast.StarExpr).X)),
+	}
+	switch t := f.refx.(*ast.StarExpr).X.(type) {
+
+	case *ast.Ident:
+		result = append(result, f.typedFillIn(rhs, tmpName, t.Name)...)
+
+	case *ast.StructType:
+		panic("not implemented")
+
+	case *ast.SelectorExpr:
+		if helpers.IsOrdinal(f.refx) {
+			return []ast.Stmt{assign(tmpName, asthlp.ExpressionTypeConvert(rhs, f.expr))}
+		}
+		result = append(result, assign(tmpName, rhs))
+
+	case *ast.MapType, *ast.ArrayType:
+		// {dst} = {rhs}
+		result = append(result, assign(tmpName, rhs))
+
+	default:
+		return nil
+	}
+	if f.isStar {
+		return append(
+			result,
+			asthlp.Assign(
+				asthlp.VarNames{dst},
+				asthlp.Assignment,
+				asthlp.Call(asthlp.NewFn, f.expr),
+			),
+			asthlp.Assign(
+				asthlp.VarNames{asthlp.Star(dst)},
+				asthlp.Assignment,
+				asthlp.ExpressionTypeConvert(asthlp.Ref(tmpName), f.expr),
+			),
+		)
+	}
+	return append(
+		result,
+		asthlp.Assign(
+			asthlp.VarNames{dst},
+			asthlp.Assignment,
+			asthlp.ExpressionTypeConvert(asthlp.Ref(tmpName), f.expr),
+		),
+	)
+}
+
 // {dst} = new({t})
 // *{dst} = {t}({rhs})
 func (f *Field) newAndFillIn(rhs, dst, t ast.Expr) []ast.Stmt {
@@ -663,16 +723,34 @@ func (f *Field) ifDefault(varName, name string) []ast.Stmt {
 		}
 		return nil
 	}
+	var refVarName = "__" + name
+	if f.isStarType {
+		if f.isStar {
+			// var __RefInt32Ref int32 = 32
+			// s.RefInt32Ref = new(DefinedRefInt32)
+			// *s.RefInt32Ref = DefinedRefInt32(&__RefInt32Ref)
+			return []ast.Stmt{
+				asthlp.Var(asthlp.VariableType(refVarName, f.refx.(*ast.StarExpr).X, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue())))),
+				assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Call(asthlp.NewFn, f.expr)),
+				assign(asthlp.Star(asthlp.SimpleSelector(names.VarNameReceiver, name)), asthlp.ExpressionTypeConvert(asthlp.Ref(asthlp.NewIdent(refVarName)), f.expr)),
+			}
+		}
+		// var _ref int32 = 32
+		// s.Int32Ref = DefinedRefInt32(&_ref)
+		return []ast.Stmt{
+			asthlp.Var(asthlp.VariableType(refVarName, f.refx.(*ast.StarExpr).X, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue())))),
+			assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.ExpressionTypeConvert(asthlp.Ref(asthlp.NewIdent(refVarName)), f.expr)),
+		}
+	}
 	if f.isStar {
-		var tmpVarName = "__" + name
 		return []ast.Stmt{
 			// if {tmp} = nil {
 			asthlp.If(
 				asthlp.IsNil(asthlp.NewIdent(varName)),
 				asthlp.Var(
-					asthlp.VariableType(tmpVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue()))),
+					asthlp.VariableType(refVarName, f.expr, asthlp.FreeExpression(helpers.BasicLiteralFromType(f.refx, f.tags.DefaultValue()))),
 				),
-				assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(tmpVarName))),
+				assign(asthlp.SimpleSelector(names.VarNameReceiver, name), asthlp.Ref(asthlp.NewIdent(refVarName))),
 			),
 		}
 	}

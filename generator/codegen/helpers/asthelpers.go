@@ -27,6 +27,9 @@ func IsOrdinal(expr ast.Expr) bool {
 func BasicLiteralFromType(t ast.Expr, val string) ast.Expr {
 	switch i := t.(type) {
 
+	case *ast.StarExpr:
+		return BasicLiteralFromType(i.X, val)
+
 	case *ast.Ident:
 		switch i.Name {
 

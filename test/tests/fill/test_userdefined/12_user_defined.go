@@ -19,20 +19,23 @@ type TestUserDefined struct {
 	RefFloat64 *DefinedFloat64 `json:"r_float64,omitempty"`
 	RefString  *DefinedString  `json:"r_string,omitempty"`
 	RefBool    *DefinedBool    `json:"r_bool,omitempty"`
-	// TODO @menshenin implement me
-	//Int32Ref   DefinedRefInt32   `json:"d_int32" default:"32"`
-	//Int64Ref   DefinedRefInt64   `json:"d_int64,omitempty"`
-	//Float32Ref DefinedRefFloat32 `json:"d_float32" default:"123.01"`
-	//Float64Ref DefinedRefFloat64 `json:"d_float64,omitempty"`
-	//StringRef  DefinedRefString  `json:"d_string" default:"default_string"`
-	//BoolRef    DefinedRefBool    `json:"d_bool,omitempty"`
-	//
-	//RefInt32Ref   *DefinedRefInt32   `json:"x_int32" default:"32"`
-	//RefInt64Ref   *DefinedRefInt64   `json:"x_int64,omitempty"`
-	//RefFloat32Ref *DefinedRefFloat32 `json:"x_float32" default:"123.01"`
-	//RefFloat64Ref *DefinedRefFloat64 `json:"x_float64,omitempty"`
-	//RefStringRef  *DefinedRefString  `json:"x_string" default:"default_string"`
-	//RefBoolRef    *DefinedRefBool    `json:"x_bool,omitempty"`
+}
+
+//json:optional
+type TestUserDefinedRef struct {
+	Int32Ref   DefinedRefInt32   `json:"d_int32" default:"32"`
+	Int64Ref   DefinedRefInt64   `json:"d_int64,omitempty"`
+	Float32Ref DefinedRefFloat32 `json:"d_float32" default:"123.01"`
+	Float64Ref DefinedRefFloat64 `json:"d_float64,omitempty"`
+	StringRef  DefinedRefString  `json:"d_string" default:"default_string"`
+	BoolRef    DefinedRefBool    `json:"d_bool,omitempty"`
+
+	RefInt32Ref   *DefinedRefInt32   `json:"x_int32" default:"32"`
+	RefInt64Ref   *DefinedRefInt64   `json:"x_int64,omitempty"`
+	RefFloat32Ref *DefinedRefFloat32 `json:"x_float32" default:"123.01"`
+	RefFloat64Ref *DefinedRefFloat64 `json:"x_float64,omitempty"`
+	RefStringRef  *DefinedRefString  `json:"x_string" default:"default_string"`
+	RefBoolRef    *DefinedRefBool    `json:"x_bool,omitempty"`
 }
 
 type (
@@ -43,12 +46,12 @@ type (
 	DefinedString  string
 	DefinedBool    bool
 
-	//DefinedRefInt32   *int32
-	//DefinedRefInt64   *int64
-	//DefinedRefFloat32 *float32
-	//DefinedRefFloat64 *float64
-	//DefinedRefString  *string
-	//DefinedRefBool    *bool
+	DefinedRefInt32   *int32
+	DefinedRefInt64   *int64
+	DefinedRefFloat32 *float32
+	DefinedRefFloat64 *float64
+	DefinedRefString  *string
+	DefinedRefBool    *bool
 )
 
 type (

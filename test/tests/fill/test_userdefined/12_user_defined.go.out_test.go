@@ -46,6 +46,13 @@ func Test_TestUserDefined_Unmarshal(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expected, got)
 	})
+	t.Run("error_f_int32_overflow", func(t *testing.T) {
+		var got TestUserDefined
+		err := got.UnmarshalJSON([]byte(`{"f_int32": 2147483648}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "f_int32")
+		require.ErrorContains(t, err, "exceeds maximum for data type")
+	})
 	t.Run("error_f_int32_double", func(t *testing.T) {
 		var got TestUserDefined
 		err := got.UnmarshalJSON([]byte(`{"f_int32": 0,"f_int32": 0}`))
@@ -58,6 +65,13 @@ func Test_TestUserDefined_Unmarshal(t *testing.T) {
 		err := got.UnmarshalJSON([]byte(`{"f_int32": null}`))
 		require.Error(t, err)
 		require.ErrorContains(t, err, "f_int32")
+		require.ErrorContains(t, err, "value doesn't contain number")
+	})
+	t.Run("error_f_int64_type_error", func(t *testing.T) {
+		var got TestUserDefined
+		err := got.UnmarshalJSON([]byte(`{"f_int64": "34"}`))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "f_int64")
 		require.ErrorContains(t, err, "value doesn't contain number")
 	})
 	t.Run("error_f_float32_double", func(t *testing.T) {
@@ -114,5 +128,117 @@ func Test_TestUserDefined_Zero(t *testing.T) {
 			String: "default_string",
 		}
 		require.False(t, test.IsZero())
+	})
+}
+
+func Test_TestUserDefined_Marshal_RInt(t *testing.T) {
+	t.Parallel()
+	t.Run("ref_int", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f  DefinedInt32 = 3
+			ff DefinedInt64 = 44
+		)
+		var test = TestUserDefined{
+			RefInt32: &f,
+			RefInt64: &ff,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"f_float32":0, "f_int32":0, "f_string":"","r_int32":3,"r_int64": 44}`, string(data))
+	})
+	t.Run("ref_int", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f  DefinedInt32 = 3
+			ff DefinedInt64 = 44
+		)
+		var test = TestUserDefined{
+			RefInt32: &f,
+			RefInt64: &ff,
+		}
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"f_float32":0, "f_int32":0, "f_string":"","r_int32":3,"r_int64": 44}`, string(data))
+	})
+}
+
+func Test_TestUserDefined_Unmarshal_RDef(t *testing.T) {
+	t.Parallel()
+	t.Run("ref_int", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f  DefinedInt32 = 3
+			ff DefinedInt64 = 2147483647
+		)
+		var actual TestUserDefined
+		var expected = TestUserDefined{
+			RefInt32: &f,
+			RefInt64: &ff,
+		}
+		const data = `{"f_float32":0, "f_int32":0, "f_string":"","r_int32":3,"r_int64": 2147483647}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+	t.Run("int32_overload", func(t *testing.T) {
+		t.Parallel()
+		var actual TestUserDefined
+		const data = `{"f_float32":0, "f_int32":0, "f_string":"","r_int32":2147483648,"r_int64": 44}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "exceeds maximum for data type")
+	})
+	t.Run("ref_float", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f  DefinedFloat32 = 123.4
+			ff DefinedFloat64 = 34.5
+		)
+		var actual TestUserDefined
+		var expected = TestUserDefined{
+			RefFloat32: &f,
+			RefFloat64: &ff,
+		}
+		const data = `{"f_float32":0, "f_int32":0, "f_string":"","r_float32":123.4, "r_float64":34.5}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+	t.Run("float32_overload", func(t *testing.T) {
+		t.Parallel()
+		var actual TestUserDefined
+		const data = `{"f_float32":3.50282346638528859811704183484516925440e+38, "f_int32":0, "f_string":"","r_int32":4433,"r_int64": 44}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "exceeds maximum for data type")
+	})
+	t.Run("ref_string", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f DefinedString = "2147483647"
+		)
+		var actual TestUserDefined
+		var expected = TestUserDefined{
+			RefString: &f,
+		}
+		const data = `{"f_float32":0, "f_int32":0, "f_string":"","r_string": "2147483647"}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+	t.Run("r_bool", func(t *testing.T) {
+		t.Parallel()
+		var (
+			f DefinedBool = true
+		)
+		var actual TestUserDefined
+		var expected = TestUserDefined{
+			RefBool: &f,
+		}
+		const data = `{"f_float32":0, "f_int32":0, "f_string":"","r_bool": true}`
+		err := actual.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
 	})
 }

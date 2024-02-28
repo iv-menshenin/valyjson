@@ -23,8 +23,10 @@ type (
 		refx ast.Expr
 		// tags contains tag descriptor
 		tags tags.Tags
-		// isStar is type is ref
+		// isStar is type is ref to type
 		isStar bool
+		// isStarType is type is type of ref
+		isStarType bool
 		// isNullable is type nullable
 		isNullable bool
 		// dontCheckErr do not check error and not to return
@@ -151,10 +153,19 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 //	}
 //
 // result.Write(b)
-func (f *Field) MarshalStatements(name string) []ast.Stmt {
+func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 	var v = intermediateVarName(name, f.tags)
-	var src = asthlp.SimpleSelector(names.VarNameReceiver, name)
 	switch tt := f.refx.(type) {
+
+	case *ast.StarExpr:
+		f.isStarType = true
+		intF := *f
+		intF.refx = tt.X
+		intF.isStar = true
+		if f.isStar {
+			src = asthlp.Star(src)
+		}
+		return intF.MarshalStatements(src, name)
 
 	case *ast.Ident:
 		return f.typeMarshal(src, v, tt.Name)
