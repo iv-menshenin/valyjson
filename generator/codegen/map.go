@@ -226,7 +226,7 @@ func (m *Map) MarshalToFunc() ast.Decl {
 	var valType = m.spec.Value
 	dec := field.GetDecorExpr(valType)
 	if i, ok := valType.(*ast.Ident); ok {
-		valType = denotedType(i)
+		valType = helpers.DenotedIdent(i)
 	}
 	errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+m.name+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 	ve := field.GetValueExtractor(valType, errExpr, dec)
@@ -258,20 +258,6 @@ func (m *Map) MarshalToFunc() ast.Decl {
 		makeWriteAndReturn('}')...,
 	)
 	return fn.Decl()
-}
-
-func denotedType(t ast.Expr) ast.Expr {
-	i, ok := t.(*ast.Ident)
-	if !ok {
-		return t
-	}
-	if i.Obj != nil {
-		ts, ok := i.Obj.Decl.(*ast.TypeSpec)
-		if ok {
-			return ts.Type
-		}
-	}
-	return i
 }
 
 func (m *Map) ZeroFunc() ast.Decl {

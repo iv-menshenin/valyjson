@@ -80,23 +80,10 @@ func (f *Field) fillDenotedType() {
 		return
 	}
 	if i, ok := f.expr.(*ast.Ident); ok {
-		f.refx = denotedType(i)
+		f.refx = helpers.DenotedIdent(i)
 		return
 	}
 	f.refx = f.expr
-}
-
-// denotedType allows to explore real type
-//
-// deprecated
-func denotedType(t *ast.Ident) ast.Expr {
-	if t.Obj != nil {
-		ts, ok := t.Obj.Decl.(*ast.TypeSpec)
-		if ok {
-			return ts.Type
-		}
-	}
-	return t
 }
 
 func (f *Field) DontCheckErr() {
@@ -154,7 +141,6 @@ func (f *Field) FillStatements(name string) []ast.Stmt {
 //
 // result.Write(b)
 func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
-	var v = intermediateVarName(name, f.tags)
 	switch tt := f.refx.(type) {
 
 	case *ast.StarExpr:
@@ -168,7 +154,7 @@ func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 		return intF.MarshalStatements(src, name)
 
 	case *ast.Ident:
-		return f.typeMarshal(src, v, tt.Name)
+		return f.typeMarshal(src, tt.Name)
 
 	case *ast.SelectorExpr:
 		if tt.Sel.Name == "Time" {
@@ -189,21 +175,15 @@ func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 		if i, ok := tt.Key.(*ast.Ident); ok {
 			isString = i.Name == "string"
 		}
-		var valType = tt.Value
-		dec := GetDecorExpr(valType)
-		if i, ok := valType.(*ast.Ident); ok {
-			valType = denotedType(i)
-		}
+		dec := GetDecorExpr(tt.Value)
+		valType := helpers.DenotedType(tt.Value)
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" attribute %q: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 		block := mapMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", isString, GetValueExtractor(valType, errExpr, dec))
 		return block.Render(putCommaFirstIf)
 
 	case *ast.ArrayType:
-		var valType = tt.Elt
-		dec := GetDecorExpr(valType)
-		if i, ok := valType.(*ast.Ident); ok {
-			valType = denotedType(i)
-		}
+		dec := GetDecorExpr(tt.Elt)
+		valType := helpers.DenotedType(tt.Elt)
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
 		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
 		return block.Render(putCommaFirstIf)
@@ -223,7 +203,7 @@ func EmptyDecorSrc(e ast.Expr) ast.Expr {
 
 func GetDecorExpr(valType ast.Expr) DecorSrc {
 	if i, ok := valType.(*ast.Ident); ok {
-		valType = denotedType(i)
+		valType = helpers.DenotedIdent(i)
 		switch t := valType.(type) {
 		case *ast.Ident:
 			if i.Name != "string" && t.Name == "string" {

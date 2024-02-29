@@ -118,8 +118,8 @@ func makeWriteAndReturn(r rune) []ast.Stmt {
 }
 
 func resetStmt(t, name ast.Expr) []ast.Stmt {
-	var needCast = t != denotedType(t)
-	switch tt := denotedType(t).(type) {
+	var needCast = t != helpers.DenotedType(t)
+	switch tt := helpers.DenotedType(t).(type) {
 	case *ast.ArrayType:
 		if tt.Len == nil {
 			//for i := range s.Data {

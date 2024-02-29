@@ -48,7 +48,7 @@ var (
 // result.WriteString("\"{json}\":")
 // b = strconv.AppendUint(buf[:0], uint64({src}), 10)
 // result.Write(b)
-func (f *Field) typeMarshal(src ast.Expr, v, t string) []ast.Stmt {
+func (f *Field) typeMarshal(src ast.Expr, t string) []ast.Stmt {
 	var (
 		ur = src
 		wb WriteBlock
@@ -141,7 +141,7 @@ func (f *Field) typeRefMarshal(src ast.Expr, v, t string) []ast.Stmt {
 	var result = []ast.Stmt{
 		define(ast.NewIdent(v), asthlp.Star(src)),
 	}
-	result = append(result, f.typeMarshal(ast.NewIdent(v), v, t)...)
+	result = append(result, f.typeMarshal(ast.NewIdent(v), t)...)
 
 	if stmt := f.ifNil(); len(stmt) > 0 {
 		return []ast.Stmt{

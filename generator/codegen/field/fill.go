@@ -3,12 +3,10 @@ package field
 import (
 	"fmt"
 	asthlp "github.com/iv-menshenin/go-ast"
-	"go/ast"
-	"go/token"
-
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
+	"go/ast"
 )
 
 var (
@@ -102,10 +100,10 @@ func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult
 		),
 	)
 	if f.isNullable {
-		//if !valueIsNotNull(listElem) {
-		//	valData[len(valData)-1] = nil
-		//	continue
-		//}
+		// if !valueIsNotNull(listElem) {
+		//  valData[len(valData)-1] = nil
+		//  continue
+		// }
 		r.append(asthlp.If(
 			asthlp.Not(asthlp.Call(valueIsNotNull, r.varElem)),
 			asthlp.Assign(asthlp.VarNames{reference}, asthlp.Assignment, asthlp.Nil),
@@ -158,10 +156,10 @@ func (f *Field) fillElem(dst ast.Expr, valVariableName string) fillArrayResult {
 	}
 	var bufVariable = asthlp.NewIdent("_tmp")
 	if f.isNullable {
-		//if !valueIsNotNull(listElem) {
-		//	valFieldRef = append(valFieldRef, nil)
-		//	continue
-		//}
+		// if !valueIsNotNull(listElem) {
+		//  valFieldRef = append(valFieldRef, nil)
+		//   continue
+		// }
 		r.append(asthlp.If(
 			asthlp.Not(asthlp.Call(valueIsNotNull, r.varElem)),
 			appendStmt(dst, ast.NewIdent("nil")),
@@ -527,7 +525,7 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 		switch t.Name {
 
 		case "bool", "int64", "int", "float64":
-			return f.typedFillIn(&ast.UnaryExpr{X: rhs, Op: token.AND}, dst, t.Name)
+			return f.typedFillIn(asthlp.Ref(rhs), dst, t.Name)
 
 		case "string":
 			// s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
