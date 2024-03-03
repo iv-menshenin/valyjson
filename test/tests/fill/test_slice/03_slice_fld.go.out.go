@@ -36,9 +36,11 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("strs", err)
 		}
-		valField := s.Field[:0]
+		valField := s.Field
 		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
 			valField = make([]string, 0, len(listA))
+		} else {
+			valField = s.Field[:0]
 		}
 		for _key1, _val1 := range listA {
 			valField = valField[:len(valField)+1]
@@ -59,9 +61,11 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("ints", err)
 		}
-		valFieldRef := s.FieldRef[:0]
+		valFieldRef := s.FieldRef
 		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
 			valFieldRef = make([]*int, 0, len(listA))
+		} else {
+			valFieldRef = s.FieldRef[:0]
 		}
 		for _key1, _val1 := range listA {
 			valFieldRef = valFieldRef[:len(valFieldRef)+1]
@@ -230,9 +234,11 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("excluded", err)
 		}
-		valExcluded := s.Excluded[:0]
+		valExcluded := s.Excluded
 		if l := len(listA); cap(valExcluded) < l || (l == 0 && s.Excluded == nil) {
 			valExcluded = make([]FieldValueString, 0, len(listA))
+		} else {
+			valExcluded = s.Excluded[:0]
 		}
 		for _key1, _val1 := range listA {
 			valExcluded = valExcluded[:len(valExcluded)+1]
@@ -335,9 +341,11 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("strs", err)
 		}
-		valFieldStr := s.FieldStr[:0]
+		valFieldStr := s.FieldStr
 		if l := len(listA); cap(valFieldStr) < l || (l == 0 && s.FieldStr == nil) {
 			valFieldStr = make([][]string, 0, len(listA))
+		} else {
+			valFieldStr = s.FieldStr[:0]
 		}
 		for _key1, _val1 := range listA {
 			valFieldStr = valFieldStr[:len(valFieldStr)+1]
@@ -350,9 +358,11 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 			if err != nil {
 				return newParsingError("", err)
 			}
-			_elem1 := valFieldStr[len(valFieldStr)-1][:0]
+			_elem1 := valFieldStr[len(valFieldStr)-1]
 			if l := len(listA); cap(_elem1) < l || (l == 0 && valFieldStr[len(valFieldStr)-1] == nil) {
 				_elem1 = make([]string, 0, len(listA))
+			} else {
+				_elem1 = valFieldStr[len(valFieldStr)-1][:0]
 			}
 			for _key2, _val2 := range listA {
 				_elem1 = _elem1[:len(_elem1)+1]
@@ -379,9 +389,11 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("ints", err)
 		}
-		valFieldInt := s.FieldInt[:0]
+		valFieldInt := s.FieldInt
 		if l := len(listA); cap(valFieldInt) < l || (l == 0 && s.FieldInt == nil) {
 			valFieldInt = make([][]int, 0, len(listA))
+		} else {
+			valFieldInt = s.FieldInt[:0]
 		}
 		for _key1, _val1 := range listA {
 			valFieldInt = valFieldInt[:len(valFieldInt)+1]
@@ -394,9 +406,11 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 			if err != nil {
 				return newParsingError("", err)
 			}
-			_elem1 := valFieldInt[len(valFieldInt)-1][:0]
+			_elem1 := valFieldInt[len(valFieldInt)-1]
 			if l := len(listA); cap(_elem1) < l || (l == 0 && valFieldInt[len(valFieldInt)-1] == nil) {
 				_elem1 = make([]int, 0, len(listA))
+			} else {
+				_elem1 = valFieldInt[len(valFieldInt)-1][:0]
 			}
 			for _key2, _val2 := range listA {
 				_elem1 = _elem1[:len(_elem1)+1]

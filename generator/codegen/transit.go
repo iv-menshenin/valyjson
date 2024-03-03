@@ -196,9 +196,15 @@ func (t *Transitive) ZeroFunc() ast.Decl {
 
 	zero := helpers.ZeroValueOfT(t.tran)
 	if zero != nil {
-		fn.AppendStmt(
-			asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.ExpressionTypeConvert(zero, asthlp.NewIdent(t.name)))),
-		)
+		if zero == asthlp.Nil {
+			fn.AppendStmt(
+				asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), zero)),
+			)
+		} else {
+			fn.AppendStmt(
+				asthlp.Return(asthlp.Equal(asthlp.NewIdent(names.VarNameReceiver), asthlp.ExpressionTypeConvert(zero, asthlp.NewIdent(t.name)))),
+			)
+		}
 	} else {
 		// return s.IsZero()
 		fn.AppendStmt(

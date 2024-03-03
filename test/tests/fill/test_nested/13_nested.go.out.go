@@ -44,9 +44,11 @@ func (s *Root) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("data", err)
 		}
-		valData := s.Data[:0]
+		valData := s.Data
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]Middle, 0, len(listA))
+		} else {
+			valData = s.Data[:0]
 		}
 		for _key1, _val1 := range listA {
 			valData = valData[:len(valData)+1]
