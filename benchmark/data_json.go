@@ -205,9 +205,11 @@ func (s *Hashtag) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("indices", err)
 		}
-		valIndices := s.Indices[:0]
+		valIndices := s.Indices
 		if l := len(listA); cap(valIndices) < l || (l == 0 && s.Indices == nil) {
 			valIndices = make([]int, 0, len(listA))
+		} else {
+			valIndices = s.Indices[:0]
 		}
 		for _key1, _val1 := range listA {
 			valIndices = valIndices[:len(valIndices)+1]
@@ -289,9 +291,11 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("hashtags", err)
 		}
-		valHashtags := s.Hashtags[:0]
+		valHashtags := s.Hashtags
 		if l := len(listA); cap(valHashtags) < l || (l == 0 && s.Hashtags == nil) {
 			valHashtags = make([]Hashtag, 0, len(listA))
+		} else {
+			valHashtags = s.Hashtags[:0]
 		}
 		for _key1, _val1 := range listA {
 			valHashtags = valHashtags[:len(valHashtags)+1]
@@ -313,9 +317,11 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("urls", err)
 		}
-		valUrls := s.Urls[:0]
+		valUrls := s.Urls
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]*string, 0, len(listA))
+		} else {
+			valUrls = s.Urls[:0]
 		}
 		for _key1, _val1 := range listA {
 			valUrls = valUrls[:len(valUrls)+1]
@@ -341,9 +347,11 @@ func (s *Entities) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("user_mentions", err)
 		}
-		valUserMentions := s.UserMentions[:0]
+		valUserMentions := s.UserMentions
 		if l := len(listA); cap(valUserMentions) < l || (l == 0 && s.UserMentions == nil) {
 			valUserMentions = make([]*string, 0, len(listA))
+		} else {
+			valUserMentions = s.UserMentions[:0]
 		}
 		for _key1, _val1 := range listA {
 			valUserMentions = valUserMentions[:len(valUserMentions)+1]
@@ -428,9 +436,11 @@ func (s *UserEntityDescription) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("urls", err)
 		}
-		valUrls := s.Urls[:0]
+		valUrls := s.Urls
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]*string, 0, len(listA))
+		} else {
+			valUrls = s.Urls[:0]
 		}
 		for _key1, _val1 := range listA {
 			valUrls = valUrls[:len(valUrls)+1]
@@ -508,9 +518,11 @@ func (s *URL) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("indices", err)
 		}
-		valIndices := s.Indices[:0]
+		valIndices := s.Indices
 		if l := len(listA); cap(valIndices) < l || (l == 0 && s.Indices == nil) {
 			valIndices = make([]int, 0, len(listA))
+		} else {
+			valIndices = s.Indices[:0]
 		}
 		for _key1, _val1 := range listA {
 			valIndices = valIndices[:len(valIndices)+1]
@@ -599,9 +611,11 @@ func (s *UserEntityURL) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("urls", err)
 		}
-		valUrls := s.Urls[:0]
+		valUrls := s.Urls
 		if l := len(listA); cap(valUrls) < l || (l == 0 && s.Urls == nil) {
 			valUrls = make([]URL, 0, len(listA))
+		} else {
+			valUrls = s.Urls[:0]
 		}
 		for _key1, _val1 := range listA {
 			valUrls = valUrls[:len(valUrls)+1]
@@ -1745,9 +1759,11 @@ func (s *LargeStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("statuses", err)
 		}
-		valStatuses := s.Statuses[:0]
+		valStatuses := s.Statuses
 		if l := len(listA); cap(valStatuses) < l || (l == 0 && s.Statuses == nil) {
 			valStatuses = make([]Status, 0, len(listA))
+		} else {
+			valStatuses = s.Statuses[:0]
 		}
 		for _key1, _val1 := range listA {
 			valStatuses = valStatuses[:len(valStatuses)+1]
@@ -1821,9 +1837,11 @@ func (s *XLStruct) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("data", err)
 		}
-		valData := s.Data[:0]
+		valData := s.Data
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]LargeStruct, 0, len(listA))
+		} else {
+			valData = s.Data[:0]
 		}
 		for _key1, _val1 := range listA {
 			valData = valData[:len(valData)+1]

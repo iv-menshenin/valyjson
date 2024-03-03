@@ -268,6 +268,15 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 		}
 	}
 
+	if dt := helpers.DenotedType(t); t != dt && helpers.IsOrdinal(dt) {
+		if dt.(*ast.Ident).Name == "string" {
+			tmpDecor := decorSrc
+			decorSrc = func(e ast.Expr) ast.Expr {
+				return asthlp.ExpressionTypeConvert(tmpDecor(e), t)
+			}
+		}
+		t = dt
+	}
 	switch tt := t.(type) {
 
 	case *ast.Ident:

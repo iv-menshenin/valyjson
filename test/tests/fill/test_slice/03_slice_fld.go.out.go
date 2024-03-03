@@ -343,7 +343,7 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 		}
 		valFieldStr := s.FieldStr
 		if l := len(listA); cap(valFieldStr) < l || (l == 0 && s.FieldStr == nil) {
-			valFieldStr = make([][]string, 0, len(listA))
+			valFieldStr = make([][]InnerString, 0, len(listA))
 		} else {
 			valFieldStr = s.FieldStr[:0]
 		}
@@ -360,7 +360,7 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 			}
 			_elem1 := valFieldStr[len(valFieldStr)-1]
 			if l := len(listA); cap(_elem1) < l || (l == 0 && valFieldStr[len(valFieldStr)-1] == nil) {
-				_elem1 = make([]string, 0, len(listA))
+				_elem1 = make([]InnerString, 0, len(listA))
 			} else {
 				_elem1 = valFieldStr[len(valFieldStr)-1][:0]
 			}
@@ -370,13 +370,17 @@ func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
 				if _elem2, err = _val2.StringBytes(); err != nil {
 					return newParsingError(strconv.Itoa(_key2), err)
 				}
-				_elem1[_key2] = string(_elem2)
+				if err != nil {
+					err = newParsingError(strconv.Itoa(_key2), err)
+					break
+				}
+				_elem1[_key2] = InnerString(_elem2)
 			}
 			if err != nil {
 				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			valFieldStr[_key1] = []string(_elem1)
+			valFieldStr[_key1] = []InnerString(_elem1)
 		}
 		if err != nil {
 			return newParsingError("strs", err)
@@ -762,7 +766,7 @@ func (s *TestSliceSlice) MarshalTo(result *jwriter.Writer) error {
 			_k = _k
 			result.RawByte('[')
 			for _k1, _v1 := range _v {
-				result.String(_v1)
+				result.String(string(_v1))
 				if len(_v)-1 > _k1 {
 					result.RawByte(',')
 				}
@@ -823,7 +827,7 @@ func (s TestSliceSlice) IsZero() bool {
 func (s *TestSliceSlice) Reset() {
 	for i := range s.FieldStr {
 		for j := range s.FieldStr[i] {
-			s.FieldStr[i][j] = ""
+			s.FieldStr[i][j] = InnerString("")
 		}
 		s.FieldStr[i] = s.FieldStr[i][:0]
 	}

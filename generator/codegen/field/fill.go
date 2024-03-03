@@ -2,11 +2,13 @@ package field
 
 import (
 	"fmt"
+	"go/ast"
+
 	asthlp "github.com/iv-menshenin/go-ast"
+
 	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
-	"go/ast"
 )
 
 var (
@@ -193,7 +195,11 @@ func (f *Field) fillElem(dst ast.Expr, valVariableName string) fillArrayResult {
 // val{name}, err = {v}.(Int|Int64|String|Bool)()
 func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []ast.Stmt {
 	var result []ast.Stmt
-	switch t := f.refx.(type) {
+	var refx = f.refx
+	if dt := helpers.DenotedType(f.refx); refx != dt && helpers.IsOrdinal(dt) {
+		refx = dt
+	}
+	switch t := refx.(type) {
 
 	case *ast.Ident:
 		result = append(result, f.typeExtraction(dst, v, t.Name, elemPathExpr)...)

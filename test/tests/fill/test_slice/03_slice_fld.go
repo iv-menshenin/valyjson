@@ -30,6 +30,8 @@ type (
 //
 //json:json
 type TestSliceSlice struct {
-	FieldStr [][]string `json:"strs"`
-	FieldInt [][]int    `json:"ints"`
+	FieldStr [][]InnerString `json:"strs"`
+	FieldInt [][]int         `json:"ints"`
 }
+
+type InnerString string

@@ -369,7 +369,7 @@ func TestSliceSlice_Unmarshal(t *testing.T) {
 		const data = `{"strs":[["a","b","c"],["1","2","3"]],"ints":[[1,2,3,4],[0,0,0,1]]}`
 		var test TestSliceSlice
 		var expected = TestSliceSlice{
-			FieldStr: [][]string{
+			FieldStr: [][]InnerString{
 				{"a", "b", "c"},
 				{"1", "2", "3"},
 			},
@@ -386,7 +386,7 @@ func TestSliceSlice_Unmarshal(t *testing.T) {
 		const data = `{"strs":[["a","b","c"],null,["1","2","3"]],"ints":[[1,2,3,4],[],[-1,0,0,1]]}`
 		var test TestSliceSlice
 		var expected = TestSliceSlice{
-			FieldStr: [][]string{
+			FieldStr: [][]InnerString{
 				{"a", "b", "c"},
 				nil,
 				{"1", "2", "3"},
@@ -424,7 +424,7 @@ func TestSliceSlice_Marshal(t *testing.T) {
 		t.Parallel()
 		const expected = `{"strs":[["bar","foo"],["test"]],"ints":[[123,321],[999]]}`
 		var test = TestSliceSlice{
-			FieldStr: [][]string{
+			FieldStr: [][]InnerString{
 				{"bar", "foo"},
 				{"test"},
 			},
@@ -441,7 +441,7 @@ func TestSliceSlice_Marshal(t *testing.T) {
 		t.Parallel()
 		const expected = `{"strs":[["bar","foo"],[],["test"]],"ints":[[123,321],[],[999]]}`
 		var test = TestSliceSlice{
-			FieldStr: [][]string{
+			FieldStr: [][]InnerString{
 				{"bar", "foo"},
 				nil,
 				{"test"},
@@ -468,7 +468,7 @@ func TestSliceSlice_Marshal(t *testing.T) {
 		t.Parallel()
 		const expected = `{"strs":[],"ints":[]}`
 		var test = TestSliceSlice{
-			FieldStr: [][]string{},
+			FieldStr: [][]InnerString{},
 			FieldInt: [][]int{},
 		}
 		data, err := test.MarshalJSON()
@@ -496,7 +496,7 @@ func TestSliceSlice_IsZero(t *testing.T) {
 		require.False(t, test.IsZero())
 	})
 	t.Run("nonzero_strs", func(t *testing.T) {
-		var test = TestSliceSlice{FieldStr: [][]string{{"a"}}}
+		var test = TestSliceSlice{FieldStr: [][]InnerString{{"a"}}}
 		require.False(t, test.IsZero())
 	})
 }
@@ -506,7 +506,7 @@ func TestSliceSlice_Unmarshal_Reuse(t *testing.T) {
 	const testsCount = 100000
 	var (
 		ints = []int{0, 1000, 1001, 1002, 1123, 1140, 5300, 6712, 33432, 546466, 746564666}
-		strs = []string{``, `null`, `[]`, `[[abc]]`, `[[foo],[bar,test]]`, `[[foo_test,bar_test],[],[a,b,c]]`}
+		strs = []InnerString{``, `null`, `[]`, `[[abc]]`, `[[foo],[bar,test]]`, `[[foo_test,bar_test],[],[a,b,c]]`}
 	)
 	var pool = sync.Pool{New: func() any { return &TestSliceSlice{} }}
 	var wg sync.WaitGroup
@@ -516,15 +516,15 @@ func TestSliceSlice_Unmarshal_Reuse(t *testing.T) {
 		for n1 := range i {
 			i[n1] = ints[(n+n1)%len(ints)]
 		}
-		var s = make([]string, n%10)
+		var s = make([]InnerString, n%10)
 		for n1 := range s {
 			s[n1] = strs[(n+n1)%len(strs)]
 		}
-		go func(i []int, s []string, n int) {
+		go func(i []int, s []InnerString, n int) {
 			defer wg.Done()
 			var (
 				ints [][]int
-				strs [][]string
+				strs [][]InnerString
 			)
 			jsonData := `{"strs":`
 			if len(s) == 0 {
@@ -532,20 +532,20 @@ func TestSliceSlice_Unmarshal_Reuse(t *testing.T) {
 			} else {
 				jsonData += `[[`
 				var x1 = (n % 3) % (len(s) + 1)
-				v := make([]string, 0, x1)
+				v := make([]InnerString, 0, x1)
 				for y1, x := range s[:x1] {
 					v = append(v, x)
-					jsonData += `"` + x + `"`
+					jsonData += `"` + string(x) + `"`
 					if x1-1 > y1 {
 						jsonData += `,`
 					}
 				}
 				jsonData += `],[`
 				strs = append(strs, v)
-				v = make([]string, 0)
+				v = make([]InnerString, 0)
 				for y1, x := range s[x1:] {
 					v = append(v, x)
-					jsonData += `"` + x + `"`
+					jsonData += `"` + string(x) + `"`
 					if len(s)-1 > y1+x1 {
 						jsonData += `,`
 					}
