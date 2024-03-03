@@ -12,6 +12,9 @@ import (
 
 // sliceExtraction makes a block of code that extracts values from json array
 func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, fa fillArrayResult) []ast.Stmt {
+	if fld == nil {
+		fld = asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))
+	}
 	varListA := asthlp.Var(
 		asthlp.TypeSpec(names.VarNameListOfArrayValues, asthlp.ArrayType(asthlp.Star(names.FastJsonValue))),
 	)
@@ -25,9 +28,10 @@ func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, f
 		asthlp.IntegerConstant(0).Expr(),
 		asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues)),
 	)
-	valListSliceDeclare := asthlp.Assign(
+	valListSliceDeclare := asthlp.Assign(asthlp.VarNames{dst}, asthlp.Definition, fld)
+	valListSliceAssignment := asthlp.Assign(
 		asthlp.VarNames{dst},
-		asthlp.Definition,
+		asthlp.Assignment,
 		asthlp.SliceExpr(fld, nil, asthlp.IntegerConstant(0)),
 	)
 	var keyName = asthlp.Blank.Name
@@ -48,7 +52,7 @@ func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, f
 		//	if l := len(listA); cap(valList) < l || (l == 0 && s.Field == nil) {
 		//		valList = make([]string, 0, l)
 		//	}
-		asthlp.IfInit(
+		asthlp.IfInitElse(
 			asthlp.Assign(asthlp.MakeVarNames("l"), asthlp.Definition, asthlp.Call(asthlp.LengthFn, asthlp.NewIdent(names.VarNameListOfArrayValues))),
 			asthlp.Or(
 				asthlp.Binary(asthlp.Call(asthlp.CapFn, dst), asthlp.NewIdent("l"), token.LSS),
@@ -59,7 +63,12 @@ func sliceExtraction(dst *ast.Ident, fld ast.Expr, v, json string, t ast.Expr, f
 					),
 				),
 			),
-			asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, valListSliceMake),
+			asthlp.Block(
+				asthlp.Assign(asthlp.VarNames{dst}, asthlp.Assignment, valListSliceMake),
+			),
+			asthlp.Block(
+				valListSliceAssignment,
+			),
 		),
 		// for _, listElem := range listA {
 		asthlp.Range(true, keyName, fa.varElem.Name, asthlp.NewIdent(names.VarNameListOfArrayValues), fa.body...),
