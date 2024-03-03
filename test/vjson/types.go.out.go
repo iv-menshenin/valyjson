@@ -268,9 +268,11 @@ func (s *TableOf) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("tables", err)
 		}
-		valTables := s.Tables[:0]
+		valTables := s.Tables
 		if l := len(listA); cap(valTables) < l || (l == 0 && s.Tables == nil) {
 			valTables = make([]*Table, 0, len(listA))
+		} else {
+			valTables = s.Tables[:0]
 		}
 		for _key1, _val1 := range listA {
 			valTables = valTables[:len(valTables)+1]
@@ -360,9 +362,11 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("assessments", err)
 		}
-		valAssessments := s.Assessments[:0]
+		valAssessments := s.Assessments
 		if l := len(listA); cap(valAssessments) < l || (l == 0 && s.Assessments == nil) {
 			valAssessments = make([]int, 0, len(listA))
+		} else {
+			valAssessments = s.Assessments[:0]
 		}
 		for _key1, _val1 := range listA {
 			valAssessments = valAssessments[:len(valAssessments)+1]
@@ -404,9 +408,11 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if err != nil {
 			return newParsingError("tags", err)
 		}
-		valTags := s.Tags[:0]
+		valTags := s.Tags
 		if l := len(listA); cap(valTags) < l || (l == 0 && s.Tags == nil) {
 			valTags = make([]Tag, 0, len(listA))
+		} else {
+			valTags = s.Tags[:0]
 		}
 		for _key1, _val1 := range listA {
 			valTags = valTags[:len(valTags)+1]
