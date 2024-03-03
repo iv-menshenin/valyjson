@@ -284,7 +284,7 @@ func (m *Map) ResetFunc() ast.Decl {
 			"k", "v",
 			asthlp.NewIdent(names.VarNameReceiver),
 			append(
-				resetStmt(m.spec.Value, asthlp.NewIdent("v")),
+				resetStmt(m.spec.Value, asthlp.NewIdent("v"), 0),
 				asthlp.Assign(
 					asthlp.VarNames{asthlp.Index(asthlp.NewIdent(names.VarNameReceiver), asthlp.FreeExpression(asthlp.NewIdent("k")))},
 					asthlp.Assignment,

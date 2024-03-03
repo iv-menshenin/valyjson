@@ -48,12 +48,12 @@ func (s *Root) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valData) < l || (l == 0 && s.Data == nil) {
 			valData = make([]Middle, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valData = valData[:len(valData)+1]
-			var elem = &valData[len(valData)-1]
-			err = elem.FillFromJSON(_val)
+			var _elem1 = &valData[len(valData)-1]
+			err = _elem1.FillFromJSON(_val1)
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
 		}

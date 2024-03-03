@@ -220,7 +220,7 @@ func (t *Transitive) ResetFunc() ast.Decl {
 		asthlp.Var(asthlp.VariableType("tmp", t.tran)),
 	)
 	fn.AppendStmt(
-		resetStmt(t.tran, asthlp.NewIdent("tmp"))...,
+		resetStmt(t.tran, asthlp.NewIdent("tmp"), 0)...,
 	)
 	fn.AppendStmt(
 		asthlp.Assign(

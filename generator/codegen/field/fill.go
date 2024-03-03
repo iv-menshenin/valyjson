@@ -81,9 +81,10 @@ func (f *fillArrayResult) append(stmt ...ast.Stmt) {
 func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult {
 	r := fillArrayResult{
 		varElem: asthlp.NewIdent(valVariableName),
-		varNum:  asthlp.NewIdent("_key"),
+		varNum:  asthlp.NewIdent(fmt.Sprintf("_key%d", f.level)),
 	}
-	bufVariable := asthlp.NewIdent("_tmp")
+	elemVar := asthlp.NewIdent(fmt.Sprintf("_elem%d", f.level))
+	bufVariable := asthlp.NewIdent(fmt.Sprintf("_tmp%d", f.level))
 	if ident, ok := dst.(*ast.Ident); ok {
 		bufVariable = ident
 	}
@@ -112,11 +113,11 @@ func (f *Field) appendElem(dst ast.Expr, valVariableName string) fillArrayResult
 	}
 
 	r.append(IsNotEmpty(
-		f.TypedValue(asthlp.NewIdent("elem"), r.varElem.Name, asthlp.Call(asthlp.StrconvItoaFn, r.varNum)),
+		f.TypedValue(elemVar, r.varElem.Name, asthlp.Call(asthlp.StrconvItoaFn, r.varNum)),
 	)...)
 	r.append(f.breakErr(r.varNum)...)
 
-	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), asthlp.NewIdent("elem"))
+	elemAsParticularType := asthlp.Call(asthlp.InlineFunc(f.expr), elemVar)
 	// valList = append(valList, int32(elem))
 	if f.isStar {
 		const newElem = "newElem"
@@ -152,9 +153,9 @@ func appendStmt(dst, el ast.Expr) ast.Stmt {
 func (f *Field) fillElem(dst ast.Expr, valVariableName string) fillArrayResult {
 	r := fillArrayResult{
 		varElem: asthlp.NewIdent(valVariableName),
-		varNum:  asthlp.NewIdent("_key"),
+		varNum:  asthlp.NewIdent(fmt.Sprintf("_key%d", f.level)),
 	}
-	var bufVariable = asthlp.NewIdent("_tmp")
+	bufVariable := asthlp.NewIdent(fmt.Sprintf("_tmp%d", f.level))
 	if f.isNullable {
 		// if !valueIsNotNull(listElem) {
 		//  valFieldRef = append(valFieldRef, nil)
@@ -201,6 +202,7 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 		f.isStarType = true
 		intF := *f
 		intF.refx = t.X
+		intF.level = f.level + 1
 		return intF.TypedValue(dst, v, elemPathExpr)
 
 	case *ast.StructType:
@@ -226,14 +228,15 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 				dst,
 				asthlp.FreeExpression(asthlp.Sub(asthlp.Call(asthlp.LengthFn, dst), asthlp.IntegerConstant(1).Expr())),
 			),
-			expr: t.Elt,
-			tags: tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
+			expr:  t.Elt,
+			tags:  tags.Parse(fmt.Sprintf(`json:"%s"`, f.tags.JsonName())),
+			level: f.level + 1,
 		}
 		intF.prepareRef()
 		if t.Len == nil {
-			result = append(result, sliceExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.appendElem(dst, "_val"))...)
+			result = append(result, sliceExtraction(dst, f.field, v, f.tags.JsonName(), t.Elt, intF.appendElem(dst, fmt.Sprintf("_val%d", intF.level)))...)
 		} else {
-			result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t, intF.fillElem(dst, "listElem"))...)
+			result = append(result, arrayExtraction(dst, f.field, v, f.tags.JsonName(), t, intF.fillElem(dst, fmt.Sprintf("_val%d", intF.level)))...)
 		}
 		return result
 

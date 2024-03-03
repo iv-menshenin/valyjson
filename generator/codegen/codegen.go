@@ -117,7 +117,8 @@ func makeWriteAndReturn(r rune) []ast.Stmt {
 	}
 }
 
-func resetStmt(t, name ast.Expr) []ast.Stmt {
+func resetStmt(t, name ast.Expr, lvl int) []ast.Stmt {
+	var nm = []string{"i", "j", "k", "l", "m", "n"}
 	var needCast = t != helpers.DenotedType(t)
 	switch tt := helpers.DenotedType(t).(type) {
 	case *ast.ArrayType:
@@ -127,8 +128,8 @@ func resetStmt(t, name ast.Expr) []ast.Stmt {
 			//}
 			//s.Data = s.Data[:0]
 			return []ast.Stmt{
-				asthlp.Range(true, "i", "", name,
-					resetStmt(tt.Elt, asthlp.Index(name, asthlp.FreeExpression(asthlp.NewIdent("i"))))...,
+				asthlp.Range(true, nm[lvl], "", name,
+					resetStmt(tt.Elt, asthlp.Index(name, asthlp.FreeExpression(asthlp.NewIdent(nm[lvl]))), lvl+1)...,
 				),
 				asthlp.Assign(asthlp.VarNames{name}, asthlp.Assignment, asthlp.SliceExpr(name, nil, asthlp.IntegerConstant(0))),
 			}

@@ -40,13 +40,13 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valField) < l || (l == 0 && s.Field == nil) {
 			valField = make([]string, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valField = valField[:len(valField)+1]
-			var elem []byte
-			if elem, err = _val.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_key), err)
+			var _elem1 []byte
+			if _elem1, err = _val1.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key1), err)
 			}
-			valField[_key] = string(elem)
+			valField[_key1] = string(_elem1)
 		}
 		if err != nil {
 			return newParsingError("strs", err)
@@ -63,20 +63,20 @@ func (s *TestSlice01) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valFieldRef) < l || (l == 0 && s.FieldRef == nil) {
 			valFieldRef = make([]*int, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valFieldRef = valFieldRef[:len(valFieldRef)+1]
-			if !valueIsNotNull(_val) {
+			if !valueIsNotNull(_val1) {
 				valFieldRef[len(valFieldRef)-1] = nil
 				continue
 			}
-			var elem int
-			elem, err = _val.Int()
+			var _elem1 int
+			_elem1, err = _val1.Int()
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			newElem := int(elem)
-			valFieldRef[_key] = &newElem
+			newElem := int(_elem1)
+			valFieldRef[_key1] = &newElem
 		}
 		if err != nil {
 			return newParsingError("ints", err)
@@ -234,17 +234,17 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valExcluded) < l || (l == 0 && s.Excluded == nil) {
 			valExcluded = make([]FieldValueString, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valExcluded = valExcluded[:len(valExcluded)+1]
-			var elem []byte
-			if elem, err = _val.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_key), err)
+			var _elem1 []byte
+			if _elem1, err = _val1.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key1), err)
 			}
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			valExcluded[_key] = FieldValueString(elem)
+			valExcluded[_key1] = FieldValueString(_elem1)
 		}
 		if err != nil {
 			return newParsingError("excluded", err)
@@ -261,16 +261,16 @@ func (s *CampaignSites) FillFromJSON(v *fastjson.Value) (err error) {
 		if len(listA) != 5 {
 			return newParsingError("included", fmt.Errorf("array len mismatch"))
 		}
-		for _key, listElem := range listA {
-			var _tmp []byte
-			if _tmp, err = listElem.StringBytes(); err != nil {
-				return newParsingError(strconv.Itoa(_key), err)
+		for _key1, _val1 := range listA {
+			var _tmp1 []byte
+			if _tmp1, err = _val1.StringBytes(); err != nil {
+				return newParsingError(strconv.Itoa(_key1), err)
 			}
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			valIncluded[_key] = FieldValueString(_tmp)
+			valIncluded[_key1] = FieldValueString(_tmp1)
 		}
 		if err != nil {
 			return newParsingError("included", err)
@@ -299,6 +299,148 @@ func (s *CampaignSites) validate(v *fastjson.Value) error {
 			return
 		}
 		if bytes.Equal(key, []byte{'i', 'n', 'c', 'l', 'u', 'd', 'e', 'd'}) {
+			checkFields[1]++
+			if checkFields[1] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
+// jsonParserTestSliceSlice used for pooling Parsers for TestSliceSlice JSONs.
+var jsonParserTestSliceSlice fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *TestSliceSlice) UnmarshalJSON(data []byte) error {
+	parser := jsonParserTestSliceSlice.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserTestSliceSlice.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *TestSliceSlice) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _fieldStr := v.Get("strs"); valueIsNotNull(_fieldStr) {
+		var listA []*fastjson.Value
+		listA, err = _fieldStr.Array()
+		if err != nil {
+			return newParsingError("strs", err)
+		}
+		valFieldStr := s.FieldStr[:0]
+		if l := len(listA); cap(valFieldStr) < l || (l == 0 && s.FieldStr == nil) {
+			valFieldStr = make([][]string, 0, len(listA))
+		}
+		for _key1, _val1 := range listA {
+			valFieldStr = valFieldStr[:len(valFieldStr)+1]
+			if !valueIsNotNull(_val1) {
+				valFieldStr[len(valFieldStr)-1] = nil
+				continue
+			}
+			var listA []*fastjson.Value
+			listA, err = _val1.Array()
+			if err != nil {
+				return newParsingError("", err)
+			}
+			_elem1 := valFieldStr[len(valFieldStr)-1][:0]
+			if l := len(listA); cap(_elem1) < l || (l == 0 && valFieldStr[len(valFieldStr)-1] == nil) {
+				_elem1 = make([]string, 0, len(listA))
+			}
+			for _key2, _val2 := range listA {
+				_elem1 = _elem1[:len(_elem1)+1]
+				var _elem2 []byte
+				if _elem2, err = _val2.StringBytes(); err != nil {
+					return newParsingError(strconv.Itoa(_key2), err)
+				}
+				_elem1[_key2] = string(_elem2)
+			}
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key1), err)
+				break
+			}
+			valFieldStr[_key1] = []string(_elem1)
+		}
+		if err != nil {
+			return newParsingError("strs", err)
+		}
+		s.FieldStr = valFieldStr
+	}
+	if _fieldInt := v.Get("ints"); valueIsNotNull(_fieldInt) {
+		var listA []*fastjson.Value
+		listA, err = _fieldInt.Array()
+		if err != nil {
+			return newParsingError("ints", err)
+		}
+		valFieldInt := s.FieldInt[:0]
+		if l := len(listA); cap(valFieldInt) < l || (l == 0 && s.FieldInt == nil) {
+			valFieldInt = make([][]int, 0, len(listA))
+		}
+		for _key1, _val1 := range listA {
+			valFieldInt = valFieldInt[:len(valFieldInt)+1]
+			if !valueIsNotNull(_val1) {
+				valFieldInt[len(valFieldInt)-1] = nil
+				continue
+			}
+			var listA []*fastjson.Value
+			listA, err = _val1.Array()
+			if err != nil {
+				return newParsingError("", err)
+			}
+			_elem1 := valFieldInt[len(valFieldInt)-1][:0]
+			if l := len(listA); cap(_elem1) < l || (l == 0 && valFieldInt[len(valFieldInt)-1] == nil) {
+				_elem1 = make([]int, 0, len(listA))
+			}
+			for _key2, _val2 := range listA {
+				_elem1 = _elem1[:len(_elem1)+1]
+				var _elem2 int
+				_elem2, err = _val2.Int()
+				if err != nil {
+					err = newParsingError(strconv.Itoa(_key2), err)
+					break
+				}
+				_elem1[_key2] = int(_elem2)
+			}
+			if err != nil {
+				err = newParsingError(strconv.Itoa(_key1), err)
+				break
+			}
+			valFieldInt[_key1] = []int(_elem1)
+		}
+		if err != nil {
+			return newParsingError("ints", err)
+		}
+		s.FieldInt = valFieldInt
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *TestSliceSlice) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [2]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'s', 't', 'r', 's'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'i', 'n', 't', 's'}) {
 			checkFields[1]++
 			if checkFields[1] > 1 {
 				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
@@ -569,4 +711,114 @@ func (s *CampaignSites) Reset() {
 	}
 	s.Excluded = s.Excluded[:0]
 	s.Included = [5]FieldValueString{}
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *TestSliceSlice) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *TestSliceSlice) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.FieldStr != nil {
+		wantComma = true
+		result.RawString(`"strs":[`)
+		var wantComma bool
+		for _k, _v := range s.FieldStr {
+			if wantComma {
+				result.RawByte(',')
+			}
+			wantComma = true
+			_k = _k
+			result.RawByte('[')
+			for _k1, _v1 := range _v {
+				result.String(_v1)
+				if len(_v)-1 > _k1 {
+					result.RawByte(',')
+				}
+			}
+			result.RawByte(']')
+		}
+		result.RawByte(']')
+		wantComma = true
+	} else {
+		result.RawString(`"strs":null`)
+		wantComma = true
+	}
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.FieldInt != nil {
+		wantComma = true
+		result.RawString(`"ints":[`)
+		var wantComma bool
+		for _k, _v := range s.FieldInt {
+			if wantComma {
+				result.RawByte(',')
+			}
+			wantComma = true
+			_k = _k
+			result.RawByte('[')
+			for _k1, _v1 := range _v {
+				result.Int64(int64(_v1))
+				if len(_v)-1 > _k1 {
+					result.RawByte(',')
+				}
+			}
+			result.RawByte(']')
+		}
+		result.RawByte(']')
+		wantComma = true
+	} else {
+		result.RawString(`"ints":null`)
+		wantComma = true
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s TestSliceSlice) IsZero() bool {
+	if s.FieldStr != nil {
+		return false
+	}
+	if s.FieldInt != nil {
+		return false
+	}
+	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *TestSliceSlice) Reset() {
+	for i := range s.FieldStr {
+		for j := range s.FieldStr[i] {
+			s.FieldStr[i][j] = ""
+		}
+		s.FieldStr[i] = s.FieldStr[i][:0]
+	}
+	s.FieldStr = s.FieldStr[:0]
+	for i := range s.FieldInt {
+		for j := range s.FieldInt[i] {
+			s.FieldInt[i][j] = 0
+		}
+		s.FieldInt[i] = s.FieldInt[i][:0]
+	}
+	s.FieldInt = s.FieldInt[:0]
 }

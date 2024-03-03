@@ -339,16 +339,16 @@ func (s *Struct) ResetFunc() ast.Decl {
 
 	for _, fld := range s.spec.Fields.List {
 		for _, name := range fld.Names {
-			fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, name.Name))...)
+			fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, name.Name), 0)...)
 		}
 		if len(fld.Names) == 0 {
 			switch t := fld.Type.(type) {
 
 			case *ast.Ident:
-				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Name))...)
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Name), 0)...)
 
 			case *ast.SelectorExpr:
-				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name))...)
+				fn.AppendStmt(resetStmt(fld.Type, asthlp.SimpleSelector(names.VarNameReceiver, t.Sel.Name), 0)...)
 			}
 		}
 	}

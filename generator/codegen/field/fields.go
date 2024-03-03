@@ -33,6 +33,8 @@ type (
 		dontCheckErr bool
 		// filled if already filled this field (by reference for example)
 		filled bool
+		// level counts code hierarchy
+		level int
 	}
 )
 
@@ -148,6 +150,7 @@ func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 		intF := *f
 		intF.refx = tt.X
 		intF.isStar = true
+		intF.level = f.level + 1
 		if f.isStar {
 			src = asthlp.Star(src)
 		}
@@ -185,7 +188,7 @@ func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 		dec := GetDecorExpr(tt.Elt)
 		valType := helpers.DenotedType(tt.Elt)
 		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-		block := arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
+		block := f.arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
 		return block.Render(putCommaFirstIf)
 
 	default:
@@ -349,6 +352,41 @@ func GetValueExtractor(t, errExpr ast.Expr, initDecorSrc DecorSrc) ValueExtracto
 	case *ast.InterfaceType:
 		// TODO
 		panic("not implemented")
+
+	case *ast.ArrayType:
+		// result.Int64(int64(_v))
+		ve := GetValueExtractor(tt.Elt, errExpr, initDecorSrc)
+		return func(src ast.Expr) []ast.Stmt {
+			return decorStmt(src, []ast.Stmt{
+				asthlp.CallStmt(asthlp.Call(
+					RawByteFn,
+					asthlp.RuneConstant('[').Expr(),
+				)),
+				// for _k1, _v1 := range _v {
+				asthlp.Range(true, "_k1", "_v1", asthlp.NewIdent("_v"),
+					append(
+						ve(asthlp.NewIdent("_v1")),
+						// if len(_v) -1 > _k1 {
+						//   result.RawByte(',')
+						// }
+						asthlp.If(
+							asthlp.Great(
+								asthlp.Sub(asthlp.Call(asthlp.LengthFn, asthlp.NewIdent("_v")), asthlp.IntegerConstant(1).Expr()),
+								asthlp.NewIdent("_k1"),
+							),
+							asthlp.CallStmt(asthlp.Call(
+								RawByteFn,
+								asthlp.RuneConstant(',').Expr(),
+							)),
+						),
+					)...,
+				),
+				asthlp.CallStmt(asthlp.Call(
+					RawByteFn,
+					asthlp.RuneConstant(']').Expr(),
+				)),
+			})
+		}
 
 	default:
 		panic("not implemented")

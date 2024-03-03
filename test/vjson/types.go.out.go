@@ -272,20 +272,20 @@ func (s *TableOf) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valTables) < l || (l == 0 && s.Tables == nil) {
 			valTables = make([]*Table, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valTables = valTables[:len(valTables)+1]
-			if !valueIsNotNull(_val) {
+			if !valueIsNotNull(_val1) {
 				valTables[len(valTables)-1] = nil
 				continue
 			}
-			var elem Table
-			err = elem.FillFromJSON(_val)
+			var _elem1 Table
+			err = _elem1.FillFromJSON(_val1)
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			newElem := Table(elem)
-			valTables[_key] = &newElem
+			newElem := Table(_elem1)
+			valTables[_key1] = &newElem
 		}
 		if err != nil {
 			return newParsingError("tables", err)
@@ -364,15 +364,15 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valAssessments) < l || (l == 0 && s.Assessments == nil) {
 			valAssessments = make([]int, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valAssessments = valAssessments[:len(valAssessments)+1]
-			var elem int
-			elem, err = _val.Int()
+			var _elem1 int
+			_elem1, err = _val1.Int()
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
-			valAssessments[_key] = int(elem)
+			valAssessments[_key1] = int(_elem1)
 		}
 		if err != nil {
 			return newParsingError("assessments", err)
@@ -408,12 +408,12 @@ func (s *Table) FillFromJSON(v *fastjson.Value) (err error) {
 		if l := len(listA); cap(valTags) < l || (l == 0 && s.Tags == nil) {
 			valTags = make([]Tag, 0, len(listA))
 		}
-		for _key, _val := range listA {
+		for _key1, _val1 := range listA {
 			valTags = valTags[:len(valTags)+1]
-			var elem = &valTags[len(valTags)-1]
-			err = elem.FillFromJSON(_val)
+			var _elem1 = &valTags[len(valTags)-1]
+			err = _elem1.FillFromJSON(_val1)
 			if err != nil {
-				err = newParsingError(strconv.Itoa(_key), err)
+				err = newParsingError(strconv.Itoa(_key1), err)
 				break
 			}
 		}

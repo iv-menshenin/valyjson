@@ -454,7 +454,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 	return w
 }
 
-func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor, isSlice bool) WriteBlock {
+func (f *Field) arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor, isSlice bool) WriteBlock {
 	const (
 		key = "_k"
 		val = "_v"

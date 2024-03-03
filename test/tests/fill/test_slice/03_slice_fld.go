@@ -25,3 +25,11 @@ type (
 	}
 	FieldValueString string
 )
+
+// TestSliceSlice tests struct with slice of slice
+//
+//json:json
+type TestSliceSlice struct {
+	FieldStr [][]string `json:"strs"`
+	FieldInt [][]int    `json:"ints"`
+}
