@@ -907,7 +907,6 @@ func (s TestNested04) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestNested04) Reset() {
-	var tmp TestNested03
+	var tmp = (*TestNested03)(s)
 	tmp.Reset()
-	*s = TestNested04(tmp)
 }

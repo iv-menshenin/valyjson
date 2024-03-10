@@ -8,7 +8,9 @@ import (
 )
 
 func Test_NumStruct01_Unmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("empty_struct", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -38,6 +40,7 @@ func Test_NumStruct01_Unmarshal(t *testing.T) {
 		require.Nil(t, num.RefFloatFld64)
 	})
 	t.Run("fulfilled_struct", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": 12345, "ref_int_fld8": 33, "ref_int_fld16": 12345, "ref_int_fld32": 12345, "ref_int_fld64": 12345, "ref_Uint_fld": 12345, "ref_Uint_fld8": 45, "ref_Uint_fld16": 12345, "ref_Uint_fld32": 12345, "ref_Uint_fld64": 12345, "ref_fl23": 12345, "ref_fl64": 12345}`))
 		require.NoError(t, err)
@@ -50,6 +53,7 @@ func Test_NumStruct01_Unmarshal(t *testing.T) {
 		require.Equal(t, *num.RefUintFld8, uint8(45))
 	})
 	t.Run("null_filled_part", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
 		require.NoError(t, err)
@@ -63,102 +67,122 @@ func Test_NumStruct01_Unmarshal(t *testing.T) {
 		require.Nil(t, num.RefUintFld64)
 	})
 	t.Run("overflow-int8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld8": 98765}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld8": 345}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-int16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld16": 45633}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld16": 65536}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-int32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld32": 2147483648}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": 4294967296}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-float32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl23": 3.40282346638528859811704183484516925440e+38}`))
 		require.NoError(t, err)
 	})
 	t.Run("overflow-float32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl23": 4.40282346638528859811704183484516925440e+38}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld8": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld8": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld16": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld16": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld32": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld64": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld64": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("float-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": 23.56}`))
 		require.Error(t, err)
 	})
 	t.Run("negative-uint", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"Uint_fld": -12}`))
 		require.Error(t, err)
 	})
 	t.Run("inf-float64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl64": 1.8976931348623157E308}`))
 		require.NoError(t, err)
 		require.Equal(t, num.FloatFld64, math.Inf(1))
 	})
 	t.Run("double-field", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct01
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld": 1200}`))
 		require.Error(t, err)
@@ -167,7 +191,9 @@ func Test_NumStruct01_Unmarshal(t *testing.T) {
 }
 
 func Test_NumStruct01_Marshal(t *testing.T) {
+	t.Parallel()
 	t.Run("filled-nonref", func(t *testing.T) {
+		t.Parallel()
 		var test = NumStruct01{
 			IntFld:     -12,
 			IntFld8:    78,
@@ -194,6 +220,7 @@ func Test_NumStruct01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("filled-refs", func(t *testing.T) {
+		t.Parallel()
 		var test = NumStruct01{
 			RefIntFld:     ref(133),
 			RefIntFld8:    ref(int8(-4)),
@@ -226,7 +253,9 @@ func ref[T any](a T) *T {
 }
 
 func Test_NumStruct02_Unmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("empty_struct", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -256,6 +285,7 @@ func Test_NumStruct02_Unmarshal(t *testing.T) {
 		require.Nil(t, num.RefFloatFld64)
 	})
 	t.Run("fulfilled_struct", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": 12345, "ref_int_fld8": 33, "ref_int_fld16": 12345, "ref_int_fld32": 12345, "ref_int_fld64": 12345, "ref_Uint_fld": 12345, "ref_Uint_fld8": 45, "ref_Uint_fld16": 12345, "ref_Uint_fld32": 12345, "ref_Uint_fld64": 12345, "ref_fl23": 12345, "ref_fl64": 12345}`))
 		require.NoError(t, err)
@@ -268,6 +298,7 @@ func Test_NumStruct02_Unmarshal(t *testing.T) {
 		require.Equal(t, *num.RefUintFld8, uint8(45))
 	})
 	t.Run("null_filled_part", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 12345, "int_fld8": 25, "int_fld16": 32767, "int_fld32": 12345, "int_fld64": 12345, "Uint_fld": 12345, "Uint_fld8": 12, "Uint_fld16": 12345, "Uint_fld32": 12345, "Uint_fld64": 12345, "fl23": 12345, "fl64": 12345, "ref_int_fld": null, "ref_int_fld8": null, "ref_int_fld16": null, "ref_int_fld32": null, "ref_int_fld64": null, "ref_Uint_fld": null, "ref_Uint_fld8": null, "ref_Uint_fld16": null, "ref_Uint_fld32": null, "ref_Uint_fld64": null, "ref_fl23": null, "ref_fl64": null}`))
 		require.NoError(t, err)
@@ -281,108 +312,129 @@ func Test_NumStruct02_Unmarshal(t *testing.T) {
 		require.Nil(t, num.RefUintFld64)
 	})
 	t.Run("overflow-int8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld8": 98765}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld8": 345}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-int16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld16": 45633}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld16": 65536}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-int32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld32": 2147483648}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": 4294967296}`))
 		require.Error(t, err)
 	})
 	t.Run("overflow-float32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl23": 3.40282346638528859811704183484516925440e+38}`))
 		require.NoError(t, err)
 	})
 	t.Run("overflow-float32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl23": 4.40282346638528859811704183484516925440e+38}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld8": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint8", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld8": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld16": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint16", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld16": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld32": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-int64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld64": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("nan-uint64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld64": "0"}`))
 		require.Error(t, err)
 	})
 	t.Run("float-uint32", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "Uint_fld32": 23.56}`))
 		require.Error(t, err)
 	})
 	t.Run("negative-uint", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"Uint_fld": -12}`))
 		require.Error(t, err)
 	})
 	t.Run("inf-float64", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "fl64": 1.8976931348623157E308}`))
 		require.NoError(t, err)
 		require.Equal(t, num.FloatFld64, math.Inf(1))
 	})
 	t.Run("double-field", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld": 1200}`))
 		require.Error(t, err)
 		require.ErrorContains(t, err, "the 'int_fld' field appears in the object twice")
 	})
 	t.Run("extra-field", func(t *testing.T) {
+		t.Parallel()
 		var num NumStruct02
 		err := num.UnmarshalJSON([]byte(`{"int_fld": 1200, "int_fld_extr": 1200}`))
 		require.Error(t, err)
@@ -391,13 +443,16 @@ func Test_NumStruct02_Unmarshal(t *testing.T) {
 }
 
 func TestNumStruct_IsZero(t *testing.T) {
+	t.Parallel()
 	t.Run("zero", func(t *testing.T) {
+		t.Parallel()
 		var test1 NumStruct01
 		require.True(t, test1.IsZero())
 		var test2 NumStruct02
 		require.True(t, test2.IsZero())
 	})
 	t.Run("not zero", func(t *testing.T) {
+		t.Parallel()
 		require.False(t, NumStruct01{
 			IntFld: 1,
 		}.IsZero())
@@ -546,7 +601,9 @@ func TestNumStruct_IsZero(t *testing.T) {
 }
 
 func Test_NumStruct02_Marshal(t *testing.T) {
+	t.Parallel()
 	t.Run("filled-nonref", func(t *testing.T) {
+		t.Parallel()
 		var test = NumStruct02{
 			IntFld:     -12,
 			IntFld8:    78,
@@ -573,6 +630,7 @@ func Test_NumStruct02_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("filled-refs", func(t *testing.T) {
+		t.Parallel()
 		var test = NumStruct02{
 			RefIntFld:     ref(133),
 			RefIntFld8:    ref(int8(-4)),

@@ -55,6 +55,27 @@ func Test_Unmarshal(t *testing.T) {
 	})
 }
 
+func Test_UnmarshalJSON(t *testing.T) {
+	t.Parallel()
+	t.Run("UnmarshalMiddle", func(t *testing.T) {
+		t.Parallel()
+		const data = `{"dateOfBorn":"2024-01-01 7:12:55.0Z","tags":{"a": "foo","b": "bar"},"name":"Igor","surname":"Menshenin","patname":"Vladimirovich"}`
+		var test Middle
+		var pn UserPatname = "Vladimirovich"
+		var expected = Middle{
+			Personal: Personal{
+				Name:    "Igor",
+				Surname: "Menshenin",
+				Patname: &pn,
+			},
+			DateOfBorn: time.Date(2024, 1, 1, 7, 12, 55, 0, time.UTC),
+			Tags:       Tags{"a": "foo", "b": "bar"},
+		}
+		require.NoError(t, test.UnmarshalJSON([]byte(data)))
+		require.EqualValues(t, expected, test)
+	})
+}
+
 func Test_InlinedNestedStructures(t *testing.T) {
 	t.Parallel()
 	t.Run("marshal", func(t *testing.T) {

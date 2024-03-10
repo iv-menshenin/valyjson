@@ -581,9 +581,8 @@ func (s TestInhBool) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestInhBool) Reset() {
-	var tmp bool
-	tmp = false
-	*s = TestInhBool(tmp)
+	var tmp = (*bool)(s)
+	*tmp = false
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.

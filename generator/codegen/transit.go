@@ -223,17 +223,10 @@ func (t *Transitive) ResetFunc() ast.Decl {
 		Receiver(asthlp.Field(names.VarNameReceiver, nil, asthlp.Star(ast.NewIdent(t.name))))
 
 	fn.AppendStmt(
-		asthlp.Var(asthlp.VariableType("tmp", t.tran)),
+		asthlp.Var(asthlp.VariableValue("tmp", asthlp.FreeExpression(asthlp.ExpressionTypeConvert(asthlp.NewIdent(names.VarNameReceiver), asthlp.Star(t.tran))))),
 	)
 	fn.AppendStmt(
-		resetStmt(t.tran, asthlp.NewIdent("tmp"), 0)...,
-	)
-	fn.AppendStmt(
-		asthlp.Assign(
-			asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))},
-			asthlp.Assignment,
-			asthlp.VariableTypeConvert("tmp", asthlp.NewIdent(t.name)),
-		),
+		resetStmt(t.tran, asthlp.Star(asthlp.NewIdent("tmp")), 0)...,
 	)
 	return fn.Decl()
 }

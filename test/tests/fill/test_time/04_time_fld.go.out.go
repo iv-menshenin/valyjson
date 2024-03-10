@@ -241,7 +241,6 @@ func (s TestTime2) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestTime2) Reset() {
-	var tmp time.Time
-	tmp = time.Time{}
-	*s = TestTime2(tmp)
+	var tmp = (*time.Time)(s)
+	*tmp = time.Time{}
 }

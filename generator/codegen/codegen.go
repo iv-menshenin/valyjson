@@ -198,6 +198,13 @@ func resetStmt(t, name ast.Expr, lvl int) []ast.Stmt {
 		}
 	}
 
+	if unref, ok := name.(*ast.StarExpr); ok {
+		return []ast.Stmt{
+			asthlp.CallStmt(asthlp.Call(
+				asthlp.InlineFunc(asthlp.Selector(unref.X, names.MethodNameReset)),
+			)),
+		}
+	}
 	// v.Field.Reset()
 	return []ast.Stmt{
 		asthlp.CallStmt(asthlp.Call(

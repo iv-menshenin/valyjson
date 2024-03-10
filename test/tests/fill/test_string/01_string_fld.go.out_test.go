@@ -7,7 +7,9 @@ import (
 )
 
 func Test_TestStr01_Unmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("test-all-omitted", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -15,6 +17,7 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("test-default", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -24,6 +27,7 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 		require.EqualValues(t, "default", *test1.DefRef)
 	})
 	t.Run("nil-ref-omitted", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled"}`))
 		require.NoError(t, err)
@@ -31,12 +35,14 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("ref-wrong-type", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"fieldRef": 0.123}`))
 		require.Error(t, err)
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("fill-fields", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field", "fieldRef": "test_fieldRef", "defRef": "000"}`))
 		require.NoError(t, err)
@@ -47,6 +53,7 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 		require.Equal(t, "000", *test1.DefRef)
 	})
 	t.Run("extra-fld-omitted", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "field-2": "test"}`))
 		require.NoError(t, err)
@@ -54,17 +61,20 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("null-for-ref-field", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": null}`))
 		require.NoError(t, err)
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("wrong-type-for-field", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": 112}`))
 		require.Error(t, err)
 	})
 	t.Run("test-double", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "field": "bar"}`))
 		require.Error(t, err)
@@ -73,7 +83,9 @@ func Test_TestStr01_Unmarshal(t *testing.T) {
 }
 
 func Test_TestStr01_Marshal(t *testing.T) {
+	t.Parallel()
 	t.Run("null-fields", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"foo-bar","fieldRef":null,"defRef":null}`
 		var test = TestStr01{
 			Field:    "foo-bar",
@@ -85,6 +97,7 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("null-struct", func(t *testing.T) {
+		t.Parallel()
 		const expected = `null`
 		var test1 *TestStr01
 		data, err := test1.MarshalJSON()
@@ -92,6 +105,7 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("fill-fields", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"foo-bar","fieldRef":"nil/null","defRef":"nil/null"}`
 		var str = "nil/null"
 		var test = TestStr01{
@@ -104,6 +118,7 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("multiline", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"test\nmulti\nlined","fieldRef":null,"defRef":null}`
 		var test = TestStr01{
 			Field: "test\nmulti\nlined",
@@ -113,6 +128,7 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("empty-field", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"","fieldRef":null,"defRef":null}`
 		var test = TestStr01{
 			Field: "",
@@ -122,6 +138,7 @@ func Test_TestStr01_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("special-runes", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"\"quoted\\slashed\ttabbed","fieldRef":null,"defRef":null}`
 		var test = TestStr01{
 			Field: `"quoted\slashed	tabbed`,
@@ -133,7 +150,9 @@ func Test_TestStr01_Marshal(t *testing.T) {
 }
 
 func Test_TestStr02_Marshal(t *testing.T) {
+	t.Parallel()
 	t.Run("null-fields", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"foo-bar","fieldRef":null,"string":"nil"}`
 		var test = TestStr02{
 			Field:    "foo-bar",
@@ -145,6 +164,7 @@ func Test_TestStr02_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("null-struct", func(t *testing.T) {
+		t.Parallel()
 		const expected = "null"
 		var test2 *TestStr02
 		data, err := test2.MarshalJSON()
@@ -152,6 +172,7 @@ func Test_TestStr02_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("fill-fields", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"foo-bar","fieldRef":"nil/null","string":""}`
 		var str = "nil/null"
 		var test = TestStr02{
@@ -163,6 +184,7 @@ func Test_TestStr02_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("ref-spec-symbols", func(t *testing.T) {
+		t.Parallel()
 		const expected = "{\"field\":\"foo-bar\",\"fieldRef\":\"\\twe\\nwrap\\nall the \\\"world\\\"\",\"string\":\"\"}"
 		var str = "\twe\nwrap\nall the \"world\""
 		var test = TestStr02{
@@ -174,6 +196,7 @@ func Test_TestStr02_Marshal(t *testing.T) {
 		require.JSONEq(t, expected, string(data))
 	})
 	t.Run("empty-field", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"field":"","fieldRef":null,"string":""}`
 		var test = TestStr02{}
 		data, err := test.MarshalJSON()
@@ -220,7 +243,9 @@ func Benchmark_TestStr_Alloc(b *testing.B) {
 }
 
 func Test_TestStr02_Unmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("test-all-omitted", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{}`))
 		require.NoError(t, err)
@@ -228,6 +253,7 @@ func Test_TestStr02_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("field-omitted", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled"}`))
 		require.NoError(t, err)
@@ -235,6 +261,7 @@ func Test_TestStr02_Unmarshal(t *testing.T) {
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("fill-fields", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field", "fieldRef": "test_fieldRef"}`))
 		require.NoError(t, err)
@@ -243,24 +270,28 @@ func Test_TestStr02_Unmarshal(t *testing.T) {
 		require.Equal(t, "test_fieldRef", *test1.FieldRef)
 	})
 	t.Run("null-for-ref-field", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "test_field_filled", "fieldRef": null}`))
 		require.NoError(t, err)
 		require.Nil(t, test1.FieldRef)
 	})
 	t.Run("wrong-type-for-field", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": 112}`))
 		require.Error(t, err)
 	})
 
 	t.Run("test-extra-fld", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"badName": "test"}`))
 		require.Error(t, err)
 		require.ErrorContains(t, err, "unexpected field 'badName'")
 	})
 	t.Run("test-double", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "field": "bar"}`))
 		require.Error(t, err)
@@ -269,13 +300,16 @@ func Test_TestStr02_Unmarshal(t *testing.T) {
 }
 
 func Test_TestSubTypeString(t *testing.T) {
+	t.Parallel()
 	t.Run("check_type", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"string": "filled well"}`))
 		require.NoError(t, err)
 		require.Equal(t, FieldValueString("filled well"), test1.String)
 	})
 	t.Run("alloc-mem", func(t *testing.T) {
+		t.Parallel()
 		n := testing.AllocsPerRun(100, func() {
 			var test1 TestStr02
 			_ = test1.UnmarshalJSON([]byte(`{"string": "filled well foo/bar"}`))
@@ -283,6 +317,7 @@ func Test_TestSubTypeString(t *testing.T) {
 		require.LessOrEqual(t, n, float64(1))
 	})
 	t.Run("test_default", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr02
 		err := test1.UnmarshalJSON([]byte(`{"field": "foo", "fieldRef": "bar"}`))
 		require.NoError(t, err)
@@ -291,11 +326,14 @@ func Test_TestSubTypeString(t *testing.T) {
 }
 
 func Test_Zero(t *testing.T) {
+	t.Parallel()
 	t.Run("TestStr01", func(t *testing.T) {
+		t.Parallel()
 		var test TestStr01
 		require.True(t, test.IsZero())
 	})
 	t.Run("TestStr01_not_zero", func(t *testing.T) {
+		t.Parallel()
 		var test1 TestStr01
 		test1.Field = "."
 		require.False(t, test1.IsZero())
@@ -307,10 +345,12 @@ func Test_Zero(t *testing.T) {
 		require.False(t, test3.IsZero())
 	})
 	t.Run("TestStr02", func(t *testing.T) {
+		t.Parallel()
 		var test TestStr02
 		require.True(t, test.IsZero())
 	})
 	t.Run("TestStr02_not_zero", func(t *testing.T) {
+		t.Parallel()
 		var test TestStr02
 		test.String = "value-foo-bar"
 		require.False(t, test.IsZero())

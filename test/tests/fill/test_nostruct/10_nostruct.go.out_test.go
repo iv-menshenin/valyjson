@@ -12,7 +12,9 @@ import (
 )
 
 func Test_Map_UnmarshalJSON(t *testing.T) {
+	t.Parallel()
 	t.Run("map[string]int64", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"test": 123, "negative": -2, "zero": 0}`
 		var test TestMap10
 		var expected = TestMap10{
@@ -25,6 +27,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.Equal(t, expected, test)
 	})
 	t.Run("map[string]int64-struct-error", func(t *testing.T) {
+		t.Parallel()
 		const input = `["test", "negative", "zero"]`
 		var test TestMap10
 		err := test.UnmarshalJSON([]byte(input))
@@ -32,6 +35,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.ErrorContains(t, err, "value doesn't contain object")
 	})
 	t.Run("map[string]int64-struct-error", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"test": {}, "negative": -2, "zero": 0}`
 		var test TestMap10
 		err := test.UnmarshalJSON([]byte(input))
@@ -41,6 +45,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("map[string]external", func(t *testing.T) {
+		t.Parallel()
 		t.SkipNow() // FIXME default values in nested structures
 		const input = `{"test": {"test1":{"comment": "foo bar"}}}`
 		var def = "default"
@@ -60,6 +65,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.Equal(t, expected, test)
 	})
 	t.Run("map[string]external-wrong-null", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"test": null}`
 		var test TestMap11
 		err := test.UnmarshalJSON([]byte(input))
@@ -69,6 +75,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("map[string]*external", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"test": {"test1":{"comment": "this isn't a comment", "level": 99}, "test2":{"field": "bar", "fieldRef": "foo", "defRef": "test"}}}`
 		var (
 			fieldRef = "foo"
@@ -94,6 +101,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("map[string]*external-null-value", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"empty":null, "test": {"test1":{"comment": "this isn't a comment", "level": 99}, "test2":{"field": "bar", "fieldRef": "foo", "defRef": "test"}}}`
 		var (
 			fieldRef = "foo"
@@ -119,6 +127,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.Equal(t, expected, test)
 	})
 	t.Run("map[string]*external-wrong-value", func(t *testing.T) {
+		t.Parallel()
 		const input = `{"wrong": [1, 2, 3], "test": null}`
 		var test TestMap11Ref
 		err := test.UnmarshalJSON([]byte(input))
@@ -127,6 +136,7 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 		require.ErrorContains(t, err, "doesn't contain object")
 	})
 	t.Run("[]int64", func(t *testing.T) {
+		t.Parallel()
 		const data = `[1,2,3,4,5]`
 		var (
 			test     TestSlice12
@@ -139,7 +149,9 @@ func Test_Map_UnmarshalJSON(t *testing.T) {
 }
 
 func Test_Map_MarshalJSON(t *testing.T) {
+	t.Parallel()
 	t.Run("null", func(t *testing.T) {
+		t.Parallel()
 		const expected = `null`
 		var test TestMap10
 		b, err := test.MarshalJSON()
@@ -147,6 +159,7 @@ func Test_Map_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("map[string]int64", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"test": 123, "negative": -2, "zero": 0}`
 		var test = TestMap10{
 			"test":     123,
@@ -158,6 +171,7 @@ func Test_Map_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("map[string]external", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"test": {"test1":{"comment": "this is a comment", "level": 100}, "test2":{"field": "foo", "fieldRef": "bar", "defRef": ""}}}`
 		var (
 			fieldRef = "bar"
@@ -181,6 +195,7 @@ func Test_Map_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("map[string]*external", func(t *testing.T) {
+		t.Parallel()
 		const expected = `{"empty":null, "test": {"test1":{"comment": "this isn't a comment", "level": 99}, "test2":{"field": "bar", "fieldRef": "foo", "defRef": "test"}}}`
 		var (
 			fieldRef = "foo"
@@ -207,7 +222,9 @@ func Test_Map_MarshalJSON(t *testing.T) {
 }
 
 func Test_Array_MarshalJSON(t *testing.T) {
+	t.Parallel()
 	t.Run("[]int64", func(t *testing.T) {
+		t.Parallel()
 		const expected = `[-100, 0, 1, 2, 10, 9223372036854775807]`
 		var test = TestSlice12{-100, 0, 1, 2, 10, math.MaxInt64}
 		b, err := test.MarshalJSON()
@@ -215,6 +232,7 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("[]int64-null", func(t *testing.T) {
+		t.Parallel()
 		const expected = `null`
 		var test TestSlice12
 		b, err := test.MarshalJSON()
@@ -222,6 +240,7 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("[]int64", func(t *testing.T) {
+		t.Parallel()
 		const expected = `[1,2,3,4,5]`
 		var test = TestSlice12{1, 2, 3, 4, 5}
 		b, err := test.MarshalJSON()
@@ -229,6 +248,7 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("[]external", func(t *testing.T) {
+		t.Parallel()
 		const expected = `[{"test1":{"comment": "foo", "level": 12}}, {"test1":{"comment": "bar", "level": 13}}]`
 		var test = TestSlice13{
 			{Test01: test_any.TestAllOfSecond{Comment: "foo", Level: 12}},
@@ -239,6 +259,7 @@ func Test_Array_MarshalJSON(t *testing.T) {
 		require.JSONEq(t, expected, string(b))
 	})
 	t.Run("[]time.Time", func(t *testing.T) {
+		t.Parallel()
 		const expected = `["2023-03-04T15:35:59Z", "0001-01-01T00:00:00Z"]`
 		var test = TestSlice14{
 			time.Date(2023, time.March, 4, 15, 35, 59, 0, time.UTC),

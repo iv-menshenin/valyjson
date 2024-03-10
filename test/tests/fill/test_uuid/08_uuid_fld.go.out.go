@@ -201,9 +201,8 @@ func (s InheritUUID2) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *InheritUUID2) Reset() {
-	var tmp InheritUUID
-	tmp = InheritUUID(uuid.Nil)
-	*s = InheritUUID2(tmp)
+	var tmp = (*InheritUUID)(s)
+	*tmp = InheritUUID(uuid.Nil)
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -237,7 +236,6 @@ func (s InheritUUID) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *InheritUUID) Reset() {
-	var tmp uuid.UUID
-	tmp = uuid.Nil
-	*s = InheritUUID(tmp)
+	var tmp = (*uuid.UUID)(s)
+	*tmp = uuid.Nil
 }

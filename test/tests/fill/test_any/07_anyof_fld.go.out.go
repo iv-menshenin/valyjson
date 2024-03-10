@@ -169,9 +169,8 @@ func (s TestOneOfInteger) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestOneOfInteger) Reset() {
-	var tmp int64
-	tmp = 0
-	*s = TestOneOfInteger(tmp)
+	var tmp = (*int64)(s)
+	*tmp = 0
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
@@ -200,9 +199,8 @@ func (s TestOneOfString) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestOneOfString) Reset() {
-	var tmp string
-	tmp = ""
-	*s = TestOneOfString(tmp)
+	var tmp = (*string)(s)
+	*tmp = ""
 }
 
 // MarshalJSON serializes the structure with all its values into JSON format.
