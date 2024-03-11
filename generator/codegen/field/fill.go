@@ -331,15 +331,28 @@ func (f *Field) typeExtraction(dst *ast.Ident, v, t string, elemPathExpr ast.Exp
 func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []ast.Stmt {
 	var value = asthlp.NewIdent("value")
 	var ifNullValue = asthlp.EmptyStmt()
-	var valueAsValue = asthlp.ExpressionTypeConvert(value, t.Value)
-	if _, isStar := t.Value.(*ast.StarExpr); isStar {
-		valueAsValue = asthlp.Call(
-			asthlp.InlineFunc(asthlp.ParenExpr(t.Value)),
-			asthlp.Call(
-				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-				asthlp.Ref(value),
+	var valueAsValue = []ast.Stmt{
+		asthlp.Assign(
+			asthlp.VarNames{
+				asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
+			},
+			asthlp.Assignment,
+			asthlp.ExpressionTypeConvert(value, t.Value),
+		),
+	}
+	if itemType, isStar := t.Value.(*ast.StarExpr); isStar {
+		// 				var valRef = uint16(value)
+		//				valUintVal[Key(key)] = &valRef
+		valueAsValue = []ast.Stmt{
+			asthlp.Var(asthlp.VariableValue("valRef", asthlp.FreeExpression(asthlp.ExpressionTypeConvert(value, itemType.X)))),
+			asthlp.Assign(
+				asthlp.VarNames{
+					asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
+				},
+				asthlp.Assignment,
+				asthlp.Ref(asthlp.NewIdent("valRef")),
 			),
-		)
+		}
 		// if v.Type() == fastjson.TypeNull {
 		//			{dst}[string(key)] = prop
 		//			return
@@ -410,13 +423,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 						),
 						// {dst}[string(key)] = prop
 						asthlp.Block(
-							asthlp.Assign(
-								asthlp.VarNames{
-									asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
-								},
-								asthlp.Assignment,
-								valueAsValue,
-							),
+							valueAsValue...,
 						),
 					),
 				).
@@ -537,18 +544,14 @@ func (f *Field) fillRefField(rhs, dst ast.Expr) []ast.Stmt {
 			return f.typedFillIn(asthlp.Ref(rhs), dst, t.Name)
 
 		case "string":
-			// s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
+			// 		var valFieldStr = string(valFieldRef)
+			//		s.FieldRef = &valFieldStr
 			return []ast.Stmt{
+				asthlp.Var(asthlp.VariableValue("valFieldStr", asthlp.FreeExpression(asthlp.ExpressionTypeConvert(rhs, asthlp.String)))),
 				asthlp.Assign(
 					asthlp.VarNames{dst},
 					asthlp.Assignment,
-					asthlp.Call(
-						asthlp.InlineFunc(asthlp.ParenExpr(asthlp.Star(t))),
-						asthlp.Call(
-							asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-							asthlp.Ref(rhs),
-						),
-					),
+					asthlp.Ref(asthlp.NewIdent("valFieldStr")),
 				),
 			}
 

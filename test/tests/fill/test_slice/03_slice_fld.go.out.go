@@ -655,6 +655,9 @@ func (s TestSlice02) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestSlice02) Reset() {
+	for i := range *s {
+		(*s)[i].Reset()
+	}
 	*s = (*s)[:0]
 }
 

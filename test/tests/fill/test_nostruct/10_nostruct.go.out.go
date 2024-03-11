@@ -4,7 +4,6 @@ package test_nostruct
 import (
 	"fmt"
 	"time"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -131,7 +130,7 @@ func (s *TestMap11Ref) FillFromJSON(v *fastjson.Value) (err error) {
 			err = newParsingError(string(key), err)
 			return
 		}
-		(*s)[string(key)] = (*test_extr.External)(unsafe.Pointer(&value))
+		(*s)[string(key)] = &value
 	})
 	return err
 }
@@ -482,6 +481,9 @@ func (s TestSlice13) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *TestSlice13) Reset() {
+	for i := range *s {
+		(*s)[i].Reset()
+	}
 	*s = (*s)[:0]
 }
 

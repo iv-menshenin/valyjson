@@ -3,6 +3,8 @@ package test_extr
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -194,7 +196,7 @@ func Test_Unmarshal_Reuse_Race(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	for n := 0; n < 10000; n++ {
+	for n := 0; n < 100000; n++ {
 		wg.Add(1)
 		go func(comment, command string, level int) {
 			time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
@@ -218,6 +220,168 @@ func Test_Unmarshal_Reuse_Race(t *testing.T) {
 			s.Reset()
 			unmarshalReuseRaceTestPool.Put(s)
 		}(comment[n%len(comment)], command[n%len(command)], n%9)
+	}
+	wg.Wait()
+}
+
+func TestExternalStringSlice(t *testing.T) {
+	t.Parallel()
+	t.Run("Marshal", func(t *testing.T) {
+		t.Parallel()
+		var ts = ExternalStringSlice{"foo", "bar"}
+		data, err := ts.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `["foo", "bar"]`, string(data))
+	})
+	t.Run("MarshalEmpty", func(t *testing.T) {
+		t.Parallel()
+		var ts = ExternalStringSlice{}
+		data, err := ts.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `[]`, string(data))
+		require.True(t, ts.IsZero())
+	})
+	t.Run("MarshalNil", func(t *testing.T) {
+		t.Parallel()
+		var ts ExternalStringSlice
+		data, err := ts.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `null`, string(data))
+		require.True(t, ts.IsZero())
+	})
+	t.Run("Unmarshal", func(t *testing.T) {
+		t.Parallel()
+		var test ExternalStringSlice
+		require.NoError(t, test.UnmarshalJSON([]byte(`["foo", "bar", ""]`)))
+		require.Equal(t, ExternalStringSlice{"foo", "bar", ""}, test)
+		require.False(t, test.IsZero())
+	})
+}
+
+func TestExternalStructSlice(t *testing.T) {
+	t.Parallel()
+	t.Run("Marshal", func(t *testing.T) {
+		t.Parallel()
+		var a, b = "a", "b"
+		var test = ExternalStructSlice{
+			{
+				Field:    "foo",
+				FieldRef: &a,
+			},
+			{
+				Field:  "bar",
+				DefRef: &b,
+			},
+		}
+		const expected = `[{"field":"foo","fieldRef":"a","defRef":null},{"field":"bar","fieldRef":null,"defRef":"b"}]`
+		data, err := test.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, expected, string(data))
+	})
+	t.Run("Marshal", func(t *testing.T) {
+		t.Parallel()
+		var a, b = "foo", "bar"
+		var expected = ExternalStructSlice{
+			{
+				Field:    "1",
+				FieldRef: &a,
+			},
+			{
+				Field:  "2",
+				DefRef: &b,
+			},
+		}
+		const data = `[{"field":"1","fieldRef":"foo","defRef":null},{"field":"2","fieldRef":null,"defRef":"bar"}]`
+		var test ExternalStructSlice
+		err := test.UnmarshalJSON([]byte(data))
+		require.NoError(t, err)
+		require.EqualValues(t, expected, test)
+	})
+	t.Run("Reset", func(t *testing.T) {
+		t.Parallel()
+		var a, b = "foo", "bar"
+		var test = ExternalStructSlice{
+			{
+				Field:    "1",
+				FieldRef: &a,
+			},
+			{
+				Field:  "2",
+				DefRef: &b,
+			},
+		}
+		require.False(t, test.IsZero())
+		test.Reset()
+		require.True(t, test.IsZero())
+		require.Equal(t, ExternalStructSlice{}, test)
+		require.Equal(t, 2, cap(test))
+	})
+}
+
+var unmarshalExternalStructSlicePool = sync.Pool{New: func() any { return &ExternalStructSlice{} }}
+
+func Test_ExternalStructSlice_Reuse_Race(t *testing.T) {
+	t.Parallel()
+	const data = `{"n":"v"%s%s%s}`
+	var comment = []string{
+		"",
+		`cmd1`,
+		`cmd1-stop`,
+	}
+	var command = []string{
+		"",
+		`983cf94b-a412-c01bef0e1d6a`,
+		`22bfb495-46af-b2d0-972bc4c1d29d`,
+		`42c61daa-782a-4244-94d1-0cfb950b202e`,
+	}
+
+	var wg sync.WaitGroup
+	for n := 0; n < 100000; n++ {
+		wg.Add(1)
+		var cmm, cmd []string
+		var lln = n % 4
+		for i := 0; i < lln; i++ {
+			cmm = append(cmm, comment[(i+n)%len(comment)])
+			cmd = append(cmd, command[(i+n)%len(command)])
+		}
+		go func(comments, commands []string, level, ln int) {
+			time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+			defer wg.Done()
+			var dataJson []string
+			for i := 0; i < len(comments); i++ {
+				comment1 := comments[i]
+				command1 := commands[i]
+				var xcomment, xcommand, xlevel string
+				if comment1 != "" {
+					xcomment = fmt.Sprintf(`,"field":"%s"`, comment1)
+				}
+				if command1 != "" {
+					xcommand = fmt.Sprintf(`,"fieldRef":"%s"`, command1)
+				}
+				if level != 0 {
+					xlevel = fmt.Sprintf(`,"defRef":"%d"`, level)
+				}
+				dataJson = append(dataJson, fmt.Sprintf(data, xcomment, xcommand, xlevel))
+			}
+			var s = unmarshalExternalStructSlicePool.Get().(*ExternalStructSlice)
+			require.NoError(t, s.UnmarshalJSON([]byte(fmt.Sprintf("[%s]", strings.Join(dataJson, ",")))))
+			require.Len(t, []test_string.TestStr01(*s), ln)
+			for i, v := range *s {
+				require.EqualValues(t, comments[i], v.Field)
+				if commands[i] == "" {
+					require.Nil(t, v.FieldRef)
+				} else {
+					require.EqualValues(t, commands[i], *v.FieldRef)
+				}
+				if level == 0 {
+					require.EqualValues(t, "default", *v.DefRef)
+				} else {
+					require.EqualValues(t, strconv.Itoa(level), *v.DefRef)
+				}
+			}
+			s.Reset()
+			unmarshalExternalStructSlicePool.Put(s)
+		}(cmm, cmd, n%19, lln)
 	}
 	wg.Wait()
 }

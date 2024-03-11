@@ -4,7 +4,6 @@ package test_string
 import (
 	"bytes"
 	"fmt"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -42,14 +41,16 @@ func (s *TestStr01) FillFromJSON(v *fastjson.Value) (err error) {
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
 			return newParsingError("fieldRef", err)
 		}
-		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
+		var valFieldStr = string(valFieldRef)
+		s.FieldRef = &valFieldStr
 	}
 	if _defRef := v.Get("defRef"); valueIsNotNull(_defRef) {
 		var valDefRef []byte
 		if valDefRef, err = _defRef.StringBytes(); err != nil {
 			return newParsingError("defRef", err)
 		}
-		s.DefRef = (*string)(unsafe.Pointer(&valDefRef))
+		var valFieldStr = string(valDefRef)
+		s.DefRef = &valFieldStr
 	} else {
 		if _defRef == nil {
 			var __DefRef string = "default"
@@ -128,7 +129,8 @@ func (s *TestStr02) FillFromJSON(v *fastjson.Value) (err error) {
 		if valFieldRef, err = _fieldRef.StringBytes(); err != nil {
 			return newParsingError("fieldRef", err)
 		}
-		s.FieldRef = (*string)(unsafe.Pointer(&valFieldRef))
+		var valFieldStr = string(valFieldRef)
+		s.FieldRef = &valFieldStr
 	}
 	if _string := v.Get("string"); _string != nil {
 		var valString []byte

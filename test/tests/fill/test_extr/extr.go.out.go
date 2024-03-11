@@ -7,6 +7,8 @@ import (
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
+
+	"fill/test_string"
 )
 
 // jsonParserExternal used for pooling Parsers for External JSONs.
@@ -75,6 +77,78 @@ func (s *External) validate(v *fastjson.Value) error {
 	return err
 }
 
+// jsonParserExternalStructSlice used for pooling Parsers for ExternalStructSlice JSONs.
+var jsonParserExternalStructSlice fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *ExternalStructSlice) UnmarshalJSON(data []byte) error {
+	parser := jsonParserExternalStructSlice.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserExternalStructSlice.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *ExternalStructSlice) FillFromJSON(v *fastjson.Value) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
+	a, err := v.Array()
+	if err != nil {
+		return err
+	}
+	*s = make([]test_string.TestStr01, len(a))
+	for i, v := range a {
+		var value test_string.TestStr01
+		err = value.FillFromJSON(v)
+		if err != nil {
+			return newParsingError(fmt.Sprintf("%d", i), err)
+		}
+		(*s)[i] = test_string.TestStr01(value)
+	}
+	return nil
+}
+
+// jsonParserExternalStringSlice used for pooling Parsers for ExternalStringSlice JSONs.
+var jsonParserExternalStringSlice fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *ExternalStringSlice) UnmarshalJSON(data []byte) error {
+	parser := jsonParserExternalStringSlice.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserExternalStringSlice.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON fills the array with the values recognized from fastjson.Value
+func (s *ExternalStringSlice) FillFromJSON(v *fastjson.Value) (err error) {
+	if v.Type() == fastjson.TypeNull {
+		return nil
+	}
+	a, err := v.Array()
+	if err != nil {
+		return err
+	}
+	*s = make([]test_string.FieldValueString, len(a))
+	for i, v := range a {
+		var value []byte
+		value, err = v.StringBytes()
+		if err != nil {
+			return newParsingError(fmt.Sprintf("%d", i), err)
+		}
+		(*s)[i] = test_string.FieldValueString(value)
+	}
+	return nil
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *External) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -133,4 +207,96 @@ func (s External) IsZero() bool {
 func (s *External) Reset() {
 	s.Test01.Reset()
 	s.Test02.Reset()
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *ExternalStructSlice) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *ExternalStructSlice) MarshalTo(result *jwriter.Writer) error {
+	if s == nil || *s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('[')
+	for _k, _v := range *s {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		_k = _k
+		err = _v.MarshalTo(result)
+		if err != nil {
+			return fmt.Errorf(`can't marshal "ExternalStructSlice" value at position %d: %w`, _k, err)
+		}
+	}
+	result.RawByte(']')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s ExternalStructSlice) IsZero() bool {
+	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *ExternalStructSlice) Reset() {
+	for i := range *s {
+		(*s)[i].Reset()
+	}
+	*s = (*s)[:0]
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *ExternalStringSlice) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *ExternalStringSlice) MarshalTo(result *jwriter.Writer) error {
+	if s == nil || *s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('[')
+	for _k, _v := range *s {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		_k = _k
+		result.String(string(_v))
+	}
+	result.RawByte(']')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s ExternalStringSlice) IsZero() bool {
+	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *ExternalStringSlice) Reset() {
+	*s = (*s)[:0]
 }

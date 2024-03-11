@@ -211,8 +211,15 @@ func (a *Array) MarshalToFunc() ast.Decl {
 		)),
 	)
 
+	dt := helpers.DenotedType(a.spec.Elt)
+	var dec field.DecorSrc
+	if dt != a.spec.Elt {
+		dec = func(e ast.Expr) ast.Expr {
+			return asthlp.ExpressionTypeConvert(e, dt)
+		}
+	}
 	errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+a.name+`" value at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-	ve := field.GetValueExtractor(helpers.DenotedType(a.spec.Elt), errExpr, nil)
+	ve := field.GetValueExtractor(dt, errExpr, dec)
 
 	var iterBlock = []ast.Stmt{
 		//	if filled {
@@ -285,7 +292,23 @@ func (a *Array) ResetFunc() ast.Decl {
 	if a.spec.Len != nil {
 		fn.AppendStmt(asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.StructLiteral(ast.NewIdent(a.name)).Expr()))
 	} else {
-		fn.AppendStmt(asthlp.Assign(asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))}, asthlp.Assignment, asthlp.SliceExpr(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver)), nil, asthlp.IntegerConstant(0))))
+		switch helpers.DenotedType(a.spec.Elt).(type) {
+		case *ast.StructType:
+			sliceVal := asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))
+			fn.AppendStmt(
+				asthlp.Range(
+					true, "i", "", sliceVal,
+					asthlp.CallStmt(asthlp.Call(asthlp.InlineFunc(asthlp.Selector(asthlp.Index(sliceVal, asthlp.FreeExpression(asthlp.NewIdent("i"))), names.MethodNameReset)))),
+				),
+			)
+		}
+		fn.AppendStmt(
+			asthlp.Assign(
+				asthlp.VarNames{asthlp.Star(asthlp.NewIdent(names.VarNameReceiver))},
+				asthlp.Assignment,
+				asthlp.SliceExpr(asthlp.Star(asthlp.NewIdent(names.VarNameReceiver)), nil, asthlp.IntegerConstant(0)),
+			),
+		)
 	}
 
 	return fn.Decl()

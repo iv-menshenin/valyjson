@@ -54,8 +54,8 @@ cpu: Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz
 | codec    | regular   | 35267  | 369.1 | 12840 |       125 |
 | codec    | small     | 455    | 180.2 |   144 |         1 |
 |          |           |        |       |       |           |
-| valyjson | reuse     | 128808 | 101.1 |  3209 |       105 |
-| valyjson | regular   | 153757 |  84.7 |  6786 |       122 |
+| valyjson | reuse     | 172632 | 103.7 |  3249 |       107 |
+| valyjson | regular   | 183561 |  70.0 |  6826 |       124 |
 | valyjson | small     | 4532   |  40.4 |   280 |        13 |
 |          |           |        |       |       |           |
 | easyjson | regular   | 107585 | 121.1 |  9512 |       126 |

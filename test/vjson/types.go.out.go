@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -52,7 +51,8 @@ func (s *Person) FillFromJSON(v *fastjson.Value) (err error) {
 		if valMiddle, err = _middle.StringBytes(); err != nil {
 			return newParsingError("middle", err)
 		}
-		s.Middle = (*string)(unsafe.Pointer(&valMiddle))
+		var valFieldStr = string(valMiddle)
+		s.Middle = &valFieldStr
 	}
 	if _dOB := v.Get("dob"); valueIsNotNull(_dOB) {
 		b, err := _dOB.StringBytes()

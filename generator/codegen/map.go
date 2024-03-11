@@ -61,13 +61,7 @@ func (m *Map) FillFromFunc() ast.Decl {
 	var ifNullValue = asthlp.EmptyStmt()
 	var valueAsValue = asthlp.ExpressionTypeConvert(value, m.spec.Value)
 	if _, isStar := m.spec.Value.(*ast.StarExpr); isStar {
-		valueAsValue = asthlp.Call(
-			asthlp.InlineFunc(asthlp.ParenExpr(m.spec.Value)),
-			asthlp.Call(
-				asthlp.InlineFunc(asthlp.SimpleSelector("unsafe", "Pointer")),
-				asthlp.Ref(value),
-			),
-		)
+		valueAsValue = asthlp.Ref(value)
 		ifNullValue = asthlp.If(
 			helpers.MakeIfItsNullTypeCondition(),
 			asthlp.Assign(

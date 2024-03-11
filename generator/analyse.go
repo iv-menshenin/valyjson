@@ -181,6 +181,12 @@ func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
 				result = v.processDecl(elDeclT, result)
 			}
 		}
+		switch tt := typed.Elt.(type) {
+		case *ast.SelectorExpr:
+			if tt.Sel.Obj == nil {
+				tt.Sel.Obj = v.resolveExternal(tt)
+			}
+		}
 		put(codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.Ident:

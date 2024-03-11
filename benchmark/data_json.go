@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -510,7 +509,8 @@ func (s *URL) FillFromJSON(v *fastjson.Value) (err error) {
 		if valExpandedURL, err = _expandedURL.StringBytes(); err != nil {
 			return newParsingError("expanded_url", err)
 		}
-		s.ExpandedURL = (*string)(unsafe.Pointer(&valExpandedURL))
+		var valFieldStr = string(valExpandedURL)
+		s.ExpandedURL = &valFieldStr
 	}
 	if _indices := v.Get("indices"); valueIsNotNull(_indices) {
 		var listA []*fastjson.Value
@@ -800,7 +800,8 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valFollowRequestSent, err = _followRequestSent.StringBytes(); err != nil {
 			return newParsingError("follow_request_sent", err)
 		}
-		s.FollowRequestSent = (*string)(unsafe.Pointer(&valFollowRequestSent))
+		var valFieldStr = string(valFollowRequestSent)
+		s.FollowRequestSent = &valFieldStr
 	}
 	if _followersCount := v.Get("followers_count"); _followersCount != nil {
 		var valFollowersCount int
@@ -815,7 +816,8 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valFollowing, err = _following.StringBytes(); err != nil {
 			return newParsingError("following", err)
 		}
-		s.Following = (*string)(unsafe.Pointer(&valFollowing))
+		var valFieldStr = string(valFollowing)
+		s.Following = &valFieldStr
 	}
 	if _friendsCount := v.Get("friends_count"); _friendsCount != nil {
 		var valFriendsCount int
@@ -890,7 +892,8 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valNotifications, err = _notifications.StringBytes(); err != nil {
 			return newParsingError("notifications", err)
 		}
-		s.Notifications = (*string)(unsafe.Pointer(&valNotifications))
+		var valFieldStr = string(valNotifications)
+		s.Notifications = &valFieldStr
 	}
 	if _profileBackgroundColor := v.Get("profile_background_color"); _profileBackgroundColor != nil {
 		var valProfileBackgroundColor []byte
@@ -1014,7 +1017,8 @@ func (s *User) FillFromJSON(v *fastjson.Value) (err error) {
 		if valURL, err = _uRL.StringBytes(); err != nil {
 			return newParsingError("url", err)
 		}
-		s.URL = (*string)(unsafe.Pointer(&valURL))
+		var valFieldStr = string(valURL)
+		s.URL = &valFieldStr
 	}
 	if _utcOffset := v.Get("utc_offset"); _utcOffset != nil {
 		var valUtcOffset int
@@ -1414,14 +1418,16 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valContributors, err = _contributors.StringBytes(); err != nil {
 			return newParsingError("contributors", err)
 		}
-		s.Contributors = (*string)(unsafe.Pointer(&valContributors))
+		var valFieldStr = string(valContributors)
+		s.Contributors = &valFieldStr
 	}
 	if _coordinates := v.Get("coordinates"); valueIsNotNull(_coordinates) {
 		var valCoordinates []byte
 		if valCoordinates, err = _coordinates.StringBytes(); err != nil {
 			return newParsingError("coordinates", err)
 		}
-		s.Coordinates = (*string)(unsafe.Pointer(&valCoordinates))
+		var valFieldStr = string(valCoordinates)
+		s.Coordinates = &valFieldStr
 	}
 	if _createdAt := v.Get("created_at"); _createdAt != nil {
 		var valCreatedAt []byte
@@ -1450,7 +1456,8 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valGeo, err = _geo.StringBytes(); err != nil {
 			return newParsingError("geo", err)
 		}
-		s.Geo = (*string)(unsafe.Pointer(&valGeo))
+		var valFieldStr = string(valGeo)
+		s.Geo = &valFieldStr
 	}
 	if _iD := v.Get("id"); _iD != nil {
 		var valID int64
@@ -1472,35 +1479,40 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valInReplyToScreenName, err = _inReplyToScreenName.StringBytes(); err != nil {
 			return newParsingError("in_reply_to_screen_name", err)
 		}
-		s.InReplyToScreenName = (*string)(unsafe.Pointer(&valInReplyToScreenName))
+		var valFieldStr = string(valInReplyToScreenName)
+		s.InReplyToScreenName = &valFieldStr
 	}
 	if _inReplyToStatusID := v.Get("in_reply_to_status_id"); valueIsNotNull(_inReplyToStatusID) {
 		var valInReplyToStatusID []byte
 		if valInReplyToStatusID, err = _inReplyToStatusID.StringBytes(); err != nil {
 			return newParsingError("in_reply_to_status_id", err)
 		}
-		s.InReplyToStatusID = (*string)(unsafe.Pointer(&valInReplyToStatusID))
+		var valFieldStr = string(valInReplyToStatusID)
+		s.InReplyToStatusID = &valFieldStr
 	}
 	if _inReplyToStatusIDStr := v.Get("in_reply_to_status_id_str"); valueIsNotNull(_inReplyToStatusIDStr) {
 		var valInReplyToStatusIDStr []byte
 		if valInReplyToStatusIDStr, err = _inReplyToStatusIDStr.StringBytes(); err != nil {
 			return newParsingError("in_reply_to_status_id_str", err)
 		}
-		s.InReplyToStatusIDStr = (*string)(unsafe.Pointer(&valInReplyToStatusIDStr))
+		var valFieldStr = string(valInReplyToStatusIDStr)
+		s.InReplyToStatusIDStr = &valFieldStr
 	}
 	if _inReplyToUserID := v.Get("in_reply_to_user_id"); valueIsNotNull(_inReplyToUserID) {
 		var valInReplyToUserID []byte
 		if valInReplyToUserID, err = _inReplyToUserID.StringBytes(); err != nil {
 			return newParsingError("in_reply_to_user_id", err)
 		}
-		s.InReplyToUserID = (*string)(unsafe.Pointer(&valInReplyToUserID))
+		var valFieldStr = string(valInReplyToUserID)
+		s.InReplyToUserID = &valFieldStr
 	}
 	if _inReplyToUserIDStr := v.Get("in_reply_to_user_id_str"); valueIsNotNull(_inReplyToUserIDStr) {
 		var valInReplyToUserIDStr []byte
 		if valInReplyToUserIDStr, err = _inReplyToUserIDStr.StringBytes(); err != nil {
 			return newParsingError("in_reply_to_user_id_str", err)
 		}
-		s.InReplyToUserIDStr = (*string)(unsafe.Pointer(&valInReplyToUserIDStr))
+		var valFieldStr = string(valInReplyToUserIDStr)
+		s.InReplyToUserIDStr = &valFieldStr
 	}
 	if _metadata := v.Get("metadata"); _metadata != nil {
 		var valMetadata = &s.Metadata
@@ -1514,7 +1526,8 @@ func (s *Status) FillFromJSON(v *fastjson.Value) (err error) {
 		if valPlace, err = _place.StringBytes(); err != nil {
 			return newParsingError("place", err)
 		}
-		s.Place = (*string)(unsafe.Pointer(&valPlace))
+		var valFieldStr = string(valPlace)
+		s.Place = &valFieldStr
 	}
 	if _retweetCount := v.Get("retweet_count"); _retweetCount != nil {
 		var valRetweetCount int

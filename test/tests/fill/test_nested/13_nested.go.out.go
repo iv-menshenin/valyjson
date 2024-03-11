@@ -787,6 +787,9 @@ func (s Middles) IsZero() bool {
 
 // Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
 func (s *Middles) Reset() {
+	for i := range *s {
+		(*s)[i].Reset()
+	}
 	*s = (*s)[:0]
 }
 

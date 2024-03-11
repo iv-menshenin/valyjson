@@ -4,7 +4,6 @@ package test_map
 import (
 	"bytes"
 	"fmt"
-	"unsafe"
 
 	"github.com/mailru/easyjson/jwriter"
 	"github.com/valyala/fastjson"
@@ -183,7 +182,8 @@ func (s *TestMap01) FillFromJSON(v *fastjson.Value) (err error) {
 			if err != nil {
 				err = newParsingError(string(key), err)
 			} else {
-				valUintVal[Key(key)] = (*uint16)(unsafe.Pointer(&value))
+				var valRef = uint16(value)
+				valUintVal[Key(key)] = &valRef
 			}
 		})
 		if err != nil {
