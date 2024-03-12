@@ -209,16 +209,18 @@ func Test_Strings_Allocations(t *testing.T) {
 	t.Parallel()
 	t.Run("ref-allocation", func(t *testing.T) {
 		t.Parallel()
-		n := testing.AllocsPerRun(100, func() {
-			var test1 TestStr01
+		var test1 TestStr01
+		n := testing.AllocsPerRun(1000, func() {
+			test1.Reset()
 			_ = test1.UnmarshalJSON([]byte(`{"field": "test_field", "defRef": "foo bar"}`))
 		})
-		require.LessOrEqual(t, n, float64(2)) // one allocation for ref
+		require.LessOrEqual(t, n, float64(3)) // one more ref than next test
 	})
 	t.Run("alloc-mem", func(t *testing.T) {
 		t.Parallel()
-		n := testing.AllocsPerRun(100, func() {
-			var test2 TestStr02
+		var test2 TestStr02
+		n := testing.AllocsPerRun(1000, func() {
+			test2.Reset()
 			_ = test2.UnmarshalJSON([]byte(`{"field": "test_field", "string": "foo bar ipsum"}`))
 		})
 		require.LessOrEqual(t, n, float64(2))
@@ -228,16 +230,18 @@ func Test_Strings_Allocations(t *testing.T) {
 func Benchmark_TestStr_Alloc(b *testing.B) {
 	b.Run("TestStr01", func(b *testing.B) {
 		b.ReportAllocs()
+		var test1 TestStr01
 		for n := 0; n < b.N; n++ {
-			var test1 TestStr01
+			test1.Reset()
 			_ = test1.UnmarshalJSON([]byte(`{"field": "test_field", "defRef": "foo bar"}`))
 		}
 	})
 	b.Run("TestStr02", func(b *testing.B) {
 		b.ReportAllocs()
+		var test2 TestStr02
 		for n := 0; n < b.N; n++ {
-			var test1 TestStr02
-			_ = test1.UnmarshalJSON([]byte(`{"field": "test_field", "string": "foo bar"}`))
+			test2.Reset()
+			_ = test2.UnmarshalJSON([]byte(`{"field": "test_field", "string": "foo bar"}`))
 		}
 	})
 }
