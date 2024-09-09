@@ -118,7 +118,11 @@ func (p parsingError) WrapPath(objPath string) error {
 }
 
 func (p parsingError) Error() string {
-	return fmt.Sprintf("error parsing '%s': %+v", p.path, p.err)
+	return fmt.Sprintf("error parsing '%s': %s", p.path, p.err.Error())
+}
+
+func (p parsingError) Unwrap() error {
+	return p.err
 }
 
 func unpackObject(data []byte, err error) ([]byte, error) {
