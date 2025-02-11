@@ -37,6 +37,8 @@ func Ordinal(s string) bool {
 		return true
 	case "string":
 		return true
+	case "byte", "rune":
+		return true
 	default:
 		return false
 	}

@@ -637,3 +637,54 @@ func TestCampaignSitesUnmarshal(t *testing.T) {
 		require.Equal(t, []FieldValueString{"", ""}, fvs)
 	})
 }
+
+func TestSliceOfBytes(t *testing.T) {
+	t.Run("marshal-single", func(t *testing.T) {
+		var b Bytes = []byte{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'}
+		strJSON, err := b.MarshalJSON()
+		require.NoError(t, err)
+		require.Equal(t, `"SGVsbG8gV29ybGQ="`, string(strJSON))
+	})
+	t.Run("marshal-stuct-1", func(t *testing.T) {
+		var b = BytesInStruct{
+			Binary: []byte{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'},
+		}
+		strJSON, err := b.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"line":"","binary":"SGVsbG8gV29ybGQ=","arrbinary":null}`, string(strJSON))
+	})
+	t.Run("marshal-stuct-fulfill", func(t *testing.T) {
+		var b = BytesInStruct{
+			Line:        "test-line",
+			Binary:      []byte{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'},
+			IfBinary:    []byte{'F', 'o', 'o'},
+			ArrBinary:   [8]byte{'f', 'o', 'o', ' ', 'b', 'a', 'r', '+'},
+			IfArrBinary: [8]byte{'f', 'o', 'o', ' ', 'b', 'a', 'r', '-'},
+		}
+		strJSON, err := b.MarshalJSON()
+		require.NoError(t, err)
+		require.JSONEq(t, `{"line":"test-line","binary":"SGVsbG8gV29ybGQ=","arrbinary":"Zm9vIGJhcis=","if-arrbinary":"Zm9vIGJhci0=","if-binary":"Rm9v"}`, string(strJSON))
+	})
+	t.Run("unmarshal-single", func(t *testing.T) {
+		var (
+			got      Bytes
+			expected Bytes = []byte{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'}
+		)
+		require.NoError(t, got.UnmarshalJSON([]byte(`"SGVsbG8gV29ybGQ="`)))
+		require.Equal(t, expected, got)
+	})
+	t.Run("unmarshal-fulfill", func(t *testing.T) {
+		var (
+			got      BytesInStruct
+			expected = BytesInStruct{
+				Line:        "test-line",
+				Binary:      []byte{'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd'},
+				IfBinary:    []byte{'F', 'o', 'o'},
+				ArrBinary:   [8]byte{'f', 'o', 'o', ' ', 'b', 'a', 'r', '+'},
+				IfArrBinary: [8]byte{'f', 'o', 'o', ' ', 'b', 'a', 'r', '-'},
+			}
+		)
+		require.NoError(t, got.UnmarshalJSON([]byte(`{"line":"test-line","binary":"SGVsbG8gV29ybGQ=","arrbinary":"Zm9vIGJhcis=","if-arrbinary":"Zm9vIGJhci0=","if-binary":"Rm9v"}`)))
+		require.Equal(t, expected, got)
+	})
+}

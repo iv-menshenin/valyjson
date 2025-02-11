@@ -63,7 +63,7 @@ func (m *Map) FillFromFunc() ast.Decl {
 	if _, isStar := m.spec.Value.(*ast.StarExpr); isStar {
 		valueAsValue = asthlp.Ref(value)
 		ifNullValue = asthlp.If(
-			helpers.MakeIfItsNullTypeCondition(),
+			helpers.MakeIfItsNullTypeCondition(asthlp.NewIdent(names.VarNameJsonValue)),
 			asthlp.Assign(
 				asthlp.VarNames{
 					asthlp.Index(
@@ -96,7 +96,7 @@ func (m *Map) FillFromFunc() ast.Decl {
 	//	}
 	fn.AppendStmt(
 		asthlp.If(
-			helpers.MakeIfItsNullTypeCondition(),
+			helpers.MakeIfItsNullTypeCondition(asthlp.NewIdent(names.VarNameJsonValue)),
 			asthlp.Return(asthlp.Nil),
 		),
 	)

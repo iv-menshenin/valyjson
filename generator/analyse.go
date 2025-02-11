@@ -8,6 +8,7 @@ import (
 
 	"github.com/iv-menshenin/go-ast/explorer"
 	"github.com/iv-menshenin/valyjson/generator/codegen"
+	"github.com/iv-menshenin/valyjson/generator/codegen/helpers"
 	"github.com/iv-menshenin/valyjson/generator/codegen/tags"
 )
 
@@ -172,6 +173,10 @@ func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
 		put(codegen.NewMap(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.ArrayType:
+		if helpers.IsIdent(helpers.DenotedType(typed.Elt), "byte") {
+			put(codegen.NewByteSlice(decl.spec.Name.Name, decl.tags, typed))
+			break
+		}
 		if el, ok := typed.Elt.(*ast.Ident); ok {
 			// elements of the array have no tags, so we will consider the tags of the child structure
 			elDecl := v.getDeclByName(el.Name)
@@ -187,6 +192,7 @@ func (v *visitor) processDecl(decl taggedDecl, result []renderer) []renderer {
 				tt.Sel.Obj = v.resolveExternal(tt)
 			}
 		}
+
 		put(codegen.NewArray(decl.spec.Name.Name, decl.tags, typed))
 
 	case *ast.Ident:

@@ -3,6 +3,8 @@ package test_slice
 
 import (
 	"bytes"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -469,6 +471,235 @@ func (s *TestSliceSlice) validate(v *fastjson.Value) error {
 	return err
 }
 
+// jsonParserBytes used for pooling Parsers for Bytes JSONs.
+var jsonParserBytes fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *Bytes) UnmarshalJSON(data []byte) error {
+	parser := jsonParserBytes.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserBytes.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON fills the byteslice with the values recognized from fastjson.Value
+func (s *Bytes) FillFromJSON(v *fastjson.Value) (err error) {
+	if v.Type() != fastjson.TypeNull {
+		// slice of bytes in JSON format is implemented via BASE64 string
+		b, err := v.StringBytes()
+		if err != nil {
+			return err
+		}
+		*s = make([]byte, base64.StdEncoding.DecodedLen(len(b)))
+		n, err := base64.StdEncoding.Decode(*s, b)
+		if err != nil {
+			return err
+		}
+		*s = (*s)[:n]
+	}
+	return
+}
+
+// jsonParserArrBytes used for pooling Parsers for ArrBytes JSONs.
+var jsonParserArrBytes fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *ArrBytes) UnmarshalJSON(data []byte) error {
+	parser := jsonParserArrBytes.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserArrBytes.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON fills the byteslice with the values recognized from fastjson.Value
+func (s *ArrBytes) FillFromJSON(v *fastjson.Value) (err error) {
+	if v.Type() != fastjson.TypeNull {
+		// slice of bytes in JSON format is implemented via BASE64 string
+		b, err := v.StringBytes()
+		if err != nil {
+			return err
+		}
+		n, err := base64.StdEncoding.Decode((*s)[:], b)
+		if err != nil {
+			return err
+		}
+		if n != len(*s) {
+			return errors.New("incomplete data")
+		}
+	}
+	return
+}
+
+// jsonParserBytesInStruct used for pooling Parsers for BytesInStruct JSONs.
+var jsonParserBytesInStruct fastjson.ParserPool
+
+// UnmarshalJSON implements json.Unmarshaler
+func (s *BytesInStruct) UnmarshalJSON(data []byte) error {
+	parser := jsonParserBytesInStruct.Get()
+	// parses data containing JSON
+	v, err := parser.ParseBytes(data)
+	if err != nil {
+		return err
+	}
+	defer jsonParserBytesInStruct.Put(parser)
+	return s.FillFromJSON(v)
+}
+
+// FillFromJSON recursively fills the fields with fastjson.Value
+func (s *BytesInStruct) FillFromJSON(v *fastjson.Value) (err error) {
+	if err = s.validate(v); err != nil {
+		return err
+	}
+	if _line := v.Get("line"); _line != nil {
+		var valLine []byte
+		if valLine, err = _line.StringBytes(); err != nil {
+			return newParsingError("line", err)
+		}
+		s.Line = string(valLine)
+	}
+	if _ifBinary := v.Get("if-binary"); _ifBinary != nil {
+		var valIfBinary []byte
+		if _ifBinary.Type() != fastjson.TypeNull {
+			// slice of bytes in JSON format is implemented via BASE64 string
+			b, err := _ifBinary.StringBytes()
+			if err != nil {
+				return err
+			}
+			valIfBinary = make([]byte, base64.StdEncoding.DecodedLen(len(b)))
+			n, err := base64.StdEncoding.Decode(valIfBinary, b)
+			if err != nil {
+				return err
+			}
+			valIfBinary = valIfBinary[:n]
+		}
+		if err != nil {
+			return newParsingError("if-binary", err)
+		}
+		s.IfBinary = Bytes(valIfBinary)
+	}
+	if _binary := v.Get("binary"); _binary != nil {
+		var valBinary []byte
+		if _binary.Type() != fastjson.TypeNull {
+			// slice of bytes in JSON format is implemented via BASE64 string
+			b, err := _binary.StringBytes()
+			if err != nil {
+				return err
+			}
+			valBinary = make([]byte, base64.StdEncoding.DecodedLen(len(b)))
+			n, err := base64.StdEncoding.Decode(valBinary, b)
+			if err != nil {
+				return err
+			}
+			valBinary = valBinary[:n]
+		}
+		if err != nil {
+			return newParsingError("binary", err)
+		}
+		s.Binary = Bytes(valBinary)
+	}
+	if _arrBinary := v.Get("arrbinary"); _arrBinary != nil {
+		var valArrBinary [8]byte
+		if _arrBinary.Type() != fastjson.TypeNull {
+			// slice of bytes in JSON format is implemented via BASE64 string
+			b, err := _arrBinary.StringBytes()
+			if err != nil {
+				return err
+			}
+			n, err := base64.StdEncoding.Decode(valArrBinary[:], b)
+			if err != nil {
+				return err
+			}
+			if n != len(valArrBinary) {
+				return errors.New("incomplete data")
+			}
+		}
+		if err != nil {
+			return newParsingError("arrbinary", err)
+		}
+		s.ArrBinary = ArrBytes(valArrBinary)
+	}
+	if _ifArrBinary := v.Get("if-arrbinary"); _ifArrBinary != nil {
+		var valIfArrBinary [8]byte
+		if _ifArrBinary.Type() != fastjson.TypeNull {
+			// slice of bytes in JSON format is implemented via BASE64 string
+			b, err := _ifArrBinary.StringBytes()
+			if err != nil {
+				return err
+			}
+			n, err := base64.StdEncoding.Decode(valIfArrBinary[:], b)
+			if err != nil {
+				return err
+			}
+			if n != len(valIfArrBinary) {
+				return errors.New("incomplete data")
+			}
+		}
+		if err != nil {
+			return newParsingError("if-arrbinary", err)
+		}
+		s.IfArrBinary = ArrBytes(valIfArrBinary)
+	}
+	return nil
+}
+
+// validate checks for correct data structure
+func (s *BytesInStruct) validate(v *fastjson.Value) error {
+	o, err := v.Object()
+	if err != nil {
+		return err
+	}
+	var checkFields [5]int
+	o.Visit(func(key []byte, _ *fastjson.Value) {
+		if err != nil {
+			return
+		}
+		if bytes.Equal(key, []byte{'l', 'i', 'n', 'e'}) {
+			checkFields[0]++
+			if checkFields[0] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'i', 'f', '-', 'b', 'i', 'n', 'a', 'r', 'y'}) {
+			checkFields[1]++
+			if checkFields[1] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'b', 'i', 'n', 'a', 'r', 'y'}) {
+			checkFields[2]++
+			if checkFields[2] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'a', 'r', 'r', 'b', 'i', 'n', 'a', 'r', 'y'}) {
+			checkFields[3]++
+			if checkFields[3] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+		if bytes.Equal(key, []byte{'i', 'f', '-', 'a', 'r', 'r', 'b', 'i', 'n', 'a', 'r', 'y'}) {
+			checkFields[4]++
+			if checkFields[4] > 1 {
+				err = newParsingError(string(key), fmt.Errorf("the '%s' field appears in the object twice", string(key)))
+			}
+			return
+		}
+	})
+	return err
+}
+
 // MarshalJSON serializes the structure with all its values into JSON format.
 func (s *TestSlice01) MarshalJSON() ([]byte, error) {
 	var result jwriter.Writer
@@ -842,4 +1073,198 @@ func (s *TestSliceSlice) Reset() {
 		s.FieldInt[i] = s.FieldInt[i][:0]
 	}
 	s.FieldInt = s.FieldInt[:0]
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *Bytes) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *Bytes) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	if *s == nil {
+		result.RawString("null")
+		return nil
+	}
+	// slice of bytes in JSON format is implemented via BASE64 string
+	buf := make([]byte, base64.StdEncoding.EncodedLen(len(*s)))
+	base64.StdEncoding.Encode(buf, *s)
+	result.String(string(buf))
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s Bytes) IsZero() bool {
+	return len(s) == 0
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *Bytes) Reset() {
+	*s = (*s)[:0]
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *ArrBytes) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *ArrBytes) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	// slice of bytes in JSON format is implemented via BASE64 string
+	buf := make([]byte, base64.StdEncoding.EncodedLen(len(*s)))
+	base64.StdEncoding.Encode(buf, (*s)[:])
+	result.String(string(buf))
+	return nil
+}
+
+// IsZero shows whether the object is an empty value.
+func (s ArrBytes) IsZero() bool {
+	for _, _v := range s {
+		if _v != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *ArrBytes) Reset() {
+	*s = ArrBytes{}
+}
+
+// MarshalJSON serializes the structure with all its values into JSON format.
+func (s *BytesInStruct) MarshalJSON() ([]byte, error) {
+	var result jwriter.Writer
+	if err := s.MarshalTo(&result); err != nil {
+		return nil, err
+	}
+	return result.BuildBytes()
+}
+
+// MarshalTo serializes all fields of the structure using a buffer.
+func (s *BytesInStruct) MarshalTo(result *jwriter.Writer) error {
+	if s == nil {
+		result.RawString("null")
+		return nil
+	}
+	var (
+		err       error
+		wantComma bool
+	)
+	result.RawByte('{')
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.Line != "" {
+		result.RawString(`"line":`)
+		result.String(s.Line)
+		wantComma = true
+	} else {
+		result.RawString(`"line":""`)
+		wantComma = true
+	}
+	if s.IfBinary != nil {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		result.RawString(`"if-binary":`)
+		// slice of bytes in JSON format is implemented via BASE64 string
+		buf := make([]byte, base64.StdEncoding.EncodedLen(len(s.IfBinary)))
+		base64.StdEncoding.Encode(buf, s.IfBinary)
+		result.String(string(buf))
+	}
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.Binary != nil {
+		wantComma = true
+		result.RawString(`"binary":`)
+		// slice of bytes in JSON format is implemented via BASE64 string
+		buf := make([]byte, base64.StdEncoding.EncodedLen(len(s.Binary)))
+		base64.StdEncoding.Encode(buf, s.Binary)
+		result.String(string(buf))
+	} else {
+		result.RawString(`"binary":null`)
+		wantComma = true
+	}
+	if wantComma {
+		result.RawByte(',')
+	}
+	if s.ArrBinary != [8]byte{} {
+		wantComma = true
+		result.RawString(`"arrbinary":`)
+		// slice of bytes in JSON format is implemented via BASE64 string
+		buf := make([]byte, base64.StdEncoding.EncodedLen(len(s.ArrBinary[:])))
+		base64.StdEncoding.Encode(buf, s.ArrBinary[:])
+		result.String(string(buf))
+	} else {
+		result.RawString(`"arrbinary":null`)
+		wantComma = true
+	}
+	if s.IfArrBinary != [8]byte{} {
+		if wantComma {
+			result.RawByte(',')
+		}
+		wantComma = true
+		result.RawString(`"if-arrbinary":`)
+		// slice of bytes in JSON format is implemented via BASE64 string
+		buf := make([]byte, base64.StdEncoding.EncodedLen(len(s.IfArrBinary[:])))
+		base64.StdEncoding.Encode(buf, s.IfArrBinary[:])
+		result.String(string(buf))
+	}
+	result.RawByte('}')
+	err = result.Error
+	return err
+}
+
+// IsZero shows whether the object is an empty value.
+func (s BytesInStruct) IsZero() bool {
+	if s.Line != "" {
+		return false
+	}
+	if s.IfBinary != nil {
+		return false
+	}
+	if s.Binary != nil {
+		return false
+	}
+	if !s.ArrBinary.IsZero() {
+		return false
+	}
+	if !s.IfArrBinary.IsZero() {
+		return false
+	}
+	return true
+}
+
+// Reset resets the values of all fields of the structure to their initial states, defined by default for the data type of each field.
+func (s *BytesInStruct) Reset() {
+	s.Line = ""
+	for i := range s.IfBinary {
+		s.IfBinary[i] = 0
+	}
+	s.IfBinary = s.IfBinary[:0]
+	for i := range s.Binary {
+		s.Binary[i] = 0
+	}
+	s.Binary = s.Binary[:0]
+	s.ArrBinary = [8]byte{}
+	s.IfArrBinary = [8]byte{}
 }

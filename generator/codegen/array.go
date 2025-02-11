@@ -53,7 +53,7 @@ func (a *Array) FillFromFunc() ast.Decl {
 	//	}
 	fn.AppendStmt(
 		asthlp.If(
-			helpers.MakeIfItsNullTypeCondition(),
+			helpers.MakeIfItsNullTypeCondition(asthlp.NewIdent(names.VarNameJsonValue)),
 			asthlp.Return(asthlp.Nil),
 		),
 	)

@@ -35,3 +35,18 @@ type TestSliceSlice struct {
 }
 
 type InnerString string
+
+//json:json
+type Bytes []byte
+
+//json:json
+type ArrBytes [8]byte
+
+//json:json
+type BytesInStruct struct {
+	Line        string   `json:"line"`
+	IfBinary    Bytes    `json:"if-binary,omitempty"`
+	Binary      Bytes    `json:"binary"`
+	ArrBinary   ArrBytes `json:"arrbinary"`
+	IfArrBinary ArrBytes `json:"if-arrbinary,omitempty"`
+}

@@ -70,6 +70,11 @@ func (g *Gen) FixImports(internals ...string) {
 		Path: "github.com/mailru/easyjson/jwriter",
 		Kind: explorer.PkgKindExternal,
 	})
+	explorer.RegisterPackage("base64", explorer.Package{
+		Path: "encoding/base64",
+		Kind: explorer.PkgKindSystem,
+	})
+
 	// discovery used imports and build their declaration
 	for name, pkg := range g.packages {
 		for i := range pkg {
