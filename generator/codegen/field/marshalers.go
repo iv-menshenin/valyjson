@@ -454,7 +454,7 @@ func mapMarshal(src ast.Expr, jsonName string, omitempty, isStringKey bool, ve V
 	return w
 }
 
-func (f *Field) arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor, isSlice bool) WriteBlock {
+func arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve ValueExtractor, isSlice bool) WriteBlock {
 	const (
 		key = "_k"
 		val = "_v"
@@ -494,6 +494,45 @@ func (f *Field) arrayMarshal(src ast.Expr, jsonName string, omitempty bool, ve V
 			// wantComma = true
 			asthlp.Assign(asthlp.MakeVarNames(WantCommaVar.Name), asthlp.Assignment, asthlp.True),
 		},
+	}
+	if !omitempty {
+		w.IfZero = []ast.Stmt{
+			asthlp.CallStmt(asthlp.Call(
+				RawStringFn,
+				asthlp.StringConstant(fmt.Sprintf(`"%s":null`, jsonName)).Expr(),
+			)),
+			SetCommaVar,
+		}
+	}
+	return w
+}
+
+func byteSliceMarshal(src ast.Expr, jsonName string, omitempty bool, typ *ast.ArrayType) WriteBlock {
+	var notNil = asthlp.NotEqual(src, asthlp.StructLiteral(typ).Expr())
+	if typ.Len == nil {
+		notNil = asthlp.NotNil(src)
+	}
+	block := make([]ast.Stmt, 0, 10)
+	block = append(
+		block,
+		SetCommaVar,
+		// result.RawString(`"jsonName":`)
+		asthlp.CallStmt(asthlp.Call(RawStringFn, asthlp.StringConstant(fmt.Sprintf(`"%s":`, jsonName)).Expr())),
+	)
+	if typ.Len == nil {
+		block = append(
+			block,
+			ByteSliceMarshal(src, asthlp.ArrayType(asthlp.Byte).(*ast.ArrayType))...,
+		)
+	} else {
+		block = append(
+			block,
+			ByteSliceMarshal(asthlp.SliceExpr(src, nil, nil), asthlp.ArrayType(asthlp.Byte).(*ast.ArrayType))...,
+		)
+	}
+	w := WriteBlock{
+		NotZero: notNil,
+		Block:   block,
 	}
 	if !omitempty {
 		w.IfZero = []ast.Stmt{

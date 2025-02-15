@@ -185,10 +185,15 @@ func (f *Field) MarshalStatements(src ast.Expr, name string) []ast.Stmt {
 		return block.Render(putCommaFirstIf)
 
 	case *ast.ArrayType:
-		dec := GetDecorExpr(tt.Elt)
-		valType := helpers.DenotedType(tt.Elt)
-		errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
-		block := f.arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
+		var block WriteBlock
+		if helpers.IsIdent(tt.Elt, "byte") {
+			block = byteSliceMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", tt)
+		} else {
+			dec := GetDecorExpr(tt.Elt)
+			valType := helpers.DenotedType(tt.Elt)
+			errExpr := asthlp.Call(asthlp.FmtErrorfFn, asthlp.StringConstant(`can't marshal "`+f.tags.JsonName()+`" item at position %d: %w`).Expr(), asthlp.NewIdent("_k"), asthlp.NewIdent("err"))
+			block = arrayMarshal(src, f.tags.JsonName(), f.tags.JsonAppendix() == "omitempty", GetValueExtractor(valType, errExpr, dec), tt.Len == nil)
+		}
 		return block.Render(putCommaFirstIf)
 
 	default:

@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	asthlp "github.com/iv-menshenin/go-ast"
-
-	"github.com/iv-menshenin/valyjson/generator/codegen/names"
 )
 
 func IsIdent(expr ast.Expr, ident string) bool {
@@ -52,7 +50,7 @@ func BasicLiteralFromType(t ast.Expr, val string) ast.Expr {
 				Value: "\"" + strings.Replace(val, "\"", "\\\"", -1) + "\"",
 			}
 
-		case "rune":
+		case "byte", "rune":
 			return &ast.BasicLit{
 				Kind:  token.CHAR,
 				Value: "'" + strings.Replace(val, "'", "\\'", -1) + "'",
@@ -90,7 +88,7 @@ func StringFromType(t ast.Expr, val string) string {
 			val = strings.ReplaceAll(val, `"`, `\"`)
 			return `"` + val + `"`
 
-		case "rune":
+		case "byte", "rune":
 			if val == "'" {
 				return `'\''`
 			}
@@ -136,7 +134,7 @@ func ZeroValueOfT(x ast.Expr) ast.Expr {
 	case *ast.Ident:
 		switch t.Name {
 
-		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64":
+		case "float32", "float64", "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "byte":
 			return asthlp.Zero
 
 		case "string":
@@ -174,9 +172,16 @@ func ZeroValueOfT(x ast.Expr) ast.Expr {
 	return nil
 }
 
-func MakeIfItsNullTypeCondition() ast.Expr {
+func MakeIfItsNullTypeCondition(v ast.Expr) ast.Expr {
 	return asthlp.Equal(
-		asthlp.Call(asthlp.InlineFunc(asthlp.SimpleSelector(names.VarNameJsonValue, "Type"))),
+		asthlp.Call(asthlp.InlineFunc(asthlp.Selector(v, "Type"))),
+		asthlp.SimpleSelector("fastjson", "TypeNull"),
+	)
+}
+
+func MakeIfItsNotNullTypeCondition(v ast.Expr) ast.Expr {
+	return asthlp.NotEqual(
+		asthlp.Call(asthlp.InlineFunc(asthlp.Selector(v, "Type"))),
 		asthlp.SimpleSelector("fastjson", "TypeNull"),
 	)
 }

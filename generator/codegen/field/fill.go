@@ -43,11 +43,6 @@ func (f *Field) fillFrom(name, v string) []ast.Stmt {
 	var bufVariable = makeBufVariable(name)
 
 	var result = make([]ast.Stmt, 0, 10)
-	//append(
-	//	make([]ast.Stmt, 0, 10),
-	//	asthlp.Var(asthlp.VariableValue(bufVariable.Name, asthlp.FreeExpression(f.field))),
-	//)
-
 	result = append(result, IsNotEmpty(f.TypedValue(bufVariable, v, asthlp.StringConstant(f.tags.JsonName()).Expr()))...)
 	result = append(result, f.checkErr(bufVariable)...)
 
@@ -228,6 +223,12 @@ func (f *Field) TypedValue(dst *ast.Ident, v string, elemPathExpr ast.Expr) []as
 		}
 
 	case *ast.ArrayType:
+		if helpers.IsIdent(t.Elt, "byte") {
+			result = append(result, asthlp.Var(
+				asthlp.TypeSpec(dst.Name, asthlp.ArrayType(t.Elt, t.Len)),
+			))
+			return append(result, ByteSliceFillFrom(asthlp.NewIdent(v), dst, t)...)
+		}
 		intF := Field{
 			// &valData[len(valData)-1]
 			field: asthlp.Index(
@@ -358,7 +359,7 @@ func (f *Field) mapExtraction(dst *ast.Ident, t *ast.MapType, v, json string) []
 		//			return
 		//		}
 		ifNullValue = asthlp.If(
-			helpers.MakeIfItsNullTypeCondition(),
+			helpers.MakeIfItsNullTypeCondition(asthlp.NewIdent(names.VarNameJsonValue)),
 			asthlp.Assign(
 				[]ast.Expr{
 					asthlp.Index(dst, asthlp.FreeExpression(asthlp.VariableTypeConvert("key", t.Key))),
